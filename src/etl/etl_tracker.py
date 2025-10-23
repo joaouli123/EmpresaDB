@@ -36,13 +36,49 @@ class ETLTracker:
             logger.error(f"Erro ao calcular hash de {file_path}: {e}")
             return None
             
-    def count_csv_lines(self, file_path: Path, skip_header: bool = True) -> int:
-        """Conta total de linhas no CSV (excluindo cabeçalho por padrão)"""
+    def has_csv_header(self, file_path: Path) -> bool:
+        """
+        Detecta automaticamente se CSV tem cabeçalho
+        Arquivos da Receita Federal: alguns têm, outros não!
+        """
         try:
             with open(file_path, 'r', encoding='latin1') as f:
+                first_line = f.readline().strip()
+                
+                # Se a primeira linha tem só números e separadores, NÃO é cabeçalho
+                # Exemplo: "12345678;01;23;..." = dados
+                # Exemplo: "CNPJ_BASICO;RAZAO_SOCIAL;..." = cabeçalho
+                if not first_line:
+                    return False
+                
+                # Pega primeira célula
+                first_cell = first_line.split(';')[0] if ';' in first_line else first_line
+                
+                # Se tiver letras, provavelmente é cabeçalho
+                has_letters = any(c.isalpha() for c in first_cell)
+                
+                return has_letters
+                
+        except Exception as e:
+            logger.error(f"Erro ao verificar cabeçalho de {file_path}: {e}")
+            return False
+    
+    def count_csv_lines(self, file_path: Path) -> int:
+        """
+        Conta total de linhas no CSV (detecta e pula cabeçalho automaticamente)
+        """
+        try:
+            has_header = self.has_csv_header(file_path)
+            
+            with open(file_path, 'r', encoding='latin1') as f:
                 total = sum(1 for _ in f)
-                # Remove cabeçalho se existir
-                return total - 1 if skip_header and total > 0 else total
+                
+                # Se tem cabeçalho, remove 1
+                result = total - 1 if has_header and total > 0 else total
+                
+                logger.info(f"📊 {file_path.name}: {total} linhas totais, cabeçalho={'SIM' if has_header else 'NÃO'}, dados={result}")
+                return result
+                
         except Exception as e:
             logger.error(f"Erro ao contar linhas de {file_path}: {e}")
             return 0
@@ -248,8 +284,8 @@ class ETLTracker:
         except Exception as e:
             logger.error(f"Erro ao finalizar chunk: {e}")
             
-    def finish_file_processing(self, file_id: int, status: str = 'completed'):
-        """Finaliza processamento de arquivo e valida integridade"""
+    def finish_file_processing(self, file_id: int, status: str = 'completed', table_name: str = None):
+        """Finaliza processamento de arquivo e valida integridade (CSV vs DB REAL)"""
         try:
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
@@ -265,10 +301,11 @@ class ETLTracker:
                 if not result:
                     return
                     
-                table_name, csv_lines = result
+                table_name_db, csv_lines = result
+                final_table = table_name or table_name_db
                 
-                # Conta registros no banco
-                db_count = db_manager.get_table_count(table_name) or 0
+                # **VALIDAÇÃO REAL: Conta registros direto no banco de dados**
+                db_count_real = db_manager.get_table_count(final_table) or 0
                 
                 # Calcula chunks completados
                 cursor.execute("""
@@ -283,19 +320,21 @@ class ETLTracker:
                 chunks_info = cursor.fetchone()
                 chunks_total, chunks_completed, total_imported = chunks_info if chunks_info else (0, 0, 0)
                 
-                # Verifica discrepâncias
-                has_discrepancy = (csv_lines != total_imported)
+                # **VALIDAÇÃO DUPLA**: Compara CSV vs chunks E CSV vs DB real
+                has_discrepancy = (csv_lines != db_count_real)
                 discrepancy_details = None
                 
                 if has_discrepancy:
                     discrepancy_details = json.dumps({
                         "csv_lines": csv_lines,
-                        "imported": total_imported,
-                        "difference": csv_lines - total_imported
+                        "chunks_imported": total_imported,
+                        "db_count_real": db_count_real,
+                        "difference_vs_db": csv_lines - db_count_real,
+                        "table": final_table
                     })
-                    logger.warning(f"⚠️  DISCREPÂNCIA: CSV={csv_lines:,} vs Importado={total_imported:,}")
+                    logger.warning(f"⚠️  DISCREPÂNCIA em {final_table}: CSV={csv_lines:,} vs DB={db_count_real:,} (diff={csv_lines - db_count_real})")
                 else:
-                    logger.info(f"✓ VALIDAÇÃO OK: {total_imported:,} registros")
+                    logger.info(f"✓ VALIDAÇÃO OK {final_table}: CSV={csv_lines:,} = DB={db_count_real:,}")
                 
                 # Atualiza status final
                 cursor.execute("""
@@ -308,7 +347,7 @@ class ETLTracker:
                         has_discrepancy = %s,
                         discrepancy_details = %s
                     WHERE id = %s
-                """, (status, total_imported, chunks_total, chunks_completed, 
+                """, (status, db_count_real, chunks_total, chunks_completed, 
                       has_discrepancy, discrepancy_details, file_id))
                 
                 conn.commit()
