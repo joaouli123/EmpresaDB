@@ -11,10 +11,12 @@ Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras,
 ## 🏗️ Arquitetura
 
 ### Banco de Dados
+- **IMPORTANTE**: Este projeto USA O BANCO DE DADOS DO VPS, NÃO o banco do Replit!
 - **Tipo**: PostgreSQL 16 (no VPS do usuário)
 - **Host**: 72.61.217.143:5432
 - **Banco**: cnpj_db
-- **Credenciais**: Armazenadas como Secrets do Replit
+- **Usuário**: novo_usuario
+- **Credenciais**: Configuradas no arquivo .env (as variáveis DATABASE_URL, PGHOST, etc do Replit são IGNORADAS)
 
 ### Estrutura do Projeto
 
