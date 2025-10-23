@@ -67,7 +67,94 @@ class CNPJImporter:
             return ''
         return value
     
-    def extract_zip(self, zip_path: Path) -> Optional[Path]:
+    def validate_zip_file(self, zip_path: Path) -> tuple[bool, str]:
+        """Valida se o arquivo ZIP está íntegro e contém dados válidos"""
+        try:
+            # Verifica se o arquivo existe
+            if not zip_path.exists():
+                return False, "Arquivo não encontrado"
+            
+            # Verifica se é um arquivo ZIP válido
+            if not zipfile.is_zipfile(zip_path):
+                return False, "Arquivo corrompido (não é um ZIP válido)"
+            
+            # Tenta abrir e verificar conteúdo
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                # Testa integridade
+                bad_file = zip_ref.testzip()
+                if bad_file is not None:
+                    return False, f"Arquivo corrompido (erro em: {bad_file})"
+                
+                # Verifica se tem CSV
+                file_list = zip_ref.namelist()
+                has_csv = any(f.upper().endswith('.CSV') or f.upper().endswith('CSV') for f in file_list)
+                
+                if not has_csv:
+                    return False, "ZIP vazio (sem arquivos CSV)"
+                
+                return True, "OK"
+                
+        except zipfile.BadZipFile:
+            return False, "Arquivo corrompido (BadZipFile)"
+        except Exception as e:
+            return False, f"Erro ao validar: {str(e)}"
+    
+    def extract_zip(self, zip_path: Path, max_retries: int = 3) -> Optional[Path]:
+        """Extrai arquivo ZIP com retry automático em caso de falha"""
+        
+        # Validar arquivo primeiro
+        is_valid, message = self.validate_zip_file(zip_path)
+        
+        if not is_valid:
+            logger.error(f"❌ {zip_path.name}: {message}")
+            
+            # Tentar redownload automático
+            for attempt in range(1, max_retries + 1):
+                logger.warning(f"🔄 Tentativa {attempt}/{max_retries}: Tentando baixar {zip_path.name} novamente...")
+                
+                # Remover arquivo corrompido
+                try:
+                    zip_path.unlink()
+                except:
+                    pass
+                
+                # Tentar baixar novamente
+                from src.etl.downloader import RFBDownloader
+                downloader = RFBDownloader()
+                
+                # Buscar URL do arquivo
+                files = downloader.list_available_files()
+                file_info = next((f for f in files if f['name'] == zip_path.name), None)
+                
+                if file_info:
+                    new_path = downloader.download_file(file_info['url'], zip_path.name)
+                    if new_path:
+                        # Validar novamente
+                        is_valid, message = self.validate_zip_file(new_path)
+                        if is_valid:
+                            logger.info(f"✅ Download bem-sucedido na tentativa {attempt}")
+                            break
+                        else:
+                            logger.error(f"❌ Tentativa {attempt} falhou: {message}")
+                else:
+                    logger.error(f"❌ Arquivo {zip_path.name} não encontrado no servidor")
+                    break
+            
+            # Se após todas as tentativas ainda está inválido
+            if not is_valid:
+                logger.error(f"\n{'='*70}")
+                logger.error(f"⚠️  ARQUIVO CORROMPIDO: {zip_path.name}")
+                logger.error(f"{'='*70}")
+                logger.error(f"Tentativas automáticas falharam após {max_retries} tentativas.")
+                logger.error(f"\n📥 OPÇÕES:")
+                logger.error(f"1. Baixe manualmente de:")
+                logger.error(f"   https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/")
+                logger.error(f"2. Coloque o arquivo em: {self.download_dir}")
+                logger.error(f"3. Execute o ETL novamente")
+                logger.error(f"{'='*70}\n")
+                return None
+        
+        # Se chegou aqui, arquivo é válido - prosseguir com extração
         try:
             logger.info(f"Extraindo: {zip_path.name}")
             
@@ -75,7 +162,6 @@ class CNPJImporter:
                 file_list = zip_ref.namelist()
                 
                 for file_name in file_list:
-                    # Arquivos da Receita podem ser: .csv, .CSV ou CSV (sem ponto)
                     name_upper = file_name.upper()
                     if name_upper.endswith('.CSV') or name_upper.endswith('CSV'):
                         extract_path = self.data_dir / file_name
@@ -88,7 +174,6 @@ class CNPJImporter:
                         
                         return extract_path
             
-            logger.warning(f"  ⚠️ Nenhum arquivo CSV encontrado em {zip_path.name}")
             return None
             
         except Exception as e:
