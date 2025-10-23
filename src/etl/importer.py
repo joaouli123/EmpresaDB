@@ -100,6 +100,17 @@ class CNPJImporter:
         ]
         
         try:
+            # Limpar tabela na primeira importação
+            if not hasattr(self, '_empresas_cleaned'):
+                logger.info("  → Limpando dados antigos da tabela empresas...")
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("TRUNCATE TABLE empresas CASCADE")
+                    conn.commit()
+                    cursor.close()
+                logger.info("  ✓ Tabela empresas limpa!")
+                self._empresas_cleaned = True
+            
             total_imported = 0
             
             with db_manager.get_connection() as conn:
@@ -160,6 +171,17 @@ class CNPJImporter:
         ]
         
         try:
+            # Limpar tabela na primeira importação
+            if not hasattr(self, '_estabelecimentos_cleaned'):
+                logger.info("  → Limpando dados antigos da tabela estabelecimentos...")
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("TRUNCATE TABLE estabelecimentos CASCADE")
+                    conn.commit()
+                    cursor.close()
+                logger.info("  ✓ Tabela estabelecimentos limpa!")
+                self._estabelecimentos_cleaned = True
+            
             total_imported = 0
             
             with db_manager.get_connection() as conn:
@@ -219,6 +241,17 @@ class CNPJImporter:
         ]
         
         try:
+            # Limpar tabela na primeira importação
+            if not hasattr(self, '_socios_cleaned'):
+                logger.info("  → Limpando dados antigos da tabela socios...")
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("TRUNCATE TABLE socios CASCADE")
+                    conn.commit()
+                    cursor.close()
+                logger.info("  ✓ Tabela socios limpa!")
+                self._socios_cleaned = True
+            
             total_imported = 0
             
             with db_manager.get_connection() as conn:
@@ -276,6 +309,17 @@ class CNPJImporter:
         ]
         
         try:
+            # Limpar tabela na primeira importação
+            if not hasattr(self, '_simples_cleaned'):
+                logger.info("  → Limpando dados antigos da tabela simples_nacional...")
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("TRUNCATE TABLE simples_nacional CASCADE")
+                    conn.commit()
+                    cursor.close()
+                logger.info("  ✓ Tabela simples_nacional limpa!")
+                self._simples_cleaned = True
+            
             total_imported = 0
             
             with db_manager.get_connection() as conn:
