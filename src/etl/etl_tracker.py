@@ -40,24 +40,46 @@ class ETLTracker:
         """
         Detecta automaticamente se CSV tem cabeçalho
         Arquivos da Receita Federal: alguns têm, outros não!
+        
+        ESTRATÉGIA CONSERVADORA:
+        - Só considera cabeçalho se TODAS as primeiras 3 células forem texto (sem aspas)
+        - Se qualquer célula começar com número, assume que são DADOS
+        - Prioriza NÃO perder dados sobre detectar cabeçalhos
         """
         try:
             with open(file_path, 'r', encoding='latin1') as f:
                 first_line = f.readline().strip()
                 
-                # Se a primeira linha tem só números e separadores, NÃO é cabeçalho
-                # Exemplo: "12345678;01;23;..." = dados
-                # Exemplo: "CNPJ_BASICO;RAZAO_SOCIAL;..." = cabeçalho
                 if not first_line:
                     return False
                 
-                # Pega primeira célula
-                first_cell = first_line.split(';')[0] if ';' in first_line else first_line
+                # Separa células (remove aspas se tiver)
+                cells = first_line.split(';')
+                cells_clean = [cell.strip('"').strip() for cell in cells[:3]]  # Pega até 3 primeiras
                 
-                # Se tiver letras, provavelmente é cabeçalho
-                has_letters = any(c.isalpha() for c in first_cell)
+                # Se alguma célula estiver vazia, provavelmente são dados
+                if not all(cells_clean):
+                    logger.info(f"📋 {file_path.name}: SEM cabeçalho (células vazias detectadas)")
+                    return False
                 
-                return has_letters
+                # Conta quantas células começam com números
+                cells_with_numbers = sum(1 for cell in cells_clean if cell and cell[0].isdigit())
+                
+                # Se QUALQUER célula começar com número, assume que são DADOS
+                if cells_with_numbers > 0:
+                    logger.info(f"📋 {file_path.name}: SEM cabeçalho (células começam com números: {cells_clean[:3]})")
+                    return False
+                
+                # Se todas as células têm letras e nenhuma começa com número
+                all_have_letters = all(any(c.isalpha() for c in cell) for cell in cells_clean)
+                
+                if all_have_letters:
+                    logger.info(f"📋 {file_path.name}: COM cabeçalho detectado (células: {cells_clean[:3]})")
+                    return True
+                
+                # Caso padrão: assume que NÃO tem cabeçalho (segurança!)
+                logger.info(f"📋 {file_path.name}: SEM cabeçalho (padrão conservador)")
+                return False
                 
         except Exception as e:
             logger.error(f"Erro ao verificar cabeçalho de {file_path}: {e}")
