@@ -18,7 +18,7 @@ if errorlevel 1 (
 echo.
 echo [2/3] Instalando dependencias...
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 echo.
 echo [3/3] Criando pastas necessarias...
