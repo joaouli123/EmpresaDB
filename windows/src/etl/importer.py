@@ -24,6 +24,9 @@ class CNPJImporter:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.chunk_size = settings.CHUNK_SIZE
         
+        # Cache de códigos válidos para validação
+        self.valid_codes_cache = {}
+        
         self.import_order = [
             ('tabela_auxiliar_cnaes', 'cnaes'),
             ('tabela_auxiliar_municipios', 'municipios'),
@@ -36,6 +39,33 @@ class CNPJImporter:
             ('socios', 'socios'),
             ('simples_nacional', 'simples_nacional')
         ]
+    
+    def load_valid_codes(self, table_name: str):
+        """Carrega códigos válidos de uma tabela auxiliar para cache"""
+        if table_name in self.valid_codes_cache:
+            return self.valid_codes_cache[table_name]
+        
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT codigo FROM {table_name}")
+                codes = {row[0] for row in cursor.fetchall()}
+                cursor.close()
+                self.valid_codes_cache[table_name] = codes
+                return codes
+        except Exception as e:
+            logger.warning(f"Erro ao carregar códigos de {table_name}: {e}")
+            return set()
+    
+    def validate_foreign_key(self, value: str, table_name: str) -> str:
+        """Valida se o código existe na tabela de referência, retorna vazio se inválido"""
+        if not value or value == '':
+            return ''
+        
+        valid_codes = self.load_valid_codes(table_name)
+        if value not in valid_codes:
+            return ''
+        return value
     
     def extract_zip(self, zip_path: Path) -> Optional[Path]:
         try:
@@ -119,6 +149,16 @@ class CNPJImporter:
                     ):
                         chunk = chunk.fillna('')
                         
+                        # Validar qualificacao_responsavel
+                        chunk['qualificacao_responsavel'] = chunk['qualificacao_responsavel'].apply(
+                            lambda x: self.validate_foreign_key(x, 'qualificacoes_socios')
+                        )
+                        
+                        # Validar natureza_juridica
+                        chunk['natureza_juridica'] = chunk['natureza_juridica'].apply(
+                            lambda x: self.validate_foreign_key(x, 'naturezas_juridicas')
+                        )
+                        
                         capital_social_series = pd.to_numeric(
                             chunk['capital_social'].str.replace(',', '.'),
                             errors='coerce'
@@ -179,6 +219,20 @@ class CNPJImporter:
                     ):
                         chunk = chunk.fillna('')
                         
+                        # Validar foreign keys
+                        chunk['motivo_situacao_cadastral'] = chunk['motivo_situacao_cadastral'].apply(
+                            lambda x: self.validate_foreign_key(x, 'motivos_situacao_cadastral')
+                        )
+                        chunk['pais'] = chunk['pais'].apply(
+                            lambda x: self.validate_foreign_key(x, 'paises')
+                        )
+                        chunk['cnae_fiscal_principal'] = chunk['cnae_fiscal_principal'].apply(
+                            lambda x: self.validate_foreign_key(x, 'cnaes')
+                        )
+                        chunk['municipio'] = chunk['municipio'].apply(
+                            lambda x: self.validate_foreign_key(x, 'municipios')
+                        )
+                        
                         for date_col in ['data_situacao_cadastral', 'data_inicio_atividade', 'data_situacao_especial']:
                             chunk[date_col] = pd.to_datetime(
                                 chunk[date_col],
@@ -237,6 +291,17 @@ class CNPJImporter:
                         desc=f"Processando {csv_path.name}"
                     ):
                         chunk = chunk.fillna('')
+                        
+                        # Validar foreign keys
+                        chunk['qualificacao_socio'] = chunk['qualificacao_socio'].apply(
+                            lambda x: self.validate_foreign_key(x, 'qualificacoes_socios')
+                        )
+                        chunk['qualificacao_representante'] = chunk['qualificacao_representante'].apply(
+                            lambda x: self.validate_foreign_key(x, 'qualificacoes_socios')
+                        )
+                        chunk['pais'] = chunk['pais'].apply(
+                            lambda x: self.validate_foreign_key(x, 'paises')
+                        )
                         
                         chunk['data_entrada_sociedade'] = pd.to_datetime(
                             chunk['data_entrada_sociedade'],
