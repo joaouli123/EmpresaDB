@@ -110,15 +110,34 @@ async def get_by_cnpj(cnpj: str):
 
 @router.get("/search", response_model=PaginatedResponse)
 async def search_empresas(
+    cnpj: Optional[str] = Query(None, description="CNPJ completo ou parcial (apenas números)"),
     razao_social: Optional[str] = Query(None, description="Razão social (busca parcial)"),
     nome_fantasia: Optional[str] = Query(None, description="Nome fantasia (busca parcial)"),
     uf: Optional[str] = Query(None, description="UF (sigla do estado)"),
     municipio: Optional[str] = Query(None, description="Código do município"),
     cnae: Optional[str] = Query(None, description="CNAE principal"),
-    situacao_cadastral: Optional[str] = Query(None, description="Situação cadastral (01-08)"),
-    porte: Optional[str] = Query(None, description="Porte da empresa (1-5)"),
-    simples: Optional[str] = Query(None, description="Optante Simples (S/N)"),
+    cnae_secundario: Optional[str] = Query(None, description="CNAE secundário (busca parcial)"),
+    situacao_cadastral: Optional[str] = Query(None, description="Situação cadastral (01-Nula, 02-Ativa, 03-Suspensa, 04-Inapta, 08-Baixada)"),
+    porte: Optional[str] = Query(None, description="Porte da empresa (1-Micro, 2-Pequena, 3-Média, 4-Grande, 5-Demais)"),
+    simples: Optional[str] = Query(None, description="Optante Simples Nacional (S/N)"),
     mei: Optional[str] = Query(None, description="Optante MEI (S/N)"),
+    identificador_matriz_filial: Optional[str] = Query(None, description="1-Matriz, 2-Filial"),
+    natureza_juridica: Optional[str] = Query(None, description="Código da natureza jurídica"),
+    capital_social_min: Optional[float] = Query(None, description="Capital social mínimo"),
+    capital_social_max: Optional[float] = Query(None, description="Capital social máximo"),
+    ente_federativo: Optional[str] = Query(None, description="Ente federativo responsável (busca parcial)"),
+    data_inicio_atividade_de: Optional[str] = Query(None, description="Data de início de atividade DE (formato: YYYY-MM-DD)"),
+    data_inicio_atividade_ate: Optional[str] = Query(None, description="Data de início de atividade ATÉ (formato: YYYY-MM-DD)"),
+    data_situacao_cadastral_de: Optional[str] = Query(None, description="Data da situação cadastral DE (formato: YYYY-MM-DD)"),
+    data_situacao_cadastral_ate: Optional[str] = Query(None, description="Data da situação cadastral ATÉ (formato: YYYY-MM-DD)"),
+    motivo_situacao_cadastral: Optional[str] = Query(None, description="Código do motivo da situação cadastral"),
+    cep: Optional[str] = Query(None, description="CEP (completo ou parcial)"),
+    bairro: Optional[str] = Query(None, description="Bairro (busca parcial)"),
+    logradouro: Optional[str] = Query(None, description="Logradouro/Rua (busca parcial)"),
+    tipo_logradouro: Optional[str] = Query(None, description="Tipo de logradouro (ex: RUA, AVENIDA)"),
+    numero: Optional[str] = Query(None, description="Número do estabelecimento"),
+    complemento: Optional[str] = Query(None, description="Complemento (busca parcial)"),
+    email: Optional[str] = Query(None, description="E-mail (busca parcial)"),
     page: int = Query(1, ge=1, description="Número da página"),
     per_page: int = Query(20, ge=1, le=100, description="Itens por página")
 ):
@@ -128,6 +147,11 @@ async def search_empresas(
             
             conditions = []
             params = []
+            
+            if cnpj:
+                cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
+                conditions.append("cnpj_completo LIKE %s")
+                params.append(f"{cnpj_clean}%")
             
             if razao_social:
                 conditions.append("razao_social ILIKE %s")
@@ -149,6 +173,10 @@ async def search_empresas(
                 conditions.append("cnae_fiscal_principal = %s")
                 params.append(cnae)
             
+            if cnae_secundario:
+                conditions.append("cnae_fiscal_secundaria LIKE %s")
+                params.append(f"%{cnae_secundario}%")
+            
             if situacao_cadastral:
                 conditions.append("situacao_cadastral = %s")
                 params.append(situacao_cadastral)
@@ -164,6 +192,74 @@ async def search_empresas(
             if mei:
                 conditions.append("opcao_mei = %s")
                 params.append(mei.upper())
+            
+            if identificador_matriz_filial:
+                conditions.append("identificador_matriz_filial = %s")
+                params.append(identificador_matriz_filial)
+            
+            if natureza_juridica:
+                conditions.append("natureza_juridica = %s")
+                params.append(natureza_juridica)
+            
+            if capital_social_min is not None:
+                conditions.append("capital_social >= %s")
+                params.append(capital_social_min)
+            
+            if capital_social_max is not None:
+                conditions.append("capital_social <= %s")
+                params.append(capital_social_max)
+            
+            if ente_federativo:
+                conditions.append("ente_federativo_responsavel ILIKE %s")
+                params.append(f"%{ente_federativo}%")
+            
+            if data_inicio_atividade_de:
+                conditions.append("data_inicio_atividade >= %s")
+                params.append(data_inicio_atividade_de)
+            
+            if data_inicio_atividade_ate:
+                conditions.append("data_inicio_atividade <= %s")
+                params.append(data_inicio_atividade_ate)
+            
+            if data_situacao_cadastral_de:
+                conditions.append("data_situacao_cadastral >= %s")
+                params.append(data_situacao_cadastral_de)
+            
+            if data_situacao_cadastral_ate:
+                conditions.append("data_situacao_cadastral <= %s")
+                params.append(data_situacao_cadastral_ate)
+            
+            if motivo_situacao_cadastral:
+                conditions.append("motivo_situacao_cadastral_desc ILIKE %s")
+                params.append(f"%{motivo_situacao_cadastral}%")
+            
+            if cep:
+                conditions.append("cep LIKE %s")
+                params.append(f"{cep}%")
+            
+            if bairro:
+                conditions.append("bairro ILIKE %s")
+                params.append(f"%{bairro}%")
+            
+            if logradouro:
+                conditions.append("logradouro ILIKE %s")
+                params.append(f"%{logradouro}%")
+            
+            if tipo_logradouro:
+                conditions.append("tipo_logradouro ILIKE %s")
+                params.append(f"%{tipo_logradouro}%")
+            
+            if numero:
+                conditions.append("numero = %s")
+                params.append(numero)
+            
+            if complemento:
+                conditions.append("complemento ILIKE %s")
+                params.append(f"%{complemento}%")
+            
+            if email:
+                conditions.append("correio_eletronico ILIKE %s")
+                params.append(f"%{email}%")
             
             where_clause = " AND ".join(conditions) if conditions else "1=1"
             
@@ -249,6 +345,71 @@ async def get_socios(cnpj: str):
             """
             
             cursor.execute(query, (cnpj_basico,))
+            results = cursor.fetchall()
+            cursor.close()
+            
+            columns = [
+                'cnpj_basico', 'identificador_socio', 'nome_socio',
+                'cnpj_cpf_socio', 'qualificacao_socio', 'data_entrada_sociedade'
+            ]
+            
+            socios = [SocioModel(**dict(zip(columns, row))) for row in results]
+            return socios
+            
+    except Exception as e:
+        logger.error(f"Erro ao buscar sócios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/socios/search", response_model=List[SocioModel])
+async def search_socios(
+    nome_socio: Optional[str] = Query(None, description="Nome do sócio (busca parcial)"),
+    cpf_cnpj: Optional[str] = Query(None, description="CPF ou CNPJ do sócio (completo ou parcial)"),
+    identificador_socio: Optional[str] = Query(None, description="Tipo de sócio (1-Pessoa Jurídica, 2-Pessoa Física, 3-Estrangeiro)"),
+    qualificacao_socio: Optional[str] = Query(None, description="Código da qualificação do sócio"),
+    faixa_etaria: Optional[str] = Query(None, description="Faixa etária do sócio"),
+    limit: int = Query(100, ge=1, le=1000, description="Limite de resultados")
+):
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            conditions = []
+            params = []
+            
+            if nome_socio:
+                conditions.append("nome_socio ILIKE %s")
+                params.append(f"%{nome_socio}%")
+            
+            if cpf_cnpj:
+                cpf_cnpj_clean = cpf_cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
+                conditions.append("cnpj_cpf_socio LIKE %s")
+                params.append(f"{cpf_cnpj_clean}%")
+            
+            if identificador_socio:
+                conditions.append("identificador_socio = %s")
+                params.append(identificador_socio)
+            
+            if qualificacao_socio:
+                conditions.append("qualificacao_socio = %s")
+                params.append(qualificacao_socio)
+            
+            if faixa_etaria:
+                conditions.append("faixa_etaria = %s")
+                params.append(faixa_etaria)
+            
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
+            
+            query = f"""
+                SELECT 
+                    cnpj_basico, identificador_socio, nome_socio,
+                    cnpj_cpf_socio, qualificacao_socio, data_entrada_sociedade
+                FROM socios
+                WHERE {where_clause}
+                ORDER BY nome_socio
+                LIMIT %s
+            """
+            
+            cursor.execute(query, params + [limit])
             results = cursor.fetchall()
             cursor.close()
             

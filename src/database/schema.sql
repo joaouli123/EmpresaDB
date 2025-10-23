@@ -165,6 +165,7 @@ SELECT
     msc.descricao as motivo_situacao_cadastral_desc,
     e.data_inicio_atividade,
     e.cnae_fiscal_principal,
+    e.cnae_fiscal_secundaria,
     cnae.descricao as cnae_principal_desc,
     e.tipo_logradouro,
     e.logradouro,
@@ -181,6 +182,7 @@ SELECT
     nj.descricao as natureza_juridica_desc,
     emp.porte_empresa,
     emp.capital_social,
+    emp.ente_federativo_responsavel,
     sn.opcao_simples,
     sn.opcao_mei
 FROM estabelecimentos e

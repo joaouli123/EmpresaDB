@@ -72,18 +72,47 @@ GET /api/v1/search?cnae=4712100
 GET /api/v1/search?uf=RJ&porte=4&simples=N&page=1&per_page=20
 ```
 
-**Filtros disponíveis**:
+**⭐ TODOS OS FILTROS DISPONÍVEIS (26 filtros no total!)**:
+
+**Dados da Empresa:**
 - `razao_social`: Nome da empresa (busca parcial)
 - `nome_fantasia`: Nome fantasia (busca parcial)
+- `natureza_juridica`: Código da natureza jurídica
+- `porte`: 1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais
+- `capital_social_min`: Capital social mínimo
+- `capital_social_max`: Capital social máximo
+- `identificador_matriz_filial`: 1=Matriz, 2=Filial
+
+**Localização:**
 - `uf`: Estado (SP, RJ, MG, etc.)
 - `municipio`: Código do município
-- `cnae`: CNAE principal
-- `situacao_cadastral`: 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada
-- `porte`: 1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais
+- `cep`: CEP (completo ou parcial)
+- `bairro`: Bairro (busca parcial)
+- `logradouro`: Rua/Avenida (busca parcial)
+- `tipo_logradouro`: Tipo (RUA, AVENIDA, etc.)
+- `numero`: Número do estabelecimento
+- `complemento`: Complemento (busca parcial)
+
+**Situação e Atividade:**
+- `situacao_cadastral`: 01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada
+- `motivo_situacao_cadastral`: Motivo (busca parcial)
+- `data_situacao_cadastral_de`: Data situação DE (YYYY-MM-DD)
+- `data_situacao_cadastral_ate`: Data situação ATÉ (YYYY-MM-DD)
+- `cnae`: CNAE principal (atividade econômica)
+
+**Datas:**
+- `data_inicio_atividade_de`: Data abertura DE (YYYY-MM-DD)
+- `data_inicio_atividade_ate`: Data abertura ATÉ (YYYY-MM-DD)
+
+**Regime Tributário:**
 - `simples`: S ou N (Simples Nacional)
 - `mei`: S ou N (MEI)
+
+**Paginação:**
 - `page`: Página (padrão: 1)
 - `per_page`: Itens por página (padrão: 20, max: 100)
+
+📄 **Ver documentação completa**: `FILTROS_COMPLETOS.md`
 
 #### Listar sócios de uma empresa
 
@@ -135,6 +164,36 @@ GET /api/v1/search?uf=RJ&porte=4&situacao_cadastral=02
 
 ```bash
 GET /api/v1/search?simples=S&uf=MG&page=1
+```
+
+### Exemplo 4: Empresas com capital social entre 100k e 1 milhão
+
+```bash
+GET /api/v1/search?capital_social_min=100000&capital_social_max=1000000&situacao_cadastral=02
+```
+
+### Exemplo 5: Empresas abertas em 2023
+
+```bash
+GET /api/v1/search?data_inicio_atividade_de=2023-01-01&data_inicio_atividade_ate=2023-12-31
+```
+
+### Exemplo 6: Matrizes de grande porte em São Paulo
+
+```bash
+GET /api/v1/search?identificador_matriz_filial=1&porte=4&uf=SP&situacao_cadastral=02
+```
+
+### Exemplo 7: Buscar por endereço específico
+
+```bash
+GET /api/v1/search?tipo_logradouro=AVENIDA&logradouro=Paulista&uf=SP
+```
+
+### Exemplo 8: MEIs no bairro Centro
+
+```bash
+GET /api/v1/search?mei=S&bairro=Centro&situacao_cadastral=02
 ```
 
 ## 📊 Estrutura dos Dados
