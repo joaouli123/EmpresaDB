@@ -1,13 +1,15 @@
 import os
 from pydantic_settings import BaseSettings
 from typing import Optional
+from urllib.parse import urlparse, unquote
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int = 5432
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
+    DATABASE_URL: Optional[str] = None
+    DB_HOST: Optional[str] = None
+    DB_PORT: Optional[int] = 5432
+    DB_NAME: Optional[str] = None
+    DB_USER: Optional[str] = None
+    DB_PASSWORD: Optional[str] = None
     
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 5000
@@ -23,8 +25,20 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 50000
     MAX_WORKERS: int = 4
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.DATABASE_URL:
+            parsed = urlparse(self.DATABASE_URL)
+            self.DB_HOST = parsed.hostname
+            self.DB_PORT = parsed.port or 5432
+            self.DB_NAME = parsed.path.lstrip('/')
+            self.DB_USER = unquote(parsed.username) if parsed.username else None
+            self.DB_PASSWORD = unquote(parsed.password) if parsed.password else None
+    
     @property
     def database_url(self) -> str:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
     class Config:
