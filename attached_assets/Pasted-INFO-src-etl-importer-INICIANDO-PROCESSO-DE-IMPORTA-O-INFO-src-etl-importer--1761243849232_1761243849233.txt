@@ -1,0 +1,52 @@
+INFO:src.etl.importer:INICIANDO PROCESSO DE IMPORTAÇÃO
+INFO:src.etl.importer:======================================================================
+
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_cnaes
+INFO:src.etl.importer:   Tabela destino: cnaes
+INFO:src.etl.importer:Extraindo: Cnaes.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.CNAECSV
+INFO:src.etl.importer:Importando tabela auxiliar: cnaes de F.K03200$Z.D51011.CNAECSV
+INFO:src.etl.importer:  ✓ Importados 1359 registros em cnaes
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_municipios
+INFO:src.etl.importer:   Tabela destino: municipios
+INFO:src.etl.importer:Extraindo: Municipios.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.MUNICCSV
+INFO:src.etl.importer:Importando tabela auxiliar: municipios de F.K03200$Z.D51011.MUNICCSV
+INFO:src.etl.importer:  ✓ Importados 5572 registros em municipios
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_motivos
+INFO:src.etl.importer:   Tabela destino: motivos_situacao_cadastral
+INFO:src.etl.importer:Extraindo: Motivos.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.MOTICSV
+INFO:src.etl.importer:Importando tabela auxiliar: motivos_situacao_cadastral de F.K03200$Z.D51011.MOTICSV
+INFO:src.etl.importer:  ✓ Importados 63 registros em motivos_situacao_cadastral
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_naturezas
+INFO:src.etl.importer:   Tabela destino: naturezas_juridicas
+INFO:src.etl.importer:Extraindo: Naturezas.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.NATJUCSV
+INFO:src.etl.importer:Importando tabela auxiliar: naturezas_juridicas de F.K03200$Z.D51011.NATJUCSV
+INFO:src.etl.importer:  ✓ Importados 91 registros em naturezas_juridicas
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_paises
+INFO:src.etl.importer:   Tabela destino: paises
+INFO:src.etl.importer:Extraindo: Paises.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:Importando tabela auxiliar: paises de F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:  ✓ Importados 255 registros em paises
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_qualificacoes
+INFO:src.etl.importer:   Tabela destino: qualificacoes_socios
+INFO:src.etl.importer:Extraindo: Qualificacoes.zip
+INFO:src.etl.importer:  ✓ Extraído: F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:Importando tabela auxiliar: qualificacoes_socios de F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:  ✓ Importados 68 registros em qualificacoes_socios
+INFO:src.etl.importer:
+📁 Processando tipo: empresas
+INFO:src.etl.importer:   Tabela destino: empresas
+INFO:src.etl.importer:Extraindo: Empresas9.zip
+INFO:src.etl.importer:  ✓ Extraído: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y9.D51011.EMPRECSV
+Processando K3241.K03200Y9.D51011.EMPRECSV: 3it [01:03, 21.46s/it]
