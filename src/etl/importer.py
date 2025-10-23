@@ -44,21 +44,23 @@ class CNPJImporter:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 file_list = zip_ref.namelist()
                 
+                # Pegar o primeiro arquivo que não seja diretório
                 for file_name in file_list:
-                    # Arquivos da Receita podem ser: .csv, .CSV ou CSV (sem ponto)
-                    name_upper = file_name.upper()
-                    if name_upper.endswith('.CSV') or name_upper.endswith('CSV'):
-                        extract_path = self.data_dir / file_name
+                    # Ignorar pastas
+                    if file_name.endswith('/'):
+                        continue
                         
-                        if not extract_path.exists():
-                            zip_ref.extract(file_name, self.data_dir)
-                            logger.info(f"  ✓ Extraído: {file_name}")
-                        else:
-                            logger.info(f"  ✓ Já existe: {file_name}")
-                        
-                        return extract_path
+                    extract_path = self.data_dir / file_name
+                    
+                    if not extract_path.exists():
+                        zip_ref.extract(file_name, self.data_dir)
+                        logger.info(f"  ✓ Extraído: {file_name}")
+                    else:
+                        logger.info(f"  ✓ Já existe: {file_name}")
+                    
+                    return extract_path
             
-            logger.warning(f"  ⚠️ Nenhum arquivo CSV encontrado em {zip_path.name}")
+            logger.warning(f"  ⚠️ Nenhum arquivo encontrado em {zip_path.name}")
             return None
             
         except Exception as e:
