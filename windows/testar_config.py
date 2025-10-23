@@ -4,7 +4,7 @@ Script de diagnóstico - Testa se o .env está sendo lido corretamente
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 print("="*70)
 print("DIAGNÓSTICO DE CONFIGURAÇÃO")
@@ -37,28 +37,47 @@ if not db_url:
 # Fazer parse da URL
 parsed = urlparse(db_url)
 
-print(f"\n3. Parse da URL:")
-print(f"   Usuário: {parsed.username}")
-print(f"   Senha: {'*' * len(parsed.password) if parsed.password else '❌ VAZIA'}")
+# Decodificar usuário e senha
+username = unquote(parsed.username) if parsed.username else None
+password = unquote(parsed.password) if parsed.password else None
+
+print(f"\n3. Parse da URL (ANTES de decodificar):")
+print(f"   Usuário codificado: {parsed.username}")
+print(f"   Senha codificada: {parsed.password[:5]}...{parsed.password[-2:] if parsed.password and len(parsed.password) > 7 else ''}")
+
+print(f"\n4. Parse da URL (DEPOIS de decodificar):")
+print(f"   Usuário: {username}")
+print(f"   Senha: {'*' * len(password) if password else '❌ VAZIA'}")
 print(f"   Host: {parsed.hostname}")
 print(f"   Porta: {parsed.port}")
 print(f"   Banco: {parsed.path.lstrip('/')}")
 
-if not parsed.password:
+if not password:
     print("\n❌ ERRO: Senha não foi extraída da URL!")
     print("   Verifique se a URL está no formato correto:")
     print("   DATABASE_URL=postgresql://usuario:senha@host:5432/banco")
-    print("\n   Se sua senha tem caracteres especiais (@, #, etc),")
-    print("   você precisa codificá-los em URL:")
-    print("   @ = %40")
-    print("   # = %23")
 else:
     print("\n✅ Configuração OK!")
-    print("   Todas as informações foram extraídas corretamente.")
-    print("\n   Agora tente conectar com:")
-    print("   python -c \"import psycopg2; psycopg2.connect(host='{0}', port={1}, database='{2}', user='{3}', password='{4}'); print('✅ Conexão OK!')\"".format(
-        parsed.hostname, parsed.port, parsed.path.lstrip('/'), parsed.username, parsed.password
-    ))
+    print("   Todas as informações foram extraídas e decodificadas.")
+    print("\n5. Testando conexão com o banco...")
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=parsed.hostname,
+            port=parsed.port,
+            database=parsed.path.lstrip('/'),
+            user=username,
+            password=password
+        )
+        conn.close()
+        print("   ✅ CONEXÃO COM BANCO OK!")
+        print("\n🎉 Tudo pronto! Execute: rodar_etl.bat")
+    except Exception as e:
+        print(f"   ❌ ERRO DE CONEXÃO: {e}")
+        print("\n   Verifique:")
+        print("   - Servidor está online?")
+        print("   - Firewall liberado?")
+        print("   - Senha correta?")
 
 print("\n" + "="*70)
 input("\nPressione ENTER para sair...")
