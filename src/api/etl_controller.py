@@ -195,7 +195,7 @@ class ETLController:
                 "end_time": datetime.now().isoformat()
             })
             
-            await self.log_message("success", f"✅ ETL concluído com sucesso! Total: {total_records:,} registros")
+            await self.log_message("info", f"✅ ETL concluído com sucesso! Total: {total_records:,} registros")
             
             self.is_running = False
             return True
