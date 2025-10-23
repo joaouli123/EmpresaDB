@@ -254,7 +254,8 @@ Você pode ajustar em tempo real:
 3. **Retry Automático**: 3 tentativas automáticas de download para arquivos corrompidos
 4. **Documentação Clara**: 
    - `LEIA_PRIMEIRO.txt` - Resumo executivo
-   - `INSTRUCOES_MIGRACAO.md` - Guia passo a passo
+   - `INSTRUCOES_MIGRACAO.md` - Guia para pgAdmin local
+   - `COMO_EXECUTAR_NO_VPS.md` - Guia para VPS Hostinger com Docker
    - `MIGRAR_BANCO.sql` - Script de migração one-time
 5. **Mensagens Amigáveis**: Instruções claras sobre o que fazer em caso de erro
 
