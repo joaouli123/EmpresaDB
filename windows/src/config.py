@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
-load_dotenv()
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class Settings:
     API_HOST: str = "0.0.0.0"
@@ -19,8 +21,7 @@ class Settings:
     CHUNK_SIZE: int = 100000
     MAX_WORKERS: int = 8
     
-    @property
-    def database_url(self) -> str:
+    def __init__(self):
         db_url = os.getenv("DATABASE_URL")
         if not db_url:
             raise ValueError(
@@ -28,12 +29,14 @@ class Settings:
                 "Crie um arquivo .env com:\n"
                 "DATABASE_URL=postgresql://usuario:senha@host:5432/banco"
             )
-        return db_url
-    
-    DB_HOST: str = os.getenv("DB_HOST", "72.61.217.143")
-    DB_PORT: int = int(os.getenv("DB_PORT", "5432"))
-    DB_NAME: str = os.getenv("DB_NAME", "cnpj_db")
-    DB_USER: str = os.getenv("DB_USER", "postgres")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
+        
+        parsed = urlparse(db_url)
+        
+        self.database_url = db_url
+        self.DB_HOST = parsed.hostname or "72.61.217.143"
+        self.DB_PORT = parsed.port or 5432
+        self.DB_NAME = parsed.path.lstrip('/') or "cnpj_db"
+        self.DB_USER = parsed.username or "postgres"
+        self.DB_PASSWORD = parsed.password or ""
 
 settings = Settings()
