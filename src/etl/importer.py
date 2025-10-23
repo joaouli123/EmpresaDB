@@ -3,12 +3,13 @@ import zipfile
 import csv
 import logging
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Callable
 from tqdm import tqdm
 import pandas as pd
 from io import StringIO
 from src.database.connection import db_manager
 from src.config import settings
+import asyncio
 
 logging.basicConfig(
     level=logging.INFO,
