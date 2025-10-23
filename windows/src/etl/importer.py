@@ -23,6 +23,7 @@ class CNPJImporter:
         self.data_dir = Path(settings.DATA_DIR)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.chunk_size = settings.CHUNK_SIZE
+        self.current_month_folder = None  # Será definido dinamicamente
 
         # Cache de códigos válidos para validação
         self.valid_codes_cache = {}
@@ -100,7 +101,11 @@ class CNPJImporter:
             return False, f"Erro ao validar: {str(e)}"
 
     def extract_zip(self, zip_path: Path, max_retries: int = 3) -> Optional[Path]:
-        """Extrai arquivo ZIP com retry automático em caso de falha"""
+        """Extrai arquivo ZIP com retry automático em caso de falha
+        
+        Se current_month_folder estiver definido, extrai para data/{mes}/
+        Caso contrário, extrai direto em data/
+        """
 
         # Validar arquivo primeiro
         is_valid, message = self.validate_zip_file(zip_path)
@@ -195,6 +200,13 @@ class CNPJImporter:
         # Se chegou aqui, arquivo é válido - prosseguir com extração
         try:
             logger.info(f"Extraindo: {zip_path.name}")
+            
+            # Define pasta de destino (com ou sem subpasta do mês)
+            if self.current_month_folder:
+                extract_dir = self.data_dir / self.current_month_folder
+                extract_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                extract_dir = self.data_dir
 
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 file_list = zip_ref.namelist()
@@ -205,10 +217,10 @@ class CNPJImporter:
                     if file_name.endswith('/'):
                         continue
 
-                    extract_path = self.data_dir / file_name
+                    extract_path = extract_dir / file_name
 
                     if not extract_path.exists():
-                        zip_ref.extract(file_name, self.data_dir)
+                        zip_ref.extract(file_name, extract_dir)
                         logger.info(f"  ✓ Extraído: {file_name}")
                     else:
                         logger.info(f"  ✓ Já existe: {file_name}")
@@ -589,7 +601,18 @@ class CNPJImporter:
         except Exception as e:
             logger.error(f"Erro ao importar Simples Nacional: {e}")
 
-    def process_all(self, downloaded_files: dict):
+    def process_all(self, downloaded_files: dict, month_folder: str = None):
+        """Processa todos os arquivos baixados
+        
+        Args:
+            downloaded_files: Dicionário com os arquivos baixados por tipo
+            month_folder: Pasta do mês (ex: '2025-10') para organizar extrações
+        """
+        # Define a pasta do mês para extrações
+        self.current_month_folder = month_folder
+        if month_folder:
+            logger.info(f"📁 Extraindo arquivos para: data/{month_folder}/\n")
+        
         logger.info("\n" + "="*70)
         logger.info("INICIANDO PROCESSO DE IMPORTAÇÃO")
         logger.info("="*70 + "\n")
@@ -671,7 +694,8 @@ def main():
     downloaded_files = downloader.download_latest_files()
 
     importer = CNPJImporter()
-    importer.process_all(downloaded_files)
+    # Passa a pasta do mês para organizar extrações
+    importer.process_all(downloaded_files, month_folder=downloader.current_month_folder)
 
 if __name__ == "__main__":
     main()

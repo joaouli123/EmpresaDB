@@ -16,6 +16,7 @@ class RFBDownloader:
         self.base_url = settings.RFB_BASE_URL
         self.download_dir = Path(settings.DOWNLOAD_DIR)
         self.download_dir.mkdir(parents=True, exist_ok=True)
+        self.current_month_folder = None  # Será definido dinamicamente
     
     def get_latest_folder(self) -> Optional[str]:
         """Detecta a pasta mais recente (ex: 2025-10/)"""
@@ -106,7 +107,13 @@ class RFBDownloader:
             return 'outros'
     
     def download_file(self, url: str, filename: str) -> Optional[Path]:
-        filepath = self.download_dir / filename
+        # Cria pasta específica do mês se não existir
+        if self.current_month_folder:
+            month_dir = self.download_dir / self.current_month_folder
+            month_dir.mkdir(parents=True, exist_ok=True)
+            filepath = month_dir / filename
+        else:
+            filepath = self.download_dir / filename
         
         if filepath.exists():
             logger.info(f"Arquivo já existe: {filename}")
@@ -140,6 +147,11 @@ class RFBDownloader:
             return None
     
     def download_latest_files(self, file_types: Optional[List[str]] = None) -> dict:
+        # Define a pasta do mês atual
+        self.current_month_folder = self.get_latest_folder()
+        if self.current_month_folder:
+            logger.info(f"📁 Salvando arquivos em: downloads/{self.current_month_folder}/")
+        
         all_files = self.list_available_files()
         
         if not all_files:

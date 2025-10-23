@@ -158,9 +158,13 @@ class ETLController:
                     "progress": 30
                 })
                 await self.log_message("info", f"✓ {total_files} arquivos baixados")
+                
+                # Guarda a pasta do mês para passar ao importer
+                month_folder = downloader.current_month_folder
             else:
                 await self.log_message("info", "⏭️ Download desabilitado, pulando...")
                 downloaded_files = {}
+                month_folder = None
                 
             # Passo 2: Importação
             if self.config["import_enabled"]:
@@ -172,7 +176,7 @@ class ETLController:
                 
                 # Importação em thread separada para não bloquear WebSocket
                 importer = CNPJImporter()
-                await asyncio.to_thread(importer.process_all, downloaded_files)
+                await asyncio.to_thread(importer.process_all, downloaded_files, month_folder)
                 
                 await self.update_stats({"progress": 80})
                 
