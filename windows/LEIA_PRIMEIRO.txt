@@ -1,0 +1,61 @@
+================================================================================
+                        ⚠️  ATENÇÃO - LEIA ANTES DE CONTINUAR
+================================================================================
+
+Olá! 👋
+
+Se você está vendo esta mensagem, é porque o sistema detectou que precisa
+fazer um pequeno ajuste no banco de dados antes de continuar.
+
+🔍 O QUE ACONTECEU?
+
+   O sistema tentou importar os dados mas encontrou um problema:
+   
+   Alguns códigos da Receita Federal que existiam antigamente foram 
+   descontinuados (exemplo: código 36 de qualificação de responsável).
+   
+   O banco de dados está com regras muito rígidas que não permitem 
+   esses códigos antigos.
+
+✅ TEM SOLUÇÃO FÁCIL!
+
+   Basta executar UM arquivo SQL que vai ajustar o banco de dados.
+   Leva menos de 1 minuto!
+
+📁 COMO FAZER?
+
+   1. Abra o arquivo: INSTRUCOES_MIGRACAO.md
+   
+   2. Siga o passo a passo (é bem simples!)
+   
+   3. Depois volte e clique em "▶️ Iniciar ETL" novamente
+
+💾 MEUS DADOS ESTÃO SEGUROS?
+
+   SIM! 100% seguros!
+   
+   - Nada será apagado
+   - Nada será perdido
+   - É apenas um ajuste nas regras do banco
+
+🕐 QUANTO TEMPO LEVA?
+
+   - Executar o arquivo SQL: ~10 segundos
+   - Ler as instruções: ~2 minutos
+   
+   Total: Menos de 3 minutos! ⚡
+
+================================================================================
+
+🚀 PRÓXIMOS PASSOS:
+
+   1. Abra o arquivo: INSTRUCOES_MIGRACAO.md
+   2. Siga as instruções
+   3. Volte aqui e clique em "▶️ Iniciar ETL"
+   4. Pronto! Vai funcionar! 🎉
+
+================================================================================
+
+⭐ DICA: Salve esta pasta! Você vai precisar dela para rodar o sistema.
+
+================================================================================

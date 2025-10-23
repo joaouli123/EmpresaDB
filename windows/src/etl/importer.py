@@ -109,12 +109,16 @@ class CNPJImporter:
             logger.error(f"❌ {zip_path.name}: {message}")
             
             # Tentar redownload automático
+            logger.warning(f"\n🔄 Tentando corrigir automaticamente...")
+            logger.warning(f"   (Não precisa fazer nada, aguarde...)\n")
+            
             for attempt in range(1, max_retries + 1):
-                logger.warning(f"🔄 Tentativa {attempt}/{max_retries}: Tentando baixar {zip_path.name} novamente...")
+                logger.warning(f"🔄 Tentativa {attempt}/{max_retries}: Baixando {zip_path.name} novamente...")
                 
                 # Remover arquivo corrompido
                 try:
                     zip_path.unlink()
+                    logger.info(f"   → Arquivo corrompido removido")
                 except:
                     pass
                 
@@ -123,35 +127,69 @@ class CNPJImporter:
                 downloader = RFBDownloader()
                 
                 # Buscar URL do arquivo
+                logger.info(f"   → Procurando arquivo no servidor da Receita Federal...")
                 files = downloader.list_available_files()
                 file_info = next((f for f in files if f['name'] == zip_path.name), None)
                 
                 if file_info:
+                    logger.info(f"   → Iniciando download...")
                     new_path = downloader.download_file(file_info['url'], zip_path.name)
                     if new_path:
                         # Validar novamente
+                        logger.info(f"   → Validando arquivo baixado...")
                         is_valid, message = self.validate_zip_file(new_path)
                         if is_valid:
-                            logger.info(f"✅ Download bem-sucedido na tentativa {attempt}")
+                            logger.info(f"✅ Sucesso! Arquivo baixado e validado na tentativa {attempt}")
                             break
                         else:
                             logger.error(f"❌ Tentativa {attempt} falhou: {message}")
+                            if attempt < max_retries:
+                                logger.warning(f"   → Aguardando 5 segundos antes da próxima tentativa...")
+                                import time
+                                time.sleep(5)
                 else:
-                    logger.error(f"❌ Arquivo {zip_path.name} não encontrado no servidor")
+                    logger.error(f"❌ Arquivo {zip_path.name} não encontrado no servidor da Receita Federal")
+                    logger.error(f"   → Você precisará baixar manualmente")
                     break
             
             # Se após todas as tentativas ainda está inválido
             if not is_valid:
-                logger.error(f"\n{'='*70}")
-                logger.error(f"⚠️  ARQUIVO CORROMPIDO: {zip_path.name}")
-                logger.error(f"{'='*70}")
-                logger.error(f"Tentativas automáticas falharam após {max_retries} tentativas.")
-                logger.error(f"\n📥 OPÇÕES:")
-                logger.error(f"1. Baixe manualmente de:")
-                logger.error(f"   https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/")
-                logger.error(f"2. Coloque o arquivo em: {self.download_dir}")
-                logger.error(f"3. Execute o ETL novamente")
-                logger.error(f"{'='*70}\n")
+                logger.error(f"\n")
+                logger.error(f"{'='*80}")
+                logger.error(f"❌ ATENÇÃO: ARQUIVO CORROMPIDO OU COM PROBLEMA")
+                logger.error(f"{'='*80}")
+                logger.error(f"")
+                logger.error(f"📁 Arquivo: {zip_path.name}")
+                logger.error(f"❌ Problema: {message}")
+                logger.error(f"")
+                logger.error(f"🔄 O sistema tentou baixar automaticamente {max_retries} vezes, mas não conseguiu.")
+                logger.error(f"")
+                logger.error(f"{'─'*80}")
+                logger.error(f"✋ O QUE FAZER AGORA?")
+                logger.error(f"{'─'*80}")
+                logger.error(f"")
+                logger.error(f"OPÇÃO 1 - AGUARDAR (Recomendado)")
+                logger.error(f"  → O sistema vai pular este arquivo e continuar com os outros")
+                logger.error(f"  → Você pode baixar este arquivo depois e processar separadamente")
+                logger.error(f"")
+                logger.error(f"OPÇÃO 2 - BAIXAR MANUALMENTE AGORA")
+                logger.error(f"  1️⃣  Abra no navegador:")
+                logger.error(f"     https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/")
+                logger.error(f"")
+                logger.error(f"  2️⃣  Procure pela pasta mais recente (ex: 2025-10/)")
+                logger.error(f"")
+                logger.error(f"  3️⃣  Baixe o arquivo: {zip_path.name}")
+                logger.error(f"")
+                logger.error(f"  4️⃣  Coloque o arquivo baixado na pasta:")
+                logger.error(f"     {self.download_dir.absolute()}")
+                logger.error(f"")
+                logger.error(f"  5️⃣  Clique em '▶️ Iniciar ETL' novamente")
+                logger.error(f"     (O sistema vai reconhecer o arquivo novo automaticamente)")
+                logger.error(f"")
+                logger.error(f"{'='*80}")
+                logger.error(f"💡 DICA: Se escolher aguardar, o processo vai continuar com os outros")
+                logger.error(f"   arquivos. Você não vai perder nada do que já foi importado!")
+                logger.error(f"{'='*80}\n")
                 return None
         
         # Se chegou aqui, arquivo é válido - prosseguir com extração
