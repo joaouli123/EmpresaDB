@@ -228,7 +228,7 @@ Você pode ajustar em tempo real:
 
 ## 📝 Estado Atual
 
-- ✅ Schema do banco criado
+- ✅ Schema do banco criado e otimizado
 - ✅ Sistema ETL implementado com tracking robusto
 - ✅ API REST funcionando
 - ✅ Secrets configurados
@@ -237,7 +237,26 @@ Você pode ajustar em tempo real:
 - ✅ Sistema de monitoramento via WebSocket
 - ✅ Validação automática de integridade (CSV vs DB)
 - ✅ Sistema de idempotência (não reprocessa arquivos completos)
+- ✅ Validação e retry automático para arquivos ZIP corrompidos
+- ✅ Tratamento inteligente de foreign keys faltantes
+- ✅ Documentação completa para usuários não-técnicos
 - ⏳ Dados não importados (aguardando execução do ETL)
+
+## 🔧 Correções Recentes (Out/2025)
+
+### Problema Identificado
+1. **Foreign Keys Rígidas**: Banco rejeitava códigos descontinuados pela Receita (ex: código 36 de qualificação)
+2. **Arquivos ZIP Corrompidos**: Downloads incompletos interrompiam todo o processo
+
+### Soluções Implementadas
+1. **Schema Flexível**: Removidas foreign keys rígidas, permitindo códigos inválidos (convertidos para NULL)
+2. **Validação Inteligente**: Sistema valida foreign keys no código antes da inserção
+3. **Retry Automático**: 3 tentativas automáticas de download para arquivos corrompidos
+4. **Documentação Clara**: 
+   - `LEIA_PRIMEIRO.txt` - Resumo executivo
+   - `INSTRUCOES_MIGRACAO.md` - Guia passo a passo
+   - `MIGRAR_BANCO.sql` - Script de migração one-time
+5. **Mensagens Amigáveis**: Instruções claras sobre o que fazer em caso de erro
 
 ## 🎯 Próximas Melhorias Sugeridas
 
