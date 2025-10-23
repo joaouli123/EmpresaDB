@@ -256,9 +256,15 @@ class CNPJImporter:
 
         try:
             total_imported = 0
+            total_skipped = 0
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
+
+                # Criar tabela temporária para importação
+                cursor.execute(f"""
+                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
+                """)
 
                 with open(csv_path, 'r', encoding='latin1') as f:
                     for chunk in tqdm(
@@ -296,15 +302,30 @@ class CNPJImporter:
                         chunk.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
 
-                        copy_sql = f"COPY {table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
+                        # Importar para tabela temporária
+                        copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                        total_imported += len(chunk)
+                # Inserir apenas os que não existem (ON CONFLICT DO NOTHING)
+                cursor.execute(f"""
+                    INSERT INTO {table_name} 
+                    SELECT * FROM temp_{table_name}
+                    ON CONFLICT (cnpj_basico) DO NOTHING
+                """)
+                
+                total_imported = cursor.rowcount
+                
+                # Contar quantos foram pulados
+                cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
+                total_in_file = cursor.fetchone()[0]
+                total_skipped = total_in_file - total_imported
 
                 conn.commit()
                 cursor.close()
 
-            logger.info(f"  ✓ Total importado: {total_imported} empresas")
+            logger.info(f"  ✓ Importados: {total_imported} empresas")
+            if total_skipped > 0:
+                logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
         except Exception as e:
             logger.error(f"Erro ao importar empresas: {e}")
@@ -326,9 +347,15 @@ class CNPJImporter:
 
         try:
             total_imported = 0
+            total_skipped = 0
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
+                
+                # Criar tabela temporária
+                cursor.execute(f"""
+                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
+                """)
 
                 with open(csv_path, 'r', encoding='latin1') as f:
                     for chunk in tqdm(
@@ -373,15 +400,28 @@ class CNPJImporter:
                         chunk.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
 
-                        copy_sql = f"COPY {table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
+                        copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                        total_imported += len(chunk)
+                # Inserir apenas os que não existem
+                cursor.execute(f"""
+                    INSERT INTO {table_name} 
+                    SELECT * FROM temp_{table_name}
+                    ON CONFLICT (cnpj_basico, cnpj_ordem, cnpj_dv) DO NOTHING
+                """)
+                
+                total_imported = cursor.rowcount
+                
+                cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
+                total_in_file = cursor.fetchone()[0]
+                total_skipped = total_in_file - total_imported
 
                 conn.commit()
                 cursor.close()
 
-            logger.info(f"  ✓ Total importado: {total_imported} estabelecimentos")
+            logger.info(f"  ✓ Importados: {total_imported} estabelecimentos")
+            if total_skipped > 0:
+                logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
         except Exception as e:
             logger.error(f"Erro ao importar estabelecimentos: {e}")
@@ -399,9 +439,14 @@ class CNPJImporter:
 
         try:
             total_imported = 0
+            total_skipped = 0
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
+                
+                cursor.execute(f"""
+                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
+                """)
 
                 with open(csv_path, 'r', encoding='latin1') as f:
                     for chunk in tqdm(
@@ -442,15 +487,28 @@ class CNPJImporter:
                         chunk.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
 
-                        copy_sql = f"COPY {table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
+                        copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                        total_imported += len(chunk)
+                # Inserir apenas os que não existem
+                cursor.execute(f"""
+                    INSERT INTO {table_name} 
+                    SELECT * FROM temp_{table_name}
+                    ON CONFLICT (cnpj_basico, identificador_socio, cnpj_cpf_socio) DO NOTHING
+                """)
+                
+                total_imported = cursor.rowcount
+                
+                cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
+                total_in_file = cursor.fetchone()[0]
+                total_skipped = total_in_file - total_imported
 
                 conn.commit()
                 cursor.close()
 
-            logger.info(f"  ✓ Total importado: {total_imported} sócios")
+            logger.info(f"  ✓ Importados: {total_imported} sócios")
+            if total_skipped > 0:
+                logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
         except Exception as e:
             logger.error(f"Erro ao importar sócios: {e}")
@@ -467,9 +525,14 @@ class CNPJImporter:
 
         try:
             total_imported = 0
+            total_skipped = 0
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
+                
+                cursor.execute(f"""
+                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
+                """)
 
                 with open(csv_path, 'r', encoding='latin1') as f:
                     for chunk in tqdm(
@@ -500,15 +563,28 @@ class CNPJImporter:
                         chunk.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
 
-                        copy_sql = f"COPY {table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
+                        copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                        total_imported += len(chunk)
+                # Inserir apenas os que não existem
+                cursor.execute(f"""
+                    INSERT INTO {table_name} 
+                    SELECT * FROM temp_{table_name}
+                    ON CONFLICT (cnpj_basico) DO NOTHING
+                """)
+                
+                total_imported = cursor.rowcount
+                
+                cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
+                total_in_file = cursor.fetchone()[0]
+                total_skipped = total_in_file - total_imported
 
                 conn.commit()
                 cursor.close()
 
-            logger.info(f"  ✓ Total importado: {total_imported} registros Simples")
+            logger.info(f"  ✓ Importados: {total_imported} registros Simples")
+            if total_skipped > 0:
+                logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
         except Exception as e:
             logger.error(f"Erro ao importar Simples Nacional: {e}")
