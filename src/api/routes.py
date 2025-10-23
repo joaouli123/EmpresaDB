@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional, List
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from typing import Optional, List, Dict, Any
 from sqlalchemy import text, or_, and_
 from src.database.connection import db_manager
 from src.api.models import (
@@ -11,7 +11,10 @@ from src.api.models import (
     CNAEModel,
     MunicipioModel
 )
+from src.api.websocket_manager import ws_manager
+from src.api.etl_controller import etl_controller
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -483,4 +486,69 @@ async def list_municipios(uf: str):
             
     except Exception as e:
         logger.error(f"Erro ao listar municípios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            
+            if data == "ping":
+                await ws_manager.send_message({"type": "pong"}, websocket)
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+
+@router.post("/etl/start")
+async def start_etl():
+    try:
+        asyncio.create_task(etl_controller.run_etl())
+        return {
+            "status": "started",
+            "message": "Processo ETL iniciado. Acompanhe o progresso via WebSocket."
+        }
+    except Exception as e:
+        logger.error(f"Erro ao iniciar ETL: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/etl/stop")
+async def stop_etl():
+    try:
+        stopped = await etl_controller.stop_etl()
+        return {
+            "status": "stopped" if stopped else "not_running",
+            "message": "Processo ETL parado" if stopped else "ETL não estava rodando"
+        }
+    except Exception as e:
+        logger.error(f"Erro ao parar ETL: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/etl/status")
+async def get_etl_status():
+    return {
+        "is_running": etl_controller.is_running,
+        "stats": etl_controller.stats,
+        "config": etl_controller.config
+    }
+
+@router.post("/etl/config")
+async def update_etl_config(config: Dict[str, Any]):
+    try:
+        updated_config = await etl_controller.update_config(config)
+        return {
+            "status": "updated",
+            "config": updated_config
+        }
+    except Exception as e:
+        logger.error(f"Erro ao atualizar configuração: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/etl/database-stats")
+async def get_database_stats():
+    try:
+        stats = await etl_controller.get_database_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Erro ao obter estatísticas do banco: {e}")
         raise HTTPException(status_code=500, detail=str(e))

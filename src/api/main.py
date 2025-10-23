@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from src.api.routes import router
 from src.config import settings
 import logging
+from pathlib import Path
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,16 +49,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router, prefix="/api/v1")
+static_path = Path(__file__).parent.parent.parent / "static"
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
 @app.get("/")
 async def root():
+    dashboard_path = static_path / "dashboard.html"
+    if dashboard_path.exists():
+        return FileResponse(str(dashboard_path))
     return {
         "message": "API de Consulta CNPJ",
         "version": settings.API_VERSION,
         "docs": "/docs",
-        "api": "/api/v1"
+        "dashboard": "/dashboard"
     }
+
+@app.get("/dashboard")
+async def dashboard():
+    dashboard_path = static_path / "dashboard.html"
+    if dashboard_path.exists():
+        return FileResponse(str(dashboard_path))
+    return {"message": "Dashboard não encontrado"}
+
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
