@@ -17,10 +17,44 @@ class RFBDownloader:
         self.download_dir = Path(settings.DOWNLOAD_DIR)
         self.download_dir.mkdir(parents=True, exist_ok=True)
     
-    def list_available_files(self) -> List[dict]:
-        logger.info(f"Listando arquivos disponíveis em: {self.base_url}")
+    def get_latest_folder(self) -> Optional[str]:
+        """Detecta a pasta mais recente (ex: 2025-10/)"""
         try:
-            response = requests.get(self.base_url, timeout=30)
+            url = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/"
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            folders = []
+            
+            for link in soup.find_all('a'):
+                href = link.get('href')
+                if href and re.match(r'\d{4}-\d{2}/', href):
+                    folders.append(href.rstrip('/'))
+            
+            if folders:
+                latest = sorted(folders, reverse=True)[0]
+                logger.info(f"📅 Pasta mais recente detectada: {latest}")
+                return latest
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Erro ao detectar pasta mais recente: {e}")
+            return None
+    
+    def list_available_files(self) -> List[dict]:
+        """Lista arquivos ZIP da pasta mais recente"""
+        try:
+            latest_folder = self.get_latest_folder()
+            if not latest_folder:
+                logger.error("Não foi possível detectar a pasta mais recente!")
+                return []
+            
+            url = f"https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{latest_folder}/"
+            logger.info(f"Listando arquivos disponíveis em: {url}")
+            
+            response = requests.get(url, timeout=30)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -31,14 +65,14 @@ class RFBDownloader:
                 if href and isinstance(href, str) and href.endswith('.zip'):
                     file_info = {
                         'name': href,
-                        'url': self.base_url + href,
+                        'url': url + href,
                         'type': self._classify_file(href)
                     }
                     files.append(file_info)
             
             files.sort(key=lambda x: x['name'], reverse=True)
             
-            logger.info(f"Encontrados {len(files)} arquivos ZIP")
+            logger.info(f"Encontrados {len(files)} arquivos ZIP em {latest_folder}/")
             return files
             
         except Exception as e:
