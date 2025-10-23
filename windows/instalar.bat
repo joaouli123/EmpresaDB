@@ -1,3 +1,31 @@
+======================================================================
+DIAGNÓSTICO DE CONFIGURAÇÃO
+======================================================================
+
+1. Procurando arquivo .env em: C:\Users\joao lucas\Downloads\windows\windows\.env
+   Arquivo existe? True
+
+2. DATABASE_URL lida do .env:
+   postgresql://postgres:Proelast1608%40@72.61.217.143:5432/cnpj_db
+
+3. Parse da URL:
+   Usuário: postgres
+   Senha: ***************
+   Host: 72.61.217.143
+   Porta: 5432
+   Banco: cnpj_db
+
+✅ Configuração OK!
+   Todas as informações foram extraídas corretamente.
+
+   Agora tente conectar com:
+   python -c "import psycopg2; psycopg2.connect(host='72.61.217.143', port=5432, database='cnpj_db', user='postgres', password='Proelast1608%40'); print('✅ Conexão OK!')"
+
+======================================================================
+
+Pressione ENTER para sair...
+
+
 @echo off
 echo ========================================
 echo INSTALADOR - Sistema CNPJ Windows

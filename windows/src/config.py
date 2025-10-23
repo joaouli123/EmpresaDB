@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -36,7 +36,7 @@ class Settings:
         self.DB_HOST = parsed.hostname or "72.61.217.143"
         self.DB_PORT = parsed.port or 5432
         self.DB_NAME = parsed.path.lstrip('/') or "cnpj_db"
-        self.DB_USER = parsed.username or "postgres"
-        self.DB_PASSWORD = parsed.password or ""
+        self.DB_USER = unquote(parsed.username) if parsed.username else "postgres"
+        self.DB_PASSWORD = unquote(parsed.password) if parsed.password else ""
 
 settings = Settings()
