@@ -148,8 +148,9 @@ class ETLController:
                 })
                 await self.log_message("info", "📥 Baixando arquivos da Receita Federal...")
                 
+                # Executa download em thread separada para não bloquear event loop
                 downloader = RFBDownloader()
-                downloaded_files = downloader.download_latest_files()
+                downloaded_files = await asyncio.to_thread(downloader.download_latest_files)
                 
                 total_files = sum(len(files) for files in downloaded_files.values())
                 await self.update_stats({
@@ -169,13 +170,9 @@ class ETLController:
                 })
                 await self.log_message("info", "📊 Importando dados para o banco...")
                 
+                # Importação em thread separada para não bloquear WebSocket
                 importer = CNPJImporter()
-                
-                # Aqui vamos modificar o importer para enviar eventos
-                # Por enquanto, vamos executar e depois pegar as estatísticas
-                # TODO: Modificar CNPJImporter para enviar eventos em tempo real
-                
-                importer.process_all(downloaded_files)
+                await asyncio.to_thread(importer.process_all, downloaded_files)
                 
                 await self.update_stats({"progress": 80})
                 

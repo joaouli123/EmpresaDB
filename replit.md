@@ -23,16 +23,22 @@ Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras,
 ├── src/
 │   ├── api/              # API REST com FastAPI
 │   │   ├── main.py       # Aplicação principal
-│   │   ├── routes.py     # Endpoints
-│   │   └── models.py     # Modelos Pydantic
+│   │   ├── routes.py     # Endpoints + WebSocket
+│   │   ├── models.py     # Modelos Pydantic
+│   │   ├── etl_controller.py      # Controlador do ETL
+│   │   └── websocket_manager.py   # Gerenciador WebSocket
 │   ├── database/         # Camada de banco de dados
-│   │   ├── connection.py # Gerenciador de conexão
-│   │   ├── schema.sql    # Schema completo (tabelas, índices, views)
-│   │   └── init_db.py    # Inicializador
+│   │   ├── connection.py          # Gerenciador de conexão
+│   │   ├── schema.sql             # Schema principal
+│   │   ├── etl_tracking_schema.sql # Schema de tracking
+│   │   └── init_db.py             # Inicializador
 │   ├── etl/              # Pipeline ETL
 │   │   ├── downloader.py # Download dos arquivos RFB
-│   │   └── importer.py   # Importação para PostgreSQL
+│   │   ├── importer.py   # Importação para PostgreSQL
+│   │   └── etl_tracker.py # Sistema de tracking e validação
 │   └── config.py         # Configurações
+├── static/
+│   └── dashboard.html    # Dashboard visual em tempo real
 ├── main.py               # Entrada da API
 ├── run_etl.py           # Executa processo ETL completo
 └── GUIA_DE_USO.md       # Documentação detalhada
@@ -53,6 +59,12 @@ Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras,
 - `estabelecimentos` - Estabelecimentos com CNPJ completo (14 dígitos)
 - `socios` - Sócios e representantes legais
 - `simples_nacional` - Opções de Simples Nacional e MEI
+
+### Tabelas de Controle ETL (Tracking)
+- `execution_runs` - Rastreamento de cada execução do ETL
+- `etl_tracking_files` - Rastreamento de cada arquivo processado
+- `etl_tracking_chunks` - Rastreamento de chunks (processamento incremental)
+- `etl_logs` - Logs estruturados do processo ETL
 
 ### Features Importantes
 - **CNPJ Completo Automático**: Campo `cnpj_completo` gerado automaticamente juntando as 3 partes
@@ -87,13 +99,21 @@ Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras,
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/v1/` | Health check |
-| GET | `/api/v1/stats` | Estatísticas do banco |
-| GET | `/api/v1/cnpj/{cnpj}` | Consulta por CNPJ |
-| GET | `/api/v1/search` | Busca avançada com filtros |
-| GET | `/api/v1/cnpj/{cnpj}/socios` | Sócios da empresa |
-| GET | `/api/v1/cnaes` | Listar CNAEs |
-| GET | `/api/v1/municipios/{uf}` | Municípios por UF |
+| GET | `/` | Dashboard visual |
+| GET | `/dashboard` | Dashboard alternativo |
+| GET | `/health` | Health check |
+| GET | `/stats` | Estatísticas do banco |
+| GET | `/cnpj/{cnpj}` | Consulta por CNPJ |
+| GET | `/search` | Busca avançada com filtros |
+| GET | `/cnpj/{cnpj}/socios` | Sócios da empresa |
+| GET | `/cnaes` | Listar CNAEs |
+| GET | `/municipios/{uf}` | Municípios por UF |
+| WebSocket | `/ws` | Conexão tempo real |
+| POST | `/etl/start` | Iniciar processo ETL |
+| POST | `/etl/stop` | Parar processo ETL |
+| GET | `/etl/status` | Status atual do ETL |
+| POST | `/etl/config` | Atualizar configurações |
+| GET | `/etl/database-stats` | Estatísticas do banco |
 
 ### Filtros da Busca Avançada
 - Razão social (parcial)
@@ -126,16 +146,66 @@ Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras,
 
 ## 🚀 Como Usar
 
-### 1. Importar Dados (Primeira vez)
+### 1. Acessar Dashboard
+Abra seu navegador em: `http://localhost:5000` ou `http://seu-dominio:5000`
+
+O dashboard permite:
+- ✅ Iniciar/Parar ETL com um clique
+- ✅ Configurar chunk_size e max_workers dinamicamente
+- ✅ Ver progresso em tempo real
+- ✅ Monitorar logs ao vivo
+- ✅ Ver estatísticas de cada tabela
+- ✅ Validação automática (CSV vs DB)
+
+### 2. Importar Dados via Terminal (Alternativo)
 ```bash
 python run_etl.py
 ```
 
-### 2. Iniciar API
-```bash
-python main.py
-```
+### 3. API REST
 API disponível em: http://0.0.0.0:5000
+
+## 🎯 Funcionalidades Avançadas
+
+### Sistema de Tracking Inteligente
+
+O sistema garante:
+
+1. **Idempotência**: 
+   - Calcula hash SHA-256 de cada arquivo
+   - Se arquivo já foi 100% processado (mesmo hash), pula automaticamente
+   - Economiza tempo e recursos
+
+2. **Recuperação Automática**:
+   - Se o processamento parar no meio, continua de onde parou
+   - Rastreamento por chunks (pedaços de 50k registros)
+   - Não perde progresso
+
+3. **Validação de Integridade**:
+   - Conta linhas no CSV
+   - Conta registros no banco de dados
+   - Alerta se houver divergências
+   - Registra tudo em tabelas de auditoria
+
+4. **Logs Estruturados**:
+   - Cada ação é registrada no banco
+   - Timestamps completos
+   - Correlação por execution_id
+   - Consulta fácil via SQL
+
+### Configurações Dinâmicas
+
+Você pode ajustar em tempo real:
+
+- **chunk_size**: Tamanho dos lotes (padrão: 50.000)
+  - Máquina fraca: 10.000 - 25.000
+  - Máquina média: 50.000 - 100.000  
+  - Máquina potente: 100.000 - 500.000
+
+- **max_workers**: Número de workers paralelos (padrão: 4)
+  - CPU 2 cores: 2 workers
+  - CPU 4 cores: 4 workers
+  - CPU 8+ cores: 8-16 workers
 
 ## 🔧 Configuração Atual
 
@@ -157,10 +227,14 @@ API disponível em: http://0.0.0.0:5000
 ## 📝 Estado Atual
 
 - ✅ Schema do banco criado
-- ✅ Sistema ETL implementado
+- ✅ Sistema ETL implementado com tracking robusto
 - ✅ API REST funcionando
 - ✅ Secrets configurados
 - ✅ Workflow ativo
+- ✅ Dashboard visual em tempo real
+- ✅ Sistema de monitoramento via WebSocket
+- ✅ Validação automática de integridade (CSV vs DB)
+- ✅ Sistema de idempotência (não reprocessa arquivos completos)
 - ⏳ Dados não importados (aguardando execução do ETL)
 
 ## 🎯 Próximas Melhorias Sugeridas

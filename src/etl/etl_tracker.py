@@ -36,11 +36,13 @@ class ETLTracker:
             logger.error(f"Erro ao calcular hash de {file_path}: {e}")
             return None
             
-    def count_csv_lines(self, file_path: Path) -> int:
-        """Conta total de linhas no CSV"""
+    def count_csv_lines(self, file_path: Path, skip_header: bool = True) -> int:
+        """Conta total de linhas no CSV (excluindo cabeçalho por padrão)"""
         try:
             with open(file_path, 'r', encoding='latin1') as f:
-                return sum(1 for _ in f)
+                total = sum(1 for _ in f)
+                # Remove cabeçalho se existir
+                return total - 1 if skip_header and total > 0 else total
         except Exception as e:
             logger.error(f"Erro ao contar linhas de {file_path}: {e}")
             return 0
