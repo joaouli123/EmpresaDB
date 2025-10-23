@@ -3,11 +3,11 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int = 5432
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
+    DB_HOST: str = os.getenv("PGHOST", "localhost")
+    DB_PORT: int = int(os.getenv("PGPORT", "5432"))
+    DB_NAME: str = os.getenv("PGDATABASE", "cnpj_db")
+    DB_USER: str = os.getenv("PGUSER", "postgres")
+    DB_PASSWORD: str = os.getenv("PGPASSWORD", "")
     
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 5000
@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     
     @property
     def database_url(self) -> str:
+        db_url = os.getenv("DATABASE_URL")
+        if db_url:
+            return db_url
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
     class Config:
