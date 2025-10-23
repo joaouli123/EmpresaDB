@@ -85,12 +85,12 @@ class CNPJImporter:
                 if bad_file is not None:
                     return False, f"Arquivo corrompido (erro em: {bad_file})"
 
-                # Verifica se tem CSV
+                # Verifica se tem arquivos (não apenas pastas)
                 file_list = zip_ref.namelist()
-                has_csv = any(f.upper().endswith('.CSV') or f.upper().endswith('CSV') for f in file_list)
+                has_files = any(not f.endswith('/') for f in file_list)
 
-                if not has_csv:
-                    return False, "ZIP vazio (sem arquivos CSV)"
+                if not has_files:
+                    return False, "ZIP vazio (sem arquivos)"
 
                 return True, "OK"
 
