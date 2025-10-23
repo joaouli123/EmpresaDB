@@ -1,0 +1,39 @@
+INFO:src.etl.importer:Importando tabela auxiliar: qualificacoes_socios de F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:  ✓ Importados 68 registros em qualificacoes_socios
+INFO:src.etl.importer:
+📁 Processando tipo: empresas
+INFO:src.etl.importer:   Tabela destino: empresas
+INFO:src.etl.importer:Extraindo: Empresas9.zip
+INFO:src.etl.importer:  ✓ Extraído: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y9.D51011.EMPRECSV
+Processando K3241.K03200Y9.D51011.EMPRECSV: 7it [02:46, 23.78s/it]
+ERROR:src.database.connection:Erro na conexão com banco de dados: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+ERROR:src.etl.importer:Erro ao importar empresas: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+INFO:src.etl.importer:Extraindo: Empresas8.zip
+INFO:src.etl.importer:  ✓ Extraído: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y8.D51011.EMPRECSV
+Processando K3241.K03200Y8.D51011.EMPRECSV: 0it [00:09, ?it/s]
+ERROR:src.database.connection:Erro na conexão com banco de dados: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+ERROR:src.etl.importer:Erro ao importar empresas: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+INFO:src.etl.importer:Extraindo: Empresas7.zip
+INFO:src.etl.importer:  ✓ Extraído: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y7.D51011.EMPRECSV
+Processando K3241.K03200Y7.D51011.EMPRECSV: 1it [00:34, 34.71s/it]
+ERROR:src.database.connection:Erro na conexão com banco de dados: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+ERROR:src.etl.importer:Erro ao importar empresas: insert or update on table "empresas" violates foreign key constraint "empresas_qualificacao_responsavel_fkey"
+DETAIL:  Key (qualificacao_responsavel)=(36) is not present in table "qualificacoes_socios".
+
+INFO:src.etl.importer:Extraindo: Empresas6.zip
+INFO:src.etl.importer:  ✓ Extraído: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y6.D51011.EMPRECSV
+Processando K3241.K03200Y6.D51011.EMPRECSV: 0it [00:00, ?it/s]
