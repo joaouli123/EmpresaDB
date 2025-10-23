@@ -18,8 +18,8 @@ class Settings:
 
     RFB_BASE_URL: str = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/"
 
-    CHUNK_SIZE: int = 100000
-    MAX_WORKERS: int = 8
+    CHUNK_SIZE: int = 200000
+    MAX_WORKERS: int = 12
 
     def __init__(self):
         db_url = os.getenv("DATABASE_URL")
