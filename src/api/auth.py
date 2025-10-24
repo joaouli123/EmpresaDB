@@ -22,7 +22,7 @@ class UserCreate(BaseModel):
     password: str
 
 class UserLogin(BaseModel):
-    username: str
+    username: str  # Pode ser username ou email
     password: str
 
 class TokenData(BaseModel):
@@ -99,14 +99,20 @@ async def register(user: UserCreate):
 
 @router.post("/login", response_model=dict)
 async def login(form_data: UserLogin):
+    # Tenta buscar por username primeiro
     user = await db_manager.get_user_by_username(form_data.username)
+    
+    # Se não encontrou, tenta buscar por email
+    if not user:
+        user = await db_manager.get_user_by_email(form_data.username)
+    
     if not user or not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=400,
-            detail="Incorrect username or password",
+            detail="Usuário/email ou senha incorretos",
         )
 
-    await db_manager.update_last_login(form_data.username)
+    await db_manager.update_last_login(user["username"])
 
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
     access_token = create_access_token(

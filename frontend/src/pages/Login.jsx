@@ -71,7 +71,7 @@ const Login = () => {
           <div className="form-group">
             <label>
               <UserIcon size={18} />
-              Usuário
+              {isLogin ? 'Usuário ou E-mail' : 'Usuário'}
             </label>
             <input
               type="text"
@@ -79,7 +79,7 @@ const Login = () => {
               value={formData.username}
               onChange={handleChange}
               required
-              placeholder="Digite seu usuário"
+              placeholder={isLogin ? "Digite seu usuário ou e-mail" : "Digite seu usuário"}
             />
           </div>
 
