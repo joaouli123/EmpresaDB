@@ -1,0 +1,56 @@
+.72s/chunk | Total: 7.9min
+Processando K3241.K03200Y0.D30513.ESTABELE: 39it [10:28, 17.96s/it]INFO:src.etl.importer:📊 Chunk 40: 16.30s | Média: 16.16s/chunk | Total: 10.8min
+Processando K3241.K03200Y0.D30513.ESTABELE: 46it [12:27, 16.25s/it]
+INFO:src.etl.importer:  ✓ Importados: 5101136 estabelecimentos
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 8638571 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em estabelecimentos: CSV=13,739,707 vs DB=47,882,051 (diff=-34142344)
+INFO:src.etl.importer:
+⏭️  PULANDO: socios (26,510,557 registros já existentes)
+INFO:src.etl.importer:
+📁 Processando tipo: simples_nacional
+INFO:src.etl.importer:   Tabela destino: simples_nacional
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$W.SIMPLES.CSV.D51011' | Tamanho: 2,860,844,049 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$W.SIMPLES.CSV.D51011'
+INFO:src.etl.importer:Extraindo: Simples.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$W.SIMPLES.CSV.D51011
+INFO:src.etl.importer:Importando Simples Nacional de: F.K03200$W.SIMPLES.CSV.D51011
+INFO:src.etl.etl_tracker:📋 F.K03200$W.SIMPLES.CSV.D51011: SEM cabeçalho (células começam com números: ['00000000', 'N', '20070701'])
+INFO:src.etl.etl_tracker:📊 F.K03200$W.SIMPLES.CSV.D51011: 45410223 linhas totais, cabeçalho=NÃO, dados=45410223
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: F.K03200$W.SIMPLES.CSV.D51011 (45,410,223 linhas)
+Processando F.K03200$W.SIMPLES.CSV.D51011: 152it [06:05,  2.40s/it]
+ERROR:src.database.connection:Erro na conexão com banco de dados: insert or update on table "simples_nacional" violates foreign key constraint "simples_nacional_cnpj_basico_fkey"
+DETAIL:  Key (cnpj_basico)=(24417449) is not present in table "empresas".
+
+ERROR:src.etl.importer:Erro ao importar Simples Nacional: insert or update on table "simples_nacional" violates foreign key constraint "simples_nacional_cnpj_basico_fkey"
+DETAIL:  Key (cnpj_basico)=(24417449) is not present in table "empresas".
+
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em simples_nacional: CSV=45,410,223 vs DB=0 (diff=45410223)
+INFO:src.etl.importer:
+======================================================================
+INFO:src.etl.importer:IMPORTAÇÃO CONCLUÍDA!
+INFO:src.etl.importer:======================================================================
+INFO:src.etl.importer:
+📊 RESUMO DA IMPORTAÇÃO:
+INFO:src.etl.importer:----------------------------------------------------------------------
+INFO:src.etl.importer:  cnaes                                         1,359 registros
+INFO:src.etl.importer:  municipios                                    5,572 registros
+INFO:src.etl.importer:  motivos_situacao_cadastral                       63 registros
+INFO:src.etl.importer:  naturezas_juridicas                              91 registros
+INFO:src.etl.importer:  paises                                          255 registros
+INFO:src.etl.importer:  qualificacoes_socios                             68 registros
+INFO:src.etl.importer:  empresas                                 64,888,615 registros
+INFO:src.etl.importer:  estabelecimentos                         47,882,051 registros
+INFO:src.etl.importer:  socios                                   26,510,557 registros
+INFO:src.etl.importer:  simples_nacional                                  0 registros
+INFO:src.etl.importer:----------------------------------------------------------------------
+INFO:src.etl.etl_tracker:✓ Execução finalizada: completed
+INFO:__main__:
+======================================================================
+INFO:__main__:PROCESSO COMPLETO!
+INFO:__main__:======================================================================
+INFO:__main__:
+A API pode ser iniciada com: python main.py
+PS C:\Users\joao lucas\Downloads\windows\windows>
