@@ -15,10 +15,32 @@ from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
 import logging
 import asyncio
+from functools import lru_cache
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# Cache em memória para resultados (expira em 1 hora)
+_cache = {}
+_cache_timeout = {}
+
+def get_from_cache(key: str):
+    """Retorna do cache se ainda válido"""
+    if key in _cache:
+        if datetime.now() < _cache_timeout.get(key, datetime.min):
+            return _cache[key]
+        else:
+            # Expirou, remove
+            _cache.pop(key, None)
+            _cache_timeout.pop(key, None)
+    return None
+
+def set_cache(key: str, value, minutes: int = 60):
+    """Salva no cache com tempo de expiração"""
+    _cache[key] = value
+    _cache_timeout[key] = datetime.now() + timedelta(minutes=minutes)
 
 async def verify_api_key(x_api_key: str = Header(None)):
     """
@@ -85,6 +107,13 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
             detail="CNPJ deve ter 14 dígitos"
         )
     
+    # Verifica cache primeiro
+    cache_key = f"cnpj:{cnpj_clean}"
+    cached = get_from_cache(cache_key)
+    if cached:
+        logger.info(f"Cache hit para CNPJ {cnpj_clean}")
+        return cached
+    
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
@@ -126,7 +155,12 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
             data['cnpj_ordem'] = cnpj_clean[8:12]
             data['cnpj_dv'] = cnpj_clean[12:14]
             
-            return EstabelecimentoCompleto(**data)
+            resultado = EstabelecimentoCompleto(**data)
+            
+            # Salva no cache (1 hora)
+            set_cache(cache_key, resultado, minutes=60)
+            
+            return resultado
             
     except HTTPException:
         raise
