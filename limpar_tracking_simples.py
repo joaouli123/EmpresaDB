@@ -26,10 +26,6 @@ def limpar_tracking_simples():
         database_url = "postgresql://cnpj_user:Proelast1608%40@72.61.217.143:5432/cnpj_db"
         print("ℹ️  Usando conexão VPS padrão")
     
-    if not database_url:
-        print("❌ ERROR: DATABASE_URL não encontrada!")
-        sys.exit(1)
-    
     try:
         conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
@@ -62,7 +58,7 @@ def limpar_tracking_simples():
                 print(f"  Arquivo: {row[1]}")
                 print(f"  Status: {row[2]}")
                 print(f"  Iniciado: {row[3]}")
-                print(f"  Concluído: {row[4]}")
+                print(f"  Finalizado: {row[4]}")
                 print()
             
             # Remove os registros de chunks relacionados primeiro
