@@ -215,6 +215,8 @@ const APIKeys = () => {
         <pre><code>Authorization: Bearer SUA_CHAVE_AQUI</code></pre>
         <p>Exemplo com curl:</p>
         <pre><code>curl -H "Authorization: Bearer SUA_CHAVE" {window.location.origin}/cnpj/00000000000191</code></pre>
+        <p style={{ marginTop: '16px' }}>URL base da API:</p>
+        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{window.location.origin}</code></pre>
       </div>
     </div>
   );

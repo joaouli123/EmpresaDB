@@ -1,6 +1,8 @@
+
 import { Code, Book, Zap, Shield, Database } from 'lucide-react';
 
 const Docs = () => {
+  // Obtém a URL base da aplicação dinamicamente
   const API_URL = window.location.origin;
   
   return (
@@ -32,6 +34,17 @@ const Docs = () => {
               A API CNPJ fornece acesso programático aos dados públicos da Receita Federal brasileira,
               permitindo consultar informações sobre empresas, estabelecimentos, sócios e muito mais.
             </p>
+            
+            <div className="info-card" style={{ marginTop: '20px', background: '#1f2937', color: 'white' }}>
+              <h3 style={{ color: 'white', marginBottom: '12px' }}>🔗 URL Base da API</h3>
+              <pre style={{ background: '#111827', padding: '15px', borderRadius: '8px', overflow: 'auto' }}>
+{API_URL}
+              </pre>
+              <p style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
+                Use esta URL em todas as requisições para a API
+              </p>
+            </div>
+
             <div className="features-grid">
               <div className="feature">
                 <Zap size={24} />
@@ -64,7 +77,7 @@ const Docs = () => {
             </div>
             <p>Para obter um token, faça login através do endpoint <code>/auth/login</code>:</p>
             <div className="code-block">
-              <pre>{`POST /auth/login
+              <pre>{`POST ${API_URL}/auth/login
 Content-Type: application/json
 
 {
@@ -219,7 +232,7 @@ consultarCNPJ('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-# Use a URL do seu Replit
+# URL base da API
 API_URL = '${API_URL}'
 TOKEN = 'SEU_TOKEN'
 
