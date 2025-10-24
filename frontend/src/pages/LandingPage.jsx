@@ -450,13 +450,13 @@ const LandingPage = () => {
                 <div className="outros-setores-info">
                   <div className="outros-setores-content">
                     <div className="outros-icon">
-                      <Sparkles size={28} />
+                      <Database size={28} />
                     </div>
                     <div className="outros-text">
                       <h4>E muito mais setores disponíveis!</h4>
                       <p>
-                        Além dos exemplos acima, temos <strong>{category.cnaes[category.cnaes.length - 1].quantidade}</strong> disponíveis 
-                        para consulta na nossa base de dados. Esta é apenas uma amostra visual dos principais CNAEs.
+                        Além dos exemplos acima, temos <strong>{category.cnaes[category.cnaes.length - 1].quantidade}</strong> 
+                        para consulta na nossa base de dados. Esta é apenas uma amostra visual dos principais CNAEs do setor.
                       </p>
                     </div>
                   </div>
