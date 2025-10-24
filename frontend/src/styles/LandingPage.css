@@ -488,6 +488,10 @@
   margin-top: 20px;
 }
 
+body {
+  font-family: 'Sora', sans-serif;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero-title {
