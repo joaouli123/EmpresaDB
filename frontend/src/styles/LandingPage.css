@@ -101,14 +101,15 @@
 
 .btn-navbar-secondary {
   background: transparent;
-  color: var(--gray);
-  border: 2px solid #e5e7eb;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  font-weight: 600;
 }
 
 .btn-navbar-secondary:hover {
-  background: #f9fafb;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .btn-navbar-primary {
