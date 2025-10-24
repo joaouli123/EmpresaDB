@@ -72,6 +72,32 @@ GET /api/v1/search?cnae=4712100
 GET /api/v1/search?uf=RJ&porte=4&simples=N&page=1&per_page=20
 ```
 
+**Resposta:**
+```json
+{
+  "total": 1234,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 62,
+  "items": [
+    {
+      "cnpj_completo": "33000167000101",
+      "razao_social": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+      "nome_fantasia": "PETROBRAS",
+      "uf": "RJ",
+      "municipio_desc": "RIO DE JANEIRO",
+      "situacao_cadastral": "02",
+      "porte_empresa": "5",
+      "capital_social": 246619165719.33,
+      "opcao_simples": "N",
+      "opcao_mei": "N"
+      // ... outros campos
+    }
+    // ... mais 19 itens
+  ]
+}
+```
+
 **⭐ TODOS OS FILTROS DISPONÍVEIS (26 filtros no total!)**:
 
 **Dados da Empresa:**

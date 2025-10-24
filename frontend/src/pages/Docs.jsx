@@ -121,7 +121,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                 <span className="method get">GET</span>
                 <code>/search</code>
               </div>
-              <p>Busca avançada com múltiplos filtros.</p>
+              <p>Busca avançada com múltiplos filtros. Retorna resultados paginados.</p>
               <div className="params-table">
                 <h4>Parâmetros disponíveis:</h4>
                 <table>
@@ -139,9 +139,19 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                       <td>Busca parcial por razão social</td>
                     </tr>
                     <tr>
+                      <td><code>nome_fantasia</code></td>
+                      <td>string</td>
+                      <td>Busca parcial por nome fantasia</td>
+                    </tr>
+                    <tr>
                       <td><code>uf</code></td>
                       <td>string</td>
                       <td>Sigla do estado (ex: SP, RJ)</td>
+                    </tr>
+                    <tr>
+                      <td><code>municipio</code></td>
+                      <td>string</td>
+                      <td>Código do município</td>
                     </tr>
                     <tr>
                       <td><code>situacao_cadastral</code></td>
@@ -154,6 +164,21 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                       <td>Código CNAE da atividade</td>
                     </tr>
                     <tr>
+                      <td><code>porte</code></td>
+                      <td>string</td>
+                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande</td>
+                    </tr>
+                    <tr>
+                      <td><code>simples</code></td>
+                      <td>string</td>
+                      <td>S ou N (Simples Nacional)</td>
+                    </tr>
+                    <tr>
+                      <td><code>mei</code></td>
+                      <td>string</td>
+                      <td>S ou N (MEI)</td>
+                    </tr>
+                    <tr>
                       <td><code>page</code></td>
                       <td>number</td>
                       <td>Número da página (padrão: 1)</td>
@@ -161,15 +186,60 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                     <tr>
                       <td><code>per_page</code></td>
                       <td>number</td>
-                      <td>Itens por página (máx: 100)</td>
+                      <td>Itens por página (padrão: 20, máx: 100)</td>
                     </tr>
                   </tbody>
                 </table>
+                <p style={{ marginTop: '12px', fontSize: '14px', color: '#64748b' }}>
+                  📋 <strong>Mais 15+ filtros disponíveis!</strong> Veja a lista completa em{' '}
+                  <a href="https://github.com/seu-repositorio/FILTROS_COMPLETOS.md" target="_blank" rel="noopener noreferrer">
+                    FILTROS_COMPLETOS.md
+                  </a>
+                </p>
               </div>
               <div className="endpoint-example">
-                <h4>Exemplo:</h4>
-                <pre>{`GET ${API_URL}/search?uf=SP&situacao_cadastral=02&page=1&per_page=20
+                <h4>Exemplo de Requisição:</h4>
+                <pre>{`GET ${API_URL}/search?razao_social=petrobras&uf=RJ&situacao_cadastral=02&page=1&per_page=20
 Authorization: Bearer SEU_TOKEN`}</pre>
+                <h4>Formato da Resposta (200 OK):</h4>
+                <pre>{`{
+  "total": 1234,           // Total de registros encontrados
+  "page": 1,               // Página atual
+  "per_page": 20,          // Itens por página
+  "total_pages": 62,       // Total de páginas
+  "items": [               // Array com os resultados
+    {
+      "cnpj_completo": "33000167000101",
+      "cnpj_basico": "33000167",
+      "cnpj_ordem": "0001",
+      "cnpj_dv": "01",
+      "identificador_matriz_filial": "1",
+      "razao_social": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+      "nome_fantasia": "PETROBRAS",
+      "situacao_cadastral": "02",
+      "data_situacao_cadastral": "2005-11-03",
+      "data_inicio_atividade": "1954-05-10",
+      "cnae_fiscal_principal": "0600001",
+      "cnae_principal_desc": "Extração de petróleo e gás natural",
+      "tipo_logradouro": "AVENIDA",
+      "logradouro": "REPÚBLICA DO CHILE",
+      "numero": "65",
+      "complemento": null,
+      "bairro": "CENTRO",
+      "cep": "20031912",
+      "uf": "RJ",
+      "municipio_desc": "RIO DE JANEIRO",
+      "ddd_1": "21",
+      "telefone_1": "32311000",
+      "correio_eletronico": "petrobras@petrobras.com.br",
+      "porte_empresa": "5",
+      "capital_social": 246619165719.33,
+      "opcao_simples": "N",
+      "opcao_mei": "N"
+    }
+    // ... mais 19 itens
+  ]
+}`}</pre>
               </div>
             </div>
 

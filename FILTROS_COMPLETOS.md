@@ -6,6 +6,54 @@
 GET /api/v1/search
 ```
 
+### 📦 Formato de Resposta
+
+A API retorna um objeto JSON paginado com a seguinte estrutura:
+
+```json
+{
+  "total": 1234,           // Total de registros encontrados
+  "page": 1,               // Página atual
+  "per_page": 20,          // Itens por página
+  "total_pages": 62,       // Total de páginas (calculado: ceil(total / per_page))
+  "items": [...]           // Array com os estabelecimentos encontrados
+}
+```
+
+**Estrutura de cada item no array `items`:**
+
+```json
+{
+  "cnpj_completo": "00000000000191",
+  "cnpj_basico": "00000000",
+  "cnpj_ordem": "0001",
+  "cnpj_dv": "91",
+  "identificador_matriz_filial": "1",      // 1=Matriz, 2=Filial
+  "razao_social": "BANCO DO BRASIL S.A.",
+  "nome_fantasia": "BANCO DO BRASIL",
+  "situacao_cadastral": "02",              // 02=Ativa
+  "data_situacao_cadastral": "2005-11-03",
+  "data_inicio_atividade": "1808-10-12",
+  "cnae_fiscal_principal": "6421200",
+  "cnae_principal_desc": "Bancos comerciais",
+  "tipo_logradouro": "AVENIDA",
+  "logradouro": "PAULISTA",
+  "numero": "1374",
+  "complemento": "SALA 101",
+  "bairro": "BELA VISTA",
+  "cep": "01310100",
+  "uf": "SP",
+  "municipio_desc": "SAO PAULO",
+  "ddd_1": "11",
+  "telefone_1": "40042000",
+  "correio_eletronico": "contato@bb.com.br",
+  "porte_empresa": "5",                    // 1-5 (Micro a Grande)
+  "capital_social": 98000000000.00,
+  "opcao_simples": "N",                    // S ou N
+  "opcao_mei": "N"                         // S ou N
+}
+```
+
 ## ✅ TODOS OS FILTROS DISPONÍVEIS
 
 ### 🏢 Dados da Empresa
