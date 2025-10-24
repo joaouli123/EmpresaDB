@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import PublicLayout from './components/PublicLayout';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
@@ -49,6 +50,14 @@ function AppRoutes() {
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
         />
         <Route
+          path="/pricing"
+          element={
+            <PublicLayout>
+              <Pricing />
+            </PublicLayout>
+          }
+        />
+        <Route
           path="/"
           element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />}
         />
@@ -61,7 +70,6 @@ function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="api-keys" element={<APIKeys />} />
           <Route path="docs" element={<Docs />} />
-          <Route path="pricing" element={<Pricing />} />
           <Route path="admin" element={
             <ProtectedRoute adminOnly={true}>
               <AdminDashboard />

@@ -1,15 +1,14 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { Check, Zap, Shield, TrendingUp } from 'lucide-react';
+import './Pricing.css';
 
 const Pricing = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(null);
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,27 +21,16 @@ const Pricing = () => {
       setPlans(response.data);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
+      // Definir planos padrão em caso de erro
+      setPlans([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubscribe = async (planId) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    setSubscribing(planId);
-    try {
-      await api.post(`/subscriptions/subscribe/${planId}`);
-      alert('Assinatura realizada com sucesso! Em breve você receberá instruções de pagamento.');
-      navigate('/dashboard');
-    } catch (error) {
-      alert('Erro ao processar assinatura. Tente novamente.');
-    } finally {
-      setSubscribing(null);
-    }
+    // Sempre redireciona para login para assinar (usuário precisa estar autenticado)
+    navigate('/login');
   };
 
   if (loading) {
