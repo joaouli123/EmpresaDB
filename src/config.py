@@ -2,6 +2,7 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 from urllib.parse import urlparse, unquote
+from fastapi.security import OAuth2PasswordBearer
 
 
 class Settings(BaseSettings):
@@ -26,6 +27,10 @@ class Settings(BaseSettings):
     API_TITLE: str = "API de Consulta CNPJ"
     API_VERSION: str = "1.0.0"
 
+    # CNPJ API
+    CNPJ_API_URL: Optional[str] = None
+    CNPJ_API_TOKEN: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',
@@ -34,3 +39,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+class DatabaseManager:
+    def __init__(self):
+        self.engine = None
+        self.SessionLocal = None
+        self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")

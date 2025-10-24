@@ -39,11 +39,11 @@ export const authAPI = {
 };
 
 export const cnpjAPI = {
-  getCNPJ: (cnpj) => api.get(`/cnpj/${cnpj}`),
   search: (params) => api.get('/search', { params }),
+  getByCNPJ: (cnpj) => api.get(`/cnpj/${cnpj}`),
   getStats: () => api.get('/stats'),
   getSocios: (cnpj) => api.get(`/cnpj/${cnpj}/socios`),
-  getCNAEs: () => api.get('/cnaes'),
+  getCNAEs: (search) => api.get('/cnaes', { params: { search } }),
   getMunicipios: (uf) => api.get(`/municipios/${uf}`),
 };
 
@@ -63,4 +63,5 @@ export const userAPI = {
   getUsage: () => api.get('/user/usage'),
 };
 
-export default api;
+// Exportar api para uso em outros componentes
+export { api };

@@ -37,10 +37,14 @@ const Docs = () => {
             <div className="info-card" style={{ marginTop: '20px', background: '#1f2937', color: 'white' }}>
               <h3 style={{ color: 'white', marginBottom: '12px' }}>🔗 URL Base da API</h3>
               <pre style={{ background: '#111827', padding: '15px', borderRadius: '8px', overflow: 'auto' }}>
-{API_URL}
+{window.location.protocol}//{window.location.host}
               </pre>
               <p style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-                Use esta URL em todas as requisições para a API
+                <strong>Para uso externo:</strong> Use esta URL em todas as requisições para a API<br/>
+                <strong>Porta Backend:</strong> {window.location.protocol}//{window.location.hostname}:8000
+              </p>
+              <p style={{ marginTop: '12px', color: '#fbbf24', fontSize: '14px' }}>
+                ⚠️ <strong>IMPORTANTE:</strong> Todas as requisições precisam do header <code>X-API-Key</code> com sua chave de API
               </p>
             </div>
 

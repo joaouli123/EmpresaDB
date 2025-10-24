@@ -21,8 +21,9 @@ class DatabaseManager:
     
     def get_engine(self):
         if not self.engine:
+            connection_string = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
             self.engine = create_engine(
-                self.connection_string,
+                connection_string,
                 pool_size=10,
                 max_overflow=20,
                 pool_pre_ping=True

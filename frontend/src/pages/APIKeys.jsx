@@ -210,36 +210,74 @@ const APIKeys = () => {
       </div>
 
       <div className="info-card">
-        <h3>Como usar sua chave de API</h3>
+        <h3>🔌 Como integrar com seu sistema externo</h3>
+        
+        <div style={{ background: '#fef3c7', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '2px solid #f59e0b' }}>
+          <h4 style={{ color: '#92400e', marginBottom: '8px' }}>📍 URLs de Conexão:</h4>
+          <p style={{ color: '#92400e', fontSize: '14px', margin: '4px 0' }}>
+            <strong>Frontend:</strong> <code>{window.location.origin}</code>
+          </p>
+          <p style={{ color: '#92400e', fontSize: '14px', margin: '4px 0' }}>
+            <strong>API Backend:</strong> <code>{window.location.protocol}//{window.location.hostname}:8000</code>
+          </p>
+        </div>
+
+        <h4>Autenticação:</h4>
         <p>Inclua sua chave de API no cabeçalho <code>X-API-Key</code> de todas as requisições:</p>
         <pre><code>X-API-Key: SUA_CHAVE_AQUI</code></pre>
         
         <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com cURL:</h4>
-        <pre><code>curl -H "X-API-Key: SUA_CHAVE" {window.location.origin}/cnpj/00000000000191</code></pre>
+        <pre><code>curl -H "X-API-Key: SUA_CHAVE" {window.location.protocol}//{window.location.hostname}:8000/cnpj/00000000000191</code></pre>
         
-        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com Python:</h4>
+        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com Python (para integração externa):</h4>
         <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{`import requests
 
-headers = {'X-API-Key': 'SUA_CHAVE'}
+# Configure a URL da API (use porta 8000 para backend direto)
+API_URL = '${window.location.protocol}//${window.location.hostname}:8000'
+
+headers = {'X-API-Key': 'SUA_CHAVE_API_AQUI'}
+
+# Buscar empresas em SP
 response = requests.get(
-    '${window.location.origin}/search?uf=SP',
+    f'{API_URL}/search?uf=SP&situacao_cadastral=02&page=1',
     headers=headers
 )
-print(response.json())`}</code></pre>
+
+if response.status_code == 200:
+    data = response.json()
+    print(f"Total encontrado: {data['total']}")
+    for empresa in data['items']:
+        print(f"{empresa['razao_social']} - {empresa['cnpj_completo']}")
+else:
+    print(f"Erro: {response.status_code} - {response.text}")`}</code></pre>
         
-        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com JavaScript:</h4>
-        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{`const response = await fetch(
-  '${window.location.origin}/cnpj/00000000000191',
+        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com JavaScript/Node.js:</h4>
+        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{`// Configure a URL da API
+const API_URL = '${window.location.protocol}//${window.location.hostname}:8000';
+
+const response = await fetch(
+  \`\${API_URL}/cnpj/00000000000191\`,
   {
     headers: {
-      'X-API-Key': 'SUA_CHAVE'
+      'X-API-Key': 'SUA_CHAVE_API_AQUI'
     }
   }
 );
-const data = await response.json();`}</code></pre>
 
-        <p style={{ marginTop: '16px' }}>URL base da API:</p>
-        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{window.location.origin}</code></pre>
+if (response.ok) {
+  const data = await response.json();
+  console.log(data);
+} else {
+  console.error('Erro:', response.status, await response.text());
+}`}</code></pre>
+
+        <div style={{ marginTop: '20px', padding: '12px', background: '#dbeafe', borderRadius: '8px', border: '2px solid #3b82f6' }}>
+          <h4 style={{ color: '#1e40af', marginBottom: '8px' }}>💡 Dica para Integração:</h4>
+          <p style={{ color: '#1e40af', fontSize: '14px' }}>
+            Para conectar seu sistema externo ao Replit, use sempre a <strong>porta 8000</strong> que aponta para o backend da API.<br/>
+            URL completa: <code>{window.location.protocol}//{window.location.hostname}:8000</code>
+          </p>
+        </div>
       </div>
     </div>
   );
