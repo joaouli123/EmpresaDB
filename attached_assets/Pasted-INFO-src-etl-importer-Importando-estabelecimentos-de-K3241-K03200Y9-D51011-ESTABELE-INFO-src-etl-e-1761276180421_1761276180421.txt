@@ -1,0 +1,41 @@
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y9.D51011.ESTABELE
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y9.D51011.ESTABELE: SEM cabeçalho (células começam com números: ['33636737', '0001', '54'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y9.D51011.ESTABELE: 4753435 linhas totais, cabeçalho=NÃO, dados=4753435
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y9.D51011.ESTABELE (4,753,435 linhas)
+Processando K3241.K03200Y9.D51011.ESTABELE: 16it [04:04, 15.29s/it]
+ERROR:src.database.connection:Erro na conexão com banco de dados: cannot insert a non-DEFAULT value into column "cnpj_completo"
+DETAIL:  Column "cnpj_completo" is a generated column.
+
+ERROR:src.etl.importer:Erro ao importar estabelecimentos: cannot insert a non-DEFAULT value into column "cnpj_completo"
+DETAIL:  Column "cnpj_completo" is a generated column.
+
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em estabelecimentos: CSV=4,753,435 vs DB=0 (diff=4753435)
+ERROR:src.etl.importer:❌ Estabelecimentos8.zip: Arquivo corrompido (não é um ZIP válido)
+WARNING:src.etl.importer:
+🔄 Tentando corrigir automaticamente...
+WARNING:src.etl.importer:   (Não precisa fazer nada, aguarde...)
+
+WARNING:src.etl.importer:🔄 Tentativa 1/3: Baixando Estabelecimentos8.zip novamente...
+INFO:src.etl.importer:   → Arquivo corrompido removido
+INFO:src.etl.importer:   → Procurando arquivo no servidor da Receita Federal...
+INFO:src.etl.downloader:📅 Pasta mais recente detectada: 2025-10
+INFO:src.etl.downloader:Listando arquivos disponíveis em: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-10/
+INFO:src.etl.downloader:Encontrados 37 arquivos ZIP em 2025-10/
+INFO:src.etl.importer:   → Iniciando download...
+INFO:src.etl.downloader:Baixando: Estabelecimentos8.zip
+Estabelecimentos8.zip: 100%|███████████████████████████████████████████████████████████| 337M/337M [01:09<00:00, 4.86MiB/s]
+INFO:src.etl.downloader:Download concluído: Estabelecimentos8.zip
+INFO:src.etl.importer:   → Validando arquivo baixado...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y8.D51011.ESTABELE' | Tamanho: 1,076,068,528 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.ESTABELE'
+INFO:src.etl.importer:✅ Sucesso! Arquivo baixado e validado na tentativa 1
+INFO:src.etl.importer:Extraindo: Estabelecimentos8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y8.D51011.ESTABELE: SEM cabeçalho (células começam com números: ['55234482', '0001', '36'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y8.D51011.ESTABELE: 4753435 linhas totais, cabeçalho=NÃO, dados=4753435
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y8.D51011.ESTABELE (4,753,435 linhas)
+Processando K3241.K03200Y8.D51011.ESTABELE: 10it [02:22, 15.77s/it]
