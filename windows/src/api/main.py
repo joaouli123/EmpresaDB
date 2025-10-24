@@ -67,10 +67,11 @@ async def root():
 
 @app.get("/dashboard")
 async def dashboard():
-    dashboard_path = static_path / "dashboard.html"
-    if dashboard_path.exists():
-        return FileResponse(str(dashboard_path))
-    return {"message": "Dashboard não encontrado"}
+    return FileResponse(str(static_path / "user-dashboard.html"))
+
+@app.get("/user-dashboard.html")
+async def user_dashboard():
+    return FileResponse(str(static_path / "user-dashboard.html"))
 
 app.include_router(router)
 app.include_router(auth_router)
