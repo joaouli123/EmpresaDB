@@ -1,0 +1,63 @@
+INFO:src.etl.importer:
+📁 Processando tipo: empresas
+INFO:src.etl.importer:   Tabela destino: empresas
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y9.D51011.EMPRECSV' | Tamanho: 362,326,300 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y9.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas9.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y9.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['36627970', 'GILVANDERSON SANTOS DA SILVA 45301862880', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y9.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+ERROR:src.database.connection:Erro na conexão com banco de dados: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y9.D51011.EMPRECSV, 88afd25cc0af2dd56dd0edd775223e50c61f2d04636e67a42b9a38d9ff8ca2b8) already exists.
+
+ERROR:src.etl.etl_tracker:Erro ao iniciar processamento de arquivo: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y9.D51011.EMPRECSV, 88afd25cc0af2dd56dd0edd775223e50c61f2d04636e67a42b9a38d9ff8ca2b8) already exists.
+
+INFO:src.etl.importer:  ⏭️  Arquivo já em processamento ou concluído, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y8.D51011.EMPRECSV' | Tamanho: 356,712,162 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y8.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['32066825', 'V. A. CABRAL DOS SANTOS LTDA', '2062'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y8.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+ERROR:src.database.connection:Erro na conexão com banco de dados: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y8.D51011.EMPRECSV, 7ef3b32ee9c780c988facd328afdf53cdbceebbb983bacbbfb8f2c6c6781e1f9) already exists.
+
+ERROR:src.etl.etl_tracker:Erro ao iniciar processamento de arquivo: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y8.D51011.EMPRECSV, 7ef3b32ee9c780c988facd328afdf53cdbceebbb983bacbbfb8f2c6c6781e1f9) already exists.
+
+INFO:src.etl.importer:  ⏭️  Arquivo já em processamento ou concluído, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y7.D51011.EMPRECSV' | Tamanho: 356,175,247 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y7.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas7.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y7.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['27499602', 'JULIANA GUIMARAES PEREIRA 64430154104', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y7.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+ERROR:src.database.connection:Erro na conexão com banco de dados: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y7.D51011.EMPRECSV, dff0f9af289a9693aba8cd39b70a7e334394f7c51c8501288d4e3f149a3edca9) already exists.
+
+ERROR:src.etl.etl_tracker:Erro ao iniciar processamento de arquivo: duplicate key value violates unique constraint "etl_tracking_files_file_name_file_hash_key"
+DETAIL:  Key (file_name, file_hash)=(K3241.K03200Y7.D51011.EMPRECSV, dff0f9af289a9693aba8cd39b70a7e334394f7c51c8501288d4e3f149a3edca9) already exists.
+
+INFO:src.etl.importer:  ⏭️  Arquivo já em processamento ou concluído, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y6.D51011.EMPRECSV' | Tamanho: 358,006,207 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y6.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas6.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y6.D51011.EMPRECSV: SEM cabeçalho (células 

@@ -275,6 +275,11 @@ class ETLTracker:
                 return file_id
 
         except Exception as e:
+            # Se o erro for de constraint de arquivo já existente, apenas pula silenciosamente
+            if "etl_tracking_files_file_name_file_hash_key" in str(e):
+                logger.info(f"⏭️  {file_path.name} já está registrado no banco, pulando...")
+                return None
+            # Outros erros devem ser logados
             logger.error(f"Erro ao iniciar processamento de arquivo: {e}")
             return None
 
