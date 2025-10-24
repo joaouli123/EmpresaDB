@@ -443,11 +443,11 @@ const LandingPage = () => {
                         <div className="cnae-nome">{cnae.nome}</div>
                         <div className="cnae-codigo">
                           {cnae.quantidade.includes('outros') ? cnae.quantidade : `${cnae.quantidade} empresas`}
-                          {index === category.cnaes.length - 1 && (
-                            <span className="badge-mais"> • e muito mais!</span>
-                          )}
                         </div>
                       </div>
+                      {index === category.cnaes.length - 1 && (
+                        <span className="badge-mais">• e muito mais!</span>
+                      )}
                     </div>
                   ))}
                 </div>
