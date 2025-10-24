@@ -773,6 +773,13 @@ class CNPJImporter:
         logger.info("\n" + "="*70)
         logger.info("INICIANDO PROCESSO DE IMPORTAÇÃO")
         logger.info("="*70 + "\n")
+        
+        # CRÍTICO: Iniciar rastreamento da execução
+        try:
+            execution_id = self.tracker.start_execution()
+        except Exception as e:
+            logger.error(f"❌ Erro ao iniciar rastreamento: {e}")
+            logger.error("   Continuando sem rastreamento...")
 
         if skip_types:
             logger.info(f"⏭️  PULANDO tipos: {', '.join(skip_types)}")
@@ -836,6 +843,12 @@ class CNPJImporter:
         logger.info("="*70)
 
         self.print_summary()
+        
+        # Finalizar rastreamento da execução
+        try:
+            self.tracker.finish_execution('completed')
+        except Exception as e:
+            logger.warning(f"⚠️  Erro ao finalizar rastreamento: {e}")
 
     def print_summary(self):
         logger.info("\n📊 RESUMO DA IMPORTAÇÃO:")
