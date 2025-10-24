@@ -42,9 +42,7 @@ CREATE TABLE IF NOT EXISTS empresas (
     capital_social NUMERIC(18,2),
     porte_empresa VARCHAR(2),
     ente_federativo_responsavel VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (natureza_juridica) REFERENCES naturezas_juridicas(codigo),
-    FOREIGN KEY (qualificacao_responsavel) REFERENCES qualificacoes_socios(codigo)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela de Estabelecimentos (todos os estabelecimentos de cada empresa)
@@ -82,11 +80,7 @@ CREATE TABLE IF NOT EXISTS estabelecimentos (
     data_situacao_especial DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (cnpj_basico, cnpj_ordem, cnpj_dv),
-    FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico),
-    FOREIGN KEY (motivo_situacao_cadastral) REFERENCES motivos_situacao_cadastral(codigo),
-    FOREIGN KEY (pais) REFERENCES paises(codigo),
-    FOREIGN KEY (cnae_fiscal_principal) REFERENCES cnaes(codigo),
-    FOREIGN KEY (municipio) REFERENCES municipios(codigo)
+    FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico)
 );
 
 -- Tabela de Sócios
@@ -104,10 +98,7 @@ CREATE TABLE IF NOT EXISTS socios (
     qualificacao_representante VARCHAR(2),
     faixa_etaria VARCHAR(1),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico),
-    FOREIGN KEY (qualificacao_socio) REFERENCES qualificacoes_socios(codigo),
-    FOREIGN KEY (pais) REFERENCES paises(codigo),
-    FOREIGN KEY (qualificacao_representante) REFERENCES qualificacoes_socios(codigo)
+    FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico)
 );
 
 -- Tabela Simples Nacional
