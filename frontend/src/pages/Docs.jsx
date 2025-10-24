@@ -2,7 +2,6 @@
 import { Code, Book, Zap, Shield, Database } from 'lucide-react';
 
 const Docs = () => {
-  // Obtém a URL base da aplicação dinamicamente
   const API_URL = window.location.origin;
   
   return (
@@ -54,7 +53,7 @@ const Docs = () => {
               <div className="feature">
                 <Shield size={24} />
                 <h4>Seguro</h4>
-                <p>Autenticação JWT robusta</p>
+                <p>Autenticação via API Key</p>
               </div>
               <div className="feature">
                 <Database size={24} />
@@ -69,21 +68,27 @@ const Docs = () => {
               <Shield size={32} />
             </div>
             <h2>Autenticação</h2>
-            <p>Todas as requisições à API requerem autenticação via Bearer Token:</p>
+            <p>Todas as requisições à API requerem autenticação via <strong>API Key</strong> no header:</p>
             <div className="code-block">
               <code>
-                Authorization: Bearer SEU_TOKEN_AQUI
+                X-API-Key: sua_chave_api_aqui
               </code>
             </div>
-            <p>Para obter um token, faça login através do endpoint <code>/auth/login</code>:</p>
-            <div className="code-block">
-              <pre>{`POST ${API_URL}/auth/login
-Content-Type: application/json
+            
+            <div className="info-card" style={{ marginTop: '20px', background: '#fef3c7', border: '2px solid #f59e0b' }}>
+              <h4 style={{ color: '#92400e', marginBottom: '8px' }}>🔑 Como obter sua API Key:</h4>
+              <ol style={{ color: '#92400e', marginLeft: '20px' }}>
+                <li>Faça login no sistema</li>
+                <li>Acesse a página "Chaves de API"</li>
+                <li>Clique em "Nova Chave"</li>
+                <li>Copie sua chave e guarde em local seguro</li>
+              </ol>
+            </div>
 
-{
-  "username": "seu_usuario",
-  "password": "sua_senha"
-}`}</pre>
+            <h3 style={{ marginTop: '24px' }}>Exemplo de Requisição Autenticada:</h3>
+            <div className="code-block">
+              <pre>{`GET ${API_URL}/cnpj/00000000000191
+X-API-Key: sk_live_abc123xyz456...`}</pre>
             </div>
           </section>
 
@@ -102,7 +107,7 @@ Content-Type: application/json
               <div className="endpoint-example">
                 <h4>Exemplo de Requisição:</h4>
                 <pre>{`GET ${API_URL}/cnpj/00000000000191
-Authorization: Bearer SEU_TOKEN`}</pre>
+X-API-Key: sua_chave_api`}</pre>
                 <h4>Resposta (200 OK):</h4>
                 <pre>{`{
   "cnpj_completo": "00000000000191",
@@ -191,55 +196,13 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                   </tbody>
                 </table>
                 <p style={{ marginTop: '12px', fontSize: '14px', color: '#64748b' }}>
-                  📋 <strong>Mais 15+ filtros disponíveis!</strong> Veja a lista completa em{' '}
-                  <a href="https://github.com/seu-repositorio/FILTROS_COMPLETOS.md" target="_blank" rel="noopener noreferrer">
-                    FILTROS_COMPLETOS.md
-                  </a>
+                  📋 <strong>Mais 15+ filtros disponíveis!</strong> Veja a lista completa em FILTROS_COMPLETOS.md
                 </p>
               </div>
               <div className="endpoint-example">
                 <h4>Exemplo de Requisição:</h4>
-                <pre>{`GET ${API_URL}/search?razao_social=petrobras&uf=RJ&situacao_cadastral=02&page=1&per_page=20
-Authorization: Bearer SEU_TOKEN`}</pre>
-                <h4>Formato da Resposta (200 OK):</h4>
-                <pre>{`{
-  "total": 1234,           // Total de registros encontrados
-  "page": 1,               // Página atual
-  "per_page": 20,          // Itens por página
-  "total_pages": 62,       // Total de páginas
-  "items": [               // Array com os resultados
-    {
-      "cnpj_completo": "33000167000101",
-      "cnpj_basico": "33000167",
-      "cnpj_ordem": "0001",
-      "cnpj_dv": "01",
-      "identificador_matriz_filial": "1",
-      "razao_social": "PETROLEO BRASILEIRO S.A. PETROBRAS",
-      "nome_fantasia": "PETROBRAS",
-      "situacao_cadastral": "02",
-      "data_situacao_cadastral": "2005-11-03",
-      "data_inicio_atividade": "1954-05-10",
-      "cnae_fiscal_principal": "0600001",
-      "cnae_principal_desc": "Extração de petróleo e gás natural",
-      "tipo_logradouro": "AVENIDA",
-      "logradouro": "REPÚBLICA DO CHILE",
-      "numero": "65",
-      "complemento": null,
-      "bairro": "CENTRO",
-      "cep": "20031912",
-      "uf": "RJ",
-      "municipio_desc": "RIO DE JANEIRO",
-      "ddd_1": "21",
-      "telefone_1": "32311000",
-      "correio_eletronico": "petrobras@petrobras.com.br",
-      "porte_empresa": "5",
-      "capital_social": 246619165719.33,
-      "opcao_simples": "N",
-      "opcao_mei": "N"
-    }
-    // ... mais 19 itens
-  ]
-}`}</pre>
+                <pre>{`GET ${API_URL}/search?razao_social=petrobras&uf=RJ&page=1
+X-API-Key: sua_chave_api`}</pre>
               </div>
             </div>
 
@@ -249,6 +212,11 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                 <code>/cnpj/:cnpj/socios</code>
               </div>
               <p>Lista os sócios de uma empresa.</p>
+              <div className="endpoint-example">
+                <h4>Exemplo:</h4>
+                <pre>{`GET ${API_URL}/cnpj/00000000000191/socios
+X-API-Key: sua_chave_api`}</pre>
+              </div>
             </div>
 
             <div className="endpoint">
@@ -256,15 +224,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
                 <span className="method get">GET</span>
                 <code>/stats</code>
               </div>
-              <p>Retorna estatísticas gerais do banco de dados.</p>
-            </div>
-
-            <div className="endpoint">
-              <div className="endpoint-header">
-                <span className="method get">GET</span>
-                <code>/cnaes</code>
-              </div>
-              <p>Lista todos os códigos CNAE disponíveis.</p>
+              <p>Retorna estatísticas gerais do banco de dados (não requer autenticação).</p>
             </div>
           </section>
 
@@ -281,7 +241,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
 const api = axios.create({
   baseURL: '${API_URL}',
   headers: {
-    'Authorization': 'Bearer SEU_TOKEN'
+    'X-API-Key': 'sua_chave_api_aqui'
   }
 });
 
@@ -302,12 +262,11 @@ consultarCNPJ('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-# URL base da API
 API_URL = '${API_URL}'
-TOKEN = 'SEU_TOKEN'
+API_KEY = 'sua_chave_api_aqui'
 
 headers = {
-    'Authorization': f'Bearer {TOKEN}'
+    'X-API-Key': API_KEY
 }
 
 # Consultar CNPJ
@@ -319,18 +278,41 @@ def consultar_cnpj(cnpj):
     return response.json()
 
 resultado = consultar_cnpj('00000000000191')
-print(resultado)`}</pre>
+print(resultado)
+
+# Busca com filtros
+def buscar_empresas(uf, situacao='02'):
+    response = requests.get(
+        f'{API_URL}/search',
+        headers=headers,
+        params={
+            'uf': uf,
+            'situacao_cadastral': situacao,
+            'page': 1,
+            'per_page': 50
+        }
+    )
+    return response.json()
+
+empresas = buscar_empresas('SP')
+print(f"Total encontrado: {empresas['total']}")
+for empresa in empresas['items']:
+    print(f"{empresa['razao_social']} - {empresa['cnpj_completo']}")`}</pre>
             </div>
 
             <h3>cURL</h3>
             <div className="code-block">
               <pre>{`# Consultar CNPJ
 curl -X GET "${API_URL}/cnpj/00000000000191" \\
-  -H "Authorization: Bearer SEU_TOKEN"
+  -H "X-API-Key: sua_chave_api"
 
 # Busca com filtros
-curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02" \\
-  -H "Authorization: Bearer SEU_TOKEN"`}</pre>
+curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1" \\
+  -H "X-API-Key: sua_chave_api"
+
+# Listar sócios
+curl -X GET "${API_URL}/cnpj/00000000000191/socios" \\
+  -H "X-API-Key: sua_chave_api"`}</pre>
             </div>
           </section>
 
@@ -356,7 +338,7 @@ curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02" \\
                 <tr>
                   <td><code>401</code></td>
                   <td>Unauthorized</td>
-                  <td>Token inválido ou expirado</td>
+                  <td>API Key não fornecida ou inválida</td>
                 </tr>
                 <tr>
                   <td><code>404</code></td>

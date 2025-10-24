@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect, Header, Depends
 from typing import Optional, List, Dict, Any
 from sqlalchemy import text, or_, and_
 from src.database.connection import db_manager
@@ -19,6 +19,26 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+async def verify_api_key(x_api_key: str = Header(None)):
+    """Verifica se a API Key é válida"""
+    if not x_api_key:
+        raise HTTPException(
+            status_code=401,
+            detail="API Key não fornecida. Use o header 'X-API-Key'"
+        )
+    
+    user = await db_manager.verify_api_key(x_api_key)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="API Key inválida ou expirada"
+        )
+    
+    # Atualizar contadores de uso
+    await db_manager.increment_api_key_usage(x_api_key)
+    
+    return user
 
 @router.get("/", response_model=HealthCheck)
 async def root():
@@ -53,7 +73,7 @@ async def get_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}", response_model=EstabelecimentoCompleto)
-async def get_by_cnpj(cnpj: str):
+async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     
     if len(cnpj_clean) != 14:
@@ -113,6 +133,7 @@ async def get_by_cnpj(cnpj: str):
 
 @router.get("/search", response_model=PaginatedResponse)
 async def search_empresas(
+    user: dict = Depends(verify_api_key),
     cnpj: Optional[str] = Query(None, description="CNPJ completo ou parcial (apenas números)"),
     razao_social: Optional[str] = Query(None, description="Razão social (busca parcial)"),
     nome_fantasia: Optional[str] = Query(None, description="Nome fantasia (busca parcial)"),
@@ -330,7 +351,7 @@ async def search_empresas(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}/socios", response_model=List[SocioModel])
-async def get_socios(cnpj: str):
+async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     cnpj_basico = cnpj_clean[:8]
     

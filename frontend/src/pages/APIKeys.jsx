@@ -211,10 +211,33 @@ const APIKeys = () => {
 
       <div className="info-card">
         <h3>Como usar sua chave de API</h3>
-        <p>Inclua sua chave de API no cabeçalho de todas as requisições:</p>
-        <pre><code>Authorization: Bearer SUA_CHAVE_AQUI</code></pre>
-        <p>Exemplo com curl:</p>
-        <pre><code>curl -H "Authorization: Bearer SUA_CHAVE" {window.location.origin}/cnpj/00000000000191</code></pre>
+        <p>Inclua sua chave de API no cabeçalho <code>X-API-Key</code> de todas as requisições:</p>
+        <pre><code>X-API-Key: SUA_CHAVE_AQUI</code></pre>
+        
+        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com cURL:</h4>
+        <pre><code>curl -H "X-API-Key: SUA_CHAVE" {window.location.origin}/cnpj/00000000000191</code></pre>
+        
+        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com Python:</h4>
+        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{`import requests
+
+headers = {'X-API-Key': 'SUA_CHAVE'}
+response = requests.get(
+    '${window.location.origin}/search?uf=SP',
+    headers=headers
+)
+print(response.json())`}</code></pre>
+        
+        <h4 style={{ marginTop: '20px', marginBottom: '8px' }}>Exemplo com JavaScript:</h4>
+        <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{`const response = await fetch(
+  '${window.location.origin}/cnpj/00000000000191',
+  {
+    headers: {
+      'X-API-Key': 'SUA_CHAVE'
+    }
+  }
+);
+const data = await response.json();`}</code></pre>
+
         <p style={{ marginTop: '16px' }}>URL base da API:</p>
         <pre style={{ background: '#1e293b', padding: '12px', borderRadius: '6px' }}><code>{window.location.origin}</code></pre>
       </div>
