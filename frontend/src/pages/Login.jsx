@@ -69,50 +69,47 @@ const Login = () => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label>
+            <div className="input-with-icon">
               <UserIcon size={18} />
-              {isLogin ? 'Usuário ou E-mail' : 'Usuário'}
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder={isLogin ? "Digite seu usuário ou e-mail" : "Digite seu usuário"}
-            />
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                placeholder={isLogin ? "Usuário ou e-mail" : "Usuário"}
+              />
+            </div>
           </div>
 
           {!isLogin && (
             <div className="form-group">
-              <label>
+              <div className="input-with-icon">
                 <Mail size={18} />
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="Digite seu email"
-              />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="E-mail"
+                />
+              </div>
             </div>
           )}
 
           <div className="form-group">
-            <label>
+            <div className="input-with-icon">
               <Lock size={18} />
-              Senha
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Digite sua senha"
-            />
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="Senha"
+              />
+            </div>
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>

@@ -261,6 +261,39 @@ code {
   font-size: 14px;
 }
 
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon svg {
+  position: absolute;
+  left: 14px;
+  color: var(--gray);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.input-with-icon input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.input-with-icon input:focus + svg,
+.input-with-icon:focus-within svg {
+  color: var(--primary);
+}
+
 .form-group input {
   padding: 12px 16px;
   border: 2px solid var(--border);
