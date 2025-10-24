@@ -20,6 +20,7 @@
   margin: 32px auto 0;
   padding: 16px 40px;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.95);
@@ -39,6 +40,7 @@
   color: var(--dark);
   cursor: pointer;
   flex: 0 0 auto;
+  order: 1;
 }
 
 .navbar-logo svg {
@@ -46,7 +48,7 @@
 }
 
 .navbar-links {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 32px;
   flex: 1;
@@ -101,7 +103,7 @@
   transition: all 0.3s;
   border-radius: 8px;
   flex: 0 0 auto;
-  margin-left: auto;
+  order: 2;
 }
 
 .menu-toggle:hover {
@@ -1342,6 +1344,8 @@ body {
   .navbar-content {
     padding: 14px 20px;
     margin: 20px 16px 0;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .mobile-menu {
