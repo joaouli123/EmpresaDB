@@ -8,6 +8,16 @@ This project is an ETL (Extract, Transform, Load) system and REST API for queryi
 
 No specific user preferences were provided in the original document. The system is designed to be highly configurable and offers both a graphical user interface for administration and a REST API for programmatic access.
 
+## Recent Changes (October 24, 2025)
+
+- **Database Recreated**: PostgreSQL database was recreated with proper schema separation
+- **Schema Separation**: Customer data (users, API keys, usage) now stored in `clientes` schema, completely isolated from public CNPJ data in `public` schema for security
+- **Login Enhancement**: Login now accepts both username AND email for authentication
+- **Test Users Created**:
+  - Admin: username=`admin`, email=`admin@sistema.com`, password=`admin123`
+  - User: username=`usuario`, email=`usuario@sistema.com`, password=`user123`
+- **Frontend Update**: Login form now shows "Usuário ou E-mail" to indicate flexible authentication
+
 ## System Architecture
 
 The system is composed of a React + Vite frontend (port 5000) and a FastAPI + Uvicorn backend (port 8000). Data is stored in a PostgreSQL 16 database hosted on the user's VPS.
@@ -18,20 +28,29 @@ The frontend uses React with Vite, providing a modern and responsive interface. 
 
 ### Technical Implementations
 
-- **Database Schema**: Optimized for CNPJ data, including auxiliary tables (CNAEs, municipalities, etc.), main tables (companies, establishments, partners, Simples Nacional), and ETL tracking tables. Key features include automatic full CNPJ generation, optimized indexes, and full-text search capabilities.
+- **Database Schema**: 
+    - **Schema Separation (Security)**: Customer/user data is stored in the `clientes` schema (users, api_keys, user_usage), completely isolated from public company data in the `public` schema. This ensures customer credentials and information are never mixed with public CNPJ data from Receita Federal.
+    - **CNPJ Data Schema**: Optimized for CNPJ data in the `public` schema, including auxiliary tables (CNAEs, municipalities, etc.), main tables (companies, establishments, partners, Simples Nacional), and ETL tracking tables. Key features include automatic full CNPJ generation, optimized indexes, and full-text search capabilities.
 - **ETL Process**:
     - **Download**: Fetches the latest ZIP files from Receita Federal, classifies them, and downloads the most recent versions. Includes retry mechanisms for corrupted ZIP files.
     - **Extraction**: Unzips files and extracts CSVs (latin1 encoding, semicolon delimiter).
     - **Importation**: Imports data into PostgreSQL using `COPY` for speed, processing in chunks (default 50,000 records). Includes data transformations (date and capital social formats) and intelligent foreign key handling.
     - **Intelligent Tracking**: Ensures idempotency via SHA-256 hash checking, automatic recovery from interruptions, integrity validation (CSV vs. DB record counts), and structured logging.
 - **REST API**: Built with FastAPI, providing authenticated endpoints for user management, API key generation/management, CNPJ data queries, and ETL process control (admin-only). Features advanced search filters and automatic Swagger UI/ReDoc documentation.
-- **Security**: Implements Argon2 for password hashing, JWT for authentication with configurable expiration, role-based access control (admin/user), and API key management with usage tracking. CORS is configured for the frontend.
+- **Security**: 
+    - Implements Argon2 for password hashing
+    - JWT for authentication with configurable expiration
+    - Role-based access control (admin/user)
+    - API key management with usage tracking
+    - CORS configured for the frontend
+    - **Login flexibility**: Users can authenticate using either username OR email address
+    - **Data isolation**: Customer data stored in separate `clientes` schema from public CNPJ data
 
 ### Feature Specifications
 
 - **Frontend**: Dashboard with metrics, API Key management, API usage history, full API documentation, user profile. Admin-specific features include full ETL control (start/stop), dynamic configuration of `chunk_size` and `max_workers`, real-time progress monitoring via WebSocket, live log viewing, detailed table statistics, and automatic validation (CSV vs. DB).
 - **Backend API Endpoints**:
-    - **Authentication**: Register, Login, Get current user.
+    - **Authentication**: Register, Login (accepts username OR email), Get current user.
     - **User & API Keys**: User profile, generate/list/revoke API keys, API key usage.
     - **CNPJ Data**: API info, health check, database stats, query by CNPJ, advanced search with filters (social reason, trade name, UF, municipality, CNAE, cadastral status, company size, Simples Nacional, MEI, pagination), company partners, CNAEs list, municipalities by UF.
     - **ETL (Admin Only)**: WebSocket for real-time connection, start/stop ETL process, ETL status, update ETL config, database stats.
