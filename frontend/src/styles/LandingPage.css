@@ -479,30 +479,6 @@
   font-family: 'Courier New', monospace;
 }
 
-.badge-mais {
-  color: #3b82f6;
-  font-weight: 700;
-  font-family: 'Sora', sans-serif;
-  font-size: 16px;
-  white-space: nowrap;
-  margin-left: 8px;
-}
-
-.cnae-card-last {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05));
-  border-color: rgba(59, 130, 246, 0.2);
-}
-
-.cnae-card-last:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-  border-color: #3b82f6;
-}
-
-.cnae-card-last .cnae-codigo {
-  font-size: 14px;
-  font-family: 'Sora', sans-serif;
-}
-
 /* Benefits Section */
 .benefits-section,
 .pricing-section,

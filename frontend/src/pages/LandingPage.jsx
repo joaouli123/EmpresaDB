@@ -437,19 +437,24 @@ const LandingPage = () => {
 
                 <div className="cnaes-grid">
                   {category.cnaes.map((cnae, index) => (
-                    <div key={index} className={`cnae-card ${index === category.cnaes.length - 1 ? 'cnae-card-last' : ''}`}>
+                    <div key={index} className="cnae-card">
                       <div className="cnae-icon">{cnae.icon}</div>
                       <div className="cnae-info">
                         <div className="cnae-nome">{cnae.nome}</div>
-                        <div className="cnae-codigo">
-                          {cnae.quantidade.includes('outros') ? cnae.quantidade : `${cnae.quantidade} empresas`}
-                        </div>
+                        <div className="cnae-codigo">{cnae.quantidade}</div>
                       </div>
-                      {index === category.cnaes.length - 1 && (
-                        <span className="badge-mais">• e muito mais!</span>
-                      )}
                     </div>
                   ))}
+                </div>
+                
+                <div style={{ 
+                  textAlign: 'center', 
+                  marginTop: '24px',
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: '#3b82f6'
+                }}>
+                  • e muito mais!
                 </div>
               </div>
             ))}
