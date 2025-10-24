@@ -81,7 +81,7 @@ class CNPJImporter:
             # Verifica tamanho do arquivo
             file_size = zip_path.stat().st_size
             logger.debug(f"  → Tamanho do arquivo: {file_size:,} bytes")
-            
+
             if file_size == 0:
                 return False, "Arquivo vazio (0 bytes)"
 
@@ -94,11 +94,11 @@ class CNPJImporter:
                 # Primeiro verifica informações básicas do ZIP
                 zip_info = zip_ref.infolist()
                 logger.info(f"  → ZIP contém {len(zip_info)} entradas")
-                
+
                 # Se não tem nenhuma entrada, está realmente vazio
                 if len(zip_info) == 0:
                     return False, "ZIP vazio (0 entradas)"
-                
+
                 # Testa integridade (pode ser None para ZIPs válidos)
                 try:
                     bad_file = zip_ref.testzip()
@@ -106,21 +106,21 @@ class CNPJImporter:
                         logger.warning(f"  ⚠️  testzip() retornou: {bad_file}")
                 except Exception as e:
                     logger.warning(f"  ⚠️  Erro ao testar ZIP (ignorando): {e}")
-                
+
                 # Verifica se tem arquivos com conteúdo real
                 file_list = zip_ref.namelist()
-                
+
                 # Log detalhado de CADA entrada
                 logger.info(f"  → Conteúdo do ZIP:")
                 valid_files = []
                 for i, info in enumerate(zip_info):
                     is_dir = info.filename.endswith('/')
                     logger.info(f"     [{i}] Nome: '{info.filename}' | Tamanho: {info.file_size:,} bytes | É pasta: {is_dir}")
-                    
+
                     # Considera arquivo válido se não é pasta E tem tamanho > 0
                     if not is_dir and info.file_size > 0:
                         valid_files.append(info.filename)
-                
+
                 if len(valid_files) == 0:
                     logger.error(f"  → PROBLEMA: ZIP contém {len(file_list)} entradas, mas nenhum arquivo válido")
                     return False, "ZIP vazio (sem arquivos CSV)"
@@ -145,7 +145,7 @@ class CNPJImporter:
 
         if not is_valid:
             logger.error(f"❌ {zip_path.name}: {message}")
-            
+
             # Tentar redownload automático
             logger.warning(f"\n🔄 Tentando corrigir automaticamente...")
             logger.warning(f"   (Não precisa fazer nada, aguarde...)\n")
@@ -363,9 +363,9 @@ class CNPJImporter:
                     SELECT * FROM temp_{table_name}
                     ON CONFLICT (cnpj_basico) DO NOTHING
                 """)
-                
+
                 total_imported = cursor.rowcount
-                
+
                 # Contar quantos foram pulados
                 cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
                 total_in_file = cursor.fetchone()[0]
@@ -415,7 +415,7 @@ class CNPJImporter:
             'ddd_fax', 'fax', 'correio_eletronico', 'situacao_especial',
             'data_situacao_especial'
         ]
-        
+
         # Colunas para inserir no banco (sem cnpj_completo que é GENERATED ALWAYS)
         db_columns = csv_columns.copy()
 
@@ -425,7 +425,7 @@ class CNPJImporter:
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 # Criar tabela temporária
                 cursor.execute(f"""
                     CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
@@ -472,7 +472,7 @@ class CNPJImporter:
 
                         # Selecionar apenas as colunas que podem ser inseridas no banco (sem cnpj_completo)
                         chunk_to_insert = chunk[db_columns]
-                        
+
                         output = StringIO()
                         chunk_to_insert.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
@@ -486,9 +486,9 @@ class CNPJImporter:
                     SELECT * FROM temp_{table_name}
                     ON CONFLICT (cnpj_basico, cnpj_ordem, cnpj_dv) DO NOTHING
                 """)
-                
+
                 total_imported = cursor.rowcount
-                
+
                 cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
                 total_in_file = cursor.fetchone()[0]
                 total_skipped = total_in_file - total_imported
@@ -539,7 +539,7 @@ class CNPJImporter:
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute(f"""
                     CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
                 """)
@@ -592,9 +592,9 @@ class CNPJImporter:
                     SELECT * FROM temp_{table_name}
                     ON CONFLICT (cnpj_basico, identificador_socio, cnpj_cpf_socio) DO NOTHING
                 """)
-                
+
                 total_imported = cursor.rowcount
-                
+
                 cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
                 total_in_file = cursor.fetchone()[0]
                 total_skipped = total_in_file - total_imported
@@ -644,7 +644,7 @@ class CNPJImporter:
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 cursor.execute(f"""
                     CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
                 """)
@@ -687,9 +687,9 @@ class CNPJImporter:
                     SELECT * FROM temp_{table_name}
                     ON CONFLICT (cnpj_basico) DO NOTHING
                 """)
-                
+
                 total_imported = cursor.rowcount
-                
+
                 cursor.execute(f"SELECT COUNT(*) FROM temp_{table_name}")
                 total_in_file = cursor.fetchone()[0]
                 total_skipped = total_in_file - total_imported
@@ -713,17 +713,17 @@ class CNPJImporter:
     def process_all(self, downloaded_files: dict, skip_types: list = None):
         """
         Processa arquivos de importação
-        
+
         Args:
             downloaded_files: Dicionário com arquivos baixados
             skip_types: Lista de tipos para PULAR (ex: ['empresas'])
         """
         skip_types = skip_types or []
-        
+
         logger.info("\n" + "="*70)
         logger.info("INICIANDO PROCESSO DE IMPORTAÇÃO")
         logger.info("="*70 + "\n")
-        
+
         if skip_types:
             logger.info(f"⏭️  PULANDO tipos: {', '.join(skip_types)}")
             logger.info("")
@@ -734,7 +734,7 @@ class CNPJImporter:
                 count = db_manager.get_table_count(table_name)
                 logger.info(f"\n⏭️  PULANDO: {file_type} ({count:,} registros já existentes)")
                 continue
-            
+
             if file_type not in downloaded_files or not downloaded_files[file_type]:
                 logger.warning(f"⚠ Nenhum arquivo encontrado para: {file_type}")
                 continue
