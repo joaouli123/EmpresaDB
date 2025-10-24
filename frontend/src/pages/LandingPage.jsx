@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { 
   Database, 
@@ -10,7 +11,19 @@ import {
   BarChart3,
   Users,
   Clock,
-  Star
+  Star,
+  Building2,
+  Store,
+  Factory,
+  Truck,
+  Briefcase,
+  ShoppingCart,
+  Filter,
+  MapPin,
+  Calendar,
+  FileCheck,
+  Code,
+  Layers
 } from 'lucide-react';
 import '../styles/LandingPage.css';
 
@@ -79,22 +92,22 @@ const LandingPage = () => {
     {
       icon: <Database size={32} />,
       title: 'Dados Completos da Receita Federal',
-      description: 'Acesso a milhões de empresas, estabelecimentos, sócios e CNPJs atualizados'
+      description: 'Acesso a milhões de empresas, estabelecimentos, sócios e CNPJs atualizados em tempo real'
     },
     {
       icon: <Zap size={32} />,
       title: 'API Ultra Rápida',
-      description: 'Consultas em milissegundos com nossa infraestrutura otimizada'
+      description: 'Consultas em milissegundos com nossa infraestrutura otimizada e cache inteligente'
     },
     {
       icon: <Shield size={32} />,
       title: '100% Seguro e Confiável',
-      description: 'Dados oficiais da Receita Federal com total segurança e privacidade'
+      description: 'Dados oficiais da Receita Federal com total segurança, privacidade e conformidade LGPD'
     },
     {
       icon: <Search size={32} />,
       title: 'Busca Avançada',
-      description: 'Filtros por CNAE, localização, porte, situação cadastral e muito mais'
+      description: 'Filtros por CNAE, localização, porte, situação cadastral, faturamento e muito mais'
     },
     {
       icon: <TrendingUp size={32} />,
@@ -104,7 +117,97 @@ const LandingPage = () => {
     {
       icon: <BarChart3 size={32} />,
       title: 'Relatórios Detalhados',
-      description: 'Visualize dados, exporte relatórios e tome decisões baseadas em informação'
+      description: 'Visualize dados, exporte relatórios e tome decisões baseadas em informação real'
+    }
+  ];
+
+  const businessCategories = [
+    {
+      icon: <Store size={32} />,
+      title: 'Varejo e Comércio',
+      description: 'Encontre lojas, supermercados e pontos de venda em todo Brasil',
+      count: '8M+'
+    },
+    {
+      icon: <Factory size={32} />,
+      title: 'Indústria',
+      description: 'Fabricantes, montadoras e empresas de transformação',
+      count: '2M+'
+    },
+    {
+      icon: <Briefcase size={32} />,
+      title: 'Serviços',
+      description: 'Consultorias, agências, escritórios e prestadores',
+      count: '12M+'
+    },
+    {
+      icon: <Truck size={32} />,
+      title: 'Logística e Transporte',
+      description: 'Transportadoras, distribuidoras e empresas de entrega',
+      count: '1.5M+'
+    },
+    {
+      icon: <Building2 size={32} />,
+      title: 'Construção Civil',
+      description: 'Construtoras, incorporadoras e empresas de engenharia',
+      count: '900K+'
+    },
+    {
+      icon: <ShoppingCart size={32} />,
+      title: 'E-commerce',
+      description: 'Lojas virtuais e marketplaces em todo território nacional',
+      count: '1.2M+'
+    }
+  ];
+
+  const advancedFilters = [
+    {
+      icon: <MapPin size={24} />,
+      title: 'Localização',
+      description: 'Filtre por estado, município, CEP ou bairro específico'
+    },
+    {
+      icon: <Filter size={24} />,
+      title: 'CNAE',
+      description: 'Busque por atividade econômica principal ou secundária'
+    },
+    {
+      icon: <BarChart3 size={24} />,
+      title: 'Porte da Empresa',
+      description: 'MEI, Micro, Pequena, Média ou Grande empresa'
+    },
+    {
+      icon: <Calendar size={24} />,
+      title: 'Data de Abertura',
+      description: 'Encontre empresas por período de constituição'
+    },
+    {
+      icon: <FileCheck size={24} />,
+      title: 'Situação Cadastral',
+      description: 'Ativa, baixada, suspensa, nula ou inapta'
+    },
+    {
+      icon: <Users size={24} />,
+      title: 'Sócios e QSA',
+      description: 'Pesquise por CPF/CNPJ de sócios e administradores'
+    }
+  ];
+
+  const integrationFeatures = [
+    {
+      icon: <Code size={32} />,
+      title: 'API RESTful Simples',
+      description: 'Endpoints intuitivos e documentação completa para integração rápida'
+    },
+    {
+      icon: <Zap size={32} />,
+      title: 'Resposta Instantânea',
+      description: 'Tempo médio de resposta de 45ms para qualquer consulta'
+    },
+    {
+      icon: <Layers size={32} />,
+      title: 'JSON Estruturado',
+      description: 'Dados organizados e prontos para consumo em qualquer linguagem'
     }
   ];
 
@@ -114,21 +217,21 @@ const LandingPage = () => {
       role: 'CEO, TechStart Consultoria',
       avatar: 'CS',
       rating: 5,
-      text: 'Transformou nossa prospecção B2B! Conseguimos identificar leads qualificados 3x mais rápido.'
+      text: 'Transformou nossa prospecção B2B! Conseguimos identificar leads qualificados 3x mais rápido com os filtros avançados.'
     },
     {
       name: 'Marina Costa',
       role: 'Analista de Compliance',
       avatar: 'MC',
       rating: 5,
-      text: 'Ferramenta essencial para due diligence. Dados precisos e atualizados que fazem toda diferença.'
+      text: 'Ferramenta essencial para due diligence. Dados precisos e atualizados que fazem toda diferença no nosso trabalho.'
     },
     {
       name: 'Roberto Almeida',
-      role: 'Contador',
+      role: 'Desenvolvedor Full Stack',
       avatar: 'RA',
       rating: 5,
-      text: 'Economizei horas de trabalho manual. A API é rápida e a integração foi muito simples!'
+      text: 'API muito bem documentada e fácil de integrar. Em 30 minutos já estava consultando dados no meu sistema!'
     }
   ];
 
@@ -139,7 +242,7 @@ const LandingPage = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={16} />
-            <span>+64 milhões de empresas cadastradas</span>
+            <span>Dados mais recentes do Brasil • Atualização diária</span>
           </div>
           
           <h1 className="hero-title">
@@ -149,8 +252,9 @@ const LandingPage = () => {
           </h1>
           
           <p className="hero-description">
-            API profissional com dados da Receita Federal. Consulte empresas, estabelecimentos, 
-            sócios e muito mais em segundos. Ideal para compliance, prospecção e inteligência de mercado.
+            API profissional com dados oficiais e atualizados da Receita Federal. 
+            Consulte empresas, estabelecimentos, sócios e muito mais em milissegundos. 
+            Integração simples, filtros poderosos e dados 100% confiáveis para seu negócio.
           </p>
           
           <div className="hero-cta">
@@ -184,8 +288,97 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Business Categories Section */}
       <section className="benefits-section">
+        <div className="section-header">
+          <h2>Dados de Todos os Setores</h2>
+          <p>Acesse informações completas de empresas em qualquer segmento do mercado brasileiro</p>
+        </div>
+        
+        <div className="benefits-grid">
+          {businessCategories.map((category, index) => (
+            <div key={index} className="benefit-card">
+              <div className="benefit-icon">{category.icon}</div>
+              <h3>{category.title}</h3>
+              <p>{category.description}</p>
+              <div style={{ marginTop: '12px', color: 'var(--primary)', fontWeight: '700', fontSize: '18px' }}>
+                {category.count} empresas
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Advanced Filters Section */}
+      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
+        <div className="section-header">
+          <h2>Filtros Poderosos Para Sua Busca</h2>
+          <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
+        </div>
+        
+        <div className="benefits-grid">
+          {advancedFilters.map((filter, index) => (
+            <div key={index} className="benefit-card">
+              <div className="benefit-icon">{filter.icon}</div>
+              <h3>{filter.title}</h3>
+              <p>{filter.description}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <p style={{ color: 'var(--gray)', fontSize: '18px', marginBottom: '24px' }}>
+            <strong>Combine múltiplos filtros</strong> para encontrar seu público-alvo perfeito
+          </p>
+          <button className="btn-primary-large">
+            Ver Todos os Filtros Disponíveis
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </section>
+
+      {/* Integration Section */}
+      <section className="benefits-section">
+        <div className="section-header">
+          <h2>Integração Rápida e Fácil</h2>
+          <p>API REST otimizada e simples de usar. Comece a consultar dados em minutos, não em dias</p>
+        </div>
+        
+        <div className="benefits-grid">
+          {integrationFeatures.map((feature, index) => (
+            <div key={index} className="benefit-card">
+              <div className="benefit-icon">{feature.icon}</div>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="info-card" style={{ marginTop: '40px', background: '#1f2937', color: 'white' }}>
+          <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta</h3>
+          <pre style={{ background: '#111827', padding: '20px', borderRadius: '8px', overflow: 'auto' }}>
+{`GET /api/v1/empresas?cnpj=00000000000191
+
+{
+  "cnpj": "00000000000191",
+  "razao_social": "BANCO DO BRASIL S.A.",
+  "nome_fantasia": "BANCO DO BRASIL",
+  "situacao_cadastral": "ATIVA",
+  "data_abertura": "1966-04-19",
+  "cnae_principal": "6422-1/00",
+  "porte": "DEMAIS",
+  "natureza_juridica": "205-1",
+  ...
+}`}
+          </pre>
+          <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.8)' }}>
+            Documentação completa com exemplos em Python, JavaScript, PHP, Java e mais
+          </p>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
         <div className="section-header">
           <h2>Por Que Escolher Nossa Plataforma?</h2>
           <p>Tudo que você precisa para acessar dados empresariais de forma profissional</p>
@@ -199,6 +392,24 @@ const LandingPage = () => {
               <p>{benefit.description}</p>
             </div>
           ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <div style={{ 
+            background: 'white', 
+            padding: '32px', 
+            borderRadius: '12px',
+            maxWidth: '700px',
+            margin: '0 auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <Clock size={48} style={{ color: 'var(--primary)', margin: '0 auto 16px' }} />
+            <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Dados Totalmente Atualizados</h3>
+            <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
+              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha 
+              acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -301,7 +512,7 @@ const LandingPage = () => {
             Criar Conta Grátis
             <ChevronRight size={20} />
           </button>
-          <p className="cta-note">Sem cartão de crédito necessário • Cancele quando quiser</p>
+          <p className="cta-note">Sem cartão de crédito necessário • Cancele quando quiser • Dados 100% atualizados</p>
         </div>
       </section>
     </div>

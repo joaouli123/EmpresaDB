@@ -6,7 +6,7 @@
 /* Hero Section */
 .hero-section {
   min-height: 90vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,7 +464,7 @@
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   padding: 100px 20px;
   text-align: center;
 }
@@ -497,19 +497,20 @@ body {
   .hero-title {
     font-size: 40px;
   }
-  
+
   .hero-description {
     font-size: 16px;
+    line-height: 1.5;
   }
-  
+
   .section-header h2 {
     font-size: 32px;
   }
-  
+
   .pricing-card.popular {
     transform: scale(1);
   }
-  
+
   .hero-stats {
     grid-template-columns: repeat(2, 1fr);
   }
