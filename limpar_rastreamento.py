@@ -51,17 +51,26 @@ def limpar_rastreamento():
             # Verificar contadores de dados reais
             logger.info(f"\n📈 DADOS NO BANCO (não serão apagados):")
             
-            cursor.execute("SELECT COUNT(*) FROM empresas")
-            total_empresas = cursor.fetchone()[0]
-            logger.info(f"   • Empresas: {total_empresas:,}")
+            try:
+                cursor.execute("SELECT COUNT(*) FROM empresas")
+                total_empresas = cursor.fetchone()[0]
+                logger.info(f"   • Empresas: {total_empresas:,}")
+            except Exception as e:
+                logger.info(f"   • Empresas: (erro ao contar: {e})")
             
-            cursor.execute("SELECT COUNT(*) FROM estabelecimentos")
-            total_estab = cursor.fetchone()[0]
-            logger.info(f"   • Estabelecimentos: {total_estab:,}")
+            try:
+                cursor.execute("SELECT COUNT(*) FROM estabelecimentos")
+                total_estab = cursor.fetchone()[0]
+                logger.info(f"   • Estabelecimentos: {total_estab:,}")
+            except Exception as e:
+                logger.info(f"   • Estabelecimentos: (erro ao contar: {e})")
             
-            cursor.execute("SELECT COUNT(*) FROM socios")
-            total_socios = cursor.fetchone()[0]
-            logger.info(f"   • Sócios: {total_socios:,}")
+            try:
+                cursor.execute("SELECT COUNT(*) FROM socios")
+                total_socios = cursor.fetchone()[0]
+                logger.info(f"   • Sócios: {total_socios:,}")
+            except Exception as e:
+                logger.info(f"   • Sócios: (erro ao contar: {e})")
             
             cursor.close()
             
