@@ -828,84 +828,62 @@ const LandingPage = () => {
         <div className="contact-wrapper">
           <div className="section-header">
             <h2>Entre em Contato</h2>
-            <p>Tem dúvidas? Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio</p>
+            <p>Tem dúvidas? Nossa equipe está pronta para ajudar</p>
           </div>
 
-          <div className="contact-grid">
-            <div className="contact-info-side">
-              <div className="contact-info-card">
-                <div className="contact-card-icon">
-                  <Mail size={24} />
-                </div>
+          <div className="contact-compact-grid">
+            <div className="contact-info-cards">
+              <div className="contact-info-item">
+                <Mail size={20} />
                 <div>
-                  <h4>Email</h4>
+                  <strong>Email</strong>
                   <p>contato@cnpjapi.com.br</p>
                 </div>
               </div>
 
-              <div className="contact-info-card">
-                <div className="contact-card-icon">
-                  <Phone size={24} />
-                </div>
+              <div className="contact-info-item">
+                <Phone size={20} />
                 <div>
-                  <h4>Telefone</h4>
+                  <strong>Telefone</strong>
                   <p>(11) 9 9999-9999</p>
                 </div>
               </div>
 
-              <div className="contact-info-card">
-                <div className="contact-card-icon">
-                  <Clock size={24} />
-                </div>
+              <div className="contact-info-item">
+                <Clock size={20} />
                 <div>
-                  <h4>Horário de Atendimento</h4>
+                  <strong>Horário</strong>
                   <p>Seg - Sex: 9h às 18h</p>
                 </div>
               </div>
             </div>
 
-            <div className="contact-form-card">
-              <form className="contact-form">
-                <div className="form-row">
-                  <div className="form-group">
-                    <input type="text" placeholder="Seu nome completo" required />
-                  </div>
-                  
-                  <div className="form-group">
-                    <input type="email" placeholder="seu@email.com" required />
-                  </div>
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <input type="tel" placeholder="(11) 99999-9999" />
-                  </div>
-                  
-                  <div className="form-group">
-                    <input type="text" placeholder="Nome da empresa" />
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <select required>
-                    <option value="">Selecione um assunto</option>
-                    <option value="duvidas">Dúvidas sobre Planos</option>
-                    <option value="tecnico">Suporte Técnico</option>
-                    <option value="comercial">Proposta Comercial</option>
-                    <option value="outro">Outro</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <textarea rows="4" placeholder="Como podemos ajudar?" required></textarea>
-                </div>
-                
-                <button type="submit" className="btn-primary-large">
-                  Enviar Mensagem
-                  <ChevronRight size={20} />
-                </button>
-              </form>
-            </div>
+            <form className="contact-form-compact">
+              <div className="form-row">
+                <input type="text" placeholder="Seu nome completo" required />
+                <input type="email" placeholder="seu@email.com" required />
+              </div>
+              
+              <div className="form-row">
+                <input type="tel" placeholder="(11) 99999-9999" />
+                <input type="text" placeholder="Nome da empresa" />
+              </div>
+              
+              <select required>
+                <option value="">Selecione um assunto</option>
+                <option value="duvidas">Dúvidas sobre Planos</option>
+                <option value="tecnico">Suporte Técnico</option>
+                <option value="comercial">Proposta Comercial</option>
+                <option value="outro">Outro</option>
+              </select>
+              
+              <textarea rows="3" placeholder="Como podemos ajudar?" required></textarea>
+              
+              <button type="submit" className="btn-primary-large">
+                Enviar Mensagem
+                <ChevronRight size={20} />
+              </button>
+            </form>
           </div>
         </div>
       </section>
