@@ -50,7 +50,7 @@ def limpar_tracking_simples():
         if count_before > 0:
             # Busca detalhes dos registros
             cursor.execute("""
-                SELECT id, file_name, status, started_at, completed_at
+                SELECT id, file_name, status, started_at, finished_at
                 FROM etl_tracking_files 
                 WHERE file_name LIKE '%SIMPLES%'
                 ORDER BY started_at DESC
