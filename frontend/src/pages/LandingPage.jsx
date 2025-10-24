@@ -28,7 +28,9 @@ import {
   Phone,
   Target,
   Sparkles,
-  Brain
+  Brain,
+  Menu,
+  X
 } from 'lucide-react';
 import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
@@ -38,6 +40,7 @@ const LandingPage = () => {
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const plans = [
     {
@@ -335,17 +338,28 @@ const LandingPage = () => {
             <span>CNPJ API</span>
           </div>
           
-          <div className="navbar-links">
-            <a href="#features">Funcionalidades</a>
-            <a href="#categories">Setores</a>
-            <a href="#pricing">Planos</a>
-            <a href="#testimonials">Depoimentos</a>
-            <a href="#contact">Contato</a>
+          <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+
+        {/* Menu Hambúrguer */}
+        <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-menu-links">
+            <a href="#features" onClick={() => setMenuOpen(false)}>Funcionalidades</a>
+            <a href="#categories" onClick={() => setMenuOpen(false)}>Setores</a>
+            <a href="#pricing" onClick={() => setMenuOpen(false)}>Planos</a>
+            <a href="#testimonials" onClick={() => setMenuOpen(false)}>Depoimentos</a>
+            <a href="#contact" onClick={() => setMenuOpen(false)}>Contato</a>
           </div>
           
-          <div className="navbar-actions">
-            <a href="#contact"><button className="btn-navbar-secondary">Entrar</button></a>
-            <a href="#pricing"><button className="btn-navbar-primary">Começar Grátis</button></a>
+          <div className="mobile-menu-actions">
+            <a href="#contact" onClick={() => setMenuOpen(false)}>
+              <button className="btn-navbar-secondary">Entrar</button>
+            </a>
+            <a href="#pricing" onClick={() => setMenuOpen(false)}>
+              <button className="btn-navbar-primary">Começar Grátis</button>
+            </a>
           </div>
         </div>
       </nav>
