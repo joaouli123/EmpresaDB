@@ -221,17 +221,24 @@ class ETLTracker:
     def start_file_processing(self, file_path: Path, file_type: str, table_name: str) -> int:
         """Registra início do processamento de um arquivo"""
         file_hash = self.calculate_file_hash(file_path)
-        file_size = file_path.stat().st_size if file_path.exists() else 0
-
-        # Verifica se já foi processado
+        
+        if not file_hash:
+            logger.error(f"Não foi possível calcular hash de {file_path.name}")
+            return None
+            
+        # Verifica se já foi processado ANTES de qualquer coisa
         status = self.check_file_status(file_path, file_hash)
         if status == 'completed':
-            return None  # Pula arquivo
+            logger.info(f"⏭️  {file_path.name} já processado, pulando...")
+            return None  # Pula arquivo - NÃO tenta inserir
 
         if status == 'partial' and self.current_file_id:
+            logger.info(f"⏸️  {file_path.name} parcialmente processado, retomando...")
             return self.current_file_id  # Retoma processamento
 
-        # Novo arquivo
+        # Só chega aqui se for arquivo NOVO
+        file_size = file_path.stat().st_size if file_path.exists() else 0
+        
         try:
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
@@ -243,11 +250,20 @@ class ETLTracker:
                         execution_id, file_name, file_type, file_hash, 
                         file_size_bytes, table_name, status, started_at, total_csv_lines
                     ) VALUES (%s, %s, %s, %s, %s, %s, 'running', CURRENT_TIMESTAMP, %s)
+                    ON CONFLICT (file_name, file_hash) DO NOTHING
                     RETURNING id
                 """, (self.execution_id, file_path.name, file_type, file_hash, 
                       file_size, table_name, total_lines))
 
-                file_id = cursor.fetchone()[0]
+                result = cursor.fetchone()
+                
+                # Se ON CONFLICT disparou, o arquivo já existe
+                if not result:
+                    logger.info(f"⏭️  {file_path.name} já registrado, pulando...")
+                    cursor.close()
+                    return None
+                
+                file_id = result[0]
                 conn.commit()
                 cursor.close()
 
