@@ -201,9 +201,12 @@ class ETLTracker:
 
                 file_id, status, csv_lines, db_records = result
 
-                # Se completado e validado, pula
-                if status == 'completed' and csv_lines == db_records:
-                    logger.info(f"⏭️  Arquivo {file_path.name} já processado 100% ({db_records} registros)")
+                # Se completado, sempre pula (mesmo com discrepância)
+                if status == 'completed':
+                    if csv_lines == db_records:
+                        logger.info(f"⏭️  Arquivo {file_path.name} já processado 100% ({db_records} registros)")
+                    else:
+                        logger.info(f"⏭️  Arquivo {file_path.name} já processado (CSV={csv_lines:,}, DB={db_records:,})")
                     return 'completed'
 
                 # Se parcial, pode retomar

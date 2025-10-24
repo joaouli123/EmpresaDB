@@ -10,6 +10,12 @@ No specific user preferences were provided in the original document. The system 
 
 ## Recent Changes (October 24, 2025)
 
+### ETL Import Fixes (Latest)
+- **Fixed Estabelecimentos Import Error**: Corrected the error `cannot insert a non-DEFAULT value into column "cnpj_completo"` by ensuring the code reads all 31 CSV columns but only inserts the 30 allowed columns (excluding the auto-generated `cnpj_completo`)
+- **Added Missing Constraint**: Added `UNIQUE (cnpj_basico, identificador_socio, cnpj_cpf_socio)` constraint to `socios` table to prevent duplicates and enable proper `ON CONFLICT` handling
+- **Improved File Tracking**: Fixed duplicate key errors in ETL tracking by ensuring files with 'completed' status are always skipped, even if there are discrepancies between CSV and DB counts
+
+### Previous Updates
 - **Database Reconnected**: Fixed PostgreSQL connection to use Replit's built-in database
 - **Schema Separation**: Customer data (users, API keys, usage) now stored in `clientes` schema, completely isolated from public CNPJ data in `public` schema for security
 - **Login Enhancement**: Login now accepts both username AND email for authentication
