@@ -1,0 +1,36 @@
+INFO:src.etl.importer:Extraindo: Empresas2.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y2.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y2.D51011.EMPRECSV
+Processando K3241.K03200Y2.D51011.EMPRECSV: 15it [01:28,  5.87s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+INFO:src.etl.importer:Extraindo: Empresas1.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y1.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y1.D51011.EMPRECSV
+Processando K3241.K03200Y1.D51011.EMPRECSV: 15it [01:26,  5.76s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+INFO:src.etl.importer:Extraindo: Empresas0.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y0.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y0.D51011.EMPRECSV
+Processando K3241.K03200Y0.D51011.EMPRECSV: 82it [08:45,  6.41s/it]
+INFO:     127.0.0.1:62936 - "GET /etl/database-stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51555 - "GET /etl/database-stats HTTP/1.1" 200 OK
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 24434875 registros
+INFO:src.etl.importer:
+📁 Processando tipo: estabelecimentos
+INFO:src.etl.importer:   Tabela destino: estabelecimentos
+ERROR:src.etl.importer:❌ Estabelecimentos9.zip: ZIP vazio (sem arquivos CSV)
+WARNING:src.etl.importer:
+🔄 Tentando corrigir automaticamente...
+WARNING:src.etl.importer:   (Não precisa fazer nada, aguarde...)
+
+WARNING:src.etl.importer:🔄 Tentativa 1/3: Baixando Estabelecimentos9.zip novamente...
+INFO:src.etl.importer:   → Arquivo corrompido removido
+INFO:src.etl.importer:   → Procurando arquivo no servidor da Receita Federal...
+INFO:src.etl.downloader:📅 Pasta mais recente detectada: 2025-10
+INFO:src.etl.downloader:Listando arquivos disponíveis em: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-10/
+INFO:src.etl.downloader:Encontrados 37 arquivos ZIP em 2025-10/
+INFO:src.etl.importer:   → Iniciando download...
+INFO:src.etl.downloader:Baixando: Estabelecimentos9.zip
