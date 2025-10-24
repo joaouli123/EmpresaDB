@@ -477,15 +477,18 @@
   font-size: 13px;
   color: var(--gray);
   font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .badge-mais {
   color: #3b82f6;
   font-weight: 700;
   font-family: 'Sora', sans-serif;
-  font-size: 16px;
+  font-size: 12px;
   white-space: nowrap;
-  margin-left: 8px;
 }
 
 .cnae-card-last {
@@ -496,11 +499,6 @@
 .cnae-card-last:hover {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
   border-color: #3b82f6;
-}
-
-.cnae-card-last .cnae-codigo {
-  font-size: 14px;
-  font-family: 'Sora', sans-serif;
 }
 
 /* Benefits Section */
