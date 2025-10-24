@@ -74,12 +74,23 @@ class CNPJImporter:
             if not zip_path.exists():
                 return False, "Arquivo não encontrado"
 
+            # Verifica tamanho do arquivo
+            file_size = zip_path.stat().st_size
+            logger.debug(f"  → Tamanho do arquivo: {file_size:,} bytes")
+            
+            if file_size == 0:
+                return False, "Arquivo vazio (0 bytes)"
+
             # Verifica se é um arquivo ZIP válido
             if not zipfile.is_zipfile(zip_path):
                 return False, "Arquivo corrompido (não é um ZIP válido)"
 
             # Tenta abrir e verificar conteúdo
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                # Primeiro verifica informações básicas do ZIP
+                zip_info = zip_ref.infolist()
+                logger.info(f"  → ZIP contém {len(zip_info)} entradas")
+                
                 # Testa integridade
                 bad_file = zip_ref.testzip()
                 if bad_file is not None:
@@ -87,16 +98,30 @@ class CNPJImporter:
 
                 # Verifica se tem arquivos (não apenas pastas)
                 file_list = zip_ref.namelist()
+                
+                # Log detalhado de CADA entrada
+                logger.info(f"  → Conteúdo do ZIP:")
+                for i, info in enumerate(zip_info):
+                    logger.info(f"     [{i}] Nome: '{info.filename}' | Tamanho: {info.file_size:,} bytes | Comprimido: {info.compress_size:,} bytes")
+                
                 has_files = any(not f.endswith('/') for f in file_list)
 
                 if not has_files:
-                    return False, "ZIP vazio (sem arquivos)"
+                    logger.error(f"  → PROBLEMA: ZIP contém {len(file_list)} entradas, mas nenhuma é arquivo")
+                    logger.error(f"  → Todas as entradas terminam com '/' (são pastas)")
+                    return False, "ZIP vazio (sem arquivos CSV)"
+
+                # Mostra qual arquivo será processado
+                first_file = next((f for f in file_list if not f.endswith('/')), None)
+                if first_file:
+                    logger.info(f"  → Arquivo a ser extraído: '{first_file}'")
 
                 return True, "OK"
 
-        except zipfile.BadZipFile:
-            return False, "Arquivo corrompido (BadZipFile)"
+        except zipfile.BadZipFile as e:
+            return False, f"Arquivo corrompido (BadZipFile): {str(e)}"
         except Exception as e:
+            logger.error(f"  → Exceção durante validação: {type(e).__name__}: {str(e)}")
             return False, f"Erro ao validar: {str(e)}"
 
     def extract_zip(self, zip_path: Path, max_retries: int = 3) -> Optional[Path]:
