@@ -416,7 +416,9 @@ const LandingPage = () => {
                       <div className="cnae-icon">{cnae.icon}</div>
                       <div className="cnae-info">
                         <div className="cnae-nome">{cnae.nome}</div>
-                        <div className="cnae-codigo">{cnae.quantidade} empresas</div>
+                        <div className="cnae-codigo">
+                          {cnae.quantidade.includes('outros') ? cnae.quantidade : `${cnae.quantidade} empresas`}
+                        </div>
                       </div>
                     </div>
                   ))}
