@@ -1,0 +1,158 @@
+📁 Processando tipo: tabela_auxiliar_paises
+INFO:src.etl.importer:   Tabela destino: paises
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.PAISCSV' | Tamanho: 5,444 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.PAISCSV'
+INFO:src.etl.importer:Extraindo: Paises.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:Importando tabela auxiliar: paises de F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:  ✓ Importados 255 registros em paises
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_qualificacoes
+INFO:src.etl.importer:   Tabela destino: qualificacoes_socios
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.QUALSCSV' | Tamanho: 2,355 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.QUALSCSV'
+INFO:src.etl.importer:Extraindo: Qualificacoes.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:Importando tabela auxiliar: qualificacoes_socios de F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:  ✓ Importados 68 registros em qualificacoes_socios
+INFO:src.etl.importer:
+📁 Processando tipo: empresas
+INFO:src.etl.importer:   Tabela destino: empresas
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y9.D51011.EMPRECSV' | Tamanho: 362,326,300 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y9.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas9.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y9.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['36627970', 'GILVANDERSON SANTOS DA SILVA 45301862880', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y9.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y9.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y9.D51011.EMPRECSV: 15it [01:36,  6.44s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y8.D51011.EMPRECSV' | Tamanho: 356,712,162 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y8.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['32066825', 'V. A. CABRAL DOS SANTOS LTDA', '2062'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y8.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y8.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y8.D51011.EMPRECSV: 15it [01:36,  6.42s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y7.D51011.EMPRECSV' | Tamanho: 356,175,247 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y7.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas7.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y7.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['27499602', 'JULIANA GUIMARAES PEREIRA 64430154104', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y7.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y7.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y7.D51011.EMPRECSV: 15it [01:39,  6.62s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y6.D51011.EMPRECSV' | Tamanho: 358,006,207 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y6.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas6.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y6.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['22967212', 'SANDRO ANDERSON DE ANDRADE 28194458889', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y6.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y6.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y6.D51011.EMPRECSV: 15it [01:32,  6.20s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y5.D51011.EMPRECSV' | Tamanho: 352,398,365 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y5.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas5.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y5.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y5.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y5.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['18421568', 'RICARDO A.T.QUIRINO CONSULTORIA E REPRESENTACOES LTDA', '2062'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y5.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y5.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y5.D51011.EMPRECSV: 15it [01:29,  5.94s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y4.D51011.EMPRECSV' | Tamanho: 353,845,287 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y4.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas4.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y4.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y4.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y4.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['13846069', 'BORGMANN PRODUTOS ALIMENTICIOS LTDA', '2062'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y4.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y4.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y4.D51011.EMPRECSV: 15it [01:24,  5.67s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y3.D51011.EMPRECSV' | Tamanho: 349,148,458 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y3.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas3.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y3.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y3.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y3.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['09253555', 'FRANCISCO ENIVALDO RODRIGUES DE OLIVEIRA', '2135'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y3.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y3.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y3.D51011.EMPRECSV: 15it [01:18,  5.24s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y2.D51011.EMPRECSV' | Tamanho: 344,152,450 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y2.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas2.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y2.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y2.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y2.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['04631961', 'ITACAMP INDUSTRIAL LTDA', '2062'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y2.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y2.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y2.D51011.EMPRECSV: 15it [01:17,  5.17s/it]
+INFO:src.etl.importer:  ✓ Importados: 0 empresas
+INFO:src.etl.importer:  ⏭️  Ignorados (já existentes): 4494860 registros
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em empresas: CSV=4,494,860 vs DB=64,888,615 (diff=-60393755)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y1.D51011.EMPRECSV' | Tamanho: 325,802,828 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y1.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas1.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y1.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y1.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y1.D51011.EMPRECSV: SEM cabeçalho (células começam com números: ['00000000', 'BANCO DO BRASIL SA', '2038'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y1.D51011.EMPRECSV: 4494860 linhas totais, cabeçalho=NÃO, dados=4494860
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y1.D51011.EMPRECSV (4,494,860 linhas)
+Processando K3241.K03200Y1.D51011.EMPRECSV: 15it [01:18,  5.23s/it]
