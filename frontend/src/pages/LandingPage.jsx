@@ -293,19 +293,19 @@ const LandingPage = () => {
       </section>
 
       {/* Business Categories Section */}
-      <section className="categories-section">
+      <section className="benefits-section">
         <div className="section-header">
           <h2>Dados de Todos os Setores</h2>
           <p>Acesse informações completas de empresas em qualquer segmento do mercado brasileiro</p>
         </div>
         
-        <div className="categories-grid">
+        <div className="benefits-grid">
           {businessCategories.map((category, index) => (
-            <div key={index} className="category-card">
-              <div className="category-icon">{category.icon}</div>
+            <div key={index} className="benefit-card">
+              <div className="benefit-icon">{category.icon}</div>
               <h3>{category.title}</h3>
               <p>{category.description}</p>
-              <div className="category-count">
+              <div style={{ marginTop: '12px', color: 'var(--primary)', fontWeight: '700', fontSize: '18px' }}>
                 {category.count} empresas
               </div>
             </div>
@@ -314,20 +314,18 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="filters-section">
+      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
         </div>
         
-        <div className="filters-grid">
+        <div className="benefits-grid">
           {advancedFilters.map((filter, index) => (
-            <div key={index} className="filter-card">
-              <div className="filter-icon">{filter.icon}</div>
-              <div className="filter-content">
-                <h3>{filter.title}</h3>
-                <p>{filter.description}</p>
-              </div>
+            <div key={index} className="benefit-card">
+              <div className="benefit-icon">{filter.icon}</div>
+              <h3>{filter.title}</h3>
+              <p>{filter.description}</p>
             </div>
           ))}
         </div>
