@@ -1,0 +1,512 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CNPJ API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .brand-side {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            padding: 60px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand-side h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .brand-side p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .features {
+            list-style: none;
+        }
+
+        .features li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .features li:before {
+            content: "✓";
+            margin-right: 12px;
+            background: rgba(255,255,255,0.2);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .form-side {
+            padding: 60px 40px;
+        }
+
+        .form-toggle {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .form-toggle button {
+            background: none;
+            border: none;
+            padding: 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #9ca3af;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .form-toggle button.active {
+            color: #2563eb;
+        }
+
+        .form-toggle button.active:after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #ef4444;
+        }
+
+        .form-group input.success {
+            border-color: #10b981;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .brand-side {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="brand-side">
+            <h1>CNPJ API</h1>
+            <p>Acesso completo aos dados empresariais da Receita Federal</p>
+            <ul class="features">
+                <li>Mais de 60 milhões de CNPJs</li>
+                <li>Dados atualizados mensalmente</li>
+                <li>API REST completa</li>
+                <li>Busca avançada com filtros</li>
+                <li>Dashboard em tempo real</li>
+                <li>Documentação completa</li>
+            </ul>
+        </div>
+
+        <div class="form-side">
+            <div class="form-toggle">
+                <button id="btnLogin" class="active" onclick="showLogin()">Login</button>
+                <button id="btnRegister" onclick="showRegister()">Criar Conta</button>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div id="loginForm" class="form-container active">
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">E-mail</label>
+                        <input type="email" id="loginEmail" required placeholder="seu@email.com">
+                        <span class="error-message" id="loginEmailError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Senha</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••">
+                        <span class="error-message" id="loginPasswordError"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btnLoginSubmit">Entrar</button>
+                </form>
+
+                <div class="forgot-password">
+                    <a href="#">Esqueceu a senha?</a>
+                </div>
+            </div>
+
+            <div id="registerForm" class="form-container">
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="registerName">Nome Completo</label>
+                        <input type="text" id="registerName" required placeholder="João Silva" 
+                               oninput="validateName(this)">
+                        <span class="error-message" id="registerNameError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail">E-mail</label>
+                        <input type="email" id="registerEmail" required placeholder="seu@email.com"
+                               oninput="validateEmail(this)">
+                        <span class="error-message" id="registerEmailError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword">Senha</label>
+                        <input type="password" id="registerPassword" required placeholder="••••••••"
+                               oninput="validatePassword(this)">
+                        <span class="error-message" id="registerPasswordError">
+                            Mínimo 8 caracteres, incluindo maiúscula, minúscula e número
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPasswordConfirm">Confirmar Senha</label>
+                        <input type="password" id="registerPasswordConfirm" required placeholder="••••••••"
+                               oninput="validatePasswordConfirm(this)">
+                        <span class="error-message" id="registerPasswordConfirmError"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btnRegisterSubmit">Criar Conta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogin() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('registerForm').classList.remove('active');
+            document.getElementById('btnLogin').classList.add('active');
+            document.getElementById('btnRegister').classList.remove('active');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.add('active');
+            document.getElementById('btnLogin').classList.remove('active');
+            document.getElementById('btnRegister').classList.add('active');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${type} show">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function validateName(input) {
+            const errorEl = document.getElementById('registerNameError');
+            if (input.value.length < 3) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                errorEl.textContent = 'Nome deve ter no mínimo 3 caracteres';
+                errorEl.classList.add('show');
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.classList.add('success');
+                errorEl.classList.remove('show');
+                return true;
+            }
+        }
+
+        function validateEmail(input) {
+            const errorEl = document.getElementById('registerEmailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                errorEl.textContent = 'E-mail inválido';
+                errorEl.classList.add('show');
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.classList.add('success');
+                errorEl.classList.remove('show');
+                return true;
+            }
+        }
+
+        function validatePassword(input) {
+            const errorEl = document.getElementById('registerPasswordError');
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(input.value)) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                errorEl.classList.add('show');
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.classList.add('success');
+                errorEl.classList.remove('show');
+                return true;
+            }
+        }
+
+        function validatePasswordConfirm(input) {
+            const errorEl = document.getElementById('registerPasswordConfirmError');
+            const password = document.getElementById('registerPassword').value;
+            if (input.value !== password) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                errorEl.textContent = 'As senhas não coincidem';
+                errorEl.classList.add('show');
+                return false;
+            } else {
+                input.classList.remove('error');
+                input.classList.add('success');
+                errorEl.classList.remove('show');
+                return true;
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnLoginSubmit');
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showAlert('Login realizado com sucesso!', 'success');
+                    setTimeout(() => window.location.href = '/user-dashboard.html', 1000);
+                } else {
+                    showAlert(data.detail || 'Erro ao fazer login', 'error');
+                }
+            } catch (error) {
+                showAlert('Erro ao conectar com o servidor', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Entrar';
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('registerName');
+            const email = document.getElementById('registerEmail');
+            const password = document.getElementById('registerPassword');
+            const passwordConfirm = document.getElementById('registerPasswordConfirm');
+
+            if (!validateName(name) || !validateEmail(email) || 
+                !validatePassword(password) || !validatePasswordConfirm(passwordConfirm)) {
+                return;
+            }
+
+            const btn = document.getElementById('btnRegisterSubmit');
+            btn.disabled = true;
+            btn.textContent = 'Criando conta...';
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name.value,
+                        email: email.value,
+                        password: password.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Conta criada com sucesso! Fazendo login...', 'success');
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    setTimeout(() => window.location.href = '/user-dashboard.html', 1500);
+                } else {
+                    showAlert(data.detail || 'Erro ao criar conta', 'error');
+                }
+            } catch (error) {
+                showAlert('Erro ao conectar com o servidor', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Criar Conta';
+            }
+        }
+    </script>
+</body>
+</html>

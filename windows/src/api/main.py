@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from src.api.routes import router
+from src.api.auth import router as auth_router
 from src.config import settings
 import logging
 from pathlib import Path
@@ -17,27 +18,27 @@ app = FastAPI(
     version=settings.API_VERSION,
     description="""
     API completa para consulta de dados públicos de CNPJ da Receita Federal.
-    
+
     ## Funcionalidades
-    
+
     * **Consulta por CNPJ** - Busca detalhada por CNPJ completo (14 dígitos)
     * **Busca Avançada** - Filtros por razão social, nome fantasia, UF, município, CNAE, etc.
     * **Sócios** - Lista de sócios de uma empresa
     * **CNAEs** - Listagem de atividades econômicas
     * **Municípios** - Municípios por UF
     * **Estatísticas** - Totais de registros no banco
-    
+
     ## Como usar
-    
+
     Todos os endpoints retornam JSON. Use os parâmetros de query para filtrar resultados.
-    
+
     ### Exemplos:
-    
+
     * `GET /cnpj/00000000000191` - Consulta CNPJ específico
     * `GET /search?uf=SP&situacao_cadastral=02` - Empresas ativas em SP
     * `GET /search?razao_social=PETROBRAS` - Busca por nome
     * `GET /cnpj/00000000000191/socios` - Sócios da empresa
-    
+
     """
 )
 
@@ -55,14 +56,13 @@ if static_path.exists():
 
 @app.get("/")
 async def root():
-    dashboard_path = static_path / "dashboard.html"
-    if dashboard_path.exists():
-        return FileResponse(str(dashboard_path))
+    auth_path = static_path / "auth.html"
+    if auth_path.exists():
+        return FileResponse(str(auth_path))
     return {
         "message": "API de Consulta CNPJ",
         "version": settings.API_VERSION,
-        "docs": "/docs",
-        "dashboard": "/dashboard"
+        "docs": "/docs"
     }
 
 @app.get("/dashboard")
@@ -73,6 +73,7 @@ async def dashboard():
     return {"message": "Dashboard não encontrado"}
 
 app.include_router(router)
+app.include_router(auth_router)
 
 if __name__ == "__main__":
     import uvicorn
