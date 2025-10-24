@@ -412,12 +412,15 @@ const LandingPage = () => {
 
                 <div className="cnaes-grid">
                   {category.cnaes.map((cnae, index) => (
-                    <div key={index} className="cnae-card">
+                    <div key={index} className={`cnae-card ${index === category.cnaes.length - 1 ? 'cnae-card-last' : ''}`}>
                       <div className="cnae-icon">{cnae.icon}</div>
                       <div className="cnae-info">
                         <div className="cnae-nome">{cnae.nome}</div>
                         <div className="cnae-codigo">
                           {cnae.quantidade.includes('outros') ? cnae.quantidade : `${cnae.quantidade} empresas`}
+                          {index === category.cnaes.length - 1 && (
+                            <span className="badge-mais"> • e muito mais!</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -430,7 +433,7 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="benefits-section filters-section">
+      <section className="benefits-section">
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>

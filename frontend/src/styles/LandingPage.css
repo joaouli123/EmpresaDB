@@ -1,6 +1,7 @@
 .landing-page {
   width: 100%;
   overflow-x: hidden;
+  background: #ffffff;
 }
 
 /* Hero Section */
@@ -364,6 +365,28 @@
   font-size: 13px;
   color: var(--gray);
   font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge-mais {
+  color: #3b82f6;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.cnae-card-last {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05));
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.cnae-card-last:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+  border-color: #3b82f6;
 }
 
 /* Benefits Section */
@@ -374,11 +397,6 @@
   max-width: 1200px;
   margin: 0 auto;
   background: #ffffff;
-}
-
-/* Seção de Filtros com fundo alternado */
-.filters-section {
-  background: #f9fafb;
 }
 
 .section-header {
@@ -790,7 +808,7 @@ body {
 /* Contact Section */
 .contact-section {
   padding: 100px 20px;
-  background: #f9fafb;
+  background: #ffffff;
 }
 
 .contact-wrapper {
