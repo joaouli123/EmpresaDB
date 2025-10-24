@@ -6,7 +6,11 @@ This project is an ETL (Extract, Transform, Load) system and REST API for queryi
 
 ## User Preferences
 
-No specific user preferences were provided in the original document. The system is designed to be highly configurable and offers both a graphical user interface for administration and a REST API for programmatic access.
+**IMPORTANTE - Configuração de Banco de Dados:**
+- O usuário **NÃO USA** o banco de dados do Replit
+- O sistema conecta-se a um PostgreSQL na **VPS própria do usuário** (via .env)
+- O ETL é executado no **Windows local** para popular o banco da VPS (mais rápido)
+- Nunca assumir que o banco é o da Replit - sempre usar o banco configurado no DATABASE_URL
 
 ## Recent Changes (October 24, 2025)
 

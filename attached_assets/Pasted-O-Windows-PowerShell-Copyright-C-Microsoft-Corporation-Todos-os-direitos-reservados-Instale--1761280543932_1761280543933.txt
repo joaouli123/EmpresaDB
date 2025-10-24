@@ -1,0 +1,330 @@
+O Windows PowerShell
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Instale o PowerShell mais recente para obter novos recursos e aprimoramentos! https://aka.ms/PSWindows
+
+PS C:\Users\joao lucas\Downloads\windows\windows> python run_etl.py --skip-empresas --skip-tabelas-aux
+INFO:__main__:======================================================================
+INFO:__main__:SISTEMA DE ETL - DADOS PÚBLICOS CNPJ
+INFO:__main__:======================================================================
+
+INFO:__main__:Passo 1: Inicializando banco de dados...
+INFO:src.database.init_db:Iniciando configuração do banco de dados...
+INFO:src.database.connection:Conexão bem-sucedida! PostgreSQL: PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+INFO:src.database.init_db:Criando tabelas e índices...
+INFO:src.database.connection:Executando schema do arquivo: C:\Users\joao lucas\Downloads\windows\windows\src\database\schema.sql
+INFO:src.database.connection:Schema executado com sucesso!
+INFO:src.database.init_db:Verificando tabelas criadas...
+INFO:src.database.init_db:✓ Tabela 'cnaes': criada
+INFO:src.database.init_db:✓ Tabela 'municipios': criada
+INFO:src.database.init_db:✓ Tabela 'motivos_situacao_cadastral': criada
+INFO:src.database.init_db:✓ Tabela 'naturezas_juridicas': criada
+INFO:src.database.init_db:✓ Tabela 'paises': criada
+INFO:src.database.init_db:✓ Tabela 'qualificacoes_socios': criada
+INFO:src.database.init_db:✓ Tabela 'empresas': criada
+INFO:src.database.init_db:✓ Tabela 'estabelecimentos': criada
+INFO:src.database.init_db:✓ Tabela 'socios': criada
+INFO:src.database.init_db:✓ Tabela 'simples_nacional': criada
+INFO:src.database.init_db:Banco de dados configurado com sucesso!
+INFO:__main__:
+Passo 2: Baixando arquivos da Receita Federal...
+INFO:src.etl.downloader:📅 Pasta mais recente detectada: 2025-10
+INFO:src.etl.downloader:Listando arquivos disponíveis em: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-10/
+INFO:src.etl.downloader:Encontrados 37 arquivos ZIP em 2025-10/
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_cnaes - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Cnaes.zip
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_municipios - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Municipios.zip
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_motivos - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Motivos.zip
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_naturezas - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Naturezas.zip
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_paises - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Paises.zip
+INFO:src.etl.downloader:
+Tipo: tabela_auxiliar_qualificacoes - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Qualificacoes.zip
+INFO:src.etl.downloader:
+Tipo: empresas - Encontrados 10 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Empresas9.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas8.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas7.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas6.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas5.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas4.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas3.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas2.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas1.zip
+INFO:src.etl.downloader:Arquivo já existe: Empresas0.zip
+INFO:src.etl.downloader:
+Tipo: estabelecimentos - Encontrados 10 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos9.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos8.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos7.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos6.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos5.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos4.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos3.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos2.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos1.zip
+INFO:src.etl.downloader:Arquivo já existe: Estabelecimentos0.zip
+INFO:src.etl.downloader:
+Tipo: socios - Encontrados 10 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Socios9.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios8.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios7.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios6.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios5.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios4.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios3.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios2.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios1.zip
+INFO:src.etl.downloader:Arquivo já existe: Socios0.zip
+INFO:src.etl.downloader:
+Tipo: simples_nacional - Encontrados 1 arquivos
+INFO:src.etl.downloader:Arquivo já existe: Simples.zip
+INFO:src.etl.downloader:
+✓ Total de arquivos baixados: 37
+INFO:__main__:
+Passo 3: Importando dados para o PostgreSQL...
+INFO:src.etl.importer:
+======================================================================
+INFO:src.etl.importer:INICIANDO PROCESSO DE IMPORTAÇÃO
+INFO:src.etl.importer:======================================================================
+
+INFO:src.etl.etl_tracker:✓ Execução iniciada: 3bd58752-fe1c-4976-b36b-cbda46468c49
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_cnaes
+INFO:src.etl.importer:   Tabela destino: cnaes
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.CNAECSV' | Tamanho: 88,215 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.CNAECSV'
+INFO:src.etl.importer:Extraindo: Cnaes.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.CNAECSV
+INFO:src.etl.importer:Importando tabela auxiliar: cnaes de F.K03200$Z.D51011.CNAECSV
+INFO:src.etl.importer:  ✓ Importados 1359 registros em cnaes
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_municipios
+INFO:src.etl.importer:   Tabela destino: municipios
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.MUNICCSV' | Tamanho: 120,435 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.MUNICCSV'
+INFO:src.etl.importer:Extraindo: Municipios.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.MUNICCSV
+INFO:src.etl.importer:Importando tabela auxiliar: municipios de F.K03200$Z.D51011.MUNICCSV
+INFO:src.etl.importer:  ✓ Importados 5572 registros em municipios
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_motivos
+INFO:src.etl.importer:   Tabela destino: motivos_situacao_cadastral
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.MOTICSV' | Tamanho: 2,944 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.MOTICSV'
+INFO:src.etl.importer:Extraindo: Motivos.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.MOTICSV
+INFO:src.etl.importer:Importando tabela auxiliar: motivos_situacao_cadastral de F.K03200$Z.D51011.MOTICSV
+INFO:src.etl.importer:  ✓ Importados 63 registros em motivos_situacao_cadastral
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_naturezas
+INFO:src.etl.importer:   Tabela destino: naturezas_juridicas
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.NATJUCSV' | Tamanho: 4,187 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.NATJUCSV'
+INFO:src.etl.importer:Extraindo: Naturezas.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.NATJUCSV
+INFO:src.etl.importer:Importando tabela auxiliar: naturezas_juridicas de F.K03200$Z.D51011.NATJUCSV
+INFO:src.etl.importer:  ✓ Importados 91 registros em naturezas_juridicas
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_paises
+INFO:src.etl.importer:   Tabela destino: paises
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.PAISCSV' | Tamanho: 5,444 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.PAISCSV'
+INFO:src.etl.importer:Extraindo: Paises.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:Importando tabela auxiliar: paises de F.K03200$Z.D51011.PAISCSV
+INFO:src.etl.importer:  ✓ Importados 255 registros em paises
+INFO:src.etl.importer:
+📁 Processando tipo: tabela_auxiliar_qualificacoes
+INFO:src.etl.importer:   Tabela destino: qualificacoes_socios
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'F.K03200$Z.D51011.QUALSCSV' | Tamanho: 2,355 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'F.K03200$Z.D51011.QUALSCSV'
+INFO:src.etl.importer:Extraindo: Qualificacoes.zip
+INFO:src.etl.importer:  ✓ Já existe: F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:Importando tabela auxiliar: qualificacoes_socios de F.K03200$Z.D51011.QUALSCSV
+INFO:src.etl.importer:  ✓ Importados 68 registros em qualificacoes_socios
+INFO:src.etl.importer:
+📁 Processando tipo: empresas
+INFO:src.etl.importer:   Tabela destino: empresas
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y9.D51011.EMPRECSV' | Tamanho: 362,326,300 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y9.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas9.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y9.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y9.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y8.D51011.EMPRECSV' | Tamanho: 356,712,162 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y8.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y8.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y7.D51011.EMPRECSV' | Tamanho: 356,175,247 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y7.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas7.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y7.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y7.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y6.D51011.EMPRECSV' | Tamanho: 358,006,207 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y6.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas6.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y6.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y6.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y5.D51011.EMPRECSV' | Tamanho: 352,398,365 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y5.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas5.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y5.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y5.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y5.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y4.D51011.EMPRECSV' | Tamanho: 353,845,287 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y4.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas4.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y4.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y4.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y4.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y3.D51011.EMPRECSV' | Tamanho: 349,148,458 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y3.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas3.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y3.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y3.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y3.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y2.D51011.EMPRECSV' | Tamanho: 344,152,450 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y2.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas2.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y2.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y2.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y2.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y1.D51011.EMPRECSV' | Tamanho: 325,802,828 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y1.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas1.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y1.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y1.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y1.D51011.EMPRECSV já processado (CSV=4,494,860, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y0.D51011.EMPRECSV' | Tamanho: 1,904,709,575 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y0.D51011.EMPRECSV'
+INFO:src.etl.importer:Extraindo: Empresas0.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y0.D51011.EMPRECSV
+INFO:src.etl.importer:Importando empresas de: K3241.K03200Y0.D51011.EMPRECSV
+INFO:src.etl.etl_tracker:⏭️  Arquivo K3241.K03200Y0.D51011.EMPRECSV já processado (CSV=24,434,875, DB=64,888,615)
+INFO:src.etl.importer:  ⏭️  Arquivo já processado anteriormente, pulando...
+INFO:src.etl.importer:
+📁 Processando tipo: estabelecimentos
+INFO:src.etl.importer:   Tabela destino: estabelecimentos
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y9.D51011.ESTABELE' | Tamanho: 1,089,767,833 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y9.D51011.ESTABELE'
+INFO:src.etl.importer:Extraindo: Estabelecimentos9.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y9.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y9.D51011.ESTABELE
+INFO:src.etl.importer:💡 Primeira importação - pré-carregando códigos de validação...
+INFO:src.etl.importer:🔄 Pré-carregando códigos de validação...
+INFO:src.etl.importer:  → Carregando cnaes...
+INFO:src.etl.importer:  ✓ cnaes: 1,359 códigos carregados
+INFO:src.etl.importer:  → Carregando municipios...
+INFO:src.etl.importer:  ✓ municipios: 5,572 códigos carregados
+INFO:src.etl.importer:  → Carregando motivos_situacao_cadastral...
+INFO:src.etl.importer:  ✓ motivos_situacao_cadastral: 63 códigos carregados
+INFO:src.etl.importer:  → Carregando naturezas_juridicas...
+INFO:src.etl.importer:  ✓ naturezas_juridicas: 91 códigos carregados
+INFO:src.etl.importer:  → Carregando paises...
+INFO:src.etl.importer:  ✓ paises: 255 códigos carregados
+INFO:src.etl.importer:  → Carregando qualificacoes_socios...
+INFO:src.etl.importer:  ✓ qualificacoes_socios: 68 códigos carregados
+INFO:src.etl.importer:✅ Pré-carregamento completo!
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y9.D51011.ESTABELE: SEM cabeçalho (células começam com números: ['33636737', '0001', '54'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y9.D51011.ESTABELE: 4753435 linhas totais, cabeçalho=NÃO, dados=4753435
+INFO:src.etl.etl_tracker:⏭️  K3241.K03200Y9.D51011.ESTABELE já registrado, pulando...
+INFO:src.etl.importer:  ⏭️  Arquivo já em processamento ou concluído, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y8.D51011.ESTABELE' | Tamanho: 1,076,068,528 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.ESTABELE'
+INFO:src.etl.importer:Extraindo: Estabelecimentos8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y8.D51011.ESTABELE: SEM cabeçalho (células começam com números: ['55234482', '0001', '36'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y8.D51011.ESTABELE: 4753435 linhas totais, cabeçalho=NÃO, dados=4753435
+INFO:src.etl.etl_tracker:⏭️  K3241.K03200Y8.D51011.ESTABELE já registrado, pulando...
+INFO:src.etl.importer:  ⏭️  Arquivo já em processamento ou concluído, pulando...
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y7.D51011.ESTABELE' | Tamanho: 1,136,807,584 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y7.D51011.ESTABELE'
+INFO:src.etl.importer:Extraindo: Estabelecimentos7.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y7.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y7.D51011.ESTABELE
+INFO:src.etl.etl_tracker:⏸️  Arquivo K3241.K03200Y7.D51011.ESTABELE parcialmente processado, retomando...
+INFO:src.etl.etl_tracker:⏸️  Arquivo K3241.K03200Y7.D51011.ESTABELE parcialmente processado, retomando...
+INFO:src.etl.etl_tracker:⏸️  K3241.K03200Y7.D51011.ESTABELE parcialmente processado, retomando...
+Processando K3241.K03200Y7.D51011.ESTABELE: 9it [02:40, 18.07s/it]INFO:src.etl.importer:📊 Chunk 10: 14.32s | Média: 17.67s/chunk | Total: 2.9min
+Processando K3241.K03200Y7.D51011.ESTABELE: 10it [02:56, 17.52s/it]
