@@ -39,7 +39,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
@@ -89,7 +89,7 @@ async def register(user: UserCreate):
     hashed_password = get_password_hash(user.password)
     new_user = await db_manager.create_user(user.username, user.email, hashed_password)
     
-    access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": new_user["username"]}, expires_delta=access_token_expires
     )
@@ -114,7 +114,7 @@ async def login(form_data: UserLogin):
 
     await db_manager.update_last_login(user["username"])
 
-    access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )

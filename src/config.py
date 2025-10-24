@@ -6,7 +6,10 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 class Settings(BaseSettings):
-    # Database - suporta tanto DATABASE_URL quanto variáveis separadas
+    # ⚠️⚠️⚠️ ATENÇÃO: BANCO DE DADOS EXTERNO VPS - NÃO USAR REPLIT DATABASE! ⚠️⚠️⚠️
+    # DATABASE_URL deve estar sempre configurado no .env apontando para: 72.61.217.143
+    # Banco externo VPS: postgresql://cnpj_user:Proelast1608@72.61.217.143:5432/cnpj_db
+    # NUNCA USAR O BANCO POSTGRESQL DO REPLIT!
     DATABASE_URL: Optional[str] = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
@@ -42,9 +45,13 @@ class Settings(BaseSettings):
     
     @property
     def database_url(self) -> str:
-        """Retorna DATABASE_URL se existir, senão constrói a partir das variáveis separadas"""
+        """
+        ⚠️ IMPORTANTE: Retorna DATABASE_URL do .env (BANCO EXTERNO VPS)
+        NÃO USAR BANCO LOCAL REPLIT! Sempre configurar DATABASE_URL no .env
+        """
         if self.DATABASE_URL:
             return self.DATABASE_URL
+        # Fallback apenas para compatibilidade (NÃO DEVE SER USADO!)
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 

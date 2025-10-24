@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     def __init__(self):
+        # ⚠️ ATENÇÃO: ESTAMOS USANDO BANCO DE DADOS EXTERNO NA VPS!
+        # NÃO USE O BANCO DO REPLIT - SEMPRE USE DATABASE_URL DO .env
+        # Banco externo: postgresql://cnpj_user:Proelast1608@72.61.217.143:5432/cnpj_db
         self.connection_string = settings.database_url
         self.engine = None
         self.SessionLocal = None
@@ -21,9 +24,10 @@ class DatabaseManager:
     
     def get_engine(self):
         if not self.engine:
-            connection_string = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+            # ⚠️ IMPORTANTE: Usando DATABASE_URL do .env (banco externo VPS)
+            # NÃO alterar para usar variáveis separadas ou banco local Replit!
             self.engine = create_engine(
-                connection_string,
+                self.connection_string,
                 pool_size=10,
                 max_overflow=20,
                 pool_pre_ping=True
@@ -41,15 +45,11 @@ class DatabaseManager:
     
     @contextmanager
     def get_connection(self):
+        # ⚠️ ATENÇÃO: Conectando no banco EXTERNO da VPS via DATABASE_URL
+        # NÃO usar banco local Replit! Sempre usar self.connection_string
         conn = None
         try:
-            conn = psycopg2.connect(
-                host=settings.DB_HOST,
-                port=settings.DB_PORT,
-                database=settings.DB_NAME,
-                user=settings.DB_USER,
-                password=settings.DB_PASSWORD
-            )
+            conn = psycopg2.connect(self.connection_string)
             yield conn
             conn.commit()
         except Exception as e:
