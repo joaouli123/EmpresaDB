@@ -326,6 +326,28 @@ const LandingPage = () => {
 
   return (
     <div className="landing-page">
+      {/* Floating Navbar */}
+      <nav className="floating-navbar">
+        <div className="navbar-content">
+          <div className="navbar-logo">
+            <Database size={28} />
+            <span>CNPJ API</span>
+          </div>
+          
+          <div className="navbar-links">
+            <a href="#features">Funcionalidades</a>
+            <a href="#categories">Setores</a>
+            <a href="#pricing">Planos</a>
+            <a href="#contact">Contato</a>
+          </div>
+          
+          <div className="navbar-actions">
+            <button className="btn-navbar-secondary">Entrar</button>
+            <button className="btn-navbar-primary">Começar Grátis</button>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
