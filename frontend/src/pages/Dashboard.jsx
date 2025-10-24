@@ -147,37 +147,52 @@ const Dashboard = () => {
         </div>
       )}
 
-      {socios && companyData && ( // Only show socios section if companyData is also loaded
+      {companyData && (
         <div className="card">
           <div className="card-header">
             <Users size={20} />
-            <h2>Sócios</h2>
+            <h2>Sócios ({socios.length})</h2>
           </div>
           {socios.length > 0 ? (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nome do Sócio</th>
-                    <th>CPF/CNPJ</th>
-                    <th>Qualificação</th>
-                    <th>Data de Início</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {socios.map((socio, index) => (
-                    <tr key={index}>
-                      <td>{socio.nome_socio || 'N/A'}</td>
-                      <td>{socio.cpf_cnpj || 'N/A'}</td>
-                      <td>{socio.qualificacao || 'N/A'}</td>
-                      <td>{socio.data_inicio ? new Date(socio.data_inicio).toLocaleDateString('pt-BR') : 'N/A'}</td>
+            <>
+              {socios.length >= 1000 && (
+                <div className="alert alert-info">
+                  ℹ️ Esta empresa possui muitos sócios. Exibindo os primeiros 1.000 resultados.
+                </div>
+              )}
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome do Sócio</th>
+                      <th>CPF/CNPJ</th>
+                      <th>Qualificação</th>
+                      <th>Data de Entrada</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {socios.map((socio, index) => (
+                      <tr key={index}>
+                        <td>{socio.nome_socio || 'N/A'}</td>
+                        <td>{socio.cnpj_cpf_socio || 'N/A'}</td>
+                        <td>{socio.qualificacao_socio || 'N/A'}</td>
+                        <td>
+                          {socio.data_entrada_sociedade 
+                            ? new Date(socio.data_entrada_sociedade).toLocaleDateString('pt-BR') 
+                            : 'N/A'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           ) : (
-            <p>Nenhum sócio encontrado para esta empresa.</p>
+            <div className="empty-state">
+              <Users size={48} />
+              <p>Nenhum sócio cadastrado para esta empresa.</p>
+              <small>Total de sócios no sistema: 26,5 milhões</small>
+            </div>
           )}
         </div>
       )}

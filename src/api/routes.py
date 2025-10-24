@@ -389,15 +389,29 @@ async def search_empresas(
 
 @router.get("/cnpj/{cnpj}/socios", response_model=List[SocioModel])
 async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
+    """
+    Busca sócios de uma empresa pelo CNPJ
+    
+    IMPORTANTE: Esta consulta pode retornar muitos resultados para empresas grandes.
+    Banco de dados contém 26,5 milhões de sócios.
+    """
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     cnpj_basico = cnpj_clean[:8]
     
     logger.info(f"🔍 Buscando sócios para CNPJ {cnpj_clean} (básico: {cnpj_basico})")
     
+    # Verifica cache primeiro
+    cache_key = f"socios:{cnpj_basico}"
+    cached = get_from_cache(cache_key)
+    if cached:
+        logger.info(f"✓ Cache hit para sócios do CNPJ {cnpj_basico}")
+        return cached
+    
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             
+            # Query otimizada com índice em cnpj_basico
             query = """
                 SELECT 
                     cnpj_basico, identificador_socio, nome_socio,
@@ -405,6 +419,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
                 FROM socios
                 WHERE cnpj_basico = %s
                 ORDER BY nome_socio
+                LIMIT 1000
             """
             
             cursor.execute(query, (cnpj_basico,))
@@ -422,7 +437,10 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             socios = [SocioModel(**dict(zip(columns, row))) for row in results]
             
             if len(socios) == 0:
-                logger.warning(f"⚠️ Nenhum sócio encontrado para CNPJ básico {cnpj_basico}")
+                logger.info(f"ℹ️ Nenhum sócio encontrado para CNPJ básico {cnpj_basico}")
+            else:
+                # Salva no cache (30 minutos)
+                set_cache(cache_key, socios, minutes=30)
             
             return socios
             

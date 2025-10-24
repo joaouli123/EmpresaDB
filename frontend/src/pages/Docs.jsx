@@ -238,6 +238,42 @@ X-API-Key: sua_chave_api`}</pre>
               </div>
               <p>Retorna estatísticas gerais do banco de dados (não requer autenticação).</p>
             </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/api/v1/cnpj/{cnpj}/socios</code>
+              </div>
+              <p>
+                ### Sócios de uma Empresa
+
+                ```bash
+                GET /api/v1/cnpj/{cnpj}/socios
+                ```
+
+                Retorna os sócios de uma empresa (máximo 1.000 resultados).
+
+                **Base de dados**: 26,5 milhões de sócios cadastrados
+
+                **Performance**: Consulta otimizada com cache de 30 minutos
+
+                **Exemplo de resposta**:
+                ```json
+                [
+                  {
+                    "cnpj_basico": "00000000",
+                    "identificador_socio": "2",
+                    "nome_socio": "JOÃO DA SILVA",
+                    "cnpj_cpf_socio": "***123456**",
+                    "qualificacao_socio": "49",
+                    "data_entrada_sociedade": "2020-01-15"
+                  }
+                ]
+                ```
+
+                **Nota**: Por questões de performance, empresas com mais de 1.000 sócios terão seus resultados limitados.
+              </p>
+            </div>
           </section>
 
           <section id="examples" className="doc-section">
