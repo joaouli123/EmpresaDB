@@ -1,0 +1,28 @@
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y8.D51011.ESTABELE'
+INFO:src.etl.importer:Extraindo: Estabelecimentos8.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y8.D51011.ESTABELE
+INFO:src.etl.etl_tracker:⏸️  Arquivo K3241.K03200Y8.D51011.ESTABELE parcialmente processado, retomando...
+INFO:src.etl.etl_tracker:⏸️  Arquivo K3241.K03200Y8.D51011.ESTABELE parcialmente processado, retomando...
+INFO:src.etl.etl_tracker:⏸️  K3241.K03200Y8.D51011.ESTABELE parcialmente processado, retomando...
+Processando K3241.K03200Y8.D51011.ESTABELE: 16it [04:42, 17.66s/it]
+ERROR:src.database.connection:Erro na conexão com banco de dados: cannot insert a non-DEFAULT value into column "cnpj_completo"
+DETAIL:  Column "cnpj_completo" is a generated column.
+
+ERROR:src.etl.importer:Erro ao importar estabelecimentos: cannot insert a non-DEFAULT value into column "cnpj_completo"
+DETAIL:  Column "cnpj_completo" is a generated column.
+
+WARNING:src.etl.etl_tracker:⚠️  DISCREPÂNCIA em estabelecimentos: CSV=4,753,435 vs DB=0 (diff=4753435)
+INFO:src.etl.importer:  → ZIP contém 1 entradas
+INFO:src.etl.importer:  → Conteúdo do ZIP:
+INFO:src.etl.importer:     [0] Nome: 'K3241.K03200Y7.D51011.ESTABELE' | Tamanho: 1,136,807,584 bytes | É pasta: False
+INFO:src.etl.importer:  ✓ Arquivos válidos encontrados: 1
+INFO:src.etl.importer:  → Primeiro arquivo a ser extraído: 'K3241.K03200Y7.D51011.ESTABELE'
+INFO:src.etl.importer:Extraindo: Estabelecimentos7.zip
+INFO:src.etl.importer:  ✓ Já existe: K3241.K03200Y7.D51011.ESTABELE
+INFO:src.etl.importer:Importando estabelecimentos de: K3241.K03200Y7.D51011.ESTABELE
+INFO:src.etl.etl_tracker:📋 K3241.K03200Y7.D51011.ESTABELE: SEM cabeçalho (células começam com números: ['01309299', '0001', '23'])
+INFO:src.etl.etl_tracker:📊 K3241.K03200Y7.D51011.ESTABELE: 4753435 linhas totais, cabeçalho=NÃO, dados=4753435
+INFO:src.etl.etl_tracker:📁 Iniciando processamento: K3241.K03200Y7.D51011.ESTABELE (4,753,435 linhas)
+Processando K3241.K03200Y7.D51011.ESTABELE: 6it [01:43, 18.14s/it]

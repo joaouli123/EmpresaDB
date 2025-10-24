@@ -530,10 +530,10 @@ class CNPJImporter:
                             avg_time = elapsed / chunk_count
                             logger.info(f"📊 Chunk {chunk_count}: {chunk_time:.2f}s | Média: {avg_time:.2f}s/chunk | Total: {elapsed/60:.1f}min")
 
-                # Inserir apenas os que não existem
+                # Inserir apenas os que não existem (sem cnpj_completo que é GENERATED)
                 cursor.execute(f"""
-                    INSERT INTO {table_name} 
-                    SELECT * FROM temp_{table_name}
+                    INSERT INTO {table_name} ({','.join(db_columns)})
+                    SELECT {','.join(db_columns)} FROM temp_{table_name}
                     ON CONFLICT (cnpj_basico, cnpj_ordem, cnpj_dv) DO NOTHING
                 """)
 
