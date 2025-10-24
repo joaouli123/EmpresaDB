@@ -31,13 +31,21 @@ class Settings(BaseSettings):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        
+        # Carrega DB_PASSWORD do ambiente se existir
+        env_password = os.getenv("DB_PASSWORD")
+        if env_password:
+            self.DB_PASSWORD = env_password
+        
         if self.DATABASE_URL:
             parsed = urlparse(self.DATABASE_URL)
             self.DB_HOST = parsed.hostname
             self.DB_PORT = parsed.port or 5432
             self.DB_NAME = parsed.path.lstrip('/')
             self.DB_USER = unquote(parsed.username) if parsed.username else None
-            self.DB_PASSWORD = unquote(parsed.password) if parsed.password else None
+            # Só usa a senha da URL se não tiver DB_PASSWORD no ambiente
+            if not env_password and parsed.password:
+                self.DB_PASSWORD = unquote(parsed.password)
     
     @property
     def database_url(self) -> str:
