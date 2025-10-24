@@ -1,7 +1,10 @@
+
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent))
+# Adiciona o diretório raiz ao Python path
+root_dir = Path(__file__).parent
+sys.path.insert(0, str(root_dir))
 
 if __name__ == "__main__":
     import uvicorn

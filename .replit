@@ -7,7 +7,7 @@ channel = "stable-25_05"
 packages = ["glibcLocales", "libxcrypt", "xcodebuild", "zlib"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start API"
 
 [[workflows.workflow]]
 name = "Project"
@@ -29,6 +29,15 @@ waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow]]
+name = "Start API"
+author = 48939076
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
 
 [[ports]]
 localPort = 5000
