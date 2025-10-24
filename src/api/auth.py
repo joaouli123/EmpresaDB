@@ -32,9 +32,12 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def create_access_token(data: dict):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
@@ -63,6 +66,14 @@ async def get_current_user(token: str = Depends(db_manager.oauth2_scheme)):
         raise credentials_exception
     return user
 
+async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
+    if current_user.get('role') != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail="Not enough permissions"
+        )
+    return current_user
+
 @router.post("/register", response_model=dict)
 async def register(user: UserCreate):
     existing_user = await db_manager.get_user_by_username(user.username)
@@ -80,7 +91,9 @@ async def register(user: UserCreate):
     access_token = create_access_token(
         data={"sub": new_user["username"]}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer", "user": new_user}
+    
+    user_data = {k: v for k, v in new_user.items() if k != 'password'}
+    return {"access_token": access_token, "token_type": "bearer", "user": user_data}
 
 @router.post("/login", response_model=dict)
 async def login(form_data: UserLogin):
@@ -91,12 +104,17 @@ async def login(form_data: UserLogin):
             detail="Incorrect username or password",
         )
 
+    await db_manager.update_last_login(form_data.username)
+
     access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
     access_token = create_access_token(
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer", "user": user}
+    
+    user_data = {k: v for k, v in user.items() if k != 'password'}
+    return {"access_token": access_token, "token_type": "bearer", "user": user_data}
 
 @router.get("/me", response_model=dict)
 async def read_users_me(current_user: dict = Depends(get_current_user)):
-    return current_user
+    user_data = {k: v for k, v in current_user.items() if k != 'password'}
+    return user_data

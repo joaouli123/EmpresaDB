@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from src.api.routes import router
+from src.api.auth import router as auth_router
+from src.api.user_routes import router as user_router
 from src.config import settings
 import logging
 from pathlib import Path
@@ -55,27 +57,14 @@ if static_path.exists():
 
 @app.get("/")
 async def root():
-    """Rota principal - exibe tela de login/cadastro"""
-    auth_path = static_path / "auth.html"
-    if auth_path.exists():
-        return FileResponse(str(auth_path))
     return {
-        "message": "Página de login não encontrada",
-        "redirect": "/docs"
+        "message": "API de Consulta CNPJ",
+        "version": settings.API_VERSION,
+        "docs": "/docs"
     }
 
-@app.get("/auth.html")
-async def auth_page():
-    """Rota alternativa para a tela de login"""
-    return FileResponse(str(static_path / "auth.html"))
-
-@app.get("/dashboard")
-async def dashboard():
-    dashboard_path = static_path / "dashboard.html"
-    if dashboard_path.exists():
-        return FileResponse(str(dashboard_path))
-    return {"message": "Dashboard não encontrado"}
-
+app.include_router(auth_router)
+app.include_router(user_router)
 app.include_router(router)
 
 if __name__ == "__main__":
@@ -83,6 +72,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "src.api.main:app",
         host=settings.API_HOST,
-        port=settings.API_PORT,
+        port=8000,
         reload=True
     )
