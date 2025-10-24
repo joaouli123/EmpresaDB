@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDatabase from './pages/AdminDatabase';
@@ -39,12 +40,16 @@ function AppRoutes() {
     <Router>
       <Routes>
         <Route 
+          path="/home" 
+          element={<LandingPage />} 
+        />
+        <Route 
           path="/login" 
           element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
         />
         <Route 
           path="/" 
-          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />} 
         />
         <Route path="/" element={
           <ProtectedRoute>
