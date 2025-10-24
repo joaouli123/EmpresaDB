@@ -15,6 +15,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='ETL - Dados CNPJ')
+    parser.add_argument('--skip-empresas', action='store_true', 
+                        help='Pula importação de empresas (use se já foram importadas)')
+    parser.add_argument('--skip-tabelas-aux', action='store_true',
+                        help='Pula tabelas auxiliares (CNAEs, municípios, etc.)')
+    args = parser.parse_args()
+    
     logger.info("="*70)
     logger.info("SISTEMA DE ETL - DADOS PÚBLICOS CNPJ")
     logger.info("="*70 + "\n")
@@ -34,7 +43,24 @@ def main():
     
     logger.info("\nPasso 3: Importando dados para o PostgreSQL...")
     importer = CNPJImporter()
-    importer.process_all(downloaded_files)
+    
+    # Define quais tipos pular
+    skip_types = []
+    if args.skip_empresas:
+        skip_types.append('empresas')
+        logger.info("⏭️  Modo: PULANDO empresas (já importadas)")
+    if args.skip_tabelas_aux:
+        skip_types.extend([
+            'tabela_auxiliar_cnaes',
+            'tabela_auxiliar_municipios',
+            'tabela_auxiliar_motivos',
+            'tabela_auxiliar_naturezas',
+            'tabela_auxiliar_paises',
+            'tabela_auxiliar_qualificacoes'
+        ])
+        logger.info("⏭️  Modo: PULANDO tabelas auxiliares (já importadas)")
+    
+    importer.process_all(downloaded_files, skip_types=skip_types)
     
     logger.info("\n" + "="*70)
     logger.info("PROCESSO COMPLETO!")

@@ -696,12 +696,31 @@ class CNPJImporter:
             if file_id:
                 self.tracker.finish_file_processing(file_id, 'failed', table_name)
 
-    def process_all(self, downloaded_files: dict):
+    def process_all(self, downloaded_files: dict, skip_types: list = None):
+        """
+        Processa arquivos de importação
+        
+        Args:
+            downloaded_files: Dicionário com arquivos baixados
+            skip_types: Lista de tipos para PULAR (ex: ['empresas'])
+        """
+        skip_types = skip_types or []
+        
         logger.info("\n" + "="*70)
         logger.info("INICIANDO PROCESSO DE IMPORTAÇÃO")
         logger.info("="*70 + "\n")
+        
+        if skip_types:
+            logger.info(f"⏭️  PULANDO tipos: {', '.join(skip_types)}")
+            logger.info("")
 
         for file_type, table_name in self.import_order:
+            # Pula tipos especificados
+            if file_type in skip_types:
+                count = db_manager.get_table_count(table_name)
+                logger.info(f"\n⏭️  PULANDO: {file_type} ({count:,} registros já existentes)")
+                continue
+            
             if file_type not in downloaded_files or not downloaded_files[file_type]:
                 logger.warning(f"⚠ Nenhum arquivo encontrado para: {file_type}")
                 continue
