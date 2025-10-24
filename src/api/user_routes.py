@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import List
+from datetime import datetime
 from src.database.connection import db_manager
 from src.api.auth import get_current_user
 import logging
@@ -126,5 +127,3 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
             'avg_response_time': '45ms',
             'last_update': 'Hoje'
         }
-
-from datetime import datetime
