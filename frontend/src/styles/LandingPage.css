@@ -142,6 +142,121 @@
   letter-spacing: 0.5px;
 }
 
+/* Categories Honeycomb Section */
+.categories-section {
+  padding: 100px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.categories-honeycomb {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  margin-top: 60px;
+}
+
+.category-hex {
+  position: relative;
+  height: 320px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+
+.category-hex::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-hex.hovered::before {
+  transform: scaleX(1);
+}
+
+.category-hex.hovered {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
+}
+
+.hex-inner {
+  padding: 40px 32px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.hex-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 24px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+}
+
+.category-hex.hovered .hex-icon {
+  transform: rotate(10deg) scale(1.1);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+}
+
+.hex-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 12px;
+  transition: color 0.3s;
+}
+
+.category-hex.hovered .hex-title {
+  color: #3b82f6;
+}
+
+.hex-count {
+  display: inline-block;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.category-hex.hovered .hex-count {
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.hex-description {
+  color: var(--gray);
+  line-height: 1.6;
+  font-size: 15px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
 /* Benefits Section */
 .benefits-section,
 .pricing-section,
@@ -335,69 +450,59 @@
   width: 100%;
 }
 
-/* Toggle Button */
-.toggle-container {
+/* Billing Toggle */
+.billing-toggle {
   display: flex;
   justify-content: center;
-  margin-bottom: 32px;
-  gap: 16px;
+  gap: 8px;
+  margin-bottom: 50px;
+  background: white;
+  padding: 8px;
+  border-radius: 100px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.toggle-label {
-  font-size: 16px;
+.billing-option {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
   color: var(--gray);
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.toggle-label.active {
-  color: var(--dark);
   font-weight: 600;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
+  font-size: 16px;
+  border-radius: 100px;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  border-radius: 34px;
-  transition: .4s;
+  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  border-radius: 50%;
-  transition: .4s;
+.billing-option.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
-input:checked + .slider {
-  background-color: #3b82f6;
+.billing-option:hover:not(.active) {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-input:checked + .slider:before {
-  transform: translateX(26px);
+.discount-badge {
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Pricing Card Modifications for Discount */
@@ -588,5 +693,28 @@ body {
 
   .hero-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .categories-honeycomb {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .category-hex {
+    height: 280px;
+  }
+
+  .billing-toggle {
+    max-width: 100%;
+  }
+
+  .billing-option {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
+  .discount-badge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }

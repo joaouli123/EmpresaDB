@@ -30,6 +30,7 @@ import '../styles/LandingPage.css';
 const LandingPage = () => {
   const [selectedPlan, setSelectedPlan] = useState('profissional');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
+  const [hoveredCategory, setHoveredCategory] = useState(null);
 
   const plans = [
     {
@@ -293,20 +294,25 @@ const LandingPage = () => {
       </section>
 
       {/* Business Categories Section */}
-      <section className="benefits-section">
+      <section className="categories-section">
         <div className="section-header">
           <h2>Dados de Todos os Setores</h2>
           <p>Acesse informações completas de empresas em qualquer segmento do mercado brasileiro</p>
         </div>
         
-        <div className="benefits-grid">
+        <div className="categories-honeycomb">
           {businessCategories.map((category, index) => (
-            <div key={index} className="benefit-card">
-              <div className="benefit-icon">{category.icon}</div>
-              <h3>{category.title}</h3>
-              <p>{category.description}</p>
-              <div style={{ marginTop: '12px', color: 'var(--primary)', fontWeight: '700', fontSize: '18px' }}>
-                {category.count} empresas
+            <div 
+              key={index} 
+              className={`category-hex ${hoveredCategory === index ? 'hovered' : ''}`}
+              onMouseEnter={() => setHoveredCategory(index)}
+              onMouseLeave={() => setHoveredCategory(null)}
+            >
+              <div className="hex-inner">
+                <div className="hex-icon">{category.icon}</div>
+                <h3 className="hex-title">{category.title}</h3>
+                <div className="hex-count">{category.count}</div>
+                <p className="hex-description">{category.description}</p>
               </div>
             </div>
           ))}
