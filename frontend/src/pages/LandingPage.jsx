@@ -792,69 +792,70 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Contact Form Section */}
+      {/* Contact Section */}
       <section className="contact-section">
         <div className="contact-wrapper">
-          <div className="contact-header-section">
+          <div className="section-header">
             <h2>Entre em Contato</h2>
-            <p>Tem dúvidas? Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio.</p>
+            <p>Tem dúvidas? Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio</p>
           </div>
 
-          <div className="contact-container">
-            <div className="contact-info-cards">
+          <div className="contact-grid">
+            <div className="contact-info-side">
               <div className="contact-info-card">
-                <div className="contact-icon-wrapper">
-                  <Mail size={28} />
+                <div className="contact-card-icon">
+                  <Mail size={24} />
                 </div>
-                <h4>Email</h4>
-                <p>contato@cnpjapi.com.br</p>
+                <div>
+                  <h4>Email</h4>
+                  <p>contato@cnpjapi.com.br</p>
+                </div>
               </div>
-              
+
               <div className="contact-info-card">
-                <div className="contact-icon-wrapper">
-                  <Phone size={28} />
+                <div className="contact-card-icon">
+                  <Phone size={24} />
                 </div>
-                <h4>Telefone</h4>
-                <p>(11) 9 9999-9999</p>
+                <div>
+                  <h4>Telefone</h4>
+                  <p>(11) 9 9999-9999</p>
+                </div>
               </div>
-              
+
               <div className="contact-info-card">
-                <div className="contact-icon-wrapper">
-                  <Clock size={28} />
+                <div className="contact-card-icon">
+                  <Clock size={24} />
                 </div>
-                <h4>Horário de Atendimento</h4>
-                <p>Seg - Sex: 9h às 18h</p>
+                <div>
+                  <h4>Horário de Atendimento</h4>
+                  <p>Seg - Sex: 9h às 18h</p>
+                </div>
               </div>
             </div>
 
-            <div className="contact-form-wrapper">
+            <div className="contact-form-card">
               <form className="contact-form">
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" placeholder="Seu nome" required />
+                    <input type="text" placeholder="Seu nome completo" required />
                   </div>
                   
                   <div className="form-group">
-                    <label>Email</label>
                     <input type="email" placeholder="seu@email.com" required />
                   </div>
                 </div>
                 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Telefone</label>
                     <input type="tel" placeholder="(11) 99999-9999" />
                   </div>
                   
                   <div className="form-group">
-                    <label>Empresa</label>
                     <input type="text" placeholder="Nome da empresa" />
                   </div>
                 </div>
                 
                 <div className="form-group">
-                  <label>Assunto</label>
                   <select required>
                     <option value="">Selecione um assunto</option>
                     <option value="duvidas">Dúvidas sobre Planos</option>
@@ -865,11 +866,10 @@ const LandingPage = () => {
                 </div>
                 
                 <div className="form-group">
-                  <label>Mensagem</label>
-                  <textarea rows="5" placeholder="Como podemos ajudar?" required></textarea>
+                  <textarea rows="4" placeholder="Como podemos ajudar?" required></textarea>
                 </div>
                 
-                <button type="submit" className="btn-primary-large btn-submit-contact">
+                <button type="submit" className="btn-primary-large">
                   Enviar Mensagem
                   <ChevronRight size={20} />
                 </button>
