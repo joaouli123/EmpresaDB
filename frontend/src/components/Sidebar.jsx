@@ -7,7 +7,8 @@ import {
   RefreshCw, 
   LogOut,
   Database,
-  Activity
+  Activity,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -77,6 +78,17 @@ const Sidebar = () => {
             ))}
           </div>
         )}
+
+        <div className="nav-section">
+          <NavLink
+            key="/pricing"
+            to="/pricing"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          >
+            <CreditCard size={20} />
+            <span>Planos e Preços</span>
+          </NavLink>
+        </div>
 
         <div className="nav-section">
           <button onClick={logout} className="nav-item logout-btn">

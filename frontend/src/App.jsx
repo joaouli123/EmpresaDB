@@ -9,6 +9,7 @@ import AdminDatabase from './pages/AdminDatabase';
 import Profile from './pages/Profile';
 import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
+import Pricing from './pages/Pricing';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -39,17 +40,17 @@ function AppRoutes() {
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/home" 
-          element={<LandingPage />} 
+        <Route
+          path="/home"
+          element={<LandingPage />}
         />
-        <Route 
-          path="/login" 
-          element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
         />
-        <Route 
-          path="/" 
-          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />} 
+        <Route
+          path="/"
+          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />}
         />
         <Route path="/" element={
           <ProtectedRoute>
@@ -60,6 +61,7 @@ function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="api-keys" element={<APIKeys />} />
           <Route path="docs" element={<Docs />} />
+          <Route path="pricing" element={<Pricing />} />
           <Route path="admin" element={
             <ProtectedRoute adminOnly={true}>
               <AdminDashboard />

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { cnpjAPI, userAPI } from '../services/api';
-import { 
-  Database, 
-  Building2, 
-  Users, 
-  Activity, 
+import { cnpjAPI, userAPI, api } from '../services/api'; // Import 'api'
+import {
+  Database,
+  Building2,
+  Users,
+  Activity,
   TrendingUp,
   Clock,
   CheckCircle2,
@@ -15,6 +15,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [usage, setUsage] = useState(null);
+  const [subscription, setSubscription] = useState(null); // State for subscription data
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,12 +24,14 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, usageRes] = await Promise.all([
+      const [statsRes, usageRes, subRes] = await Promise.all([
         cnpjAPI.getStats(),
-        userAPI.getUsage()
+        userAPI.getUsage(),
+        api.get('/subscriptions/my-subscription') // Fetch subscription data
       ]);
       setStats(statsRes.data);
       setUsage(usageRes.data);
+      setSubscription(subRes.data); // Set subscription state
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -53,6 +56,36 @@ const Dashboard = () => {
         <h1>Dashboard</h1>
         <p>Visão geral do sistema e uso da API</p>
       </div>
+
+      {subscription && (
+        <div className="subscription-card">
+          <h3>Sua Assinatura: {subscription.plan_name}</h3>
+          <div className="subscription-stats">
+            <div className="sub-stat">
+              <p>Limite Mensal</p>
+              <strong>{subscription.total_limit.toLocaleString('pt-BR')}</strong>
+            </div>
+            <div className="sub-stat">
+              <p>Consultas Usadas</p>
+              <strong>{subscription.queries_used.toLocaleString('pt-BR')}</strong>
+            </div>
+            <div className="sub-stat">
+              <p>Consultas Restantes</p>
+              <strong>{subscription.queries_remaining.toLocaleString('pt-BR')}</strong>
+            </div>
+            <div className="sub-stat">
+              <p>Renovação</p>
+              <strong>{new Date(subscription.renewal_date).toLocaleDateString('pt-BR')}</strong>
+            </div>
+          </div>
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{ width: `${(subscription.queries_used / subscription.total_limit * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="stats-grid">
         <div className="stat-card">
