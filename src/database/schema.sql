@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS socios (
     qualificacao_representante VARCHAR(2),
     faixa_etaria VARCHAR(1),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (cnpj_basico, identificador_socio, cnpj_cpf_socio),
     FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico)
 );
 

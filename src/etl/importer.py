@@ -404,7 +404,8 @@ class CNPJImporter:
             logger.info(f"  ⏭️  Arquivo já em processamento ou concluído, pulando...")
             return  # Já processado
 
-        columns = [
+        # Colunas do CSV da Receita Federal (31 colunas no total)
+        csv_columns = [
             'cnpj_basico', 'cnpj_ordem', 'cnpj_dv', 'identificador_matriz_filial',
             'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
             'motivo_situacao_cadastral', 'nome_cidade_exterior', 'pais',
@@ -414,7 +415,9 @@ class CNPJImporter:
             'ddd_fax', 'fax', 'correio_eletronico', 'situacao_especial',
             'data_situacao_especial'
         ]
-        # Nota: cnpj_completo é GENERATED ALWAYS, não pode ser inserido manualmente
+        
+        # Colunas para inserir no banco (sem cnpj_completo que é GENERATED ALWAYS)
+        db_columns = csv_columns.copy()
 
         try:
             total_imported = 0
@@ -434,7 +437,7 @@ class CNPJImporter:
                             f,
                             sep=';',
                             header=None,
-                            names=columns,
+                            names=csv_columns,
                             chunksize=self.chunk_size,
                             dtype=str,
                             na_values=[''],
@@ -467,11 +470,14 @@ class CNPJImporter:
                             chunk[date_col] = chunk[date_col].dt.strftime('%Y-%m-%d')
                             chunk[date_col] = chunk[date_col].replace('NaT', '')
 
+                        # Selecionar apenas as colunas que podem ser inseridas no banco (sem cnpj_completo)
+                        chunk_to_insert = chunk[db_columns]
+                        
                         output = StringIO()
-                        chunk.to_csv(output, sep=';', header=False, index=False)
+                        chunk_to_insert.to_csv(output, sep=';', header=False, index=False)
                         output.seek(0)
 
-                        copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
+                        copy_sql = f"COPY temp_{table_name} ({','.join(db_columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
                 # Inserir apenas os que não existem
