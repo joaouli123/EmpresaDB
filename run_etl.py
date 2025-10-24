@@ -20,18 +20,25 @@ def main():
     parser = argparse.ArgumentParser(description='ETL - Dados CNPJ')
     parser.add_argument('--skip-empresas', action='store_true', 
                         help='Pula importação de empresas (use se já foram importadas)')
+    parser.add_argument('--skip-socios', action='store_true',
+                        help='Pula importação de sócios (use se já foram importados)')
     parser.add_argument('--skip-tabelas-aux', action='store_true',
                         help='Pula tabelas auxiliares (CNAEs, municípios, etc.)')
+    parser.add_argument('--skip-init', action='store_true',
+                        help='Pula inicialização do banco (use se já foi inicializado)')
     args = parser.parse_args()
     
     logger.info("="*70)
     logger.info("SISTEMA DE ETL - DADOS PÚBLICOS CNPJ")
     logger.info("="*70 + "\n")
     
-    logger.info("Passo 1: Inicializando banco de dados...")
-    if not init_database():
-        logger.error("Falha ao inicializar banco de dados!")
-        return False
+    if args.skip_init:
+        logger.info("Passo 1: ⏭️  PULANDO inicialização do banco (já configurado)")
+    else:
+        logger.info("Passo 1: Inicializando banco de dados...")
+        if not init_database():
+            logger.error("Falha ao inicializar banco de dados!")
+            return False
     
     logger.info("\nPasso 2: Baixando arquivos da Receita Federal...")
     downloader = RFBDownloader()
@@ -49,6 +56,9 @@ def main():
     if args.skip_empresas:
         skip_types.append('empresas')
         logger.info("⏭️  Modo: PULANDO empresas (já importadas)")
+    if args.skip_socios:
+        skip_types.append('socios')
+        logger.info("⏭️  Modo: PULANDO sócios (já importados)")
     if args.skip_tabelas_aux:
         skip_types.extend([
             'tabela_auxiliar_cnaes',
