@@ -428,7 +428,7 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
+      <section className="benefits-section filters-section">
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>

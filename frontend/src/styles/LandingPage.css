@@ -147,7 +147,7 @@
   padding: 100px 20px;
   max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  background: #ffffff;
 }
 
 .categories-tabs-container {
@@ -373,6 +373,12 @@
   padding: 100px 20px;
   max-width: 1200px;
   margin: 0 auto;
+  background: #ffffff;
+}
+
+/* Seção de Filtros com fundo alternado */
+.filters-section {
+  background: #f9fafb;
 }
 
 .section-header {
@@ -784,7 +790,7 @@ body {
 /* Contact Section */
 .contact-section {
   padding: 100px 20px;
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  background: #f9fafb;
 }
 
 .contact-wrapper {
