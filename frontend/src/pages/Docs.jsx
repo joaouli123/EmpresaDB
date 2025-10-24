@@ -1,6 +1,8 @@
 import { Code, Book, Zap, Shield, Database } from 'lucide-react';
 
 const Docs = () => {
+  const API_URL = window.location.origin;
+  
   return (
     <div className="docs-page">
       <div className="page-header">
@@ -86,7 +88,7 @@ Content-Type: application/json
               <p>Consulta informações completas de uma empresa por CNPJ.</p>
               <div className="endpoint-example">
                 <h4>Exemplo de Requisição:</h4>
-                <pre>{`GET /cnpj/00000000000191
+                <pre>{`GET ${API_URL}/cnpj/00000000000191
 Authorization: Bearer SEU_TOKEN`}</pre>
                 <h4>Resposta (200 OK):</h4>
                 <pre>{`{
@@ -153,7 +155,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
               </div>
               <div className="endpoint-example">
                 <h4>Exemplo:</h4>
-                <pre>{`GET /search?uf=SP&situacao_cadastral=02&page=1&per_page=20
+                <pre>{`GET ${API_URL}/search?uf=SP&situacao_cadastral=02&page=1&per_page=20
 Authorization: Bearer SEU_TOKEN`}</pre>
               </div>
             </div>
@@ -194,7 +196,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
               <pre>{`const axios = require('axios');
 
 const api = axios.create({
-  baseURL: window.location.origin,
+  baseURL: '${API_URL}',
   headers: {
     'Authorization': 'Bearer SEU_TOKEN'
   }
@@ -218,7 +220,7 @@ consultarCNPJ('00000000000191');`}</pre>
               <pre>{`import requests
 
 # Use a URL do seu Replit
-API_URL = '${window.location.origin}'
+API_URL = '${API_URL}'
 TOKEN = 'SEU_TOKEN'
 
 headers = {
@@ -240,11 +242,11 @@ print(resultado)`}</pre>
             <h3>cURL</h3>
             <div className="code-block">
               <pre>{`# Consultar CNPJ
-curl -X GET "${window.location.origin}/cnpj/00000000000191" \\
+curl -X GET "${API_URL}/cnpj/00000000000191" \\
   -H "Authorization: Bearer SEU_TOKEN"
 
 # Busca com filtros
-curl -X GET "${window.location.origin}/search?uf=SP&situacao_cadastral=02" \\
+curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02" \\
   -H "Authorization: Bearer SEU_TOKEN"`}</pre>
             </div>
           </section>

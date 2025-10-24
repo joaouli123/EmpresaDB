@@ -214,7 +214,7 @@ const APIKeys = () => {
         <p>Inclua sua chave de API no cabeçalho de todas as requisições:</p>
         <pre><code>Authorization: Bearer SUA_CHAVE_AQUI</code></pre>
         <p>Exemplo com curl:</p>
-        <pre><code>curl -H "Authorization: Bearer SUA_CHAVE" https://api.exemplo.com/cnpj/00000000000191</code></pre>
+        <pre><code>curl -H "Authorization: Bearer SUA_CHAVE" {window.location.origin}/cnpj/00000000000191</code></pre>
       </div>
     </div>
   );
