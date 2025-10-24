@@ -251,13 +251,6 @@ class CNPJImporter:
                     else:
                         logger.info(f"  ✓ Já existe: {file_name}")
 
-                    # Verificar se CSV já foi processado 100%
-                    file_hash = self.tracker.calculate_file_hash(extract_path)
-                    if file_hash:
-                        status = self.tracker.check_file_status(extract_path, file_hash)
-                        if status == 'completed':
-                            return None  # Arquivo já processado, pular
-
                     return extract_path
 
             logger.warning(f"  ⚠️ Nenhum arquivo encontrado em {zip_path.name}")
@@ -292,6 +285,17 @@ class CNPJImporter:
     def import_empresas(self, csv_path: Path):
         logger.info(f"Importando empresas de: {csv_path.name}")
         table_name = 'empresas'
+
+        # Iniciar rastreamento
+        file_hash = self.tracker.calculate_file_hash(csv_path)
+        if file_hash:
+            status = self.tracker.check_file_status(csv_path, file_hash)
+            if status == 'completed':
+                return  # Já processado
+
+        file_id = self.tracker.start_file_processing(csv_path, 'empresas', table_name)
+        if file_id is None:
+            return  # Já processado
 
         columns = [
             'cnpj_basico', 'razao_social', 'natureza_juridica',
@@ -372,12 +376,29 @@ class CNPJImporter:
             if total_skipped > 0:
                 logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
+            # Finalizar rastreamento
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'completed', table_name)
+
         except Exception as e:
             logger.error(f"Erro ao importar empresas: {e}")
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'failed', table_name)
 
     def import_estabelecimentos(self, csv_path: Path):
         logger.info(f"Importando estabelecimentos de: {csv_path.name}")
         table_name = 'estabelecimentos'
+
+        # Iniciar rastreamento
+        file_hash = self.tracker.calculate_file_hash(csv_path)
+        if file_hash:
+            status = self.tracker.check_file_status(csv_path, file_hash)
+            if status == 'completed':
+                return  # Já processado
+
+        file_id = self.tracker.start_file_processing(csv_path, 'estabelecimentos', table_name)
+        if file_id is None:
+            return  # Já processado
 
         columns = [
             'cnpj_basico', 'cnpj_ordem', 'cnpj_dv', 'identificador_matriz_filial',
@@ -468,12 +489,29 @@ class CNPJImporter:
             if total_skipped > 0:
                 logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
+            # Finalizar rastreamento
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'completed', table_name)
+
         except Exception as e:
             logger.error(f"Erro ao importar estabelecimentos: {e}")
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'failed', table_name)
 
     def import_socios(self, csv_path: Path):
         logger.info(f"Importando sócios de: {csv_path.name}")
         table_name = 'socios'
+
+        # Iniciar rastreamento
+        file_hash = self.tracker.calculate_file_hash(csv_path)
+        if file_hash:
+            status = self.tracker.check_file_status(csv_path, file_hash)
+            if status == 'completed':
+                return  # Já processado
+
+        file_id = self.tracker.start_file_processing(csv_path, 'socios', table_name)
+        if file_id is None:
+            return  # Já processado
 
         columns = [
             'cnpj_basico', 'identificador_socio', 'nome_socio', 'cnpj_cpf_socio',
@@ -555,12 +593,29 @@ class CNPJImporter:
             if total_skipped > 0:
                 logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
+            # Finalizar rastreamento
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'completed', table_name)
+
         except Exception as e:
             logger.error(f"Erro ao importar sócios: {e}")
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'failed', table_name)
 
     def import_simples(self, csv_path: Path):
         logger.info(f"Importando Simples Nacional de: {csv_path.name}")
         table_name = 'simples_nacional'
+
+        # Iniciar rastreamento
+        file_hash = self.tracker.calculate_file_hash(csv_path)
+        if file_hash:
+            status = self.tracker.check_file_status(csv_path, file_hash)
+            if status == 'completed':
+                return  # Já processado
+
+        file_id = self.tracker.start_file_processing(csv_path, 'simples_nacional', table_name)
+        if file_id is None:
+            return  # Já processado
 
         columns = [
             'cnpj_basico', 'opcao_simples', 'data_opcao_simples',
@@ -631,8 +686,14 @@ class CNPJImporter:
             if total_skipped > 0:
                 logger.info(f"  ⏭️  Ignorados (já existentes): {total_skipped} registros")
 
+            # Finalizar rastreamento
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'completed', table_name)
+
         except Exception as e:
             logger.error(f"Erro ao importar Simples Nacional: {e}")
+            if file_id:
+                self.tracker.finish_file_processing(file_id, 'failed', table_name)
 
     def process_all(self, downloaded_files: dict):
         logger.info("\n" + "="*70)
