@@ -133,7 +133,31 @@ class CNPJImporter:
         if not is_valid:
             logger.error(f"❌ {zip_path.name}: {message}")
 
-            # Tentar redownload automático
+            # Se o arquivo tem conteúdo mas está vazio no ZIP, provavelmente está corrompido na fonte
+            if "ZIP vazio" in message and zip_path.stat().st_size > 100000:
+                logger.error(f"\n")
+                logger.error(f"{'='*80}")
+                logger.error(f"⚠️  ARQUIVO COM PROBLEMA NA FONTE (Receita Federal)")
+                logger.error(f"{'='*80}")
+                logger.error(f"")
+                logger.error(f"📁 Arquivo: {zip_path.name}")
+                logger.error(f"💾 Tamanho no disco: {zip_path.stat().st_size:,} bytes")
+                logger.error(f"❌ Problema: {message}")
+                logger.error(f"")
+                logger.error(f"🔍 DIAGNÓSTICO:")
+                logger.error(f"  O arquivo tem tamanho significativo mas o conteúdo ZIP está vazio.")
+                logger.error(f"  Isso indica que o arquivo está corrompido NO SERVIDOR da Receita Federal,")
+                logger.error(f"  não é um problema de download.")
+                logger.error(f"")
+                logger.error(f"✅ SOLUÇÃO:")
+                logger.error(f"  → O sistema vai PULAR este arquivo e continuar com os outros")
+                logger.error(f"  → Tente novamente em alguns dias quando a Receita corrigir o arquivo")
+                logger.error(f"  → Ou baixe manualmente de outra fonte se disponível")
+                logger.error(f"")
+                logger.error(f"{'='*80}\n")
+                return None
+
+            # Tentar redownload automático apenas se fizer sentido
             logger.warning(f"\n🔄 Tentando corrigir automaticamente...")
             logger.warning(f"   (Não precisa fazer nada, aguarde...)\n")
 
