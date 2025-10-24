@@ -477,28 +477,66 @@
   font-size: 13px;
   color: var(--gray);
   font-family: 'Courier New', monospace;
+}
+
+.outros-setores-info {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.outros-setores-content {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(37, 99, 235, 0.08));
+  padding: 28px 32px;
+  border-radius: 16px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.3s;
 }
 
-.badge-mais {
+.outros-setores-content:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.12));
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.outros-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.outros-text {
+  flex: 1;
+}
+
+.outros-text h4 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+
+.outros-text p {
+  font-size: 15px;
+  color: var(--gray);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.outros-text strong {
   color: #3b82f6;
   font-weight: 700;
-  font-family: 'Sora', sans-serif;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.cnae-card-last {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05));
-  border-color: rgba(59, 130, 246, 0.2);
-}
-
-.cnae-card-last:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-  border-color: #3b82f6;
 }
 
 /* Benefits Section */

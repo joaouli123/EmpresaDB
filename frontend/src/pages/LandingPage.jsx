@@ -436,20 +436,30 @@ const LandingPage = () => {
                 </div>
 
                 <div className="cnaes-grid">
-                  {category.cnaes.map((cnae, index) => (
-                    <div key={index} className={`cnae-card ${index === category.cnaes.length - 1 ? 'cnae-card-last' : ''}`}>
+                  {category.cnaes.slice(0, -1).map((cnae, index) => (
+                    <div key={index} className="cnae-card">
                       <div className="cnae-icon">{cnae.icon}</div>
                       <div className="cnae-info">
                         <div className="cnae-nome">{cnae.nome}</div>
-                        <div className="cnae-codigo">
-                          {cnae.quantidade.includes('outros') ? cnae.quantidade : `${cnae.quantidade} empresas`}
-                          {index === category.cnaes.length - 1 && (
-                            <span className="badge-mais"> • e muito mais!</span>
-                          )}
-                        </div>
+                        <div className="cnae-codigo">{cnae.quantidade} empresas</div>
                       </div>
                     </div>
                   ))}
+                </div>
+
+                <div className="outros-setores-info">
+                  <div className="outros-setores-content">
+                    <div className="outros-icon">
+                      <Sparkles size={28} />
+                    </div>
+                    <div className="outros-text">
+                      <h4>E muito mais setores disponíveis!</h4>
+                      <p>
+                        Além dos exemplos acima, temos <strong>{category.cnaes[category.cnaes.length - 1].quantidade}</strong> disponíveis 
+                        para consulta na nossa base de dados. Esta é apenas uma amostra visual dos principais CNAEs.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
