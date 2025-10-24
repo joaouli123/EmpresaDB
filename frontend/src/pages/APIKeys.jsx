@@ -5,9 +5,12 @@ import { Key, Plus, Trash2, Copy, CheckCircle2, Calendar } from 'lucide-react';
 const APIKeys = () => {
   const [apiKeys, setApiKeys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [copiedKey, setCopiedKey] = useState(null);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     loadAPIKeys();
@@ -28,14 +31,23 @@ const APIKeys = () => {
 
   const handleCreateKey = async (e) => {
     e.preventDefault();
+    if (creating) return; // Previne múltiplos cliques
+    
+    setCreating(true);
+    setMessage({ type: '', text: '' });
+    
     try {
       await userAPI.createAPIKey({ name: newKeyName });
       setNewKeyName('');
       setShowCreateForm(false);
+      setMessage({ type: 'success', text: 'Chave de API criada com sucesso!' });
       await loadAPIKeys();
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
       console.error('Error creating API key:', error);
-      alert('Erro ao criar chave de API');
+      setMessage({ type: 'error', text: 'Erro ao criar chave de API. Tente novamente.' });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -44,12 +56,17 @@ const APIKeys = () => {
       return;
     }
 
+    setDeleting(id);
     try {
       await userAPI.deleteAPIKey(id);
+      setMessage({ type: 'success', text: 'Chave de API excluída com sucesso!' });
       await loadAPIKeys();
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
       console.error('Error deleting API key:', error);
-      alert('Erro ao excluir chave de API');
+      setMessage({ type: 'error', text: 'Erro ao excluir chave de API.' });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -78,11 +95,18 @@ const APIKeys = () => {
         <button 
           className="btn-primary"
           onClick={() => setShowCreateForm(true)}
+          disabled={creating}
         >
           <Plus size={20} />
           Nova Chave
         </button>
       </div>
+
+      {message.text && (
+        <div className={`alert alert-${message.type}`}>
+          {message.text}
+        </div>
+      )}
 
       {showCreateForm && (
         <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
@@ -105,11 +129,12 @@ const APIKeys = () => {
                   type="button" 
                   className="btn-secondary"
                   onClick={() => setShowCreateForm(false)}
+                  disabled={creating}
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary">
-                  Criar Chave
+                <button type="submit" className="btn-primary" disabled={creating}>
+                  {creating ? 'Criando...' : 'Criar Chave'}
                 </button>
               </div>
             </form>
@@ -146,6 +171,7 @@ const APIKeys = () => {
                   <button 
                     className="btn-icon-danger"
                     onClick={() => handleDeleteKey(key.id)}
+                    disabled={deleting === key.id}
                   >
                     <Trash2 size={18} />
                   </button>
