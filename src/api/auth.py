@@ -1,119 +1,102 @@
-
-
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 import hashlib
-import secrets
 from datetime import datetime, timedelta
 import jwt
 from src.database.connection import db_manager
+from src.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-SECRET_KEY = secrets.token_urlsafe(32)
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-class UserRegister(BaseModel):
-    name: str
+class UserCreate(BaseModel):
+    username: str
     email: EmailStr
     password: str
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    username: str
     password: str
 
-class UserResponse(BaseModel):
-    id: int
-    name: str
-    email: str
-    created_at: str
+class TokenData(BaseModel):
+    username: Optional[str] = None
 
-def hash_password(password: str) -> str:
+def verify_password(plain_password, hashed_password):
+    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+
+def get_password_hash(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    expire = datetime.utcnow() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
-@router.post("/register")
-async def register(user: UserRegister):
+async def get_current_user(token: str = Depends(db_manager.oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT id FROM users WHERE email = %s", (user.email,))
-            if cursor.fetchone():
-                raise HTTPException(status_code=400, detail="E-mail já cadastrado")
-            
-            hashed_password = hash_password(user.password)
-            
-            cursor.execute("""
-                INSERT INTO users (name, email, password, created_at)
-                VALUES (%s, %s, %s, %s)
-                RETURNING id, name, email, created_at
-            """, (user.name, user.email, hashed_password, datetime.now()))
-            
-            user_data = cursor.fetchone()
-            conn.commit()
-            cursor.close()
-            
-            token = create_access_token({"user_id": user_data[0], "email": user_data[2]})
-            
-            return {
-                "token": token,
-                "user": {
-                    "id": user_data[0],
-                    "name": user_data[1],
-                    "email": user_data[2],
-                    "created_at": user_data[3].isoformat()
-                }
-            }
-    except HTTPException:
-        raise
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
-        logger.error(f"Erro ao registrar usuário: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error decoding token: {e}")
+        raise credentials_exception
 
-@router.post("/login")
-async def login(credentials: UserLogin):
-    try:
-        with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
-            
-            hashed_password = hash_password(credentials.password)
-            
-            cursor.execute("""
-                SELECT id, name, email, created_at
-                FROM users
-                WHERE email = %s AND password = %s
-            """, (credentials.email, hashed_password))
-            
-            user_data = cursor.fetchone()
-            cursor.close()
-            
-            if not user_data:
-                raise HTTPException(status_code=401, detail="E-mail ou senha inválidos")
-            
-            token = create_access_token({"user_id": user_data[0], "email": user_data[2]})
-            
-            return {
-                "token": token,
-                "user": {
-                    "id": user_data[0],
-                    "name": user_data[1],
-                    "email": user_data[2],
-                    "created_at": user_data[3].isoformat()
-                }
-            }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao fazer login: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    user = await db_manager.get_user_by_username(token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+@router.post("/register", response_model=dict)
+async def register(user: UserCreate):
+    existing_user = await db_manager.get_user_by_username(user.username)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+
+    existing_email = await db_manager.get_user_by_email(user.email)
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = get_password_hash(user.password)
+    new_user = await db_manager.create_user(user.username, user.email, hashed_password)
+    
+    access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    access_token = create_access_token(
+        data={"sub": new_user["username"]}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer", "user": new_user}
+
+@router.post("/login", response_model=dict)
+async def login(form_data: UserLogin):
+    user = await db_manager.get_user_by_username(form_data.username)
+    if not user or not verify_password(form_data.password, user["password"]):
+        raise HTTPException(
+            status_code=400,
+            detail="Incorrect username or password",
+        )
+
+    access_token_expires = timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    access_token = create_access_token(
+        data={"sub": user["username"]}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer", "user": user}
+
+@router.get("/me", response_model=dict)
+async def read_users_me(current_user: dict = Depends(get_current_user)):
+    return current_user

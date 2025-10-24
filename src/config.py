@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 50000
     MAX_WORKERS: int = 4
     
+    # Configurações de autenticação
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+    ACCESS_TOKEN_EXPIRE_HOURS: int = 24
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if self.DATABASE_URL:
