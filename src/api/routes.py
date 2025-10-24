@@ -392,6 +392,8 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     cnpj_basico = cnpj_clean[:8]
     
+    logger.info(f"🔍 Buscando sócios para CNPJ {cnpj_clean} (básico: {cnpj_basico})")
+    
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
@@ -407,6 +409,9 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             
             cursor.execute(query, (cnpj_basico,))
             results = cursor.fetchall()
+            
+            logger.info(f"📊 Encontrados {len(results)} sócios para CNPJ básico {cnpj_basico}")
+            
             cursor.close()
             
             columns = [
@@ -415,10 +420,14 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             ]
             
             socios = [SocioModel(**dict(zip(columns, row))) for row in results]
+            
+            if len(socios) == 0:
+                logger.warning(f"⚠️ Nenhum sócio encontrado para CNPJ básico {cnpj_basico}")
+            
             return socios
             
     except Exception as e:
-        logger.error(f"Erro ao buscar sócios: {e}")
+        logger.error(f"❌ Erro ao buscar sócios do CNPJ {cnpj_basico}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/socios/search", response_model=List[SocioModel])

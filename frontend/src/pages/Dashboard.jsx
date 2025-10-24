@@ -21,6 +21,11 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [results, setResults] = useState(null);
 
+  // Dummy states for search functionality (assuming these are defined elsewhere or for a different component)
+  const [searchCnpj, setSearchCnpj] = useState('');
+  const [companyData, setCompanyData] = useState(null);
+  const [socios, setSocios] = useState([]);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -37,6 +42,8 @@ const Dashboard = () => {
       setSubscription(subRes.data); // Set subscription state
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      // Set error state if needed for the dashboard itself
+      setError('Falha ao carregar dados do dashboard.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +58,63 @@ const Dashboard = () => {
     );
   }
 
+  // Handle errors specifically for the dashboard loading
+  if (error) {
+    return (
+      <div className="error-container">
+        <AlertCircle size={48} className="error-icon" />
+        <h2>Erro</h2>
+        <p>{error}</p>
+        <button onClick={loadData} className="retry-button">Tentar Novamente</button>
+      </div>
+    );
+  }
+
   const usageData = usage?.daily_usage || [];
+
+  // Dummy handleSearch function, as it was part of the changes provided but not the original code for Dashboard.
+  // This is added to ensure the provided changes are integrated.
+  const handleSearch = async () => {
+    if (!searchCnpj) {
+      setError('Por favor, digite um CNPJ');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setCompanyData(null);
+    setSocios([]);
+
+    try {
+      // Buscar dados da empresa
+      const response = await api.get(`/cnpj/${searchCnpj}`);
+      setCompanyData(response.data);
+
+      // Buscar sócios separadamente - SEMPRE fazer a requisição
+      try {
+        const sociosResponse = await api.get(`/cnpj/${searchCnpj}/socios`);
+        console.log('Sócios retornados:', sociosResponse.data);
+
+        if (Array.isArray(sociosResponse.data)) {
+          setSocios(sociosResponse.data);
+        } else {
+          console.warn('Resposta de sócios não é um array:', sociosResponse.data);
+          setSocios([]);
+        }
+      } catch (sociosErr) {
+        console.error('Erro ao buscar sócios:', sociosErr);
+        console.error('Detalhes do erro:', sociosErr.response?.data);
+        // Define array vazio se falhar
+        setSocios([]);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar empresa:', err);
+      setError(err.response?.data?.detail || 'Erro ao buscar CNPJ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="dashboard">
@@ -59,6 +122,66 @@ const Dashboard = () => {
         <h1>Dashboard</h1>
         <p>Visão geral do sistema e uso da API</p>
       </div>
+
+      {/* Search Input (example of where it might be used, based on handleSearch) */}
+      <div className="search-section">
+        <input
+          type="text"
+          value={searchCnpj}
+          onChange={(e) => setSearchCnpj(e.target.value)}
+          placeholder="Digite o CNPJ para buscar"
+        />
+        <button onClick={handleSearch} disabled={loading}>
+          {loading ? 'Buscando...' : 'Buscar'}
+        </button>
+        {error && <p className="error-message">{error}</p>}
+      </div>
+
+      {/* Display search results if available */}
+      {companyData && (
+        <div className="company-details card">
+          <h2>Dados da Empresa</h2>
+          <p><strong>Nome:</strong> {companyData.nome_fantasia || companyData.razao_social}</p>
+          <p><strong>CNPJ:</strong> {companyData.cnpj}</p>
+          {/* Add more company details as needed */}
+        </div>
+      )}
+
+      {socios && companyData && ( // Only show socios section if companyData is also loaded
+        <div className="card">
+          <div className="card-header">
+            <Users size={20} />
+            <h2>Sócios</h2>
+          </div>
+          {socios.length > 0 ? (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome do Sócio</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Qualificação</th>
+                    <th>Data de Início</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {socios.map((socio, index) => (
+                    <tr key={index}>
+                      <td>{socio.nome_socio || 'N/A'}</td>
+                      <td>{socio.cpf_cnpj || 'N/A'}</td>
+                      <td>{socio.qualificacao || 'N/A'}</td>
+                      <td>{socio.data_inicio ? new Date(socio.data_inicio).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>Nenhum sócio encontrado para esta empresa.</p>
+          )}
+        </div>
+      )}
+
 
       {subscription && (
         <div className="subscription-card">
@@ -84,7 +207,7 @@ const Dashboard = () => {
           <div className="progress-bar">
             <div
               className="progress-fill"
-              style={{ width: `${(subscription.queries_used / subscription.total_limit * 100)}%` }}
+              style={{ width: `${(subscription.total_limit > 0 ? (subscription.queries_used / subscription.total_limit * 100) : 0)}%` }}
             />
           </div>
         </div>
