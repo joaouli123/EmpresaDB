@@ -15,6 +15,15 @@
   transition: all 0.3s ease;
 }
 
+/* Mobile: header relativo e não sobreposto */
+@media (max-width: 991px) {
+  .floating-navbar {
+    position: relative;
+    padding-top: 20px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }
+}
+
 .navbar-content {
   max-width: 1400px;
   margin: 20px auto 0;
@@ -34,10 +43,13 @@
 /* Mobile: navbar mais compacto */
 @media (max-width: 991px) {
   .navbar-content {
-    margin: 16px 16px 0;
-    padding: 12px 20px;
+    margin: 0 16px 20px;
+    padding: 14px 20px;
     border-radius: 16px;
     gap: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 
@@ -62,8 +74,8 @@
   .navbar-logo {
     font-size: 18px;
     gap: 10px;
-    flex: 0 0 80%;
-    max-width: 80%;
+    flex: 0 0 auto;
+    max-width: none;
   }
   
   .navbar-logo svg {
@@ -143,9 +155,8 @@
 /* Mobile: menu toggle mais compacto */
 @media (max-width: 991px) {
   .menu-toggle {
-    flex: 0 0 18%;
-    max-width: 18%;
-    justify-content: flex-end;
+    flex: 0 0 auto;
+    max-width: none;
   }
 }
 
@@ -287,6 +298,14 @@
   padding: 160px 20px 80px;
   position: relative;
   overflow: hidden;
+}
+
+/* Mobile: hero sem padding superior (header já não sobrepõe) */
+@media (max-width: 991px) {
+  .hero-section {
+    padding: 60px 20px 60px;
+    min-height: auto;
+  }
 }
 
 .hero-section::before {
