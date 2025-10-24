@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-import hashlib
 from datetime import datetime, timedelta
 import jwt
+from passlib.context import CryptContext
 from src.database.connection import db_manager
 from src.config import settings
 import logging
@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 ALGORITHM = "HS256"
+
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 class UserCreate(BaseModel):
     username: str
@@ -27,10 +29,10 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 def verify_password(plain_password, hashed_password):
-    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+    return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
