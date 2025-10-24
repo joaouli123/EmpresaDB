@@ -12,6 +12,32 @@ This project is an ETL (Extract, Transform, Load) system and REST API for queryi
 - O ETL é executado no **Windows local** para popular o banco da VPS (mais rápido)
 - Nunca assumir que o banco é o da Replit - sempre usar o banco configurado no DATABASE_URL
 
+## 💼 Modelo de Negócio (Planejamento)
+
+**Sistema de Assinatura + Pacotes Adicionais:**
+
+### Planos Mensais:
+1. **Plano Básico** - R$ 59,90/mês
+   - 300 consultas/mês de empresas
+   
+2. **Plano Profissional** - R$ 89,90/mês
+   - 500 consultas/mês de empresas
+   
+3. **Plano Empresarial** - R$ 149,00/mês
+   - 1.000 consultas/mês de empresas
+
+### Pacotes Adicionais (Sob Demanda):
+- **+200 consultas** - R$ 49,90
+- **+400 consultas** - R$ 69,90
+
+### Características do Sistema:
+- Limite de consultas mensal por usuário
+- Contador em tempo real de uso
+- Renovação automática todo mês
+- Dashboard mostrando uso atual vs. limite
+- Possibilidade de upgrade de plano a qualquer momento
+- Compra de pacotes adicionais quando atingir o limite
+
 ## Recent Changes (October 24, 2025)
 
 ### ETL Import Fixes (Latest)
