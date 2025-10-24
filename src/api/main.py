@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from src.api.routes import router
+from src.api.auth import router as auth_router
 from src.config import settings
 import logging
 from pathlib import Path
@@ -55,24 +56,25 @@ if static_path.exists():
 
 @app.get("/")
 async def root():
-    dashboard_path = static_path / "dashboard.html"
-    if dashboard_path.exists():
-        return FileResponse(str(dashboard_path))
+    auth_path = static_path / "auth.html"
+    if auth_path.exists():
+        return FileResponse(str(auth_path))
     return {
         "message": "API de Consulta CNPJ",
         "version": settings.API_VERSION,
-        "docs": "/docs",
-        "dashboard": "/dashboard"
+        "docs": "/docs"
     }
 
 @app.get("/dashboard")
 async def dashboard():
-    dashboard_path = static_path / "dashboard.html"
-    if dashboard_path.exists():
-        return FileResponse(str(dashboard_path))
-    return {"message": "Dashboard não encontrado"}
+    return FileResponse(str(static_path / "user-dashboard.html"))
+
+@app.get("/user-dashboard.html")
+async def user_dashboard():
+    return FileResponse(str(static_path / "user-dashboard.html"))
 
 app.include_router(router)
+app.include_router(auth_router)
 
 if __name__ == "__main__":
     import uvicorn
