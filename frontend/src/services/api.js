@@ -65,3 +65,4 @@ export const userAPI = {
 
 // Exportar api para uso em outros componentes
 export { api };
+export default api;
