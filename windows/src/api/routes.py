@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect, Depends
 from typing import Optional, List, Dict, Any
 from sqlalchemy import text, or_, and_
 from src.database.connection import db_manager
@@ -13,6 +13,7 @@ from src.api.models import (
 )
 from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
+from src.api.security import verify_read_key, verify_admin_key, api_key_manager
 import logging
 import asyncio
 
@@ -53,7 +54,7 @@ async def get_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}", response_model=EstabelecimentoCompleto)
-async def get_by_cnpj(cnpj: str):
+async def get_by_cnpj(cnpj: str, key_info: dict = Depends(verify_read_key)):
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     
     if len(cnpj_clean) != 14:
@@ -113,6 +114,7 @@ async def get_by_cnpj(cnpj: str):
 
 @router.get("/search", response_model=PaginatedResponse)
 async def search_empresas(
+    key_info: dict = Depends(verify_read_key),
     cnpj: Optional[str] = Query(None, description="CNPJ completo ou parcial (apenas números)"),
     razao_social: Optional[str] = Query(None, description="Razão social (busca parcial)"),
     nome_fantasia: Optional[str] = Query(None, description="Nome fantasia (busca parcial)"),
@@ -330,7 +332,7 @@ async def search_empresas(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}/socios", response_model=List[SocioModel])
-async def get_socios(cnpj: str):
+async def get_socios(cnpj: str, key_info: dict = Depends(verify_read_key)):
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
     cnpj_basico = cnpj_clean[:8]
     
@@ -365,6 +367,7 @@ async def get_socios(cnpj: str):
 
 @router.get("/socios/search", response_model=List[SocioModel])
 async def search_socios(
+    key_info: dict = Depends(verify_read_key),
     nome_socio: Optional[str] = Query(None, description="Nome do sócio (busca parcial)"),
     cpf_cnpj: Optional[str] = Query(None, description="CPF ou CNPJ do sócio (completo ou parcial)"),
     identificador_socio: Optional[str] = Query(None, description="Tipo de sócio (1-Pessoa Jurídica, 2-Pessoa Física, 3-Estrangeiro)"),
@@ -501,7 +504,7 @@ async def websocket_endpoint(websocket: WebSocket):
         ws_manager.disconnect(websocket)
 
 @router.post("/etl/start")
-async def start_etl():
+async def start_etl(key_info: dict = Depends(verify_admin_key)):
     try:
         asyncio.create_task(etl_controller.run_etl())
         return {
@@ -513,7 +516,7 @@ async def start_etl():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/etl/stop")
-async def stop_etl():
+async def stop_etl(key_info: dict = Depends(verify_admin_key)):
     try:
         stopped = await etl_controller.stop_etl()
         return {
@@ -533,7 +536,7 @@ async def get_etl_status():
     }
 
 @router.post("/etl/config")
-async def update_etl_config(config: Dict[str, Any]):
+async def update_etl_config(config: Dict[str, Any], key_info: dict = Depends(verify_admin_key)):
     try:
         updated_config = await etl_controller.update_config(config)
         return {
@@ -551,4 +554,64 @@ async def get_database_stats():
         return stats
     except Exception as e:
         logger.error(f"Erro ao obter estatísticas do banco: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================
+# ENDPOINTS DE SEGURANÇA E GERENCIAMENTO DE API KEYS
+# ============================================================
+
+@router.get("/security/keys")
+async def list_api_keys(key_info: dict = Depends(verify_admin_key)):
+    """Lista todas as API Keys (requer permissão de admin)"""
+    try:
+        keys = api_key_manager.list_keys()
+        return {
+            "total": len(keys),
+            "keys": keys
+        }
+    except Exception as e:
+        logger.error(f"Erro ao listar keys: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/security/keys/generate")
+async def generate_api_key(
+    name: str = Query(..., description="Nome da chave"),
+    permissions: List[str] = Query(..., description="Permissões: read, write, admin"),
+    rate_limit: int = Query(100, description="Limite de requisições por hora"),
+    key_info: dict = Depends(verify_admin_key)
+):
+    """Gera uma nova API Key (requer permissão de admin)"""
+    try:
+        new_key = api_key_manager.generate_key(name, permissions, rate_limit)
+        return {
+            "status": "created",
+            "api_key": new_key,
+            "name": name,
+            "permissions": permissions,
+            "rate_limit": rate_limit,
+            "warning": "GUARDE ESTA CHAVE EM LOCAL SEGURO! Não será possível recuperá-la depois."
+        }
+    except Exception as e:
+        logger.error(f"Erro ao gerar key: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/security/keys/{api_key}")
+async def revoke_api_key(
+    api_key: str,
+    key_info: dict = Depends(verify_admin_key)
+):
+    """Revoga uma API Key (requer permissão de admin)"""
+    try:
+        success = api_key_manager.revoke_key(api_key)
+        if success:
+            return {
+                "status": "revoked",
+                "message": f"API Key {api_key[:20]}... foi revogada"
+            }
+        else:
+            raise HTTPException(status_code=404, detail="API Key não encontrada")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao revogar key: {e}")
         raise HTTPException(status_code=500, detail=str(e))
