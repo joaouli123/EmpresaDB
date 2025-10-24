@@ -291,10 +291,12 @@ class CNPJImporter:
         if file_hash:
             status = self.tracker.check_file_status(csv_path, file_hash)
             if status == 'completed':
+                logger.info(f"  ⏭️  Arquivo já processado anteriormente, pulando...")
                 return  # Já processado
 
         file_id = self.tracker.start_file_processing(csv_path, 'empresas', table_name)
         if file_id is None:
+            logger.info(f"  ⏭️  Arquivo já em processamento ou concluído, pulando...")
             return  # Já processado
 
         columns = [
@@ -394,10 +396,12 @@ class CNPJImporter:
         if file_hash:
             status = self.tracker.check_file_status(csv_path, file_hash)
             if status == 'completed':
+                logger.info(f"  ⏭️  Arquivo já processado anteriormente, pulando...")
                 return  # Já processado
 
         file_id = self.tracker.start_file_processing(csv_path, 'estabelecimentos', table_name)
         if file_id is None:
+            logger.info(f"  ⏭️  Arquivo já em processamento ou concluído, pulando...")
             return  # Já processado
 
         columns = [
@@ -508,10 +512,12 @@ class CNPJImporter:
         if file_hash:
             status = self.tracker.check_file_status(csv_path, file_hash)
             if status == 'completed':
+                logger.info(f"  ⏭️  Arquivo já processado anteriormente, pulando...")
                 return  # Já processado
 
         file_id = self.tracker.start_file_processing(csv_path, 'socios', table_name)
         if file_id is None:
+            logger.info(f"  ⏭️  Arquivo já em processamento ou concluído, pulando...")
             return  # Já processado
 
         columns = [
@@ -612,10 +618,12 @@ class CNPJImporter:
         if file_hash:
             status = self.tracker.check_file_status(csv_path, file_hash)
             if status == 'completed':
+                logger.info(f"  ⏭️  Arquivo já processado anteriormente, pulando...")
                 return  # Já processado
 
         file_id = self.tracker.start_file_processing(csv_path, 'simples_nacional', table_name)
         if file_id is None:
+            logger.info(f"  ⏭️  Arquivo já em processamento ou concluído, pulando...")
             return  # Já processado
 
         columns = [
