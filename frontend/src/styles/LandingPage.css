@@ -142,7 +142,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Categories Honeycomb Section */
+/* Categories Section - Com Tabs */
 .categories-section {
   padding: 100px 20px;
   max-width: 1400px;
@@ -150,111 +150,220 @@
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 }
 
-.categories-honeycomb {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 40px;
+.categories-tabs-container {
   margin-top: 60px;
-}
-
-.category-hex {
-  position: relative;
-  height: 320px;
   background: white;
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+
+.tabs-header {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 0;
+  scrollbar-width: thin;
+}
+
+.tabs-header::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs-header::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.tab-button {
+  flex: 1;
+  min-width: 180px;
+  padding: 24px 20px;
+  border: none;
+  background: transparent;
   cursor: pointer;
-}
-
-.category-hex::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.category-hex.hovered::before {
-  transform: scaleX(1);
-}
-
-.category-hex.hovered {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
-}
-
-.hex-inner {
-  padding: 40px 32px;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: 12px;
+  transition: all 0.3s;
+  border-bottom: 3px solid transparent;
   position: relative;
 }
 
-.hex-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 20px;
+.tab-button:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.tab-button.active {
+  background: white;
+  border-bottom-color: #3b82f6;
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  border-radius: 16px;
+  color: #6b7280;
+  transition: all 0.3s;
+}
+
+.tab-button.active .tab-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  transform: scale(1.05);
+}
+
+.tab-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  transition: color 0.3s;
+  text-align: center;
+}
+
+.tab-button.active .tab-label {
+  color: #3b82f6;
+}
+
+.tab-content {
+  position: relative;
+  min-height: 500px;
+}
+
+.tab-panel {
+  display: none;
+  padding: 48px 40px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.category-icon-large {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  margin-bottom: 24px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.25);
+  flex-shrink: 0;
 }
 
-.category-hex.hovered .hex-icon {
-  transform: rotate(10deg) scale(1.1);
-  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
-}
-
-.hex-title {
-  font-size: 22px;
+.category-info h3 {
+  font-size: 32px;
   font-weight: 800;
   color: var(--dark);
+  margin-bottom: 8px;
+}
+
+.category-info p {
+  font-size: 16px;
+  color: var(--gray);
+  line-height: 1.6;
   margin-bottom: 12px;
-  transition: color 0.3s;
 }
 
-.category-hex.hovered .hex-title {
-  color: #3b82f6;
-}
-
-.hex-count {
+.category-count {
   display: inline-block;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   padding: 8px 20px;
   border-radius: 50px;
   font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.cnaes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.cnae-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.cnae-card:hover {
+  background: white;
+  border-color: #3b82f6;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.cnae-icon {
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;
 }
 
-.category-hex.hovered .hex-count {
+.cnae-card:hover .cnae-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
   transform: scale(1.1);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-.hex-description {
-  color: var(--gray);
-  line-height: 1.6;
+.cnae-info {
+  flex: 1;
+}
+
+.cnae-nome {
   font-size: 15px;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.cnae-codigo {
+  font-size: 13px;
+  color: var(--gray);
+  font-family: 'Courier New', monospace;
 }
 
 /* Benefits Section */
@@ -1038,13 +1147,41 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .categories-honeycomb {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .tab-button {
+    min-width: 140px;
+    padding: 20px 16px;
   }
 
-  .category-hex {
-    height: 280px;
+  .tab-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tab-label {
+    font-size: 12px;
+  }
+
+  .tab-panel {
+    padding: 32px 20px;
+  }
+
+  .tab-panel-header {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .category-icon-large {
+    width: 80px;
+    height: 80px;
+  }
+
+  .category-info h3 {
+    font-size: 24px;
+  }
+
+  .cnaes-grid {
+    grid-template-columns: 1fr;
   }
 
   .billing-toggle {

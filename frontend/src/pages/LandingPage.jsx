@@ -33,6 +33,7 @@ const LandingPage = () => {
   const [selectedPlan, setSelectedPlan] = useState('profissional');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [activeTab, setActiveTab] = useState('varejo');
 
   const plans = [
     {
@@ -128,44 +129,122 @@ const LandingPage = () => {
     }
   ];
 
-  const businessCategories = [
-    {
-      icon: <Store size={32} />,
+  const businessCategories = {
+    varejo: {
+      id: 'varejo',
+      icon: <Store size={48} />,
       title: 'Varejo e Comércio',
       description: 'Encontre lojas, supermercados e pontos de venda em todo Brasil',
-      count: '8M+'
+      count: '8M+',
+      cnaes: [
+        { icon: <ShoppingCart size={20} />, nome: 'Supermercados', cnae: '4711-3/02' },
+        { icon: <Store size={20} />, nome: 'Lojas de Roupas', cnae: '4781-4/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Farmácias', cnae: '4771-7/01' },
+        { icon: <Store size={20} />, nome: 'Lojas de Calçados', cnae: '4782-2/01' },
+        { icon: <ShoppingCart size={20} />, nome: 'Lojas de Móveis', cnae: '4754-7/01' },
+        { icon: <Store size={20} />, nome: 'Lojas de Eletrônicos', cnae: '4752-1/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Padarias', cnae: '4721-1/02' },
+        { icon: <Store size={20} />, nome: 'Lojas de Cosméticos', cnae: '4772-5/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Pet Shops', cnae: '4789-0/05' },
+        { icon: <Store size={20} />, nome: 'Lojas de Materiais', cnae: '4744-0/05' }
+      ]
     },
-    {
-      icon: <Factory size={32} />,
+    industria: {
+      id: 'industria',
+      icon: <Factory size={48} />,
       title: 'Indústria',
       description: 'Fabricantes, montadoras e empresas de transformação',
-      count: '2M+'
+      count: '2M+',
+      cnaes: [
+        { icon: <Factory size={20} />, nome: 'Ind. Alimentícia', cnae: '1011-2/01' },
+        { icon: <Factory size={20} />, nome: 'Ind. Têxtil', cnae: '1311-1/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Metalúrgica', cnae: '2511-0/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Química', cnae: '2011-8/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Plásticos', cnae: '2221-8/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Madeira', cnae: '1610-2/01' },
+        { icon: <Factory size={20} />, nome: 'Ind. Papel', cnae: '1710-9/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Eletrônica', cnae: '2610-8/00' },
+        { icon: <Factory size={20} />, nome: 'Ind. Automobilística', cnae: '2910-7/01' },
+        { icon: <Factory size={20} />, nome: 'Ind. Farmacêutica', cnae: '2121-1/01' }
+      ]
     },
-    {
-      icon: <Briefcase size={32} />,
+    servicos: {
+      id: 'servicos',
+      icon: <Briefcase size={48} />,
       title: 'Serviços',
       description: 'Consultorias, agências, escritórios e prestadores',
-      count: '12M+'
+      count: '12M+',
+      cnaes: [
+        { icon: <Briefcase size={20} />, nome: 'Contabilidade', cnae: '6920-6/01' },
+        { icon: <Briefcase size={20} />, nome: 'Advocacia', cnae: '6911-7/01' },
+        { icon: <Briefcase size={20} />, nome: 'Marketing', cnae: '7319-0/02' },
+        { icon: <Briefcase size={20} />, nome: 'Consultoria TI', cnae: '6204-0/00' },
+        { icon: <Briefcase size={20} />, nome: 'Arquitetura', cnae: '7111-1/00' },
+        { icon: <Briefcase size={20} />, nome: 'Engenharia', cnae: '7112-0/00' },
+        { icon: <Briefcase size={20} />, nome: 'Design Gráfico', cnae: '7410-2/02' },
+        { icon: <Briefcase size={20} />, nome: 'RH e Recrutamento', cnae: '7830-2/00' },
+        { icon: <Briefcase size={20} />, nome: 'Treinamentos', cnae: '8599-6/04' },
+        { icon: <Briefcase size={20} />, nome: 'Assessoria Empresarial', cnae: '7020-4/00' }
+      ]
     },
-    {
-      icon: <Truck size={32} />,
+    logistica: {
+      id: 'logistica',
+      icon: <Truck size={48} />,
       title: 'Logística e Transporte',
       description: 'Transportadoras, distribuidoras e empresas de entrega',
-      count: '1.5M+'
+      count: '1.5M+',
+      cnaes: [
+        { icon: <Truck size={20} />, nome: 'Transporte Rodoviário', cnae: '4930-2/02' },
+        { icon: <Truck size={20} />, nome: 'Entregas Expressas', cnae: '5320-2/02' },
+        { icon: <Truck size={20} />, nome: 'Armazenamento', cnae: '5211-7/01' },
+        { icon: <Truck size={20} />, nome: 'Transporte de Cargas', cnae: '4930-2/01' },
+        { icon: <Truck size={20} />, nome: 'Logística', cnae: '5250-8/05' },
+        { icon: <Truck size={20} />, nome: 'Distribuição', cnae: '4635-4/02' },
+        { icon: <Truck size={20} />, nome: 'Transporte Internacional', cnae: '5212-5/00' },
+        { icon: <Truck size={20} />, nome: 'Serviços Postais', cnae: '5310-5/01' },
+        { icon: <Truck size={20} />, nome: 'Transporte Urbano', cnae: '4921-3/01' },
+        { icon: <Truck size={20} />, nome: 'Fretes', cnae: '4930-2/04' }
+      ]
     },
-    {
-      icon: <Building2 size={32} />,
+    construcao: {
+      id: 'construcao',
+      icon: <Building2 size={48} />,
       title: 'Construção Civil',
       description: 'Construtoras, incorporadoras e empresas de engenharia',
-      count: '900K+'
+      count: '900K+',
+      cnaes: [
+        { icon: <Building2 size={20} />, nome: 'Construtoras', cnae: '4120-4/00' },
+        { icon: <Building2 size={20} />, nome: 'Incorporação', cnae: '4110-7/00' },
+        { icon: <Building2 size={20} />, nome: 'Reformas', cnae: '4330-4/05' },
+        { icon: <Building2 size={20} />, nome: 'Pintura', cnae: '4330-4/04' },
+        { icon: <Building2 size={20} />, nome: 'Instalações Elétricas', cnae: '4321-5/00' },
+        { icon: <Building2 size={20} />, nome: 'Instalações Hidráulicas', cnae: '4322-3/01' },
+        { icon: <Building2 size={20} />, nome: 'Terraplenagem', cnae: '4313-4/00' },
+        { icon: <Building2 size={20} />, nome: 'Alvenaria', cnae: '4330-4/01' },
+        { icon: <Building2 size={20} />, nome: 'Demolição', cnae: '4311-8/01' },
+        { icon: <Building2 size={20} />, nome: 'Pavimentação', cnae: '4212-0/00' }
+      ]
     },
-    {
-      icon: <ShoppingCart size={32} />,
+    ecommerce: {
+      id: 'ecommerce',
+      icon: <ShoppingCart size={48} />,
       title: 'E-commerce',
       description: 'Lojas virtuais e marketplaces em todo território nacional',
-      count: '1.2M+'
+      count: '1.2M+',
+      cnaes: [
+        { icon: <ShoppingCart size={20} />, nome: 'Comércio Eletrônico', cnae: '4781-4/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Marketplace', cnae: '4789-0/99' },
+        { icon: <ShoppingCart size={20} />, nome: 'Dropshipping', cnae: '4619-2/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Loja Virtual de Roupas', cnae: '4781-4/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'E-commerce Alimentício', cnae: '4721-1/04' },
+        { icon: <ShoppingCart size={20} />, nome: 'Vendas Online', cnae: '4789-0/01' },
+        { icon: <ShoppingCart size={20} />, nome: 'Infoprodutos', cnae: '5819-1/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Assinaturas Online', cnae: '6311-9/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'Plataforma Digital', cnae: '6319-4/00' },
+        { icon: <ShoppingCart size={20} />, nome: 'E-commerce B2B', cnae: '4619-2/00' }
+      ]
     }
-  ];
+  };
 
   const advancedFilters = [
     {
@@ -295,29 +374,56 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Business Categories Section */}
+      {/* Business Categories Section - Com Tabs */}
       <section className="categories-section">
         <div className="section-header">
           <h2>Dados de Todos os Setores</h2>
-          <p>Acesse informações completas de empresas em qualquer segmento do mercado brasileiro</p>
+          <p>Explore os principais CNAEs de cada categoria e consulte milhões de empresas</p>
         </div>
         
-        <div className="categories-honeycomb">
-          {businessCategories.map((category, index) => (
-            <div 
-              key={index} 
-              className={`category-hex ${hoveredCategory === index ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCategory(index)}
-              onMouseLeave={() => setHoveredCategory(null)}
-            >
-              <div className="hex-inner">
-                <div className="hex-icon">{category.icon}</div>
-                <h3 className="hex-title">{category.title}</h3>
-                <div className="hex-count">{category.count}</div>
-                <p className="hex-description">{category.description}</p>
+        <div className="categories-tabs-container">
+          <div className="tabs-header">
+            {Object.values(businessCategories).map((category) => (
+              <button
+                key={category.id}
+                className={`tab-button ${activeTab === category.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(category.id)}
+              >
+                <span className="tab-icon">{category.icon}</span>
+                <span className="tab-label">{category.title}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="tab-content">
+            {Object.values(businessCategories).map((category) => (
+              <div
+                key={category.id}
+                className={`tab-panel ${activeTab === category.id ? 'active' : ''}`}
+              >
+                <div className="tab-panel-header">
+                  <div className="category-icon-large">{category.icon}</div>
+                  <div className="category-info">
+                    <h3>{category.title}</h3>
+                    <p>{category.description}</p>
+                    <div className="category-count">{category.count} empresas</div>
+                  </div>
+                </div>
+
+                <div className="cnaes-grid">
+                  {category.cnaes.map((cnae, index) => (
+                    <div key={index} className="cnae-card">
+                      <div className="cnae-icon">{cnae.icon}</div>
+                      <div className="cnae-info">
+                        <div className="cnae-nome">{cnae.nome}</div>
+                        <div className="cnae-codigo">CNAE {cnae.cnae}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -569,53 +675,29 @@ const LandingPage = () => {
           </div>
 
           <div className="contact-container">
-            <div className="contact-left">
-              <div className="contact-info-cards">
-                <div className="contact-info-card">
-                  <div className="contact-icon-wrapper">
-                    <Mail size={24} />
-                  </div>
-                  <div>
-                    <h4>Email</h4>
-                    <p>contato@cnpjapi.com.br</p>
-                  </div>
+            <div className="contact-info-cards">
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Mail size={28} />
                 </div>
-                
-                <div className="contact-info-card">
-                  <div className="contact-icon-wrapper">
-                    <Phone size={24} />
-                  </div>
-                  <div>
-                    <h4>Telefone</h4>
-                    <p>(11) 9 9999-9999</p>
-                  </div>
-                </div>
-                
-                <div className="contact-info-card">
-                  <div className="contact-icon-wrapper">
-                    <Clock size={24} />
-                  </div>
-                  <div>
-                    <h4>Horário de Atendimento</h4>
-                    <p>Seg - Sex: 9h às 18h</p>
-                  </div>
-                </div>
+                <h4>Email</h4>
+                <p>contato@cnpjapi.com.br</p>
               </div>
-
-              <div className="contact-cta-box">
-                <h3>Precisa de Ajuda Agora?</h3>
-                <p>Fale com nosso time de especialistas pelo WhatsApp</p>
-                <a 
-                  href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ" 
-                  className="btn-whatsapp-contact"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                  </svg>
-                  Iniciar Conversa
-                </a>
+              
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Phone size={28} />
+                </div>
+                <h4>Telefone</h4>
+                <p>(11) 9 9999-9999</p>
+              </div>
+              
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Clock size={28} />
+                </div>
+                <h4>Horário de Atendimento</h4>
+                <p>Seg - Sex: 9h às 18h</p>
               </div>
             </div>
 
