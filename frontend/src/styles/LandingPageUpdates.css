@@ -1,0 +1,423 @@
+/* ===============================================
+   MELHORIAS DE CONTRASTE E RESPONSIVIDADE
+   =============================================== */
+
+/* BOTÕES EM FUNDO AZUL - CONTRASTE MELHORADO */
+.btn-hero-primary {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1f2937 !important;
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+.btn-hero-primary:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 15px 40px rgba(251, 191, 36, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+.btn-hero-secondary {
+  background: white !important;
+  color: #3b82f6 !important;
+  border: 3px solid white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3) !important;
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #2563eb !important;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn-cta-primary {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1f2937 !important;
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+.btn-cta-primary:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 15px 40px rgba(251, 191, 36, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+/* Links sem estilo de decoração */
+.hero-cta a,
+.cta-content a,
+.navbar-actions a {
+  text-decoration: none;
+}
+
+/* SCROLL SUAVE */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* ===============================================
+   RESPONSIVIDADE MELHORADA - MOBILE FIRST
+   =============================================== */
+
+/* Tablets e menores (max-width: 1024px) */
+@media (max-width: 1024px) {
+  /* Navbar */
+  .navbar-content {
+    margin: 16px 20px 0;
+    padding: 12px 20px;
+    gap: 20px;
+  }
+  
+  .navbar-links {
+    gap: 16px;
+  }
+  
+  .navbar-links a {
+    font-size: 14px;
+  }
+  
+  /* Hero */
+  .hero-section {
+    padding: 120px 20px 60px;
+    min-height: auto;
+  }
+  
+  .hero-title {
+    font-size: 48px;
+  }
+  
+  .hero-description {
+    font-size: 18px;
+  }
+  
+  /* Seções */
+  .section-header h2 {
+    font-size: 36px;
+  }
+  
+  /* Footer */
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  
+  .footer-section:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Navbar - Mobile */
+  .navbar-content {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    margin: 12px;
+  }
+  
+  .navbar-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .navbar-links a {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+  
+  .navbar-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .navbar-actions a {
+    flex: 1;
+    max-width: 150px;
+  }
+  
+  .btn-navbar-secondary,
+  .btn-navbar-primary {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  /* Hero - Mobile */
+  .hero-section {
+    padding: 100px 16px 40px;
+  }
+  
+  .hero-title {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  
+  .hero-description {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .hero-cta {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  
+  .hero-cta a {
+    width: 100%;
+  }
+  
+  .btn-primary-large,
+  .btn-secondary-large {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    justify-content: center;
+  }
+  
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .stat-number {
+    font-size: 28px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  /* Seções - Mobile */
+  .categories-section,
+  .benefits-section,
+  .pricing-section,
+  .testimonials-section {
+    padding: 60px 16px;
+  }
+  
+  .section-header {
+    margin-bottom: 40px;
+  }
+  
+  .section-header h2 {
+    font-size: 28px;
+  }
+  
+  .section-header p {
+    font-size: 16px;
+  }
+  
+  /* Tabs - Mobile */
+  .tabs-header {
+    padding: 8px;
+  }
+  
+  .tab-button {
+    min-width: 140px;
+    padding: 16px 12px;
+  }
+  
+  .tab-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .tab-label {
+    font-size: 12px;
+  }
+  
+  .tab-panel {
+    padding: 32px 20px;
+  }
+  
+  .tab-panel-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .category-icon-large {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .category-info h3 {
+    font-size: 24px;
+  }
+  
+  /* CNAEs Grid - Mobile */
+  .cnaes-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .cnae-card {
+    padding: 16px;
+  }
+  
+  /* Benefits Grid - Mobile */
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .benefit-card {
+    padding: 24px;
+  }
+  
+  /* Pricing - Mobile */
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .pricing-card {
+    padding: 32px 24px;
+  }
+  
+  .pricing-card.popular {
+    transform: scale(1);
+  }
+  
+  .billing-toggle {
+    max-width: 100%;
+    flex-direction: column;
+  }
+  
+  .billing-option {
+    width: 100%;
+  }
+  
+  /* Testimonials - Mobile */
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  /* CTA Section - Mobile */
+  .cta-section {
+    padding: 60px 16px;
+  }
+  
+  .cta-content h2 {
+    font-size: 32px;
+  }
+  
+  .cta-content > p {
+    font-size: 16px;
+  }
+  
+  /* Contact - Mobile */
+  .contact-section {
+    padding: 60px 16px;
+  }
+  
+  .contact-info-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .contact-form-compact .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .contact-compact-grid {
+    padding: 24px 20px;
+  }
+  
+  /* Footer - Mobile */
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .footer-section:first-child {
+    grid-column: 1;
+  }
+}
+
+/* Mobile pequeno (max-width: 480px) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 32px;
+  }
+  
+  .hero-description {
+    font-size: 15px;
+  }
+  
+  .section-header h2 {
+    font-size: 24px;
+  }
+  
+  .section-header p {
+    font-size: 15px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .hero-stats {
+    gap: 16px;
+  }
+  
+  .navbar-links {
+    gap: 8px;
+  }
+  
+  .navbar-links a {
+    font-size: 12px;
+  }
+}
+
+/* ===============================================
+   OTIMIZAÇÕES DE PERFORMANCE
+   =============================================== */
+
+/* Lazy loading de imagens de fundo */
+.hero-section::before {
+  will-change: opacity;
+}
+
+/* Otimizar animações */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Hardware acceleration para animações */
+.benefit-card,
+.pricing-card,
+.testimonial-card,
+.cnae-card,
+.tab-button {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Lazy load para elementos não visíveis */
+.tab-panel:not(.active) {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.tab-panel.active {
+  visibility: visible;
+  height: auto;
+}

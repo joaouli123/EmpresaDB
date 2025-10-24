@@ -31,6 +31,7 @@ import {
   Brain
 } from 'lucide-react';
 import '../styles/LandingPage.css';
+import '../styles/LandingPageUpdates.css';
 
 const LandingPage = () => {
   const [selectedPlan, setSelectedPlan] = useState('profissional');
@@ -338,12 +339,13 @@ const LandingPage = () => {
             <a href="#features">Funcionalidades</a>
             <a href="#categories">Setores</a>
             <a href="#pricing">Planos</a>
+            <a href="#testimonials">Depoimentos</a>
             <a href="#contact">Contato</a>
           </div>
           
           <div className="navbar-actions">
-            <button className="btn-navbar-secondary">Entrar</button>
-            <button className="btn-navbar-primary">Começar Grátis</button>
+            <a href="#contact"><button className="btn-navbar-secondary">Entrar</button></a>
+            <a href="#pricing"><button className="btn-navbar-primary">Começar Grátis</button></a>
           </div>
         </div>
       </nav>
@@ -369,13 +371,17 @@ const LandingPage = () => {
           </p>
           
           <div className="hero-cta">
-            <button className="btn-primary-large">
-              Começar Agora
-              <ChevronRight size={20} />
-            </button>
-            <button className="btn-secondary-large">
-              Ver Demonstração
-            </button>
+            <a href="#pricing">
+              <button className="btn-primary-large btn-hero-primary">
+                Começar Agora
+                <ChevronRight size={20} />
+              </button>
+            </a>
+            <a href="#features">
+              <button className="btn-secondary-large btn-hero-secondary">
+                Ver Demonstração
+              </button>
+            </a>
           </div>
           
           <div className="hero-stats">
@@ -400,7 +406,7 @@ const LandingPage = () => {
       </section>
 
       {/* Business Categories Section - Com Tabs */}
-      <section className="categories-section">
+      <section id="categories" className="categories-section">
         <div className="section-header">
           <h2>Dados de Todos os Setores</h2>
           <p>Explore os principais CNAEs de cada categoria e consulte milhões de empresas</p>
@@ -467,7 +473,7 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="benefits-section filters-section">
+      <section id="filters" className="benefits-section filters-section">
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
@@ -535,7 +541,7 @@ const LandingPage = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="benefits-section">
+      <section id="features" className="benefits-section">
         <div className="section-header">
           <h2>Por Que Escolher Nossa Plataforma?</h2>
           <p>Tudo que você precisa para acessar dados empresariais de forma profissional</p>
@@ -571,7 +577,7 @@ const LandingPage = () => {
       </section>
 
       {/* Lookalike/Meta Ads Section */}
-      <section className="lookalike-section">
+      <section id="marketing" className="lookalike-section">
         <div className="section-header">
           <h2>Potencialize Suas Campanhas com Públicos Lookalike</h2>
           <p>Use nossos dados para criar audiências personalizadas no Meta Ads e treinar a inteligência artificial para encontrar clientes ideais</p>
@@ -689,7 +695,7 @@ const LandingPage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="pricing-section">
+      <section id="pricing" className="pricing-section">
         <div className="section-header">
           <h2>Planos Que Cabem no Seu Bolso</h2>
           <p>Escolha o plano ideal para seu negócio. Sem taxas escondidas, cancele quando quiser</p>
@@ -783,7 +789,7 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials-section">
+      <section id="testimonials" className="testimonials-section">
         <div className="section-header">
           <h2>O Que Nossos Clientes Dizem</h2>
           <p>Empresas de todos os tamanhos confiam em nossa plataforma</p>
@@ -815,16 +821,18 @@ const LandingPage = () => {
         <div className="cta-content">
           <h2>Pronto Para Começar?</h2>
           <p>Junte-se a centenas de empresas que já utilizam nossa plataforma</p>
-          <button className="btn-primary-large">
-            Criar Conta Grátis
-            <ChevronRight size={20} />
-          </button>
+          <a href="#pricing">
+            <button className="btn-primary-large btn-cta-primary">
+              Criar Conta Grátis
+              <ChevronRight size={20} />
+            </button>
+          </a>
           <p className="cta-note">Sem cartão de crédito necessário • Cancele quando quiser • Dados 100% atualizados</p>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section className="contact-section">
+      <section id="contact" className="contact-section">
         <div className="contact-wrapper">
           <div className="section-header">
             <h2>Entre em Contato</h2>
