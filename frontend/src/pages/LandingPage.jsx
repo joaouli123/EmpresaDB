@@ -562,85 +562,87 @@ const LandingPage = () => {
 
       {/* Contact Form Section */}
       <section className="contact-section">
-        <div className="contact-container">
-          <div className="contact-info">
+        <div className="contact-wrapper">
+          <div className="contact-header-section">
             <h2>Entre em Contato</h2>
             <p>Tem dúvidas? Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio.</p>
-            
-            <div className="contact-details">
-              <div className="contact-item">
-                <Mail size={24} />
-                <div>
-                  <h4>Email</h4>
-                  <p>contato@cnpjapi.com.br</p>
-                </div>
-              </div>
-              
-              <div className="contact-item">
-                <Phone size={24} />
-                <div>
-                  <h4>Telefone</h4>
-                  <p>(11) 9 9999-9999</p>
-                </div>
-              </div>
-              
-              <div className="contact-item">
-                <Clock size={24} />
-                <div>
-                  <h4>Horário de Atendimento</h4>
-                  <p>Seg - Sex: 9h às 18h</p>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="contact-form-wrapper">
-            <form className="contact-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nome Completo</label>
-                  <input type="text" placeholder="Seu nome" required />
+          <div className="contact-container">
+            <div className="contact-info-cards">
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Mail size={28} />
+                </div>
+                <h4>Email</h4>
+                <p>contato@cnpjapi.com.br</p>
+              </div>
+              
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Phone size={28} />
+                </div>
+                <h4>Telefone</h4>
+                <p>(11) 9 9999-9999</p>
+              </div>
+              
+              <div className="contact-info-card">
+                <div className="contact-icon-wrapper">
+                  <Clock size={28} />
+                </div>
+                <h4>Horário de Atendimento</h4>
+                <p>Seg - Sex: 9h às 18h</p>
+              </div>
+            </div>
+
+            <div className="contact-form-wrapper">
+              <form className="contact-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" placeholder="Seu nome" required />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="seu@email.com" required />
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" placeholder="(11) 99999-9999" />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Empresa</label>
+                    <input type="text" placeholder="Nome da empresa" />
+                  </div>
                 </div>
                 
                 <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" placeholder="seu@email.com" required />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Telefone</label>
-                  <input type="tel" placeholder="(11) 99999-9999" />
+                  <label>Assunto</label>
+                  <select required>
+                    <option value="">Selecione um assunto</option>
+                    <option value="duvidas">Dúvidas sobre Planos</option>
+                    <option value="tecnico">Suporte Técnico</option>
+                    <option value="comercial">Proposta Comercial</option>
+                    <option value="outro">Outro</option>
+                  </select>
                 </div>
                 
                 <div className="form-group">
-                  <label>Empresa</label>
-                  <input type="text" placeholder="Nome da empresa" />
+                  <label>Mensagem</label>
+                  <textarea rows="5" placeholder="Como podemos ajudar?" required></textarea>
                 </div>
-              </div>
-              
-              <div className="form-group">
-                <label>Assunto</label>
-                <select required>
-                  <option value="">Selecione um assunto</option>
-                  <option value="duvidas">Dúvidas sobre Planos</option>
-                  <option value="tecnico">Suporte Técnico</option>
-                  <option value="comercial">Proposta Comercial</option>
-                  <option value="outro">Outro</option>
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label>Mensagem</label>
-                <textarea rows="5" placeholder="Como podemos ajudar?" required></textarea>
-              </div>
-              
-              <button type="submit" className="btn-primary-large">
-                Enviar Mensagem
-                <ChevronRight size={20} />
-              </button>
-            </form>
+                
+                <button type="submit" className="btn-primary-large btn-submit-contact">
+                  Enviar Mensagem
+                  <ChevronRight size={20} />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </section>
