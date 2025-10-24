@@ -194,7 +194,7 @@ Authorization: Bearer SEU_TOKEN`}</pre>
               <pre>{`const axios = require('axios');
 
 const api = axios.create({
-  baseURL: 'https://api.exemplo.com',
+  baseURL: window.location.origin,
   headers: {
     'Authorization': 'Bearer SEU_TOKEN'
   }
@@ -217,7 +217,8 @@ consultarCNPJ('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-API_URL = 'https://api.exemplo.com'
+# Use a URL do seu Replit
+API_URL = '${window.location.origin}'
 TOKEN = 'SEU_TOKEN'
 
 headers = {
@@ -239,11 +240,11 @@ print(resultado)`}</pre>
             <h3>cURL</h3>
             <div className="code-block">
               <pre>{`# Consultar CNPJ
-curl -X GET "https://api.exemplo.com/cnpj/00000000000191" \\
+curl -X GET "${window.location.origin}/cnpj/00000000000191" \\
   -H "Authorization: Bearer SEU_TOKEN"
 
 # Busca com filtros
-curl -X GET "https://api.exemplo.com/search?uf=SP&situacao_cadastral=02" \\
+curl -X GET "${window.location.origin}/search?uf=SP&situacao_cadastral=02" \\
   -H "Authorization: Bearer SEU_TOKEN"`}</pre>
             </div>
           </section>
