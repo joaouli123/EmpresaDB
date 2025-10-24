@@ -44,6 +44,38 @@ class CNPJImporter:
             ('simples_nacional', 'simples_nacional')
         ]
 
+    def preload_all_valid_codes(self):
+        """Pré-carrega TODOS os códigos válidos de uma vez (otimização para VPS remota)"""
+        logger.info("🔄 Pré-carregando códigos de validação...")
+        
+        tables_to_load = [
+            'cnaes', 
+            'municipios', 
+            'motivos_situacao_cadastral', 
+            'naturezas_juridicas', 
+            'paises', 
+            'qualificacoes_socios'
+        ]
+        
+        try:
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for table in tables_to_load:
+                    logger.info(f"  → Carregando {table}...")
+                    cursor.execute(f"SELECT codigo FROM {table}")
+                    codes = {row[0] for row in cursor.fetchall()}
+                    self.valid_codes_cache[table] = codes
+                    logger.info(f"  ✓ {table}: {len(codes):,} códigos carregados")
+                
+                cursor.close()
+            
+            logger.info("✅ Pré-carregamento completo!")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-carregar códigos: {e}")
+            return False
+    
     def load_valid_codes(self, table_name: str):
         """Carrega códigos válidos de uma tabela auxiliar para cache"""
         if table_name in self.valid_codes_cache:
@@ -56,6 +88,7 @@ class CNPJImporter:
                 codes = {row[0] for row in cursor.fetchall()}
                 cursor.close()
                 self.valid_codes_cache[table_name] = codes
+                logger.info(f"✓ Cache carregado: {table_name} ({len(codes):,} códigos)")
                 return codes
         except Exception as e:
             logger.warning(f"Erro ao carregar códigos de {table_name}: {e}")
@@ -391,6 +424,11 @@ class CNPJImporter:
         logger.info(f"Importando estabelecimentos de: {csv_path.name}")
         table_name = 'estabelecimentos'
 
+        # PRÉ-CARREGAR códigos válidos (otimização crítica para VPS remota!)
+        if not self.valid_codes_cache:
+            logger.info("💡 Primeira importação - pré-carregando códigos de validação...")
+            self.preload_all_valid_codes()
+
         # Iniciar rastreamento
         file_hash = self.tracker.calculate_file_hash(csv_path)
         if file_hash:
@@ -422,6 +460,9 @@ class CNPJImporter:
         try:
             total_imported = 0
             total_skipped = 0
+            chunk_count = 0
+            import time
+            start_time = time.time()
 
             with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
@@ -445,6 +486,8 @@ class CNPJImporter:
                         ),
                         desc=f"Processando {csv_path.name}"
                     ):
+                        chunk_count += 1
+                        chunk_start = time.time()
                         chunk = chunk.fillna('')
 
                         # Validar foreign keys
@@ -479,6 +522,13 @@ class CNPJImporter:
 
                         copy_sql = f"COPY temp_{table_name} ({','.join(db_columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
+                        
+                        # Log de performance a cada 10 chunks
+                        if chunk_count % 10 == 0:
+                            elapsed = time.time() - start_time
+                            chunk_time = time.time() - chunk_start
+                            avg_time = elapsed / chunk_count
+                            logger.info(f"📊 Chunk {chunk_count}: {chunk_time:.2f}s | Média: {avg_time:.2f}s/chunk | Total: {elapsed/60:.1f}min")
 
                 # Inserir apenas os que não existem
                 cursor.execute(f"""
