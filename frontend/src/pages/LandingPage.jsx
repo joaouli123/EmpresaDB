@@ -338,12 +338,32 @@ const LandingPage = () => {
             <span>CNPJ API</span>
           </div>
           
+          {/* Links de navegação (visível no desktop) */}
+          <div className="navbar-links">
+            <a href="#features">Funcionalidades</a>
+            <a href="#categories">Setores</a>
+            <a href="#pricing">Planos</a>
+            <a href="#testimonials">Depoimentos</a>
+            <a href="#contact">Contato</a>
+          </div>
+          
+          {/* Ações (visível no desktop) */}
+          <div className="navbar-actions">
+            <a href="/login">
+              <button className="btn-navbar-secondary">Entrar</button>
+            </a>
+            <a href="#pricing">
+              <button className="btn-navbar-primary">Começar Grátis</button>
+            </a>
+          </div>
+          
+          {/* Botão hamburguer (visível no mobile) */}
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
 
-        {/* Menu Hambúrguer */}
+        {/* Menu Mobile */}
         <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-links">
             <a href="#features" onClick={() => setMenuOpen(false)}>Funcionalidades</a>
@@ -354,7 +374,7 @@ const LandingPage = () => {
           </div>
           
           <div className="mobile-menu-actions">
-            <a href="#contact" onClick={() => setMenuOpen(false)}>
+            <a href="/login" onClick={() => setMenuOpen(false)}>
               <button className="btn-navbar-secondary">Entrar</button>
             </a>
             <a href="#pricing" onClick={() => setMenuOpen(false)}>
