@@ -25,7 +25,10 @@ import {
   Code,
   Layers,
   Mail,
-  Phone
+  Phone,
+  Target,
+  Sparkles,
+  Brain
 } from 'lucide-react';
 import '../styles/LandingPage.css';
 
@@ -433,7 +436,7 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="benefits-section">
+      <section className="benefits-section filters-section">
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
@@ -461,7 +464,7 @@ const LandingPage = () => {
       </section>
 
       {/* Integration Section */}
-      <section className="benefits-section">
+      <section className="benefits-section integration-section">
         <div className="section-header">
           <h2>Integração Rápida e Fácil</h2>
           <p>API REST otimizada e simples de usar. Comece a consultar dados em minutos, não em dias</p>
@@ -531,6 +534,124 @@ const LandingPage = () => {
             <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
               Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha 
               acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Lookalike/Meta Ads Section */}
+      <section className="lookalike-section">
+        <div className="section-header">
+          <h2>Potencialize Suas Campanhas com Públicos Lookalike</h2>
+          <p>Use nossos dados para criar audiências personalizadas no Meta Ads e treinar a inteligência artificial para encontrar clientes ideais</p>
+        </div>
+
+        <div className="benefits-grid" style={{ marginBottom: '48px' }}>
+          <div className="benefit-card" style={{ background: 'white' }}>
+            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+              <Target size={32} />
+            </div>
+            <h3>Público-Alvo Preciso</h3>
+            <p>Exporte listas segmentadas de CNPJs para criar audiências personalizadas (Custom Audiences) no Facebook e Instagram Ads</p>
+          </div>
+
+          <div className="benefit-card" style={{ background: 'white' }}>
+            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+              <Brain size={32} />
+            </div>
+            <h3>Treinar a IA do Meta</h3>
+            <p>Alimente o algoritmo com dados precisos de empresas similares ao seu cliente ideal, melhorando drasticamente a performance das campanhas</p>
+          </div>
+
+          <div className="benefit-card" style={{ background: 'white' }}>
+            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+              <Sparkles size={32} />
+            </div>
+            <h3>Lookalike Inteligente</h3>
+            <p>A partir da sua lista de CNPJs, o Meta cria públicos semelhantes (Lookalike Audiences) com milhões de prospects qualificados</p>
+          </div>
+        </div>
+
+        <div style={{ 
+          background: 'white', 
+          padding: '40px', 
+          borderRadius: '20px',
+          maxWidth: '800px',
+          margin: '0 auto',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.1)',
+          border: '2px solid #fbbf24'
+        }}>
+          <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--dark)', marginBottom: '16px', textAlign: 'center' }}>
+            Como Funciona na Prática
+          </h3>
+          <div style={{ display: 'grid', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
+                color: 'white', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontWeight: '700',
+                flexShrink: 0
+              }}>1</div>
+              <div>
+                <strong style={{ color: 'var(--dark)' }}>Filtre empresas do seu nicho</strong>
+                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Use nossa API para buscar CNPJs por CNAE, localização, porte e situação cadastral</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
+                color: 'white', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontWeight: '700',
+                flexShrink: 0
+              }}>2</div>
+              <div>
+                <strong style={{ color: 'var(--dark)' }}>Exporte e carregue no Meta Ads</strong>
+                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Crie uma Custom Audience com os CNPJs das empresas-alvo no Gerenciador de Anúncios</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
+                color: 'white', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontWeight: '700',
+                flexShrink: 0
+              }}>3</div>
+              <div>
+                <strong style={{ color: 'var(--dark)' }}>Deixe a IA do Meta trabalhar</strong>
+                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>O algoritmo analisa padrões e encontra empresas similares, expandindo seu alcance com precisão</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ 
+            marginTop: '32px', 
+            padding: '20px', 
+            background: 'linear-gradient(135deg, #fef3c7, #fde68a)', 
+            borderRadius: '12px',
+            textAlign: 'center'
+          }}>
+            <p style={{ color: '#78350f', fontWeight: '600', margin: 0 }}>
+              💡 <strong>Resultado:</strong> Campanhas mais eficientes, menor CPA e melhor ROI nas suas estratégias de marketing digital
             </p>
           </div>
         </div>
