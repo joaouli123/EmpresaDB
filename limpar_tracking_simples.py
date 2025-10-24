@@ -6,11 +6,26 @@ permitindo sua reimportação
 import os
 import psycopg2
 import sys
+from pathlib import Path
+
+# Tenta carregar o .env
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 def limpar_tracking_simples():
     """Limpa o rastreamento do arquivo Simples Nacional"""
     
+    # Tenta pegar do ambiente ou usa o padrão
     database_url = os.getenv('DATABASE_URL')
+    
+    # Se não encontrou, usa a conexão direta da VPS
+    if not database_url:
+        database_url = "postgresql://cnpj_user:Proelast1608%40@72.61.217.143:5432/cnpj_db"
+        print("ℹ️  Usando conexão VPS padrão")
+    
     if not database_url:
         print("❌ ERROR: DATABASE_URL não encontrada!")
         sys.exit(1)

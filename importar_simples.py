@@ -3,8 +3,20 @@
 Script para importar APENAS a tabela Simples Nacional
 """
 import sys
+import os
 from pathlib import Path
 import logging
+
+# Tenta carregar o .env
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# Se DATABASE_URL não existe, configura a conexão VPS
+if not os.getenv('DATABASE_URL'):
+    os.environ['DATABASE_URL'] = "postgresql://cnpj_user:Proelast1608%40@72.61.217.143:5432/cnpj_db"
 
 sys.path.append(str(Path(__file__).parent))
 
