@@ -149,7 +149,7 @@ const LandingPage = () => {
         { icon: <ShoppingCart size={20} />, nome: 'Padarias', quantidade: '~380K' },
         { icon: <Store size={20} />, nome: 'Lojas de Cosméticos', quantidade: '~340K' },
         { icon: <ShoppingCart size={20} />, nome: 'Pet Shops', quantidade: '~280K' },
-        { icon: <Store size={20} />, nome: 'Lojas de Materiais', quantidade: '~320K' }
+        { icon: <Store size={20} />, nome: 'Lojas de Materiais', quantidade: '+2.9M outros setores' }
       ]
     },
     industria: {
@@ -168,7 +168,7 @@ const LandingPage = () => {
         { icon: <Factory size={20} />, nome: 'Ind. Papel', quantidade: '~95K' },
         { icon: <Factory size={20} />, nome: 'Ind. Eletrônica', quantidade: '~72K' },
         { icon: <Factory size={20} />, nome: 'Ind. Automobilística', quantidade: '~58K' },
-        { icon: <Factory size={20} />, nome: 'Ind. Farmacêutica', quantidade: '~45K' }
+        { icon: <Factory size={20} />, nome: 'Ind. Farmacêutica', quantidade: '+517K outros setores' }
       ]
     },
     servicos: {
@@ -187,7 +187,7 @@ const LandingPage = () => {
         { icon: <Briefcase size={20} />, nome: 'Design Gráfico', quantidade: '~380K' },
         { icon: <Briefcase size={20} />, nome: 'RH e Recrutamento', quantidade: '~310K' },
         { icon: <Briefcase size={20} />, nome: 'Treinamentos', quantidade: '~275K' },
-        { icon: <Briefcase size={20} />, nome: 'Assessoria Empresarial', quantidade: '~250K' }
+        { icon: <Briefcase size={20} />, nome: 'Assessoria Empresarial', quantidade: '+6.2M outros setores' }
       ]
     },
     logistica: {
@@ -206,7 +206,7 @@ const LandingPage = () => {
         { icon: <Truck size={20} />, nome: 'Transporte Internacional', quantidade: '~76K' },
         { icon: <Truck size={20} />, nome: 'Serviços Postais', quantidade: '~58K' },
         { icon: <Truck size={20} />, nome: 'Transporte Urbano', quantidade: '~47K' },
-        { icon: <Truck size={20} />, nome: 'Fretes', quantidade: '~38K' }
+        { icon: <Truck size={20} />, nome: 'Fretes', quantidade: '+352K outros setores' }
       ]
     },
     construcao: {
@@ -225,7 +225,7 @@ const LandingPage = () => {
         { icon: <Building2 size={20} />, nome: 'Terraplenagem', quantidade: '~52K' },
         { icon: <Building2 size={20} />, nome: 'Alvenaria', quantidade: '~45K' },
         { icon: <Building2 size={20} />, nome: 'Demolição', quantidade: '~38K' },
-        { icon: <Building2 size={20} />, nome: 'Pavimentação', quantidade: '~32K' }
+        { icon: <Building2 size={20} />, nome: 'Pavimentação', quantidade: '+153K outros setores' }
       ]
     },
     ecommerce: {
@@ -244,7 +244,7 @@ const LandingPage = () => {
         { icon: <ShoppingCart size={20} />, nome: 'Infoprodutos', quantidade: '~52K' },
         { icon: <ShoppingCart size={20} />, nome: 'Assinaturas Online', quantidade: '~43K' },
         { icon: <ShoppingCart size={20} />, nome: 'Plataforma Digital', quantidade: '~38K' },
-        { icon: <ShoppingCart size={20} />, nome: 'E-commerce B2B', quantidade: '~29K' }
+        { icon: <ShoppingCart size={20} />, nome: 'E-commerce B2B', quantidade: '+182K outros setores' }
       ]
     }
   };
@@ -453,10 +453,10 @@ const LandingPage = () => {
                       <Database size={28} />
                     </div>
                     <div className="outros-text">
-                      <h4>E muito mais CNAEs disponíveis!</h4>
+                      <h4>E muito mais setores disponíveis!</h4>
                       <p>
-                        Além dos exemplos acima, existem <strong>{category.cnaes[category.cnaes.length - 1].quantidade} empresas</strong> em 
-                        centenas de outros CNAEs deste setor. Esta é apenas uma amostra visual dos principais.
+                        Além dos exemplos acima, temos <strong>{category.cnaes[category.cnaes.length - 1].quantidade}</strong> 
+                        para consulta na nossa base de dados. Esta é apenas uma amostra visual dos principais CNAEs do setor.
                       </p>
                     </div>
                   </div>
