@@ -455,7 +455,7 @@ const LandingPage = () => {
                     <div className="outros-text">
                       <h4>E isso é só o começo!</h4>
                       <p>
-                        Explore <strong>milhões de empresas</strong> em centenas de outros setores disponíveis na nossa base de dados.
+                        Além dos exemplos acima, nossa base conta com <strong>milhões de empresas</strong> em diversos outros setores. Esta é apenas uma amostra dos principais CNAEs disponíveis.
                       </p>
                     </div>
                   </div>
