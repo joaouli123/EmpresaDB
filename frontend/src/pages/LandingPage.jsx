@@ -29,12 +29,14 @@ import '../styles/LandingPage.css';
 
 const LandingPage = () => {
   const [selectedPlan, setSelectedPlan] = useState('profissional');
+  const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
 
   const plans = [
     {
       id: 'basico',
       name: 'Básico',
-      price: '59,90',
+      priceMonthly: '59,90',
+      priceYearly: '503,16', // 59.90 * 12 * 0.7 = 503.16
       queries: '300',
       description: 'Ideal para pequenos negócios',
       features: [
@@ -49,7 +51,8 @@ const LandingPage = () => {
     {
       id: 'profissional',
       name: 'Profissional',
-      price: '89,90',
+      priceMonthly: '89,90',
+      priceYearly: '755,16', // 89.90 * 12 * 0.7 = 755.16
       queries: '500',
       description: 'Para empresas em crescimento',
       features: [
@@ -66,7 +69,8 @@ const LandingPage = () => {
     {
       id: 'empresarial',
       name: 'Empresarial',
-      price: '149,00',
+      priceMonthly: '149,00',
+      priceYearly: '1.252,80', // 149.00 * 12 * 0.7 = 1252.80
       queries: '1.000',
       description: 'Solução corporativa completa',
       features: [
@@ -378,7 +382,7 @@ const LandingPage = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
+      <section className="benefits-section">
         <div className="section-header">
           <h2>Por Que Escolher Nossa Plataforma?</h2>
           <p>Tudo que você precisa para acessar dados empresariais de forma profissional</p>
@@ -420,6 +424,22 @@ const LandingPage = () => {
           <p>Escolha o plano ideal para seu negócio. Sem taxas escondidas, cancele quando quiser</p>
         </div>
         
+        <div className="billing-toggle">
+          <button 
+            className={`billing-option ${billingPeriod === 'mensal' ? 'active' : ''}`}
+            onClick={() => setBillingPeriod('mensal')}
+          >
+            Mensal
+          </button>
+          <button 
+            className={`billing-option ${billingPeriod === 'anual' ? 'active' : ''}`}
+            onClick={() => setBillingPeriod('anual')}
+          >
+            Anual
+            <span className="discount-badge">Economize 30%</span>
+          </button>
+        </div>
+        
         <div className="pricing-grid">
           {plans.map((plan) => (
             <div 
@@ -436,9 +456,25 @@ const LandingPage = () => {
               
               <div className="plan-price">
                 <span className="currency">R$</span>
-                <span className="amount">{plan.price}</span>
-                <span className="period">/mês</span>
+                <span className="amount">
+                  {billingPeriod === 'mensal' ? plan.priceMonthly : plan.priceYearly}
+                </span>
+                <span className="period">
+                  {billingPeriod === 'mensal' ? '/mês' : '/ano'}
+                </span>
               </div>
+              
+              {billingPeriod === 'anual' && (
+                <div style={{ 
+                  fontSize: '14px', 
+                  color: 'var(--primary)', 
+                  fontWeight: '600',
+                  marginBottom: '12px',
+                  textAlign: 'center'
+                }}>
+                  R$ {(parseFloat(plan.priceYearly.replace('.', '').replace(',', '.')) / 12).toFixed(2).replace('.', ',')} /mês
+                </div>
+              )}
               
               <div className="plan-queries">
                 <strong>{plan.queries}</strong> consultas/mês
