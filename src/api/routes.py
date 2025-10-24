@@ -21,7 +21,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 async def verify_api_key(x_api_key: str = Header(None)):
-    """Verifica se a API Key é válida"""
+    """
+    Verifica se a API Key é válida
+    
+    Nota: A API externa da Receita Federal pode demorar 30+ segundos para responder.
+    Isso é normal e está fora do nosso controle.
+    """
     if not x_api_key:
         raise HTTPException(
             status_code=401,

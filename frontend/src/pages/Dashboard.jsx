@@ -17,6 +17,9 @@ const Dashboard = () => {
   const [usage, setUsage] = useState(null);
   const [subscription, setSubscription] = useState(null); // State for subscription data
   const [loading, setLoading] = useState(true);
+  const [loadingTime, setLoadingTime] = useState(0);
+  const [error, setError] = useState(null);
+  const [results, setResults] = useState(null);
 
   useEffect(() => {
     loadData();

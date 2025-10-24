@@ -1,9 +1,8 @@
-
 import { Code, Book, Zap, Shield, Database } from 'lucide-react';
 
 const Docs = () => {
   const API_URL = window.location.origin;
-  
+
   return (
     <div className="docs-page">
       <div className="page-header">
@@ -30,17 +29,26 @@ const Docs = () => {
             </div>
             <h2>Introdução</h2>
             <p>
-              A API CNPJ fornece acesso programático aos dados públicos da Receita Federal brasileira,
-              permitindo consultar informações sobre empresas, estabelecimentos, sócios e muito mais.
+              Nossa API permite consultar dados de empresas brasileiras através de diversos filtros.
             </p>
-            
+            <div style={{
+              padding: '1rem',
+              background: '#fff3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '4px',
+              marginBottom: '1rem'
+            }}>
+              <strong>⚠️ Tempo de Resposta:</strong> A API externa da Receita Federal pode demorar entre 5 a 30 segundos para responder.
+              Isso é normal e está fora do nosso controle. Aguarde o carregamento completo.
+            </div>
+
             <div className="info-card" style={{ marginTop: '20px', background: '#1f2937', color: 'white' }}>
               <h3 style={{ color: 'white', marginBottom: '12px' }}>🔗 URL Base da API</h3>
               <pre style={{ background: '#111827', padding: '15px', borderRadius: '8px', overflow: 'auto' }}>
-{window.location.protocol}//{window.location.host}
+                {window.location.protocol}//{window.location.host}
               </pre>
               <p style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-                <strong>Para uso externo:</strong> Use esta URL em todas as requisições para a API<br/>
+                <strong>Para uso externo:</strong> Use esta URL em todas as requisições para a API<br />
                 <strong>Porta Backend:</strong> {window.location.protocol}//{window.location.hostname}:8000
               </p>
               <p style={{ marginTop: '12px', color: '#fbbf24', fontSize: '14px' }}>
@@ -78,7 +86,7 @@ const Docs = () => {
                 X-API-Key: sua_chave_api_aqui
               </code>
             </div>
-            
+
             <div className="info-card" style={{ marginTop: '20px', background: '#fef3c7', border: '2px solid #f59e0b' }}>
               <h4 style={{ color: '#92400e', marginBottom: '8px' }}>🔑 Como obter sua API Key:</h4>
               <ol style={{ color: '#92400e', marginLeft: '20px' }}>
