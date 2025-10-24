@@ -6,11 +6,7 @@
 
 /* Floating Navbar */
 .floating-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  position: relative;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -127,7 +123,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 140px 20px 80px;
+  padding: 80px 20px;
   position: relative;
   overflow: hidden;
 }
