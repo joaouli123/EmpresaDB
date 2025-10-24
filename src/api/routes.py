@@ -35,9 +35,7 @@ async def verify_api_key(x_api_key: str = Header(None)):
             detail="API Key inválida ou expirada"
         )
     
-    # Atualizar contadores de uso
-    await db_manager.increment_api_key_usage(x_api_key)
-    
+    # O método verify_api_key já incrementa automaticamente os contadores
     return user
 
 @router.get("/", response_model=HealthCheck)
