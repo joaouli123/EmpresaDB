@@ -4,7 +4,7 @@ from typing import Optional
 from urllib.parse import urlparse, unquote
 
 class Settings(BaseSettings):
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
     DB_HOST: Optional[str] = None
     DB_PORT: Optional[int] = 5432
     DB_NAME: Optional[str] = None

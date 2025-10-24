@@ -14,8 +14,8 @@ No specific user preferences were provided in the original document. The system 
 - **Schema Separation**: Customer data (users, API keys, usage) now stored in `clientes` schema, completely isolated from public CNPJ data in `public` schema for security
 - **Login Enhancement**: Login now accepts both username AND email for authentication
 - **Test Users Created**:
-  - Admin: username=`admin`, email=`admin@sistema.com`, password=`admin123`
-  - User: username=`usuario`, email=`usuario@sistema.com`, password=`user123`
+  - Admin: username=`admin_jl`, email=`jl.uli1996@gmail.com`, password=`Palio123@`
+  - User: username=`usuario_demo`, email=`usuario.demo@sistema.com`, password=`Demo123@`
 - **Frontend Update**: Login form now shows "Usuário ou E-mail" to indicate flexible authentication
 
 ## System Architecture
