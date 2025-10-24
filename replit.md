@@ -1,313 +1,56 @@
 # Sistema de Consulta CNPJ - Receita Federal
 
-## 📋 Visão Geral do Projeto
+## Overview
 
-Sistema completo de ETL (Extração, Transformação e Carga) e API REST para consulta de dados públicos de CNPJ da Receita Federal brasileira.
+This project is an ETL (Extract, Transform, Load) system and REST API for querying public CNPJ data from the Brazilian Federal Revenue. Its primary goal is to create an advanced search and filtering system for Brazilian companies, storing and organizing all Federal Revenue data (companies, establishments, CNPJs, partners) in a PostgreSQL database on the user's VPS, complete with a comprehensive REST API for integration. The system aims to provide a robust solution for business intelligence, compliance, and market analysis, handling large volumes of data efficiently.
 
-## 🎯 Objetivo
+## User Preferences
 
-Criar um "super sistema de consulta e filtro avançado" de empresas brasileiras, armazenando e organizando todos os dados da Receita Federal (empresas, estabelecimentos, CNPJs, sócios) em um banco PostgreSQL no VPS do usuário, com API REST completa para integração.
+No specific user preferences were provided in the original document. The system is designed to be highly configurable and offers both a graphical user interface for administration and a REST API for programmatic access.
 
-## 🏗️ Arquitetura
+## System Architecture
 
-### Banco de Dados
-- **IMPORTANTE**: Este projeto USA O BANCO DE DADOS DO VPS, NÃO o banco do Replit!
-- **Tipo**: PostgreSQL 16 (no VPS do usuário)
-- **Host**: 72.61.217.143:5432
-- **Banco**: cnpj_db
-- **Usuário**: novo_usuario
-- **Credenciais**: Configuradas no arquivo .env (as variáveis DATABASE_URL, PGHOST, etc do Replit são IGNORADAS)
+The system is composed of a React + Vite frontend (port 5000) and a FastAPI + Uvicorn backend (port 8000). Data is stored in a PostgreSQL 16 database hosted on the user's VPS.
 
-### Estrutura do Projeto
+### UI/UX Decisions
 
-```
-.
-├── src/
-│   ├── api/              # API REST com FastAPI
-│   │   ├── main.py       # Aplicação principal
-│   │   ├── routes.py     # Endpoints + WebSocket
-│   │   ├── models.py     # Modelos Pydantic
-│   │   ├── etl_controller.py      # Controlador do ETL
-│   │   └── websocket_manager.py   # Gerenciador WebSocket
-│   ├── database/         # Camada de banco de dados
-│   │   ├── connection.py          # Gerenciador de conexão
-│   │   ├── schema.sql             # Schema principal
-│   │   ├── etl_tracking_schema.sql # Schema de tracking
-│   │   └── init_db.py             # Inicializador
-│   ├── etl/              # Pipeline ETL
-│   │   ├── downloader.py # Download dos arquivos RFB
-│   │   ├── importer.py   # Importação para PostgreSQL
-│   │   └── etl_tracker.py # Sistema de tracking e validação
-│   └── config.py         # Configurações
-├── static/
-│   └── dashboard.html    # Dashboard visual em tempo real
-├── main.py               # Entrada da API
-├── run_etl.py           # Executa processo ETL completo
-└── GUIA_DE_USO.md       # Documentação detalhada
-```
+The frontend uses React with Vite, providing a modern and responsive interface. It includes a dashboard with metrics, API key management, API documentation, and a user profile. For administrators, there's a visual dashboard with real-time ETL control via WebSocket, allowing them to start/stop the ETL process, configure parameters, and monitor logs and statistics.
 
-## 🗄️ Schema do Banco de Dados
+### Technical Implementations
 
-### Tabelas Auxiliares
-- `cnaes` - Classificação Nacional de Atividades Econômicas
-- `municipios` - Municípios brasileiros
-- `motivos_situacao_cadastral` - Motivos de situação cadastral
-- `naturezas_juridicas` - Naturezas jurídicas
-- `paises` - Países
-- `qualificacoes_socios` - Qualificações de sócios
+- **Database Schema**: Optimized for CNPJ data, including auxiliary tables (CNAEs, municipalities, etc.), main tables (companies, establishments, partners, Simples Nacional), and ETL tracking tables. Key features include automatic full CNPJ generation, optimized indexes, and full-text search capabilities.
+- **ETL Process**:
+    - **Download**: Fetches the latest ZIP files from Receita Federal, classifies them, and downloads the most recent versions. Includes retry mechanisms for corrupted ZIP files.
+    - **Extraction**: Unzips files and extracts CSVs (latin1 encoding, semicolon delimiter).
+    - **Importation**: Imports data into PostgreSQL using `COPY` for speed, processing in chunks (default 50,000 records). Includes data transformations (date and capital social formats) and intelligent foreign key handling.
+    - **Intelligent Tracking**: Ensures idempotency via SHA-256 hash checking, automatic recovery from interruptions, integrity validation (CSV vs. DB record counts), and structured logging.
+- **REST API**: Built with FastAPI, providing authenticated endpoints for user management, API key generation/management, CNPJ data queries, and ETL process control (admin-only). Features advanced search filters and automatic Swagger UI/ReDoc documentation.
+- **Security**: Implements Argon2 for password hashing, JWT for authentication with configurable expiration, role-based access control (admin/user), and API key management with usage tracking. CORS is configured for the frontend.
 
-### Tabelas Principais
-- `empresas` - Dados das empresas (nível CNPJ básico - 8 dígitos)
-- `estabelecimentos` - Estabelecimentos com CNPJ completo (14 dígitos)
-- `socios` - Sócios e representantes legais
-- `simples_nacional` - Opções de Simples Nacional e MEI
+### Feature Specifications
 
-### Tabelas de Controle ETL (Tracking)
-- `execution_runs` - Rastreamento de cada execução do ETL
-- `etl_tracking_files` - Rastreamento de cada arquivo processado
-- `etl_tracking_chunks` - Rastreamento de chunks (processamento incremental)
-- `etl_logs` - Logs estruturados do processo ETL
+- **Frontend**: Dashboard with metrics, API Key management, API usage history, full API documentation, user profile. Admin-specific features include full ETL control (start/stop), dynamic configuration of `chunk_size` and `max_workers`, real-time progress monitoring via WebSocket, live log viewing, detailed table statistics, and automatic validation (CSV vs. DB).
+- **Backend API Endpoints**:
+    - **Authentication**: Register, Login, Get current user.
+    - **User & API Keys**: User profile, generate/list/revoke API keys, API key usage.
+    - **CNPJ Data**: API info, health check, database stats, query by CNPJ, advanced search with filters (social reason, trade name, UF, municipality, CNAE, cadastral status, company size, Simples Nacional, MEI, pagination), company partners, CNAEs list, municipalities by UF.
+    - **ETL (Admin Only)**: WebSocket for real-time connection, start/stop ETL process, ETL status, update ETL config, database stats.
+- **Dynamic Configurations**: `chunk_size` (batch processing size) and `max_workers` (parallel processing threads) can be adjusted in real-time via the admin interface.
 
-### Features Importantes
-- **CNPJ Completo Automático**: Campo `cnpj_completo` gerado automaticamente juntando as 3 partes
-- **Índices Otimizados**: Índices em todas as colunas de busca (CNPJ, razão social, UF, município, CNAE)
-- **Full-Text Search**: Busca em português para razão social e nome fantasia
-- **View Completa**: `vw_estabelecimentos_completos` com todos os dados relacionados
+## External Dependencies
 
-## 🔄 Processo ETL
-
-### 1. Download
-- Acessa https://arquivos.receitafederal.gov.br/dados/cnpj/
-- Lista todos os arquivos ZIP disponíveis
-- Classifica por tipo (empresas, estabelecimentos, sócios, etc.)
-- Baixa a versão mais recente (outubro/2025)
-
-### 2. Extração
-- Descompacta arquivos ZIP
-- Extrai CSVs (encoding: latin1, delimiter: ;)
-
-### 3. Importação
-- **Ordem respeitada**: Tabelas auxiliares → Empresas → Estabelecimentos → Sócios → Simples
-- **Processamento em chunks**: 50.000 registros por vez para otimizar memória
-- **COPY otimizado**: Usa PostgreSQL COPY para importação rápida
-- **Transformações**:
-  - Conversão de datas (AAAAMMDD → YYYY-MM-DD)
-  - Conversão de capital social (vírgula → ponto decimal)
-  - Construção do CNPJ completo (14 dígitos)
-
-## 📡 API REST
-
-### Endpoints Principais
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/` | Dashboard visual |
-| GET | `/dashboard` | Dashboard alternativo |
-| GET | `/health` | Health check |
-| GET | `/stats` | Estatísticas do banco |
-| GET | `/cnpj/{cnpj}` | Consulta por CNPJ |
-| GET | `/search` | Busca avançada com filtros |
-| GET | `/cnpj/{cnpj}/socios` | Sócios da empresa |
-| GET | `/cnaes` | Listar CNAEs |
-| GET | `/municipios/{uf}` | Municípios por UF |
-| WebSocket | `/ws` | Conexão tempo real |
-| POST | `/etl/start` | Iniciar processo ETL |
-| POST | `/etl/stop` | Parar processo ETL |
-| GET | `/etl/status` | Status atual do ETL |
-| POST | `/etl/config` | Atualizar configurações |
-| GET | `/etl/database-stats` | Estatísticas do banco |
-
-### Filtros da Busca Avançada
-- Razão social (parcial)
-- Nome fantasia (parcial)
-- UF
-- Município
-- CNAE
-- Situação cadastral
-- Porte da empresa
-- Optante Simples Nacional
-- Optante MEI
-- Paginação (page, per_page)
-
-### Documentação Automática
-- Swagger UI: `/docs`
-- ReDoc: `/redoc`
-
-## 🔐 Segurança
-
-- **Secrets do Replit**: Credenciais armazenadas de forma segura
-- **Sem hardcoded credentials**: Removidas do código
-- **CORS aberto**: Permite requisições de qualquer origem (dados públicos)
-
-## 📊 Volumes Esperados
-
-- ~60 milhões de empresas
-- ~50 milhões de estabelecimentos
-- ~5GB de dados compactados
-- ~20GB descompactados
-
-## 🚀 Como Usar
-
-### 1. Acessar Dashboard
-Abra seu navegador em: `http://localhost:5000` ou `http://seu-dominio:5000`
-
-O dashboard permite:
-- ✅ Iniciar/Parar ETL com um clique
-- ✅ Configurar chunk_size e max_workers dinamicamente
-- ✅ Ver progresso em tempo real
-- ✅ Monitorar logs ao vivo
-- ✅ Ver estatísticas de cada tabela
-- ✅ Validação automática (CSV vs DB)
-
-### 2. Importar Dados via Terminal (Alternativo)
-```bash
-python run_etl.py
-```
-
-### 3. API REST
-API disponível em: http://0.0.0.0:5000
-
-## 🎯 Funcionalidades Avançadas
-
-### Sistema de Tracking Inteligente
-
-O sistema garante:
-
-1. **Idempotência**: 
-   - Calcula hash SHA-256 de cada arquivo
-   - Se arquivo já foi 100% processado (mesmo hash), pula automaticamente
-   - Economiza tempo e recursos
-
-2. **Recuperação Automática**:
-   - Se o processamento parar no meio, continua de onde parou
-   - Rastreamento por chunks (pedaços de 50k registros)
-   - Não perde progresso
-
-3. **Validação de Integridade**:
-   - Conta linhas no CSV
-   - Conta registros no banco de dados
-   - Alerta se houver divergências
-   - Registra tudo em tabelas de auditoria
-
-4. **Logs Estruturados**:
-   - Cada ação é registrada no banco
-   - Timestamps completos
-   - Correlação por execution_id
-   - Consulta fácil via SQL
-
-### Configurações Dinâmicas
-
-Você pode ajustar em tempo real:
-
-- **chunk_size**: Tamanho dos lotes (padrão: 50.000)
-  - Máquina fraca: 10.000 - 25.000
-  - Máquina média: 50.000 - 100.000  
-  - Máquina potente: 100.000 - 500.000
-
-- **max_workers**: Número de workers paralelos (padrão: 4)
-  - CPU 2 cores: 2 workers
-  - CPU 4 cores: 4 workers
-  - CPU 8+ cores: 8-16 workers
-
-## 🔧 Configuração Atual
-
-### Workflow
-- **Nome**: API
-- **Comando**: `python main.py`
-- **Porta**: 5000
-- **Output**: Webview
-
-### Dependências Python
-- FastAPI + Uvicorn (API REST)
-- psycopg2-binary (PostgreSQL)
-- SQLAlchemy (ORM)
-- pandas (processamento CSV)
-- requests + BeautifulSoup4 (download)
-- tqdm (barras de progresso)
-- pydantic (validação)
-
-## 📝 Estado Atual
-
-- ✅ Schema do banco criado e otimizado
-- ✅ Sistema ETL implementado com tracking robusto
-- ✅ API REST funcionando
-- ✅ Secrets configurados
-- ✅ Workflow ativo
-- ✅ Dashboard visual em tempo real
-- ✅ Sistema de monitoramento via WebSocket
-- ✅ Validação automática de integridade (CSV vs DB)
-- ✅ Sistema de idempotência (não reprocessa arquivos completos)
-- ✅ Validação e retry automático para arquivos ZIP corrompidos
-- ✅ Tratamento inteligente de foreign keys faltantes
-- ✅ Documentação completa para usuários não-técnicos
-- ⏳ Dados não importados (aguardando execução do ETL)
-
-## 🔧 Correções Recentes (Out/2025)
-
-### Problema Identificado
-1. **Foreign Keys Rígidas**: Banco rejeitava códigos descontinuados pela Receita (ex: código 36 de qualificação)
-2. **Arquivos ZIP Corrompidos**: Downloads incompletos interrompiam todo o processo
-
-### Soluções Implementadas
-1. **Schema Flexível**: Removidas foreign keys rígidas, permitindo códigos inválidos (convertidos para NULL)
-2. **Validação Inteligente**: Sistema valida foreign keys no código antes da inserção
-3. **Retry Automático**: 3 tentativas automáticas de download para arquivos corrompidos
-4. **Documentação Clara**: 
-   - `LEIA_PRIMEIRO.txt` - Resumo executivo
-   - `INSTRUCOES_MIGRACAO.md` - Guia para pgAdmin local
-   - `COMO_EXECUTAR_NO_VPS.md` - Guia para VPS Hostinger com Docker
-   - `MIGRAR_BANCO.sql` - Script de migração one-time
-5. **Mensagens Amigáveis**: Instruções claras sobre o que fazer em caso de erro
-
-## 🎯 Próximas Melhorias Sugeridas
-
-1. **Cache**: Implementar Redis para consultas frequentes
-2. **Async**: Migrar queries para async para melhor performance
-3. **Rate Limiting**: Controle de requisições por IP/usuário
-4. **Autenticação**: API keys para controle de acesso
-5. **Estatísticas**: Endpoints de agregações (empresas por estado, CNAEs mais comuns)
-6. **Atualização Incremental**: Sistema automático de atualização mensal
-
-## 📞 Integrações Futuras
-
-A API está pronta para integração com:
-- Sistemas de consulta empresarial
-- Dashboards de business intelligence
-- Ferramentas de compliance
-- Apps de análise de mercado
-
-## 🐛 Debugging
-
-### Verificar Conexão
-```bash
-curl http://localhost:5000/api/v1/
-```
-
-### Ver Estatísticas
-```bash
-curl http://localhost:5000/api/v1/stats
-```
-
-### Logs
-- Workflow logs: Disponíveis no painel do Replit
-- ETL logs: Output detalhado durante execução
-
-## 💡 Observações Importantes
-
-1. **CNPJ Estrutura**: 8 (básico) + 4 (ordem) + 2 (DV) = 14 dígitos
-2. **Chave de Ligação**: `cnpj_basico` (8 primeiros dígitos) liga todas as tabelas
-3. **Dados Públicos**: Informações disponibilizadas pela Receita Federal
-4. **Atualização Mensal**: RFB atualiza dados todo mês
-5. **Performance**: Índices otimizados para consultas rápidas
-
-## 📚 Documentação
-
-- `README.md` - Documentação técnica
-- `GUIA_DE_USO.md` - Guia passo a passo para o usuário
-- `/docs` - Documentação interativa da API (Swagger)
-
----
-
-**Última atualização**: 23 de outubro de 2025
-**Versão da API**: 1.0.0
-**Status**: Pronto para importação de dados
+- **Database**: PostgreSQL 16
+- **Backend Framework**: FastAPI
+- **Web Server**: Uvicorn
+- **Database Driver**: `psycopg2-binary`
+- **ORM**: SQLAlchemy
+- **CSV Processing**: pandas
+- **Web Scraping/Download**: requests, BeautifulSoup4
+- **Progress Bars**: tqdm
+- **Data Validation**: pydantic
+- **Password Hashing**: passlib[argon2]
+- **JWT**: PyJWT
+- **Frontend Framework**: React
+- **Build Tool**: Vite
+- **Icons**: Lucide React
+- **Charting Library**: Recharts
