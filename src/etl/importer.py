@@ -9,6 +9,7 @@ import pandas as pd
 from io import StringIO
 from src.database.connection import db_manager
 from src.config import settings
+from src.etl.etl_tracker import ETLTracker
 import asyncio
 
 logging.basicConfig(
@@ -23,6 +24,9 @@ class CNPJImporter:
         self.data_dir = Path(settings.DATA_DIR)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.chunk_size = settings.CHUNK_SIZE
+
+        # Sistema de rastreamento ETL
+        self.tracker = ETLTracker()
 
         # Cache de códigos válidos para validação
         self.valid_codes_cache = {}
@@ -246,6 +250,13 @@ class CNPJImporter:
                         logger.info(f"  ✓ Extraído: {file_name}")
                     else:
                         logger.info(f"  ✓ Já existe: {file_name}")
+
+                    # Verificar se CSV já foi processado 100%
+                    file_hash = self.tracker.calculate_file_hash(extract_path)
+                    if file_hash:
+                        status = self.tracker.check_file_status(extract_path, file_hash)
+                        if status == 'completed':
+                            return None  # Arquivo já processado, pular
 
                     return extract_path
 
