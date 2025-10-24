@@ -293,19 +293,19 @@ const LandingPage = () => {
       </section>
 
       {/* Business Categories Section */}
-      <section className="benefits-section">
+      <section className="categories-section">
         <div className="section-header">
           <h2>Dados de Todos os Setores</h2>
           <p>Acesse informações completas de empresas em qualquer segmento do mercado brasileiro</p>
         </div>
         
-        <div className="benefits-grid">
+        <div className="categories-grid">
           {businessCategories.map((category, index) => (
-            <div key={index} className="benefit-card">
-              <div className="benefit-icon">{category.icon}</div>
+            <div key={index} className="category-card">
+              <div className="category-icon">{category.icon}</div>
               <h3>{category.title}</h3>
               <p>{category.description}</p>
-              <div style={{ marginTop: '12px', color: 'var(--primary)', fontWeight: '700', fontSize: '18px' }}>
+              <div className="category-count">
                 {category.count} empresas
               </div>
             </div>
@@ -314,18 +314,20 @@ const LandingPage = () => {
       </section>
 
       {/* Advanced Filters Section */}
-      <section className="benefits-section" style={{ background: 'var(--light-gray)' }}>
+      <section className="filters-section">
         <div className="section-header">
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
         </div>
         
-        <div className="benefits-grid">
+        <div className="filters-grid">
           {advancedFilters.map((filter, index) => (
-            <div key={index} className="benefit-card">
-              <div className="benefit-icon">{filter.icon}</div>
-              <h3>{filter.title}</h3>
-              <p>{filter.description}</p>
+            <div key={index} className="filter-card">
+              <div className="filter-icon">{filter.icon}</div>
+              <div className="filter-content">
+                <h3>{filter.title}</h3>
+                <p>{filter.description}</p>
+              </div>
             </div>
           ))}
         </div>
