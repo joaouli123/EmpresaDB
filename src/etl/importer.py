@@ -410,6 +410,7 @@ class CNPJImporter:
             'ddd_fax', 'fax', 'correio_eletronico', 'situacao_especial',
             'data_situacao_especial'
         ]
+        # Nota: cnpj_completo é GENERATED ALWAYS, não pode ser inserido manualmente
 
         try:
             total_imported = 0
