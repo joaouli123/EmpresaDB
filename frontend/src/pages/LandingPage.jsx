@@ -23,7 +23,9 @@ import {
   Calendar,
   FileCheck,
   Code,
-  Layers
+  Layers,
+  Mail,
+  Phone
 } from 'lucide-react';
 import '../styles/LandingPage.css';
 
@@ -557,6 +559,167 @@ const LandingPage = () => {
           <p className="cta-note">Sem cartão de crédito necessário • Cancele quando quiser • Dados 100% atualizados</p>
         </div>
       </section>
+
+      {/* Contact Form Section */}
+      <section className="contact-section">
+        <div className="contact-container">
+          <div className="contact-info">
+            <h2>Entre em Contato</h2>
+            <p>Tem dúvidas? Nossa equipe está pronta para ajudar você a escolher o melhor plano para seu negócio.</p>
+            
+            <div className="contact-details">
+              <div className="contact-item">
+                <Mail size={24} />
+                <div>
+                  <h4>Email</h4>
+                  <p>contato@cnpjapi.com.br</p>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <Phone size={24} />
+                <div>
+                  <h4>Telefone</h4>
+                  <p>(11) 9 9999-9999</p>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <Clock size={24} />
+                <div>
+                  <h4>Horário de Atendimento</h4>
+                  <p>Seg - Sex: 9h às 18h</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="contact-form-wrapper">
+            <form className="contact-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nome Completo</label>
+                  <input type="text" placeholder="Seu nome" required />
+                </div>
+                
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" placeholder="seu@email.com" required />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Telefone</label>
+                  <input type="tel" placeholder="(11) 99999-9999" />
+                </div>
+                
+                <div className="form-group">
+                  <label>Empresa</label>
+                  <input type="text" placeholder="Nome da empresa" />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Assunto</label>
+                <select required>
+                  <option value="">Selecione um assunto</option>
+                  <option value="duvidas">Dúvidas sobre Planos</option>
+                  <option value="tecnico">Suporte Técnico</option>
+                  <option value="comercial">Proposta Comercial</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label>Mensagem</label>
+                <textarea rows="5" placeholder="Como podemos ajudar?" required></textarea>
+              </div>
+              
+              <button type="submit" className="btn-primary-large">
+                Enviar Mensagem
+                <ChevronRight size={20} />
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <div className="footer-logo">
+              <Database size={32} />
+              <h3>CNPJ API</h3>
+            </div>
+            <p>Acesso completo aos dados empresariais da Receita Federal. Consultas rápidas, precisas e atualizadas.</p>
+            <div className="social-links">
+              <a href="#" aria-label="LinkedIn"><Users size={20} /></a>
+              <a href="#" aria-label="Twitter"><Users size={20} /></a>
+              <a href="#" aria-label="Instagram"><Users size={20} /></a>
+            </div>
+          </div>
+
+          <div className="footer-section">
+            <h4>Produto</h4>
+            <ul>
+              <li><a href="#features">Funcionalidades</a></li>
+              <li><a href="#pricing">Planos e Preços</a></li>
+              <li><a href="#api">Documentação API</a></li>
+              <li><a href="#updates">Atualizações</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Empresa</h4>
+            <ul>
+              <li><a href="#about">Sobre Nós</a></li>
+              <li><a href="#blog">Blog</a></li>
+              <li><a href="#careers">Carreiras</a></li>
+              <li><a href="#contact">Contato</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Suporte</h4>
+            <ul>
+              <li><a href="#help">Central de Ajuda</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="#status">Status do Sistema</a></li>
+              <li><a href="#terms">Termos de Uso</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#privacy">Política de Privacidade</a></li>
+              <li><a href="#terms">Termos de Serviço</a></li>
+              <li><a href="#lgpd">LGPD</a></li>
+              <li><a href="#cookies">Cookies</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>&copy; 2024 CNPJ API. Todos os direitos reservados.</p>
+          <p>Dados oficiais da Receita Federal do Brasil</p>
+        </div>
+      </footer>
+
+      {/* WhatsApp Floating Button */}
+      <a 
+        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ" 
+        className="whatsapp-float"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contato via WhatsApp"
+      >
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      </a>
     </div>
   );
 };
