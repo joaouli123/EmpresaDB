@@ -17,6 +17,26 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/user': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/cnpj': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/search': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/stats': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/etl': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/ws': {
         target: 'ws://localhost:8000',
         ws: true,

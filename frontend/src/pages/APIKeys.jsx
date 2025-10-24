@@ -16,9 +16,11 @@ const APIKeys = () => {
   const loadAPIKeys = async () => {
     try {
       const response = await userAPI.getAPIKeys();
-      setApiKeys(response.data || []);
+      const keys = Array.isArray(response.data) ? response.data : [];
+      setApiKeys(keys);
     } catch (error) {
       console.error('Error loading API keys:', error);
+      setApiKeys([]);
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ const APIKeys = () => {
       )}
 
       <div className="api-keys-container">
-        {apiKeys.length === 0 ? (
+        {!Array.isArray(apiKeys) || apiKeys.length === 0 ? (
           <div className="empty-state">
             <Key size={48} />
             <h3>Nenhuma chave de API criada</h3>

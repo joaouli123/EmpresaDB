@@ -10,9 +10,10 @@ No specific user preferences were provided in the original document. The system 
 
 ## Recent Changes (October 24, 2025)
 
-- **Database Recreated**: PostgreSQL database was recreated with proper schema separation
+- **Database Reconnected**: Fixed PostgreSQL connection to use Replit's built-in database
 - **Schema Separation**: Customer data (users, API keys, usage) now stored in `clientes` schema, completely isolated from public CNPJ data in `public` schema for security
 - **Login Enhancement**: Login now accepts both username AND email for authentication
+- **Proxy Configuration Fixed**: All backend routes now properly proxied through Vite (/user, /cnpj, /search, /stats, /etl)
 - **Test Users Created**:
   - Admin: username=`admin_jl`, email=`jl.uli1996@gmail.com`, password=`Palio123@`
   - User: username=`usuario_demo`, email=`usuario.demo@sistema.com`, password=`Demo123@`
