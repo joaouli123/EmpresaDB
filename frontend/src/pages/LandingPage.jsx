@@ -453,10 +453,9 @@ const LandingPage = () => {
                       <Database size={28} />
                     </div>
                     <div className="outros-text">
-                      <h4>E muito mais setores disponíveis!</h4>
+                      <h4>E isso é só o começo!</h4>
                       <p>
-                        Além dos exemplos acima, temos <strong>{category.cnaes[category.cnaes.length - 1].quantidade}</strong> 
-                        para consulta na nossa base de dados. Esta é apenas uma amostra visual dos principais CNAEs do setor.
+                        Explore <strong>milhões de empresas</strong> em centenas de outros setores disponíveis na nossa base de dados.
                       </p>
                     </div>
                   </div>
