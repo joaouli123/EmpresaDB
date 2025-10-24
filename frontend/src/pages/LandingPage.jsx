@@ -137,16 +137,16 @@ const LandingPage = () => {
       description: 'Encontre lojas, supermercados e pontos de venda em todo Brasil',
       count: '8M+',
       cnaes: [
-        { icon: <ShoppingCart size={20} />, nome: 'Supermercados', cnae: '4711-3/02' },
-        { icon: <Store size={20} />, nome: 'Lojas de Roupas', cnae: '4781-4/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Farmácias', cnae: '4771-7/01' },
-        { icon: <Store size={20} />, nome: 'Lojas de Calçados', cnae: '4782-2/01' },
-        { icon: <ShoppingCart size={20} />, nome: 'Lojas de Móveis', cnae: '4754-7/01' },
-        { icon: <Store size={20} />, nome: 'Lojas de Eletrônicos', cnae: '4752-1/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Padarias', cnae: '4721-1/02' },
-        { icon: <Store size={20} />, nome: 'Lojas de Cosméticos', cnae: '4772-5/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Pet Shops', cnae: '4789-0/05' },
-        { icon: <Store size={20} />, nome: 'Lojas de Materiais', cnae: '4744-0/05' }
+        { icon: <ShoppingCart size={20} />, nome: 'Supermercados', quantidade: '~1.2M' },
+        { icon: <Store size={20} />, nome: 'Lojas de Roupas', quantidade: '~890K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Farmácias', quantidade: '~650K' },
+        { icon: <Store size={20} />, nome: 'Lojas de Calçados', quantidade: '~520K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Lojas de Móveis', quantidade: '~480K' },
+        { icon: <Store size={20} />, nome: 'Lojas de Eletrônicos', quantidade: '~410K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Padarias', quantidade: '~380K' },
+        { icon: <Store size={20} />, nome: 'Lojas de Cosméticos', quantidade: '~340K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Pet Shops', quantidade: '~280K' },
+        { icon: <Store size={20} />, nome: 'Lojas de Materiais', quantidade: '+2.9M outros setores' }
       ]
     },
     industria: {
@@ -156,16 +156,16 @@ const LandingPage = () => {
       description: 'Fabricantes, montadoras e empresas de transformação',
       count: '2M+',
       cnaes: [
-        { icon: <Factory size={20} />, nome: 'Ind. Alimentícia', cnae: '1011-2/01' },
-        { icon: <Factory size={20} />, nome: 'Ind. Têxtil', cnae: '1311-1/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Metalúrgica', cnae: '2511-0/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Química', cnae: '2011-8/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Plásticos', cnae: '2221-8/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Madeira', cnae: '1610-2/01' },
-        { icon: <Factory size={20} />, nome: 'Ind. Papel', cnae: '1710-9/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Eletrônica', cnae: '2610-8/00' },
-        { icon: <Factory size={20} />, nome: 'Ind. Automobilística', cnae: '2910-7/01' },
-        { icon: <Factory size={20} />, nome: 'Ind. Farmacêutica', cnae: '2121-1/01' }
+        { icon: <Factory size={20} />, nome: 'Ind. Alimentícia', quantidade: '~380K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Têxtil', quantidade: '~245K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Metalúrgica', quantidade: '~195K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Química', quantidade: '~168K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Plásticos', quantidade: '~142K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Madeira', quantidade: '~128K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Papel', quantidade: '~95K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Eletrônica', quantidade: '~72K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Automobilística', quantidade: '~58K' },
+        { icon: <Factory size={20} />, nome: 'Ind. Farmacêutica', quantidade: '+517K outros setores' }
       ]
     },
     servicos: {
@@ -175,16 +175,16 @@ const LandingPage = () => {
       description: 'Consultorias, agências, escritórios e prestadores',
       count: '12M+',
       cnaes: [
-        { icon: <Briefcase size={20} />, nome: 'Contabilidade', cnae: '6920-6/01' },
-        { icon: <Briefcase size={20} />, nome: 'Advocacia', cnae: '6911-7/01' },
-        { icon: <Briefcase size={20} />, nome: 'Marketing', cnae: '7319-0/02' },
-        { icon: <Briefcase size={20} />, nome: 'Consultoria TI', cnae: '6204-0/00' },
-        { icon: <Briefcase size={20} />, nome: 'Arquitetura', cnae: '7111-1/00' },
-        { icon: <Briefcase size={20} />, nome: 'Engenharia', cnae: '7112-0/00' },
-        { icon: <Briefcase size={20} />, nome: 'Design Gráfico', cnae: '7410-2/02' },
-        { icon: <Briefcase size={20} />, nome: 'RH e Recrutamento', cnae: '7830-2/00' },
-        { icon: <Briefcase size={20} />, nome: 'Treinamentos', cnae: '8599-6/04' },
-        { icon: <Briefcase size={20} />, nome: 'Assessoria Empresarial', cnae: '7020-4/00' }
+        { icon: <Briefcase size={20} />, nome: 'Contabilidade', quantidade: '~1.8M' },
+        { icon: <Briefcase size={20} />, nome: 'Advocacia', quantidade: '~920K' },
+        { icon: <Briefcase size={20} />, nome: 'Marketing', quantidade: '~680K' },
+        { icon: <Briefcase size={20} />, nome: 'Consultoria TI', quantidade: '~540K' },
+        { icon: <Briefcase size={20} />, nome: 'Arquitetura', quantidade: '~470K' },
+        { icon: <Briefcase size={20} />, nome: 'Engenharia', quantidade: '~425K' },
+        { icon: <Briefcase size={20} />, nome: 'Design Gráfico', quantidade: '~380K' },
+        { icon: <Briefcase size={20} />, nome: 'RH e Recrutamento', quantidade: '~310K' },
+        { icon: <Briefcase size={20} />, nome: 'Treinamentos', quantidade: '~275K' },
+        { icon: <Briefcase size={20} />, nome: 'Assessoria Empresarial', quantidade: '+6.2M outros setores' }
       ]
     },
     logistica: {
@@ -194,16 +194,16 @@ const LandingPage = () => {
       description: 'Transportadoras, distribuidoras e empresas de entrega',
       count: '1.5M+',
       cnaes: [
-        { icon: <Truck size={20} />, nome: 'Transporte Rodoviário', cnae: '4930-2/02' },
-        { icon: <Truck size={20} />, nome: 'Entregas Expressas', cnae: '5320-2/02' },
-        { icon: <Truck size={20} />, nome: 'Armazenamento', cnae: '5211-7/01' },
-        { icon: <Truck size={20} />, nome: 'Transporte de Cargas', cnae: '4930-2/01' },
-        { icon: <Truck size={20} />, nome: 'Logística', cnae: '5250-8/05' },
-        { icon: <Truck size={20} />, nome: 'Distribuição', cnae: '4635-4/02' },
-        { icon: <Truck size={20} />, nome: 'Transporte Internacional', cnae: '5212-5/00' },
-        { icon: <Truck size={20} />, nome: 'Serviços Postais', cnae: '5310-5/01' },
-        { icon: <Truck size={20} />, nome: 'Transporte Urbano', cnae: '4921-3/01' },
-        { icon: <Truck size={20} />, nome: 'Fretes', cnae: '4930-2/04' }
+        { icon: <Truck size={20} />, nome: 'Transporte Rodoviário', quantidade: '~285K' },
+        { icon: <Truck size={20} />, nome: 'Entregas Expressas', quantidade: '~195K' },
+        { icon: <Truck size={20} />, nome: 'Armazenamento', quantidade: '~148K' },
+        { icon: <Truck size={20} />, nome: 'Transporte de Cargas', quantidade: '~132K' },
+        { icon: <Truck size={20} />, nome: 'Logística', quantidade: '~115K' },
+        { icon: <Truck size={20} />, nome: 'Distribuição', quantidade: '~92K' },
+        { icon: <Truck size={20} />, nome: 'Transporte Internacional', quantidade: '~76K' },
+        { icon: <Truck size={20} />, nome: 'Serviços Postais', quantidade: '~58K' },
+        { icon: <Truck size={20} />, nome: 'Transporte Urbano', quantidade: '~47K' },
+        { icon: <Truck size={20} />, nome: 'Fretes', quantidade: '+352K outros setores' }
       ]
     },
     construcao: {
@@ -213,16 +213,16 @@ const LandingPage = () => {
       description: 'Construtoras, incorporadoras e empresas de engenharia',
       count: '900K+',
       cnaes: [
-        { icon: <Building2 size={20} />, nome: 'Construtoras', cnae: '4120-4/00' },
-        { icon: <Building2 size={20} />, nome: 'Incorporação', cnae: '4110-7/00' },
-        { icon: <Building2 size={20} />, nome: 'Reformas', cnae: '4330-4/05' },
-        { icon: <Building2 size={20} />, nome: 'Pintura', cnae: '4330-4/04' },
-        { icon: <Building2 size={20} />, nome: 'Instalações Elétricas', cnae: '4321-5/00' },
-        { icon: <Building2 size={20} />, nome: 'Instalações Hidráulicas', cnae: '4322-3/01' },
-        { icon: <Building2 size={20} />, nome: 'Terraplenagem', cnae: '4313-4/00' },
-        { icon: <Building2 size={20} />, nome: 'Alvenaria', cnae: '4330-4/01' },
-        { icon: <Building2 size={20} />, nome: 'Demolição', cnae: '4311-8/01' },
-        { icon: <Building2 size={20} />, nome: 'Pavimentação', cnae: '4212-0/00' }
+        { icon: <Building2 size={20} />, nome: 'Construtoras', quantidade: '~165K' },
+        { icon: <Building2 size={20} />, nome: 'Incorporação', quantidade: '~128K' },
+        { icon: <Building2 size={20} />, nome: 'Reformas', quantidade: '~95K' },
+        { icon: <Building2 size={20} />, nome: 'Pintura', quantidade: '~82K' },
+        { icon: <Building2 size={20} />, nome: 'Instalações Elétricas', quantidade: '~74K' },
+        { icon: <Building2 size={20} />, nome: 'Instalações Hidráulicas', quantidade: '~68K' },
+        { icon: <Building2 size={20} />, nome: 'Terraplenagem', quantidade: '~52K' },
+        { icon: <Building2 size={20} />, nome: 'Alvenaria', quantidade: '~45K' },
+        { icon: <Building2 size={20} />, nome: 'Demolição', quantidade: '~38K' },
+        { icon: <Building2 size={20} />, nome: 'Pavimentação', quantidade: '+153K outros setores' }
       ]
     },
     ecommerce: {
@@ -232,16 +232,16 @@ const LandingPage = () => {
       description: 'Lojas virtuais e marketplaces em todo território nacional',
       count: '1.2M+',
       cnaes: [
-        { icon: <ShoppingCart size={20} />, nome: 'Comércio Eletrônico', cnae: '4781-4/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Marketplace', cnae: '4789-0/99' },
-        { icon: <ShoppingCart size={20} />, nome: 'Dropshipping', cnae: '4619-2/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Loja Virtual de Roupas', cnae: '4781-4/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'E-commerce Alimentício', cnae: '4721-1/04' },
-        { icon: <ShoppingCart size={20} />, nome: 'Vendas Online', cnae: '4789-0/01' },
-        { icon: <ShoppingCart size={20} />, nome: 'Infoprodutos', cnae: '5819-1/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Assinaturas Online', cnae: '6311-9/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'Plataforma Digital', cnae: '6319-4/00' },
-        { icon: <ShoppingCart size={20} />, nome: 'E-commerce B2B', cnae: '4619-2/00' }
+        { icon: <ShoppingCart size={20} />, nome: 'Comércio Eletrônico', quantidade: '~320K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Marketplace', quantidade: '~185K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Dropshipping', quantidade: '~140K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Loja Virtual de Roupas', quantidade: '~95K' },
+        { icon: <ShoppingCart size={20} />, nome: 'E-commerce Alimentício', quantidade: '~78K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Vendas Online', quantidade: '~67K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Infoprodutos', quantidade: '~52K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Assinaturas Online', quantidade: '~43K' },
+        { icon: <ShoppingCart size={20} />, nome: 'Plataforma Digital', quantidade: '~38K' },
+        { icon: <ShoppingCart size={20} />, nome: 'E-commerce B2B', quantidade: '+182K outros setores' }
       ]
     }
   };
@@ -416,7 +416,7 @@ const LandingPage = () => {
                       <div className="cnae-icon">{cnae.icon}</div>
                       <div className="cnae-info">
                         <div className="cnae-nome">{cnae.nome}</div>
-                        <div className="cnae-codigo">CNAE {cnae.cnae}</div>
+                        <div className="cnae-codigo">{cnae.quantidade} empresas</div>
                       </div>
                     </div>
                   ))}
