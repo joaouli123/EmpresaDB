@@ -111,7 +111,7 @@ GET /api/v1/cnpj/{cnpj}/socios
 GET /api/v1/cnaes?search=comercio&limit=100
 ```
 
-### Municípios por UF
+###Municípios por UF
 
 ```bash
 GET /api/v1/municipios/SP
@@ -174,21 +174,28 @@ GET /api/v1/stats
 └── requirements.txt        # Dependências Python
 ```
 
-## 🔐 Segurança
+## 🔐 Autenticação
 
-- A API aceita requisições de qualquer origem (CORS aberto)
-- Não há autenticação (dados públicos)
-- Para produção, considere adicionar rate limiting e autenticação por API key
+O sistema utiliza **API Keys** para autenticação segura:
 
-## 📝 Observações
+1. Faça login no dashboard web
+2. Acesse a página "Chaves de API"
+3. Gere uma nova chave de API
+4. Use a chave no header `X-API-Key` em todas as requisições
 
-- Os dados são atualizados mensalmente pela Receita Federal
-- O CNPJ é dividido em: CNPJ Básico (8) + Ordem (4) + DV (2) = 14 dígitos
-- A chave de ligação entre tabelas é o `cnpj_basico` (8 primeiros dígitos)
-- CNPJs são armazenados sem pontuação (apenas números)
+Exemplo:
+```bash
+# Consultar CNPJ usando API Key
+curl http://localhost:8000/cnpj/00000000000191 \
+  -H "X-API-Key: SUA_CHAVE_API_AQUI"
 
-## 🆘 Suporte
+# Buscar empresas
+curl "http://localhost:8000/search?uf=SP&situacao_cadastral=02" \
+  -H "X-API-Key: SUA_CHAVE_API_AQUI"
+```
 
-Para problemas ou dúvidas sobre a estrutura dos dados da Receita Federal:
-- https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf
-- https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-da-pessoa-juridica---cnpj
+**Vantagens da API Key:**
+- ✅ Permanente (não expira)
+- ✅ Ideal para integrações e scripts
+- ✅ Rastreamento de uso por chave
+- ✅ Fácil revogação em caso de comprometimento

@@ -332,3 +332,33 @@ for item in empresas['items']:
 ## 🎉 Pronto!
 
 Você agora tem um sistema completo de consulta de CNPJs. Bom uso! 🚀
+
+## 🔑 Autenticação
+
+Todas as requisições precisam de autenticação via **API Key**:
+
+```bash
+# Gere sua API Key no Dashboard Web:
+# 1. Acesse http://localhost:5000
+# 2. Faça login
+# 3. Vá em "Chaves de API"
+# 4. Clique em "Nova Chave"
+# 5. Copie a chave gerada
+
+# Use a chave em todas as requisições:
+curl http://localhost:8000/cnpj/00000000000191 \
+  -H "X-API-Key: SUA_CHAVE_API_AQUI"
+
+# Exemplo com Python:
+import requests
+
+headers = {'X-API-Key': 'SUA_CHAVE_API_AQUI'}
+response = requests.get('http://localhost:8000/search?uf=SP', headers=headers)
+print(response.json())
+```
+
+**Por que API Key ao invés de JWT?**
+- ✅ Mais simples para integrações
+- ✅ Não expira (permanente até você revogar)
+- ✅ Ideal para vender assinaturas de acesso
+- ✅ Rastreamento individual de uso por cliente
