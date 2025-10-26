@@ -30,14 +30,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
+      console.log('[AUTH] Tentando login com:', credentials.username);
       const response = await authAPI.login(credentials);
+      console.log('[AUTH] Resposta completa:', response);
+      console.log('[AUTH] Response data:', response.data);
       const { access_token, user } = response.data;
+      console.log('[AUTH] Token:', access_token);
+      console.log('[AUTH] User:', user);
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
       setToken(access_token);
       setUser(user);
       return { success: true };
     } catch (error) {
+      console.error('[AUTH] Erro no login:', error);
+      console.error('[AUTH] Erro response:', error.response);
+      console.error('[AUTH] Erro response data:', error.response?.data);
       return { 
         success: false, 
         error: error.response?.data?.detail || 'Login failed' 
