@@ -1,0 +1,66 @@
+============================================
+VERIFICAR STATUS DAS OTIMIZAÇÕES NA VPS
+Execute na VPS para ver o que já foi aplicado
+============================================
+
+# 1. Verificar se MATERIALIZED VIEW existe
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT 
+    schemaname,
+    matviewname as nome,
+    pg_size_pretty(pg_total_relation_size(schemaname||'.'||matviewname)) as tamanho
+FROM pg_matviews
+WHERE matviewname LIKE '%estabelecimentos%';
+EOF
+
+# 2. Verificar TODOS os índices relacionados
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT 
+    tablename,
+    indexname,
+    pg_size_pretty(pg_relation_size(indexname::regclass)) as tamanho
+FROM pg_indexes
+WHERE tablename LIKE '%estabelecimentos%'
+   OR indexname LIKE '%mv%'
+ORDER BY tablename, indexname;
+EOF
+
+# 3. Contar quantos índices existem na view
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT COUNT(*) as total_indices
+FROM pg_indexes
+WHERE tablename = 'vw_estabelecimentos_completos';
+EOF
+
+# 4. Ver tamanho do banco completo
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT 
+    pg_size_pretty(pg_database_size('cnpj_db')) as tamanho_total_banco;
+EOF
+
+# 5. Verificar se extensões necessárias estão instaladas
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT extname, extversion 
+FROM pg_extension 
+WHERE extname IN ('pg_trgm', 'btree_gin');
+EOF
+
+============================================
+INTERPRETAÇÃO DOS RESULTADOS:
+============================================
+
+MATERIALIZED VIEW:
+- Se mostrar "vw_estabelecimentos_completos" → ✅ CRIADA!
+- Se tamanho > 10GB → ✅ Populada com dados!
+- Se vazio ou erro → ❌ Ainda não foi criada
+
+ÍNDICES:
+- Se mostrar 10+ índices → ✅ CRIADOS!
+- Se mostrar < 10 → ⚠️ Faltam alguns
+- Se total_indices = 0 → ❌ Não foram criados
+
+EXTENSÕES:
+- pg_trgm → Necessária para índices TRIGRAM
+- btree_gin → Necessária para índices GIN
+
+============================================
