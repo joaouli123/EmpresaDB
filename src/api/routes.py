@@ -92,14 +92,30 @@ async def root():
 
 @router.get("/stats", response_model=StatsResponse)
 async def get_stats():
+    """
+    Retorna estatísticas do banco de dados
+    Cache: 10 minutos (contagens são estimativas rápidas)
+    """
+    cache_key = "stats_cached"
+    
+    # Verifica cache primeiro (10 minutos)
+    cached_stats = get_from_cache(cache_key)
+    if cached_stats:
+        return cached_stats
+    
     try:
-        return StatsResponse(
+        stats = StatsResponse(
             total_empresas=db_manager.get_table_count('empresas') or 0,
             total_estabelecimentos=db_manager.get_table_count('estabelecimentos') or 0,
             total_socios=db_manager.get_table_count('socios') or 0,
             total_cnaes=db_manager.get_table_count('cnaes') or 0,
             total_municipios=db_manager.get_table_count('municipios') or 0
         )
+        
+        # Cacheia por 10 minutos
+        set_cache(cache_key, stats, minutes=10)
+        
+        return stats
     except Exception as e:
         logger.error(f"Erro ao obter estatísticas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
