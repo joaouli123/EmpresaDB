@@ -1,0 +1,38 @@
+Last login: Sun Oct 26 07:23:43 2025 from 169.254.0.1
+root@srv1080561:~# docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db
+^X^Croot@srv1080561docker exec -it cnpj_postgres psql -U cnpj_user -d cnpj_dbj_db
+psql (16.10)
+Type "help" for help.
+
+cnpj_db=# \timing on
+Timing is on.
+cnpj_db=# SELECT * FROM vw_estabelecimentos_completos WHERE cnpj_completo = '00000000000191' LIMIT 1;
+ cnpj_completo | identificador_matriz_filial | razao_social | nome_fantasia | situacao_cadastral | data_situacao_cadastral | motivo_situacao_cadastral_desc | data_inicio_atividade | cnae_fiscal_principal | cnae_fiscal_secundaria | cnae_principal_desc | tipo_logradouro | logradouro | numero | complemento | bairro | cep | uf | municipio_desc | ddd_1 | telefone_1 | correio_eletronico | natureza_juridica | natureza_juridica_desc | porte_empresa | capital_social | ente_federativo_responsavel | opcao_simples | opcao_mei
+---------------+-----------------------------+--------------+---------------+--------------------+-------------------------+--------------------------------+-----------------------+-----------------------+------------------------+---------------------+-----------------+------------+--------+-------------+--------+-----+----+----------------+-------+------------+--------------------+-------------------+------------------------+---------------+----------------+-----------------------------+---------------+-----------
+(0 rows)
+
+Time: 25.589 ms
+cnpj_db=# SELECT cnpj_completo, razao_social FROM vw_estabelecimentos_completos WHERE razao_social ILIKE '%PETROBRAS%' LIMIT 10;
+ cnpj_completo  |                                           razao_social
+----------------+--------------------------------------------------------------------------------------------------
+ 08487089000174 | FUNDO DE INVESTIMENTO EM DIREITOS CREDITORIOS FORNECEDORES PETROBRAS BR1 - INDUSTRIAL E SERVICOS
+ 03859884000122 | ITAU PETROBRAS FUNDO MUTUO DE PRIVATIZACAO - FGTS CARTEIRA LIVRE
+ 31504335000170 | NUCLEO REGIONAL MACAE ASSOCIACAO ENGENHEIROS PETROBRAS
+ 03919418000195 | SUL AMERICA GRESUL FUNDO MUTUO DE PRIVATIZACAO - FGTS PETROBRAS
+ 45729902000100 | CEPE CLUBE DOS EMPREGADOS DA PETROBRAS
+ 03925570000180 | OPPORTUNITY FUNDO MUTUO DE PRIVATIZACAO - FGTS PETROBRAS
+ 05597139000188 | PETROBRAS XXXIV TRUST LLT
+ 02709449006009 | PETROBRAS TRANSPORTE S.A - TRANSPETRO
+ 02709449010200 | PETROBRAS TRANSPORTE S.A - TRANSPETRO
+ 02709449010898 | PETROBRAS TRANSPORTE S.A - TRANSPETRO
+(10 rows)
+
+Time: 218.467 ms
+cnpj_db=# SELECT pg_size_pretty(pg_total_relation_size('vw_estabelecimentos_completos')) as tamanho;
+ tamanho
+---------
+ 26 GB
+(1 row)
+
+Time: 3.513 ms
+cnpj_db=#
