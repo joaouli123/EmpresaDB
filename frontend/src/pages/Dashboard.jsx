@@ -62,6 +62,9 @@ const Dashboard = () => {
   const convertDateToISO = (dateStr) => {
     if (!dateStr) return null;
 
+    // Remove espaços extras
+    dateStr = dateStr.trim();
+
     // Se já está no formato YYYY-MM-DD, retorna como está
     if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
       return dateStr;
@@ -70,9 +73,19 @@ const Dashboard = () => {
     // Se está no formato DD/MM/YYYY, converte para YYYY-MM-DD
     if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
       const [day, month, year] = dateStr.split('/');
-      return `${year}-${month}-${day}`;
+      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      console.log(`🔄 Convertendo data: ${dateStr} → ${isoDate}`);
+      return isoDate;
     }
 
+    // Se está no formato YYYY/MM/DD, converte para YYYY-MM-DD
+    if (dateStr.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+      const isoDate = dateStr.replace(/\//g, '-');
+      console.log(`🔄 Convertendo data: ${dateStr} → ${isoDate}`);
+      return isoDate;
+    }
+
+    console.error(`❌ Formato de data inválido: ${dateStr}`);
     return null;
   };
 

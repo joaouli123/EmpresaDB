@@ -299,14 +299,34 @@ async def search_companies(
                 params.append(situacao)
 
             if data_inicio_atividade_min:
-                logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min} (>= {data_inicio_atividade_min})")
-                conditions.append("data_inicio_atividade IS NOT NULL AND data_inicio_atividade >= %s::date")
-                params.append(data_inicio_atividade_min)
+                # Validar formato YYYY-MM-DD
+                try:
+                    from datetime import datetime
+                    datetime.strptime(data_inicio_atividade_min, '%Y-%m-%d')
+                    logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min}")
+                    conditions.append("data_inicio_atividade >= %s")
+                    params.append(data_inicio_atividade_min)
+                except ValueError:
+                    logger.error(f"❌ Data mínima inválida: {data_inicio_atividade_min} (esperado YYYY-MM-DD)")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"data_inicio_atividade_min deve estar no formato YYYY-MM-DD (ex: 2025-09-01)"
+                    )
 
             if data_inicio_atividade_max:
-                logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max} (<= {data_inicio_atividade_max})")
-                conditions.append("data_inicio_atividade IS NOT NULL AND data_inicio_atividade <= %s::date")
-                params.append(data_inicio_atividade_max)
+                # Validar formato YYYY-MM-DD
+                try:
+                    from datetime import datetime
+                    datetime.strptime(data_inicio_atividade_max, '%Y-%m-%d')
+                    logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max}")
+                    conditions.append("data_inicio_atividade <= %s")
+                    params.append(data_inicio_atividade_max)
+                except ValueError:
+                    logger.error(f"❌ Data máxima inválida: {data_inicio_atividade_max} (esperado YYYY-MM-DD)")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"data_inicio_atividade_max deve estar no formato YYYY-MM-DD (ex: 2025-09-02)"
+                    )
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
