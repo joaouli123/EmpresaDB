@@ -21,6 +21,10 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/subscriptions': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/cnpj': {
         target: 'http://localhost:8000',
         changeOrigin: true,
