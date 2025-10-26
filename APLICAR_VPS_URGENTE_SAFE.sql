@@ -180,11 +180,51 @@ BEGIN
     END IF;
 END $$;
 
--- 6.2. Renomear nova para nome oficial (SWAP ATÔMICO!)
+-- 6.2. Renomear índices da view antiga (_old) para evitar conflito
+-- ✅ Isso libera os nomes idx_mv_estabelecimentos_* para os índices novos
+DO $$
+BEGIN
+    -- Renomear índices da view antiga SE ela existir como MATERIALIZED VIEW
+    IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'vw_estabelecimentos_completos_old') THEN
+        -- Tentar renomear cada índice (pode não existir em todas as instalações)
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_cnpj_unique 
+        RENAME TO idx_mv_old_estabelecimentos_cnpj_unique;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_razao_social 
+        RENAME TO idx_mv_old_estabelecimentos_razao_social;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_nome_fantasia 
+        RENAME TO idx_mv_old_estabelecimentos_nome_fantasia;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_uf 
+        RENAME TO idx_mv_old_estabelecimentos_uf;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_situacao 
+        RENAME TO idx_mv_old_estabelecimentos_situacao;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_cnae 
+        RENAME TO idx_mv_old_estabelecimentos_cnae;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_municipio 
+        RENAME TO idx_mv_old_estabelecimentos_municipio;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_uf_situacao 
+        RENAME TO idx_mv_old_estabelecimentos_uf_situacao;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_razao_social_trgm 
+        RENAME TO idx_mv_old_estabelecimentos_razao_social_trgm;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_nome_fantasia_trgm 
+        RENAME TO idx_mv_old_estabelecimentos_nome_fantasia_trgm;
+    END IF;
+END $$;
+
+-- 6.3. Renomear nova para nome oficial (SWAP ATÔMICO!)
 ALTER MATERIALIZED VIEW vw_estabelecimentos_completos_new 
 RENAME TO vw_estabelecimentos_completos;
 
--- 6.3. Renomear os índices também
+-- 6.4. Renomear os índices da view nova para nomes oficiais
+-- ✅ Agora os nomes estão livres (view antiga usa sufixo _old)
 ALTER INDEX idx_mv_new_estabelecimentos_cnpj_unique RENAME TO idx_mv_estabelecimentos_cnpj_unique;
 ALTER INDEX idx_mv_new_estabelecimentos_razao_social RENAME TO idx_mv_estabelecimentos_razao_social;
 ALTER INDEX idx_mv_new_estabelecimentos_nome_fantasia RENAME TO idx_mv_estabelecimentos_nome_fantasia;
