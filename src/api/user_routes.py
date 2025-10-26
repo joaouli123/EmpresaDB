@@ -127,3 +127,18 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
             'avg_response_time': '45ms',
             'last_update': 'Hoje'
         }
+
+@router.get("/rate-limit-status")
+async def get_rate_limit_status(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna status atual de rate limiting do usuário
+    """
+    from src.api.rate_limiter import rate_limiter
+    
+    user_plan = current_user.get('subscription_plan', 'free')
+    status = rate_limiter.get_rate_limit_status(current_user['id'], user_plan)
+    
+    return {
+        'success': True,
+        'data': status
+    }
