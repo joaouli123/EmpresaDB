@@ -104,14 +104,47 @@ async def get_stats():
         logger.error(f"Erro ao obter estatísticas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def get_user_from_jwt_or_api_key(
+    x_api_key: str = Header(None),
+    authorization: str = Header(None)
+) -> dict:
+    """
+    Aceita autenticação via API Key (header X-API-Key) OU JWT token
+    """
+    # Tentar API Key primeiro
+    if x_api_key:
+        user = await db_manager.verify_api_key(x_api_key)
+        if user:
+            return user
+    
+    # Tentar JWT token
+    if authorization and authorization.startswith("Bearer "):
+        from src.api.auth import get_current_user
+        from fastapi import Request
+        # Criar um request fake para get_current_user
+        try:
+            token = authorization.replace("Bearer ", "")
+            # Validar JWT manualmente
+            from src.api.auth import verify_token
+            payload = verify_token(token)
+            if payload:
+                return payload
+        except:
+            pass
+    
+    raise HTTPException(
+        status_code=401,
+        detail="Autenticação necessária. Use API Key (header X-API-Key) ou JWT token (header Authorization)"
+    )
+
 @router.get("/cnpj/{cnpj}")
 async def get_cnpj_data(
     cnpj: str,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_user_from_jwt_or_api_key)
 ):
     """
-    Consulta dados de CNPJ (usuários autenticados)
-    Requer autenticação JWT (qualquer usuário logado)
+    Consulta dados de CNPJ
+    Requer autenticação via API Key (X-API-Key) ou JWT token
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
@@ -183,6 +216,12 @@ async def get_cnpj_data(
             data['cnpj_basico'] = cleaned_cnpj[:8]
             data['cnpj_ordem'] = cleaned_cnpj[8:12]
             data['cnpj_dv'] = cleaned_cnpj[12:14]
+
+            # Converter datas para string (formato ISO)
+            if data.get('data_situacao_cadastral'):
+                data['data_situacao_cadastral'] = str(data['data_situacao_cadastral'])
+            if data.get('data_inicio_atividade'):
+                data['data_inicio_atividade'] = str(data['data_inicio_atividade'])
 
             # Buscar CNAEs secundários com descrições
             cnae_secundarios = []
