@@ -14,20 +14,22 @@ logger = logging.getLogger(__name__)
 class RateLimiter:
     # 🎯 LIMITES POR PLANO DE ASSINATURA
     RATE_LIMITS = {
-        'free': {'requests': 300, 'window': 3600},      # 300 req/hora (5 req/min)
-        'basic': {'requests': 1000, 'window': 3600},    # 1.000 req/hora (~16 req/min)
-        'professional': {'requests': 3000, 'window': 3600},  # 3.000 req/hora (50 req/min)
-        'enterprise': {'requests': 10000, 'window': 3600},   # 10.000 req/hora (166 req/min)
-        'admin': {'requests': 50000, 'window': 3600}    # 50.000 req/hora (833 req/min)
+        'free': {'requests': 600, 'window': 3600},      # 600 req/hora (10 req/min)
+        'start': {'requests': 3600, 'window': 3600},    # 3.600 req/hora (60 req/min)
+        'growth': {'requests': 18000, 'window': 3600},  # 18.000 req/hora (300 req/min)
+        'pro': {'requests': 60000, 'window': 3600},     # 60.000 req/hora (1000 req/min)
+        'enterprise': {'requests': 100000, 'window': 3600}, # 100.000 req/hora (customizado)
+        'admin': {'requests': 200000, 'window': 3600}   # 200.000 req/hora (admin)
     }
     
     # 🔥 LIMITES DE BURST (requisições em rajada - 1 minuto)
     BURST_LIMITS = {
-        'free': 30,           # Máx 30 req/min
-        'basic': 100,         # Máx 100 req/min
-        'professional': 300,  # Máx 300 req/min
-        'enterprise': 1000,   # Máx 1.000 req/min
-        'admin': 5000         # Máx 5.000 req/min
+        'free': 10,           # Máx 10 req/min
+        'start': 60,          # Máx 60 req/min
+        'growth': 300,        # Máx 300 req/min
+        'pro': 1000,          # Máx 1.000 req/min
+        'enterprise': 5000,   # Máx 5.000 req/min (customizado)
+        'admin': 10000        # Máx 10.000 req/min
     }
     
     def __init__(self):
@@ -42,7 +44,7 @@ class RateLimiter:
         
         Args:
             user_id: ID do usuário
-            user_plan: Plano do usuário (free, basic, professional, enterprise, admin)
+            user_plan: Plano do usuário (free, start, growth, pro, enterprise, admin)
             max_requests: Limite customizado (sobrescreve plano)
             window_seconds: Janela de tempo customizada (sobrescreve plano)
         """
