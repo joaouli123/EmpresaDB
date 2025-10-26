@@ -11,7 +11,7 @@ from src.api.models import (
     CNAEModel,
     MunicipioModel
 )
-from src.api.auth import get_current_user, get_current_admin_user
+from src.api.auth import get_current_admin_user
 from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
 import logging
@@ -758,10 +758,10 @@ async def stop_etl(current_user: dict = Depends(get_current_admin_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/etl/status")
-async def get_etl_status(current_user: dict = Depends(get_current_user)):
+async def get_etl_status(current_user: dict = Depends(get_current_admin_user)):
     """
-    Obtém status do ETL (usuários autenticados)
-    Requer autenticação JWT (qualquer usuário logado)
+    Obtém status do ETL (apenas administradores)
+    Requer autenticação JWT com role de admin
     """
     return {
         "is_running": etl_controller.is_running,
@@ -787,10 +787,10 @@ async def update_etl_config(config: Dict[str, Any], current_user: dict = Depends
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/etl/database-stats")
-async def get_database_stats(current_user: dict = Depends(get_current_user)):
+async def get_database_stats(current_user: dict = Depends(get_current_admin_user)):
     """
-    Obtém estatísticas do banco de dados (usuários autenticados)
-    Requer autenticação JWT (qualquer usuário logado)
+    Obtém estatísticas do banco de dados (apenas administradores)
+    Requer autenticação JWT com role de admin
     """
     try:
         stats = await etl_controller.get_database_stats()
