@@ -279,12 +279,15 @@ def cache_decorator(ttl_seconds: int = 3600, key_prefix: str = ""):
 
 
 # Instância global do cache
-# CONFIGURAR O HOST DO REDIS NA VPS!
+# Redis configurado na VPS com senha!
+import os
+from src.config import settings
+
 cache = RedisCache(
-    host='localhost',  # ou IP da VPS se Redis estiver em outra máquina
-    port=6379,
+    host=os.getenv('REDIS_HOST', '72.61.217.143'),  # IP da VPS
+    port=int(os.getenv('REDIS_PORT', '6379')),
     db=0,
-    password=None  # Adicionar senha em produção!
+    password=os.getenv('REDIS_PASSWORD', None)  # Senha do Redis
 )
 
 # Exemplo de uso:
