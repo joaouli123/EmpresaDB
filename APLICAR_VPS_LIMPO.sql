@@ -1,0 +1,238 @@
+
+\timing on
+
+SELECT 
+    'INÍCIO DA OTIMIZAÇÃO (ZERO DOWNTIME)' as status,
+    pg_size_pretty(pg_database_size('cnpj_db')) as tamanho_db,
+    NOW() as inicio;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS btree_gin;
+
+SELECT 'Passo 1: Extensões verificadas' as status;
+
+SELECT 
+    indexname, 
+    pg_size_pretty(pg_relation_size(indexname::regclass)) as tamanho
+FROM pg_indexes 
+WHERE indexname IN ('idx_estabelecimentos_cnpj_basico', 'idx_estabelecimentos_uf_situacao')
+AND schemaname = 'public';
+
+DROP INDEX IF EXISTS idx_estabelecimentos_cnpj_basico;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_cnpj_basico 
+ON estabelecimentos(cnpj_basico);
+
+DROP INDEX IF EXISTS idx_estabelecimentos_uf_situacao;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_uf_situacao 
+ON estabelecimentos(uf, situacao_cadastral);
+
+SELECT 'Passo 2: Índices base corrigidos (se necessário)' as status;
+
+SELECT 'Passo 3: Criando MATERIALIZED VIEW temporária (30-60min, API continua funcionando!)...' as status;
+
+DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_new;
+
+CREATE MATERIALIZED VIEW vw_estabelecimentos_completos_new AS
+SELECT 
+    e.cnpj_completo,
+    e.identificador_matriz_filial,
+    emp.razao_social,
+    e.nome_fantasia,
+    e.situacao_cadastral,
+    e.data_situacao_cadastral,
+    msc.descricao as motivo_situacao_cadastral_desc,
+    e.data_inicio_atividade,
+    e.cnae_fiscal_principal,
+    e.cnae_fiscal_secundaria,
+    cnae.descricao as cnae_principal_desc,
+    e.tipo_logradouro,
+    e.logradouro,
+    e.numero,
+    e.complemento,
+    e.bairro,
+    e.cep,
+    e.uf,
+    mun.descricao as municipio_desc,
+    e.ddd_1,
+    e.telefone_1,
+    e.correio_eletronico,
+    emp.natureza_juridica,
+    nj.descricao as natureza_juridica_desc,
+    emp.porte_empresa,
+    emp.capital_social,
+    emp.ente_federativo_responsavel,
+    sn.opcao_simples,
+    sn.opcao_mei
+FROM estabelecimentos e
+INNER JOIN empresas emp ON e.cnpj_basico = emp.cnpj_basico
+LEFT JOIN cnaes cnae ON e.cnae_fiscal_principal = cnae.codigo
+LEFT JOIN municipios mun ON e.municipio = mun.codigo
+LEFT JOIN motivos_situacao_cadastral msc ON e.motivo_situacao_cadastral = msc.codigo
+LEFT JOIN naturezas_juridicas nj ON emp.natureza_juridica = nj.codigo
+LEFT JOIN simples_nacional sn ON e.cnpj_basico = sn.cnpj_basico;
+
+SELECT 
+    'Passo 3: MATERIALIZED VIEW temporária criada!' as status,
+    pg_size_pretty(pg_total_relation_size('vw_estabelecimentos_completos_new')) as tamanho;
+
+SELECT 'Passo 4: Criando índices (20-30min, API continua funcionando!)...' as status;
+
+CREATE UNIQUE INDEX idx_mv_new_estabelecimentos_cnpj_unique 
+ON vw_estabelecimentos_completos_new(cnpj_completo);
+
+CREATE INDEX idx_mv_new_estabelecimentos_razao_social 
+ON vw_estabelecimentos_completos_new(razao_social);
+
+CREATE INDEX idx_mv_new_estabelecimentos_nome_fantasia 
+ON vw_estabelecimentos_completos_new(nome_fantasia);
+
+CREATE INDEX idx_mv_new_estabelecimentos_uf 
+ON vw_estabelecimentos_completos_new(uf);
+
+CREATE INDEX idx_mv_new_estabelecimentos_situacao 
+ON vw_estabelecimentos_completos_new(situacao_cadastral);
+
+CREATE INDEX idx_mv_new_estabelecimentos_cnae 
+ON vw_estabelecimentos_completos_new(cnae_fiscal_principal);
+
+CREATE INDEX idx_mv_new_estabelecimentos_municipio 
+ON vw_estabelecimentos_completos_new(municipio_desc);
+
+CREATE INDEX idx_mv_new_estabelecimentos_uf_situacao 
+ON vw_estabelecimentos_completos_new(uf, situacao_cadastral);
+
+CREATE INDEX idx_mv_new_estabelecimentos_razao_social_trgm 
+ON vw_estabelecimentos_completos_new USING gin(razao_social gin_trgm_ops);
+
+CREATE INDEX idx_mv_new_estabelecimentos_nome_fantasia_trgm 
+ON vw_estabelecimentos_completos_new USING gin(nome_fantasia gin_trgm_ops);
+
+SELECT 'Passo 4: Todos os índices criados!' as status;
+
+ANALYZE vw_estabelecimentos_completos_new;
+
+SELECT 'Passo 5: Estatísticas atualizadas' as status;
+
+SELECT 'Passo 6: Preparando swap atômico...' as status;
+
+BEGIN;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_views WHERE viewname = 'vw_estabelecimentos_completos') THEN
+        DROP VIEW IF EXISTS vw_estabelecimentos_completos_old CASCADE;
+        ALTER VIEW vw_estabelecimentos_completos RENAME TO vw_estabelecimentos_completos_old;
+    END IF;
+    
+    IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'vw_estabelecimentos_completos') THEN
+        DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_old;
+        ALTER MATERIALIZED VIEW vw_estabelecimentos_completos RENAME TO vw_estabelecimentos_completos_old;
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'vw_estabelecimentos_completos_old') THEN
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_cnpj_unique 
+        RENAME TO idx_mv_old_estabelecimentos_cnpj_unique;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_razao_social 
+        RENAME TO idx_mv_old_estabelecimentos_razao_social;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_nome_fantasia 
+        RENAME TO idx_mv_old_estabelecimentos_nome_fantasia;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_uf 
+        RENAME TO idx_mv_old_estabelecimentos_uf;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_situacao 
+        RENAME TO idx_mv_old_estabelecimentos_situacao;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_cnae 
+        RENAME TO idx_mv_old_estabelecimentos_cnae;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_municipio 
+        RENAME TO idx_mv_old_estabelecimentos_municipio;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_uf_situacao 
+        RENAME TO idx_mv_old_estabelecimentos_uf_situacao;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_razao_social_trgm 
+        RENAME TO idx_mv_old_estabelecimentos_razao_social_trgm;
+        
+        ALTER INDEX IF EXISTS idx_mv_estabelecimentos_nome_fantasia_trgm 
+        RENAME TO idx_mv_old_estabelecimentos_nome_fantasia_trgm;
+    END IF;
+END $$;
+
+ALTER MATERIALIZED VIEW vw_estabelecimentos_completos_new 
+RENAME TO vw_estabelecimentos_completos;
+
+ALTER INDEX idx_mv_new_estabelecimentos_cnpj_unique RENAME TO idx_mv_estabelecimentos_cnpj_unique;
+ALTER INDEX idx_mv_new_estabelecimentos_razao_social RENAME TO idx_mv_estabelecimentos_razao_social;
+ALTER INDEX idx_mv_new_estabelecimentos_nome_fantasia RENAME TO idx_mv_estabelecimentos_nome_fantasia;
+ALTER INDEX idx_mv_new_estabelecimentos_uf RENAME TO idx_mv_estabelecimentos_uf;
+ALTER INDEX idx_mv_new_estabelecimentos_situacao RENAME TO idx_mv_estabelecimentos_situacao;
+ALTER INDEX idx_mv_new_estabelecimentos_cnae RENAME TO idx_mv_estabelecimentos_cnae;
+ALTER INDEX idx_mv_new_estabelecimentos_municipio RENAME TO idx_mv_estabelecimentos_municipio;
+ALTER INDEX idx_mv_new_estabelecimentos_uf_situacao RENAME TO idx_mv_estabelecimentos_uf_situacao;
+ALTER INDEX idx_mv_new_estabelecimentos_razao_social_trgm RENAME TO idx_mv_estabelecimentos_razao_social_trgm;
+ALTER INDEX idx_mv_new_estabelecimentos_nome_fantasia_trgm RENAME TO idx_mv_estabelecimentos_nome_fantasia_trgm;
+
+COMMIT;
+
+SELECT '✅ Passo 6: SWAP COMPLETO! API agora usa MATERIALIZED VIEW otimizada!' as status;
+
+SELECT 
+    'Passo 7: View antiga preservada como backup (_old)' as status,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM pg_views WHERE viewname = 'vw_estabelecimentos_completos_old')
+        THEN 'VIEW antiga existe (backup disponível)'
+        WHEN EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'vw_estabelecimentos_completos_old')
+        THEN 'MATERIALIZED VIEW antiga existe (backup disponível)'
+        ELSE 'Sem backup (primeira instalação)'
+    END as status_backup;
+
+ANALYZE vw_estabelecimentos_completos;
+ANALYZE estabelecimentos;
+ANALYZE empresas;
+ANALYZE socios;
+
+SELECT 'Passo 8: Estatísticas globais atualizadas' as status;
+
+SELECT 
+    '✅ OTIMIZAÇÃO COMPLETA - ZERO DOWNTIME!' as status,
+    pg_size_pretty(pg_database_size('cnpj_db')) as tamanho_db_final,
+    NOW() as fim;
+
+SELECT 
+    'MATERIALIZED VIEW FINAL' as tipo,
+    pg_size_pretty(pg_total_relation_size('vw_estabelecimentos_completos')) as tamanho_total,
+    pg_size_pretty(pg_relation_size('vw_estabelecimentos_completos')) as tamanho_dados,
+    pg_size_pretty(pg_total_relation_size('vw_estabelecimentos_completos') - pg_relation_size('vw_estabelecimentos_completos')) as tamanho_indices;
+
+SELECT 
+    indexname,
+    pg_size_pretty(pg_relation_size(indexname::regclass)) as tamanho
+FROM pg_indexes
+WHERE tablename = 'vw_estabelecimentos_completos'
+ORDER BY pg_relation_size(indexname::regclass) DESC;
+
+SELECT '🚀 TESTANDO PERFORMANCE...' as status;
+
+\timing on
+EXPLAIN ANALYZE
+SELECT * FROM vw_estabelecimentos_completos
+WHERE cnpj_completo = '00000000000191'
+LIMIT 1;
+
+EXPLAIN ANALYZE
+SELECT COUNT(*) FROM vw_estabelecimentos_completos
+WHERE uf = 'SP' AND situacao_cadastral = '02';
+
+EXPLAIN ANALYZE
+SELECT * FROM vw_estabelecimentos_completos
+WHERE razao_social ILIKE '%PETROBRAS%'
+LIMIT 10;
+
+SELECT '✅ TESTES CONCLUÍDOS!' as status;
