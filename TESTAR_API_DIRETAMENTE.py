@@ -12,7 +12,7 @@ from datetime import datetime
 API_URL = "https://458a29a2-33bc-4703-8186-ff6ee7c25cf9-00-twvo7peuo4pj.kirk.replit.dev"
 
 # Sua API Key (substitua pela sua)
-API_KEY = "sk_G6yLHFzYjh_8XS1KCYuHQoCk8kM4CDRy4gGwE9eV"
+API_KEY = "sk_G6yLHFzYjh_8XS1KCYuHQoCk8kM4CDRy4gGwE9eV-Q8"
 
 
 def test_date_filter():
