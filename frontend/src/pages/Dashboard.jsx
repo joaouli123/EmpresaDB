@@ -33,6 +33,7 @@ const Dashboard = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
+  const [selectedCompany, setSelectedCompany] = useState(null); // State to hold selected company details for modal
 
   useEffect(() => {
     loadData();
@@ -126,6 +127,25 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCompanyClick = async (cnpj) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await cnpjAPI.getCompanyByCNPJ(cnpj);
+      setSelectedCompany(response.data);
+    } catch (err) {
+      console.error('Error fetching company details:', err);
+      setError('Falha ao carregar detalhes da empresa.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCompany(null);
+    setError(null); // Clear error when closing modal
   };
 
 
@@ -313,7 +333,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Seção de Busca de Empresas (se houver) */}
+      {/* Seção de Busca de Empresas */}
       <div className="card search-filters">
         <div className="card-header">
           <Users size={20} />
@@ -415,6 +435,7 @@ const Dashboard = () => {
                 <th>Município</th>
                 <th>UF</th>
                 <th>Status</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -426,6 +447,9 @@ const Dashboard = () => {
                   <td>{item.municipio}</td>
                   <td>{item.uf}</td>
                   <td>{item.situacao_cadastral}</td>
+                  <td>
+                    <button onClick={() => handleCompanyClick(item.cnpj)} className="details-button">Ver Detalhes</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -434,6 +458,88 @@ const Dashboard = () => {
             <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
             <span>Página {currentPage} de {totalPages}</span>
             <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Detalhes da Empresa */}
+      {selectedCompany && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Detalhes da Empresa</h3>
+              <button onClick={handleCloseModal} className="close-modal-button">&times;</button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-section">
+                <h4>Informações Gerais</h4>
+                <div className="detail-item">
+                  <span className="detail-label">CNPJ:</span>
+                  <span className="detail-value">{selectedCompany.cnpj}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Razão Social:</span>
+                  <span className="detail-value">{selectedCompany.razao_social}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Nome Fantasia:</span>
+                  <span className="detail-value">{selectedCompany.nome_fantasia}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">UF:</span>
+                  <span className="detail-value">{selectedCompany.uf}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Município:</span>
+                  <span className="detail-value">{selectedCompany.municipio}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Situação Cadastral:</span>
+                  <span className="detail-value">{selectedCompany.situacao_cadastral}</span>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h4>Datas</h4>
+                <div className="detail-item">
+                  <span className="detail-label">Data Início Atividade:</span>
+                  <span className="detail-value">
+                    {selectedCompany.data_inicio_atividade
+                      ? (() => {
+                        const [year, month, day] = selectedCompany.data_inicio_atividade.split('-');
+                        return `${day}/${month}/${year}`;
+                      })()
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Data Situação Cadastral:</span>
+                  <span className="detail-value">
+                    {selectedCompany.data_situacao_cadastral
+                      ? (() => {
+                        const [year, month, day] = selectedCompany.data_situacao_cadastral.split('-');
+                        return `${day}/${month}/${year}`;
+                      })()
+                      : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h4>CNAE Principal</h4>
+                <div className="detail-item">
+                  <span className="detail-label">Código:</span>
+                  <span className="detail-value">{selectedCompany.cnae_principal?.codigo || 'N/A'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Descrição:</span>
+                  <span className="detail-value">{selectedCompany.cnae_principal?.descricao || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={handleCloseModal} className="close-modal-button">Fechar</button>
+            </div>
           </div>
         </div>
       )}
