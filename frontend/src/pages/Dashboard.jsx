@@ -72,31 +72,31 @@ const Dashboard = () => {
         <p>Visão geral do sistema e uso da API</p>
       </div>
 
-      {subscription && (
+      {subscription && subscription.plan_name && (
         <div className="subscription-card">
           <h3>Sua Assinatura: {subscription.plan_name}</h3>
           <div className="subscription-stats">
             <div className="sub-stat">
               <p>Limite Mensal</p>
-              <strong>{subscription.total_limit.toLocaleString('pt-BR')}</strong>
+              <strong>{(subscription.total_limit || 0).toLocaleString('pt-BR')}</strong>
             </div>
             <div className="sub-stat">
               <p>Consultas Usadas</p>
-              <strong>{subscription.queries_used.toLocaleString('pt-BR')}</strong>
+              <strong>{(subscription.queries_used || 0).toLocaleString('pt-BR')}</strong>
             </div>
             <div className="sub-stat">
               <p>Consultas Restantes</p>
-              <strong>{subscription.queries_remaining.toLocaleString('pt-BR')}</strong>
+              <strong>{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</strong>
             </div>
             <div className="sub-stat">
               <p>Renovação</p>
-              <strong>{new Date(subscription.renewal_date).toLocaleDateString('pt-BR')}</strong>
+              <strong>{subscription.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') : 'N/A'}</strong>
             </div>
           </div>
           <div className="progress-bar">
             <div
               className="progress-fill"
-              style={{ width: `${(subscription.total_limit > 0 ? (subscription.queries_used / subscription.total_limit * 100) : 0)}%` }}
+              style={{ width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%` }}
             />
           </div>
         </div>
