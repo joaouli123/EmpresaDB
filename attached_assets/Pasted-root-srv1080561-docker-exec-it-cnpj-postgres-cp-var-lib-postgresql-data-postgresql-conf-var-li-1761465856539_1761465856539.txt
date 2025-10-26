@@ -1,0 +1,49 @@
+root@srv1080561:~# docker exec -it cnpj_postgres cp /var/lib/postgresql/data/postgresql.conf /var/lib/postgresql/data/postgresql.conf.backup
+root@srv1080561:~# docker exec -it cnpj_postgres bash -c "
+# Comentar linhas antigas (se existirem)
+sed -i 's/^shared_buffers = /#shared_buffers = (OLD) /' /var/lib/postgresql/data/postgresql.conf
+sed -i 's/^effective_cache_size = /#effective_cache_size = (OLD) /' /var/lib/postgresql/data/postgresql.conf
+sed -i 's/^work_mem = /#work_mem = (OLD) /' /var/lib/postgresql/data/postgresql.conf
+sed -i 's/^maintenance_work_mem = /#maintenance_work_mem = (OLD) /' /var/lib/postgresql/data/postgresql.conf
+
+# Adicionar novas configurações no final
+cat >> /var/lib/postgresql/data/postgresql.conf << 'PGCONF'
+
+# ===== CONFIGURAÇÕES OTIMIZADAS PARA VPS 16GB RAM =====
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+max_worker_processes = 4
+max_parallel_workers = 4
+max_parallel_workers_per_gather = 2
+random_page_cost = 1.1
+effective_io_concurrency = 200
+wal_buffers = 16MB
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+log_min_duration_statement = 1000
+log_checkpoints = on
+PGCONF
+"
+root@srv1080561:~# docker exec -it cnpj_postgres cat /var/lib/postgresql/data/postgresql.conf | grep -E "shared_buffers|effective_cache_size|work_mem" | grep -v "^#"
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+root@srv1080561:~# docker restart cnpj_postgres
+cnpj_postgres
+root@srv1080561:~# sleep 3
+root@srv1080561:~# docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SELECT name, setting, unit FROM pg_settings WHERE name IN ('shared_buffers', 'effective_cache_size', 'work_mem', 'maintenance_work_mem') ORDER BY name;"
+         name         | setting | unit
+----------------------+---------+------
+ effective_cache_size | 786432  | 8kB
+ maintenance_work_mem | 524288  | kB
+ shared_buffers       | 262144  | 8kB
+ work_mem             | 10485   | kB
+(4 rows)
+
+root@srv1080561:~#
