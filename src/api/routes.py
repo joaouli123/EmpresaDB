@@ -237,6 +237,8 @@ async def search_companies(
     municipio: str = Query(None, description="Município"),
     uf: str = Query(None, description="UF"),
     situacao: str = Query(None, description="Situação cadastral"),
+    data_inicio_atividade_min: str = Query(None, description="Data início atividade mínima (YYYY-MM-DD)"),
+    data_inicio_atividade_max: str = Query(None, description="Data início atividade máxima (YYYY-MM-DD)"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     user: dict = Depends(verify_api_key)
@@ -257,12 +259,17 @@ async def search_companies(
                 'filters': {
                     'razao_social': razao_social,
                     'cnae': cnae,
-                    'municipio': municipio
+                    'municipio': municipio,
+                    'data_inicio_atividade_min': data_inicio_atividade_min,
+                    'data_inicio_atividade_max': data_inicio_atividade_max
                 }
             }
         )
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # IMPORTANTE: Desabilitar parallel workers para evitar erro de memória no Replit
+            cursor.execute("SET max_parallel_workers_per_gather = 0")
 
             conditions = []
             params = []
@@ -290,6 +297,14 @@ async def search_companies(
             if situacao:
                 conditions.append("situacao_cadastral = %s")
                 params.append(situacao)
+
+            if data_inicio_atividade_min:
+                conditions.append("data_inicio_atividade >= %s")
+                params.append(data_inicio_atividade_min)
+
+            if data_inicio_atividade_max:
+                conditions.append("data_inicio_atividade <= %s")
+                params.append(data_inicio_atividade_max)
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
