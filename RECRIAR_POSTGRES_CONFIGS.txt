@@ -1,0 +1,61 @@
+============================================
+RECRIAR CONTAINER POSTGRESQL COM CONFIGS CORRETAS
+============================================
+
+# Passo 1: Ver como o container foi criado
+docker inspect cnpj_postgres | grep -A 5 "Cmd"
+
+# Passo 2: Verificar se há docker-compose.yml
+ls -la | grep docker-compose
+cat docker-compose.yml 2>/dev/null || echo "Não há docker-compose.yml"
+
+# Passo 3: Ver o comando completo que iniciou o container
+docker inspect cnpj_postgres --format='{{.Config.Cmd}}'
+
+# Passo 4: SOLUÇÃO - Parar e remover container atual
+docker stop cnpj_postgres
+docker rm cnpj_postgres
+
+# Passo 5: Recriar com as configurações corretas
+docker run -d \
+  --name cnpj_postgres \
+  -e POSTGRES_USER=cnpj_user \
+  -e POSTGRES_PASSWORD=Proelast1608@ \
+  -e POSTGRES_DB=cnpj_db \
+  -v /var/lib/postgresql/data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:16 \
+  -c shared_buffers=4GB \
+  -c effective_cache_size=12GB \
+  -c work_mem=40MB \
+  -c maintenance_work_mem=1600MB \
+  -c max_worker_processes=4 \
+  -c max_parallel_workers=4 \
+  -c max_parallel_workers_per_gather=2 \
+  -c random_page_cost=1.1 \
+  -c effective_io_concurrency=200 \
+  -c wal_buffers=16MB \
+  -c max_wal_size=2GB \
+  -c min_wal_size=1GB \
+  -c checkpoint_completion_target=0.9 \
+  -c autovacuum_max_workers=2 \
+  -c log_min_duration_statement=1000 \
+  -c log_checkpoints=on
+
+# Passo 6: Aguardar iniciar
+sleep 10
+
+# Passo 7: Verificar
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW shared_buffers;"
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW effective_cache_size;"
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW work_mem;"
+
+============================================
+⚠️ IMPORTANTE: ANTES DE RECRIAR
+============================================
+
+1. Verifique se há docker-compose.yml primeiro
+2. Se sim, edite o docker-compose.yml ao invés de recriar manual
+3. Os dados estarão seguros no volume
+
+============================================
