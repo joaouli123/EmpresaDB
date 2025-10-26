@@ -6,6 +6,10 @@ class CNAEModel(BaseModel):
     codigo: str
     descricao: str
 
+class CNAESecundario(BaseModel):
+    codigo: str
+    descricao: str
+
 class MunicipioModel(BaseModel):
     codigo: str
     descricao: str
@@ -18,18 +22,21 @@ class EmpresaBasica(BaseModel):
     porte_empresa: Optional[str] = None
 
 class EstabelecimentoCompleto(BaseModel):
-    cnpj_completo: str
-    cnpj_basico: str
-    cnpj_ordem: str
-    cnpj_dv: str
+    cnpj_completo: Optional[str] = None
+    cnpj_basico: Optional[str] = None
+    cnpj_ordem: Optional[str] = None
+    cnpj_dv: Optional[str] = None
     identificador_matriz_filial: Optional[str] = None
     razao_social: Optional[str] = None
     nome_fantasia: Optional[str] = None
     situacao_cadastral: Optional[str] = None
-    data_situacao_cadastral: Optional[date] = None
-    data_inicio_atividade: Optional[date] = None
+    data_situacao_cadastral: Optional[str] = None
+    motivo_situacao_cadastral_desc: Optional[str] = None
+    data_inicio_atividade: Optional[str] = None
     cnae_fiscal_principal: Optional[str] = None
+    cnae_fiscal_secundaria: Optional[str] = None
     cnae_principal_desc: Optional[str] = None
+    cnae_secundarios_completos: Optional[List[CNAESecundario]] = []
     tipo_logradouro: Optional[str] = None
     logradouro: Optional[str] = None
     numero: Optional[str] = None
@@ -41,8 +48,11 @@ class EstabelecimentoCompleto(BaseModel):
     ddd_1: Optional[str] = None
     telefone_1: Optional[str] = None
     correio_eletronico: Optional[str] = None
-    capital_social: Optional[float] = None
+    natureza_juridica: Optional[str] = None
+    natureza_juridica_desc: Optional[str] = None
     porte_empresa: Optional[str] = None
+    capital_social: Optional[float] = None
+    ente_federativo_responsavel: Optional[str] = None
     opcao_simples: Optional[str] = None
     opcao_mei: Optional[str] = None
 

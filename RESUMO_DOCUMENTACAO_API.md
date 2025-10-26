@@ -128,10 +128,11 @@ Sua API de intermediação de dados CNPJ está **100% documentada** e pronta par
 ## 🚀 Principais Recursos Documentados
 
 ### Endpoints
-1. ✅ **GET /cnpj/{cnpj}** - Consultar CNPJ específico
+1. ✅ **GET /cnpj/{cnpj}** - Consultar CNPJ específico (com CNAEs secundários completos)
 2. ✅ **GET /search** - Busca avançada de empresas (28 filtros)
-3. ✅ **GET /cnpj/{cnpj}/socios** - Listar sócios de uma empresa
-4. ✅ **GET /socios/search** - Buscar sócios por filtros avançados (5 filtros)
+3. ✅ **GET /cnpj/{cnpj}/cnaes-secundarios** - Listar CNAEs secundários com descrições
+4. ✅ **GET /cnpj/{cnpj}/socios** - Listar sócios de uma empresa
+5. ✅ **GET /socios/search** - Buscar sócios por filtros avançados (5 filtros)
 5. ✅ **GET /cnaes** - Listar CNAEs
 6. ✅ **GET /municipios/{uf}** - Listar municípios por estado
 7. ✅ **GET /stats** - Estatísticas do banco

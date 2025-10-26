@@ -155,6 +155,32 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
             data['cnpj_ordem'] = cnpj_clean[8:12]
             data['cnpj_dv'] = cnpj_clean[12:14]
             
+            # Buscar CNAEs secundários com descrições
+            cnae_secundarios = []
+            if data.get('cnae_fiscal_secundaria'):
+                codigos = data['cnae_fiscal_secundaria'].split(',')
+                codigos = [c.strip() for c in codigos if c.strip()]
+                
+                if codigos:
+                    placeholders = ','.join(['%s'] * len(codigos))
+                    query_cnaes = f"""
+                        SELECT codigo, descricao
+                        FROM cnaes
+                        WHERE codigo IN ({placeholders})
+                        ORDER BY codigo
+                    """
+                    cursor = conn.cursor()
+                    cursor.execute(query_cnaes, codigos)
+                    cnaes_results = cursor.fetchall()
+                    cursor.close()
+                    
+                    cnae_secundarios = [
+                        {'codigo': row[0], 'descricao': row[1]}
+                        for row in cnaes_results
+                    ]
+            
+            data['cnae_secundarios_completos'] = cnae_secundarios
+            
             resultado = EstabelecimentoCompleto(**data)
             
             # Salva no cache (1 hora)
@@ -371,6 +397,11 @@ async def search_empresas(
                 data['cnpj_basico'] = cnpj[:8] if cnpj else ''
                 data['cnpj_ordem'] = cnpj[8:12] if cnpj and len(cnpj) >= 12 else ''
                 data['cnpj_dv'] = cnpj[12:14] if cnpj and len(cnpj) >= 14 else ''
+                
+                # Buscar CNAEs secundários (sem JOIN para manter performance)
+                # Para busca em lote, não buscar CNAEs secundários (usar endpoint específico)
+                data['cnae_secundarios_completos'] = []
+                
                 items.append(EstabelecimentoCompleto(**data))
             
             total_pages = (total + per_page - 1) // per_page
@@ -385,6 +416,78 @@ async def search_empresas(
             
     except Exception as e:
         logger.error(f"Erro na busca: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/cnpj/{cnpj}/cnaes-secundarios", response_model=List[CNAEModel])
+async def get_cnaes_secundarios(cnpj: str, user: dict = Depends(verify_api_key)):
+    """
+    Busca todos os CNAEs secundários de uma empresa com suas descrições
+    """
+    cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
+    
+    if len(cnpj_clean) != 14:
+        raise HTTPException(
+            status_code=400,
+            detail="CNPJ deve ter 14 dígitos"
+        )
+    
+    # Verifica cache primeiro
+    cache_key = f"cnaes_sec:{cnpj_clean}"
+    cached = get_from_cache(cache_key)
+    if cached:
+        logger.info(f"Cache hit para CNAEs secundários do CNPJ {cnpj_clean}")
+        return cached
+    
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Buscar CNAEs secundários do estabelecimento
+            query = """
+                SELECT cnae_fiscal_secundaria
+                FROM estabelecimentos
+                WHERE cnpj_completo = %s
+            """
+            
+            cursor.execute(query, (cnpj_clean,))
+            result = cursor.fetchone()
+            
+            if not result or not result[0]:
+                cursor.close()
+                return []
+            
+            # Processar códigos de CNAE
+            codigos = result[0].split(',')
+            codigos = [c.strip() for c in codigos if c.strip()]
+            
+            if not codigos:
+                cursor.close()
+                return []
+            
+            # Buscar descrições
+            placeholders = ','.join(['%s'] * len(codigos))
+            query_cnaes = f"""
+                SELECT codigo, descricao
+                FROM cnaes
+                WHERE codigo IN ({placeholders})
+                ORDER BY codigo
+            """
+            
+            cursor.execute(query_cnaes, codigos)
+            cnaes_results = cursor.fetchall()
+            cursor.close()
+            
+            cnaes = [CNAEModel(codigo=row[0], descricao=row[1]) for row in cnaes_results]
+            
+            # Salva no cache (1 hora)
+            set_cache(cache_key, cnaes, minutes=60)
+            
+            return cnaes
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao buscar CNAEs secundários do CNPJ {cnpj_clean}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}/socios", response_model=List[SocioModel])

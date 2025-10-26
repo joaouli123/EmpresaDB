@@ -67,6 +67,16 @@ GET /cnpj/00000000000191
   "data_inicio_atividade": "1966-03-01",
   "cnae_fiscal_principal": "6421200",
   "cnae_principal_desc": "Bancos comerciais",
+  "cnaes_secundarios": [
+    {
+      "codigo": "6422200",
+      "descricao": "Bancos múltiplos, com atividade de crédito, investimento e divisas"
+    },
+    {
+      "codigo": "6430000",
+      "descricao": "Atividades de participação em outras sociedades, exceto holdings"
+    }
+  ],
   "tipo_logradouro": "AVENIDA",
   "logradouro": "PAULISTA",
   "numero": "1374",
@@ -198,6 +208,16 @@ Busca empresas com filtros avançados e paginação.
       "data_inicio_atividade": "1954-10-03",
       "cnae_fiscal_principal": "0600001",
       "cnae_principal_desc": "Extração de petróleo e gás natural",
+      "cnaes_secundarios": [
+        {
+          "codigo": "1921700",
+          "descricao": "Fabricação de produtos do refino de petróleo"
+        },
+        {
+          "codigo": "4681801",
+          "descricao": "Comércio atacadista de álcool carburante, biodiesel, gasolina e outros combustíveis derivados de petróleo"
+        }
+      ],
       "tipo_logradouro": "AVENIDA",
       "logradouro": "REPUBLICA DO CHILE",
       "numero": "65",
@@ -259,7 +279,7 @@ Busca sócios com filtros avançados. Ideal para encontrar empresas através de 
 | `nome_socio` | string | Nome do sócio (busca parcial, case-insensitive) | `nome_socio=JOÃO SILVA` |
 | `cpf_cnpj` | string | CPF ou CNPJ do sócio (completo ou parcial) | `cpf_cnpj=12345678900` |
 | `identificador_socio` | string | Tipo de sócio | `1`-Pessoa Jurídica<br>`2`-Pessoa Física<br>`3`-Estrangeiro |
-| `qualificacao_socio` | string | Código da qualificação do sócio | `05`-Administrador<br>`10`-Diretor<br>`16`-Presidente<br>`49`-Sócio-Administrador<br>`52`-Sócio Comanditado<br>(ver [códigos completos](#códigos-de-qualificação-de-sócio)) |
+| `qualificacao_socio` | string | Código da qualificação do sócio | `05`-Administrador<br>`10`-Diretor<br>`16`-Presidente<br>`49`-Sócio-Administrador<br>(ver [códigos completos](#códigos-de-qualificação-de-sócio)) |
 | `faixa_etaria` | string | Faixa etária do sócio | `1`-0 a 12 anos<br>`2`-13 a 20 anos<br>`3`-21 a 30 anos<br>`4`-31 a 40 anos<br>`5`-41 a 50 anos<br>`6`-51 a 60 anos<br>`7`-61 a 70 anos<br>`8`-71 a 80 anos<br>`9`-Acima de 80 anos |
 | `limit` | integer | Limite de resultados (padrão: 100, máx: 1000) | `limit=500` |
 
@@ -422,14 +442,14 @@ def consultar_cnpj(cnpj):
         f"{API_BASE_URL}/cnpj/{cnpj}",
         headers=headers
     )
-    
+
     if response.status_code == 200:
         return response.json()
     elif response.status_code == 404:
         print("CNPJ não encontrado")
     else:
         print(f"Erro: {response.status_code}")
-    
+
     return None
 
 # Exemplo de uso
@@ -446,10 +466,10 @@ def buscar_empresas(filtros):
         headers=headers,
         params=filtros
     )
-    
+
     if response.status_code == 200:
         return response.json()
-    
+
     return None
 
 # Exemplo: Buscar empresas de grande porte em SP, ativas
@@ -465,21 +485,39 @@ resultado = buscar_empresas(filtros)
 if resultado:
     print(f"Total de empresas encontradas: {resultado['total']}")
     print(f"Página {resultado['page']} de {resultado['total_pages']}")
-    
+
     for empresa in resultado['items']:
         print(f"{empresa['cnpj_completo']} - {empresa['razao_social']}")
 
 
-# 3. Buscar sócios de uma empresa
+# 3. Buscar CNAEs secundários
+def buscar_cnaes_secundarios(cnpj):
+    response = requests.get(
+        f"{API_BASE_URL}/cnpj/{cnpj}/cnaes-secundarios",
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        return response.json()
+
+    return []
+
+cnaes_sec = buscar_cnaes_secundarios("00000000000191")
+print(f"CNAEs Secundários: {len(cnaes_sec)}")
+for cnae in cnaes_sec:
+    print(f"  {cnae['codigo']}: {cnae['descricao']}")
+
+
+# 4. Buscar sócios
 def buscar_socios(cnpj):
     response = requests.get(
         f"{API_BASE_URL}/cnpj/{cnpj}/socios",
         headers=headers
     )
-    
+
     if response.status_code == 200:
         return response.json()
-    
+
     return []
 
 socios = buscar_socios("00000000000191")
@@ -488,40 +526,40 @@ for socio in socios:
     print(f"Qualificação: {socio['qualificacao_socio']}")
 
 
-# 4. Exemplo completo: Exportar empresas para CSV
+# 5. Exemplo completo: Exportar empresas para CSV
 import csv
 
 def exportar_empresas_para_csv(filtros, arquivo_saida):
     todas_empresas = []
     page = 1
-    
+
     while True:
         filtros['page'] = page
         filtros['per_page'] = 100  # Máximo por requisição
-        
+
         resultado = buscar_empresas(filtros)
         if not resultado or not resultado['items']:
             break
-        
+
         todas_empresas.extend(resultado['items'])
-        
+
         print(f"Baixando página {page} de {resultado['total_pages']}...")
-        
+
         if page >= resultado['total_pages']:
             break
-        
+
         page += 1
-    
+
     # Salvar em CSV
     if todas_empresas:
         with open(arquivo_saida, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = todas_empresas[0].keys()
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            
+
             writer.writeheader()
             for empresa in todas_empresas:
                 writer.writerow(empresa)
-        
+
         print(f"Exportadas {len(todas_empresas)} empresas para {arquivo_saida}")
 
 # Usar a função
@@ -601,7 +639,7 @@ async function buscarEmpresas(filtros) {
   const resultado = await buscarEmpresas(filtros);
   if (resultado) {
     console.log(`Total encontrado: ${resultado.total}`);
-    
+
     resultado.items.forEach(empresa => {
       console.log(`${empresa.cnpj_completo} - ${empresa.razao_social}`);
     });
@@ -613,19 +651,19 @@ async function buscarEmpresas(filtros) {
 async function buscarTodasPaginas(filtros) {
   const todasEmpresas = [];
   let page = 1;
-  
+
   while (true) {
     const resultado = await buscarEmpresas({ ...filtros, page, per_page: 100 });
-    
+
     if (!resultado || resultado.items.length === 0) break;
-    
+
     todasEmpresas.push(...resultado.items);
     console.log(`Baixando página ${page} de ${resultado.total_pages}...`);
-    
+
     if (page >= resultado.total_pages) break;
     page++;
   }
-  
+
   return todasEmpresas;
 }
 
@@ -636,7 +674,7 @@ async function buscarTodasPaginas(filtros) {
     cnae: '4712100',
     situacao_cadastral: '02'
   });
-  
+
   console.log(`Total de empresas baixadas: ${empresas.length}`);
 })();
 
@@ -651,6 +689,26 @@ async function buscarSocios(cnpj) {
     return [];
   }
 }
+
+// 5. Buscar CNAEs secundários
+async function buscarCnaesSecundarios(cnpj) {
+  try {
+    const response = await api.get(`/cnpj/${cnpj}/cnaes-secundarios`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro:', error.message);
+    return [];
+  }
+}
+
+// Exemplo de uso
+(async () => {
+  const cnaesSecundarios = await buscarCnaesSecundarios('00000000000191');
+  console.log(`CNAEs Secundários encontrados: ${cnaesSecundarios.length}`);
+  cnaesSecundarios.forEach(cnae => {
+    console.log(`  ${cnae.codigo}: ${cnae.descricao}`);
+  });
+})();
 ```
 
 ---
@@ -663,48 +721,52 @@ async function buscarSocios(cnpj) {
 class CNPJApi {
     private $baseUrl = 'https://sua-api.com.br/api/v1';
     private $apiKey;
-    
+
     public function __construct($apiKey) {
         $this->apiKey = $apiKey;
     }
-    
+
     private function request($endpoint, $params = []) {
         $url = $this->baseUrl . $endpoint;
-        
+
         if (!empty($params)) {
             $url .= '?' . http_build_query($params);
         }
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-API-Key: ' . $this->apiKey
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode === 200) {
             return json_decode($response, true);
         }
-        
+
         return null;
     }
-    
+
     public function consultarCNPJ($cnpj) {
         return $this->request("/cnpj/{$cnpj}");
     }
-    
+
     public function buscarEmpresas($filtros) {
         return $this->request('/search', $filtros);
     }
-    
+
     public function buscarSocios($cnpj) {
         return $this->request("/cnpj/{$cnpj}/socios");
     }
-    
+
+    public function buscarCnaesSecundarios($cnpj) {
+        return $this->request("/cnpj/{$cnpj}/cnaes-secundarios");
+    }
+
     public function listarCNAEs($search = null, $limit = 100) {
         $params = ['limit' => $limit];
         if ($search) {
@@ -735,7 +797,7 @@ $resultado = $api->buscarEmpresas([
 
 if ($resultado) {
     echo "Total: " . $resultado['total'] . " empresas\n";
-    
+
     foreach ($resultado['items'] as $empresa) {
         echo $empresa['cnpj_completo'] . " - " . $empresa['razao_social'] . "\n";
     }
@@ -745,6 +807,13 @@ if ($resultado) {
 $socios = $api->buscarSocios('00000000000191');
 foreach ($socios as $socio) {
     echo "Nome: " . $socio['nome_socio'] . "\n";
+}
+
+// Buscar CNAEs secundários
+$cnaes_secundarios = $api->buscarCnaesSecundarios('00000000000191');
+echo "CNAEs Secundários: " . count($cnaes_secundarios) . "\n";
+foreach ($cnaes_secundarios as $cnae) {
+    echo "  " . $cnae['codigo'] . ": " . $cnae['descricao'] . "\n";
 }
 ?>
 ```
@@ -770,15 +839,19 @@ curl -X GET "https://sua-api.com.br/api/v1/search?uf=RJ&porte=4&capital_social_m
 curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191/socios" \
   -H "X-API-Key: sua_chave_api_aqui"
 
-# 5. Listar CNAEs
+# 5. Buscar CNAEs secundários
+curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191/cnaes-secundarios" \
+  -H "X-API-Key: sua_chave_api_aqui"
+
+# 6. Listar CNAEs
 curl -X GET "https://sua-api.com.br/api/v1/cnaes?search=comercio&limit=50" \
   -H "X-API-Key: sua_chave_api_aqui"
 
-# 6. Listar municípios de SP
+# 7. Listar municípios de SP
 curl -X GET "https://sua-api.com.br/api/v1/municipios/SP" \
   -H "X-API-Key: sua_chave_api_aqui"
 
-# 7. Estatísticas
+# 8. Estatísticas
 curl -X GET "https://sua-api.com.br/api/v1/stats" \
   -H "X-API-Key: sua_chave_api_aqui"
 ```
@@ -818,17 +891,17 @@ socios = requests.get(
 # 2. Para cada CNPJ básico retornado, buscar dados completos da empresa
 for socio in socios:
     cnpj_basico = socio['cnpj_basico']
-    
+
     # Buscar a matriz (ordem 0001)
     cnpj_completo = cnpj_basico + "00010001"  # CNPJ básico + ordem + DV aproximado
-    
+
     # Ou buscar todos os estabelecimentos desse CNPJ básico
     empresas = requests.get(
         f"{API_BASE_URL}/search",
         headers=headers,
         params={"cnpj": cnpj_basico}
     ).json()
-    
+
     print(f"Empresas do sócio {socio['nome_socio']}:")
     for emp in empresas['items']:
         print(f"  - {emp['cnpj_completo']}: {emp['razao_social']}")
@@ -862,7 +935,7 @@ for cnpj_basico in cnpjs_basicos[:50]:  # Limitar para exemplo
         headers=headers,
         params={"cnpj": cnpj_basico, "situacao_cadastral": "02"}
     ).json()
-    
+
     if empresas['items']:
         empresas_detalhadas.extend(empresas['items'])
 
@@ -914,7 +987,7 @@ import pandas as pd
 def exportar_meis_campinas():
     empresas = []
     page = 1
-    
+
     while True:
         filtros = {
             "mei": "S",
@@ -923,18 +996,18 @@ def exportar_meis_campinas():
             "page": page,
             "per_page": 100
         }
-        
+
         resultado = buscar_empresas(filtros)
         if not resultado or not resultado['items']:
             break
-        
+
         empresas.extend(resultado['items'])
-        
+
         if page >= resultado['total_pages']:
             break
-        
+
         page += 1
-    
+
     # Converter para DataFrame
     df = pd.DataFrame(empresas)
     df.to_excel('meis_campinas.xlsx', index=False)
@@ -956,11 +1029,11 @@ def monitorar_empresas_tech():
         "page": 1,
         "per_page": 100
     }
-    
+
     resultado = buscar_empresas(filtros)
-    
+
     print(f"Empresas de Tecnologia encontradas: {resultado['total']}")
-    
+
     for empresa in resultado['items']:
         print(f"\nCNPJ: {empresa['cnpj_completo']}")
         print(f"Razão Social: {empresa['razao_social']}")
@@ -1081,7 +1154,7 @@ Sempre use paginação para grandes volumes:
 for page in range(1, total_pages + 1):
     resultado = buscar_empresas({...filtros, "page": page, "per_page": 100})
     processar(resultado['items'])
-    
+
 # ❌ RUIM: Tentar baixar tudo de uma vez
 resultado = buscar_empresas({...filtros, "per_page": 100000})  # Não funciona!
 ```
@@ -1096,20 +1169,20 @@ from pathlib import Path
 
 def buscar_com_cache(cnpj, cache_dir='cache'):
     cache_path = Path(cache_dir) / f"{cnpj}.pkl"
-    
+
     # Verificar cache
     if cache_path.exists():
         with open(cache_path, 'rb') as f:
             return pickle.load(f)
-    
+
     # Buscar da API
     empresa = consultar_cnpj(cnpj)
-    
+
     # Salvar em cache
     cache_path.parent.mkdir(exist_ok=True)
     with open(cache_path, 'wb') as f:
         pickle.dump(empresa, f)
-    
+
     return empresa
 ```
 
@@ -1141,14 +1214,14 @@ Valide CNPJs antes de enviar:
 def validar_cnpj(cnpj):
     # Remove formatação
     cnpj = ''.join(filter(str.isdigit, cnpj))
-    
+
     # Verifica se tem 14 dígitos
     if len(cnpj) != 14:
         return False
-    
+
     # Validação de dígitos verificadores (algoritmo oficial)
     # ... código de validação ...
-    
+
     return True
 
 # Uso
@@ -1168,18 +1241,18 @@ import aiohttp
 async def buscar_cnpjs_async(cnpjs):
     async with aiohttp.ClientSession() as session:
         tasks = []
-        
+
         for cnpj in cnpjs:
             task = buscar_cnpj_async(session, cnpj)
             tasks.append(task)
-        
+
         resultados = await asyncio.gather(*tasks)
         return resultados
 
 async def buscar_cnpj_async(session, cnpj):
     url = f"{API_BASE_URL}/cnpj/{cnpj}"
     headers = {"X-API-Key": API_KEY}
-    
+
     async with session.get(url, headers=headers) as response:
         return await response.json()
 
