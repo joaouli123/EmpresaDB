@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { api } from '../services/api';
 import { Check, Zap, Shield, TrendingUp } from 'lucide-react';
 import './Pricing.css';
 

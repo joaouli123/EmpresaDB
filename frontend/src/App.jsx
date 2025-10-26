@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
 import Pricing from './pages/Pricing';
+import Subscription from './pages/Subscription';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -69,6 +70,7 @@ function AppRoutes() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="api-keys" element={<APIKeys />} />
+          <Route path="subscription" element={<Subscription />} />
           <Route path="docs" element={<Docs />} />
           <Route path="admin" element={
             <ProtectedRoute adminOnly={true}>

@@ -19,6 +19,7 @@ const Sidebar = () => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/profile', icon: User, label: 'Perfil' },
     { path: '/api-keys', icon: Key, label: 'API Keys' },
+    { path: '/subscription', icon: CreditCard, label: 'Minha Assinatura' },
     { path: '/docs', icon: FileText, label: 'Documentação' },
   ];
 
@@ -78,17 +79,6 @@ const Sidebar = () => {
             ))}
           </div>
         )}
-
-        <div className="nav-section">
-          <NavLink
-            key="/pricing"
-            to="/pricing"
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            <CreditCard size={20} />
-            <span>Planos e Preços</span>
-          </NavLink>
-        </div>
 
         <div className="nav-section">
           <button onClick={logout} className="nav-item logout-btn">

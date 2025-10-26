@@ -230,3 +230,60 @@ async def cancel_subscription(current_user: dict = Depends(get_current_user)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao cancelar assinatura: {str(e)}")
+
+@router.get("/transactions")
+async def get_transactions(current_user: dict = Depends(get_current_user)):
+    """Retorna histórico de transações (DEMO - dados mockados)"""
+    demo_transactions = [
+        {
+            "id": 1,
+            "date": "2025-01-15T10:00:00",
+            "description": "Assinatura Mensal - Plano Profissional",
+            "status": "paid",
+            "amount": 89.90
+        },
+        {
+            "id": 2,
+            "date": "2024-12-15T10:00:00",
+            "description": "Assinatura Mensal - Plano Profissional",
+            "status": "paid",
+            "amount": 89.90
+        },
+        {
+            "id": 3,
+            "date": "2024-11-15T10:00:00",
+            "description": "Assinatura Mensal - Plano Básico",
+            "status": "paid",
+            "amount": 59.90
+        }
+    ]
+    return demo_transactions
+
+@router.get("/payment-methods")
+async def get_payment_methods(current_user: dict = Depends(get_current_user)):
+    """Retorna métodos de pagamento cadastrados (DEMO - dados mockados)"""
+    demo_cards = [
+        {
+            "id": 1,
+            "brand": "visa",
+            "last4": "4242",
+            "exp_month": 12,
+            "exp_year": 2025,
+            "is_default": True
+        },
+        {
+            "id": 2,
+            "brand": "mastercard",
+            "last4": "5555",
+            "exp_month": 6,
+            "exp_year": 2026,
+            "is_default": False
+        }
+    ]
+    return demo_cards
+
+@router.delete("/payment-methods/{card_id}")
+async def delete_payment_method(card_id: int, current_user: dict = Depends(get_current_user)):
+    """Remove um método de pagamento (DEMO)"""
+    return {"message": "Cartão removido com sucesso (DEMO)"}
+
