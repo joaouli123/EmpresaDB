@@ -69,6 +69,20 @@ async def get_available_plans():
 async def get_my_subscription(current_user: dict = Depends(get_current_user)):
     """Retorna informações da assinatura do usuário atual"""
     try:
+        # Se for usuário demo, retorna dados demo
+        if current_user.get('username') == 'demo':
+            renewal_date = (datetime.now() + timedelta(days=15)).isoformat()
+            return {
+                "plan_name": "Plano Profissional",
+                "monthly_limit": 10000,
+                "extra_credits": 2500,
+                "total_limit": 12500,
+                "queries_used": 7350,
+                "queries_remaining": 5150,
+                "renewal_date": renewal_date,
+                "status": "active"
+            }
+        
         print(f"[DEBUG] Buscando assinatura para user_id: {current_user['id']}")
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
@@ -240,54 +254,85 @@ async def cancel_subscription(current_user: dict = Depends(get_current_user)):
 
 @router.get("/transactions")
 async def get_transactions(current_user: dict = Depends(get_current_user)):
-    """Retorna histórico de transações (DEMO - dados mockados)"""
-    demo_transactions = [
-        {
-            "id": 1,
-            "date": "2025-01-15T10:00:00",
-            "description": "Assinatura Mensal - Plano Profissional",
-            "status": "paid",
-            "amount": 89.90
-        },
-        {
-            "id": 2,
-            "date": "2024-12-15T10:00:00",
-            "description": "Assinatura Mensal - Plano Profissional",
-            "status": "paid",
-            "amount": 89.90
-        },
-        {
-            "id": 3,
-            "date": "2024-11-15T10:00:00",
-            "description": "Assinatura Mensal - Plano Básico",
-            "status": "paid",
-            "amount": 59.90
-        }
-    ]
-    return demo_transactions
+    """Retorna histórico de transações"""
+    # Se for usuário demo, retorna dados demo mais completos
+    if current_user.get('username') == 'demo':
+        demo_transactions = [
+            {
+                "id": 1,
+                "date": (datetime.now() - timedelta(days=2)).isoformat(),
+                "description": "Compra de Créditos Extras - 2.500 consultas",
+                "status": "paid",
+                "amount": 49.90
+            },
+            {
+                "id": 2,
+                "date": (datetime.now() - timedelta(days=15)).isoformat(),
+                "description": "Renovação Mensal - Plano Profissional",
+                "status": "paid",
+                "amount": 149.90
+            },
+            {
+                "id": 3,
+                "date": (datetime.now() - timedelta(days=45)).isoformat(),
+                "description": "Renovação Mensal - Plano Profissional",
+                "status": "paid",
+                "amount": 149.90
+            },
+            {
+                "id": 4,
+                "date": (datetime.now() - timedelta(days=75)).isoformat(),
+                "description": "Renovação Mensal - Plano Profissional",
+                "status": "paid",
+                "amount": 149.90
+            },
+            {
+                "id": 5,
+                "date": (datetime.now() - timedelta(days=105)).isoformat(),
+                "description": "Upgrade: Plano Básico → Profissional",
+                "status": "paid",
+                "amount": 149.90
+            },
+            {
+                "id": 6,
+                "date": (datetime.now() - timedelta(days=135)).isoformat(),
+                "description": "Primeira Assinatura - Plano Básico",
+                "status": "paid",
+                "amount": 79.90
+            }
+        ]
+        return demo_transactions
+    
+    # Para outros usuários, retorna dados reais do banco (a implementar)
+    return []
 
 @router.get("/payment-methods")
 async def get_payment_methods(current_user: dict = Depends(get_current_user)):
-    """Retorna métodos de pagamento cadastrados (DEMO - dados mockados)"""
-    demo_cards = [
-        {
-            "id": 1,
-            "brand": "visa",
-            "last4": "4242",
-            "exp_month": 12,
-            "exp_year": 2025,
-            "is_default": True
-        },
-        {
-            "id": 2,
-            "brand": "mastercard",
-            "last4": "5555",
-            "exp_month": 6,
-            "exp_year": 2026,
-            "is_default": False
-        }
-    ]
-    return demo_cards
+    """Retorna métodos de pagamento cadastrados"""
+    # Se for usuário demo, retorna cartões demo
+    if current_user.get('username') == 'demo':
+        demo_cards = [
+            {
+                "id": 1,
+                "brand": "visa",
+                "last4": "4242",
+                "exp_month": 8,
+                "exp_year": 2027,
+                "is_default": True
+            },
+            {
+                "id": 2,
+                "brand": "mastercard",
+                "last4": "5555",
+                "exp_month": 3,
+                "exp_year": 2028,
+                "is_default": False
+            }
+        ]
+        return demo_cards
+    
+    # Para outros usuários, retorna dados reais do banco (a implementar)
+    return []
 
 @router.delete("/payment-methods/{card_id}")
 async def delete_payment_method(card_id: int, current_user: dict = Depends(get_current_user)):
