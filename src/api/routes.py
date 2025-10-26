@@ -299,10 +299,12 @@ async def search_companies(
                 params.append(situacao)
 
             if data_inicio_atividade_min:
+                logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min}")
                 conditions.append("data_inicio_atividade >= %s")
                 params.append(data_inicio_atividade_min)
 
             if data_inicio_atividade_max:
+                logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max}")
                 conditions.append("data_inicio_atividade <= %s")
                 params.append(data_inicio_atividade_max)
 

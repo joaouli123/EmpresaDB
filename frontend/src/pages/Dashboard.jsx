@@ -95,8 +95,9 @@ const Dashboard = () => {
       const dataMin = convertDateToISO(filters.data_inicio_atividade_min);
       const dataMax = convertDateToISO(filters.data_inicio_atividade_max);
 
-      if (dataMin) params.append('data_inicio_atividade_de', dataMin);
-      if (dataMax) params.append('data_inicio_atividade_ate', dataMax);
+      // IMPORTANTE: API usa '_min' e '_max', não '_de' e '_ate'
+      if (dataMin) params.append('data_inicio_atividade_min', dataMin);
+      if (dataMax) params.append('data_inicio_atividade_max', dataMax);
 
       params.append('page', currentPage);
       params.append('per_page', itemsPerPage);
@@ -361,7 +362,7 @@ const Dashboard = () => {
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label>Data Início ATÉ:</label>
+            <label>Data Início DE:</label>
             <input
               type="text"
               placeholder="DD/MM/AAAA ou AAAA-MM-DD"
