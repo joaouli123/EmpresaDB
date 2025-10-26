@@ -319,15 +319,15 @@ X-API-Key: sua_chave_api`}</pre>
                   </thead>
                   <tbody>
                     <tr>
-                      <td><code>data_inicio_atividade_de</code></td>
+                      <td><code>data_inicio_atividade_min</code></td>
                       <td>date</td>
-                      <td>Data de início DE (YYYY-MM-DD)</td>
+                      <td>Data de início mínima (YYYY-MM-DD)</td>
                       <td>2020-01-01</td>
                     </tr>
                     <tr>
-                      <td><code>data_inicio_atividade_ate</code></td>
+                      <td><code>data_inicio_atividade_max</code></td>
                       <td>date</td>
-                      <td>Data de início ATÉ (YYYY-MM-DD)</td>
+                      <td>Data de início máxima (YYYY-MM-DD)</td>
                       <td>2024-12-31</td>
                     </tr>
                   </tbody>

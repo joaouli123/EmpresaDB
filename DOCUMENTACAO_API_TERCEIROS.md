@@ -159,8 +159,8 @@ Busca empresas com filtros avançados e paginação.
 
 | Parâmetro | Tipo | Descrição | Exemplo |
 |-----------|------|-----------|---------|
-| `data_inicio_atividade_de` | date | Data início atividade DE (YYYY-MM-DD) | `data_inicio_atividade_de=2023-01-01` |
-| `data_inicio_atividade_ate` | date | Data início atividade ATÉ (YYYY-MM-DD) | `data_inicio_atividade_ate=2023-12-31` |
+| `data_inicio_atividade_min` | date | Data início atividade mínima (YYYY-MM-DD) | `data_inicio_atividade_min=2023-01-01` |
+| `data_inicio_atividade_max` | date | Data início atividade máxima (YYYY-MM-DD) | `data_inicio_atividade_max=2023-12-31` |
 
 ##### **Tipo de Estabelecimento**
 
