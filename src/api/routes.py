@@ -230,17 +230,25 @@ async def search_companies(
     situacao: str = Query(None, description="Situação cadastral"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    x_api_key: str = Header(None),
     current_user: dict = Depends(get_current_user)
 ):
     """
     Pesquisa empresas por múltiplos critérios (usuários autenticados)
-    Requer autenticação JWT (qualquer usuário logado)
+    Requer autenticação JWT OU API Key
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
+        # Verificar se está usando API Key
+        user = None
+        if x_api_key:
+            user = await verify_api_key(x_api_key)
+        else:
+            user = current_user
+        
         # Log de auditoria
         await security_logger.log_query(
-            user_id=current_user['id'],
+            user_id=user.get('id') if isinstance(user, dict) else user['id'],
             action='search',
             resource='/search',
             details={
