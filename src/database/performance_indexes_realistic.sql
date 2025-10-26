@@ -1,3 +1,4 @@
+
 -- ============================================
 -- ÍNDICES OTIMIZADOS REALISTAS
 -- Para 50M+ empresas, 200GB disco disponível
@@ -44,22 +45,28 @@ ON estabelecimentos(cnae_fiscal_principal);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_uf_situacao 
 ON estabelecimentos(uf, situacao_cadastral);
 
--- ===== 4. ÍNDICE CRÍTICO PARA ORDER BY =====
+-- ===== 4. ÍNDICES CRÍTICOS PARA ORDER BY =====
 -- **ESSENCIAL**: Sem isso, PostgreSQL ordena milhões de registros a cada query!
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_razao_social_btree
-ON estabelecimentos(razao_social);
+
+-- Nome fantasia (existe em estabelecimentos)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_nome_fantasia_btree
+ON estabelecimentos(nome_fantasia);
+
+-- Razão social (existe em empresas, não estabelecimentos)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_empresas_razao_social_btree
+ON empresas(razao_social);
 
 -- ===== 5. ÍNDICES TRIGRAM (APENAS OS 2 MAIS IMPORTANTES) =====
 -- ⚠️ ATENÇÃO: Índices trigram são GRANDES (2-5x tamanho da coluna)
 -- Só criar se houver espaço suficiente!
 
--- Razão social (busca mais comum)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_razao_social_trgm 
-ON estabelecimentos USING gin(razao_social gin_trgm_ops);
-
--- Nome fantasia (segunda busca mais comum)
+-- Nome fantasia (busca em estabelecimentos)
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_nome_fantasia_trgm 
 ON estabelecimentos USING gin(nome_fantasia gin_trgm_ops);
+
+-- Razão social (busca em empresas)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_empresas_razao_social_trgm 
+ON empresas USING gin(razao_social gin_trgm_ops);
 
 -- ===== 6. ÍNDICE PARCIAL (EMPRESAS ATIVAS) =====
 -- Índice menor, apenas para registros ativos (maioria das consultas)
@@ -102,7 +109,7 @@ ORDER BY pg_relation_size(indexname::regclass) DESC;
 -- ===== RESUMO =====
 -- ✅ CREATE INDEX CONCURRENTLY: não bloqueia escritas
 -- ✅ Apenas 2 índices trigram (ao invés de 7)
--- ✅ Índice B-tree para ORDER BY razao_social (CRÍTICO!)
+-- ✅ Índice B-tree para ORDER BY nome_fantasia E razao_social (CRÍTICO!)
 -- ✅ Índices parciais para economizar espaço
 -- ✅ Total estimado: 20-40GB de índices (cabe em 200GB)
 
