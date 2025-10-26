@@ -48,8 +48,7 @@ const Docs = () => {
                 {window.location.protocol}//{window.location.host}
               </pre>
               <p style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-                <strong>Para uso externo:</strong> Use esta URL em todas as requisições para a API<br />
-                <strong>Porta Backend:</strong> {window.location.protocol}//{window.location.hostname}:8000
+                Use esta URL em todas as suas requisições para a API
               </p>
               <p style={{ marginTop: '12px', color: '#fbbf24', fontSize: '14px' }}>
                 ⚠️ <strong>IMPORTANTE:</strong> Todas as requisições precisam do header <code>X-API-Key</code> com sua chave de API
@@ -277,6 +276,15 @@ X-API-Key: sua_chave_api`}</pre>
             </div>
             <h2>Exemplos de Código</h2>
 
+            <div className="info-card" style={{ background: '#fef3c7', border: '2px solid #f59e0b', marginBottom: '24px' }}>
+              <h4 style={{ color: '#92400e', marginBottom: '8px' }}>🔑 Antes de começar:</h4>
+              <ol style={{ color: '#92400e', marginLeft: '20px' }}>
+                <li>Obtenha sua chave de API na página <a href="/api-keys" style={{ color: '#b45309', fontWeight: 'bold' }}>API Keys</a></li>
+                <li>Substitua <code>sua_chave_api_aqui</code> pela sua chave nos exemplos abaixo</li>
+                <li>Use a URL base: <code>{API_URL}</code></li>
+              </ol>
+            </div>
+
             <h3>JavaScript / Node.js</h3>
             <div className="code-block">
               <pre>{`const axios = require('axios');
@@ -288,7 +296,7 @@ const api = axios.create({
   }
 });
 
-// Consultar CNPJ
+// Consultar CNPJ específico
 const consultarCNPJ = async (cnpj) => {
   try {
     const response = await api.get(\`/cnpj/\${cnpj}\`);
@@ -298,7 +306,39 @@ const consultarCNPJ = async (cnpj) => {
   }
 };
 
-consultarCNPJ('00000000000191');`}</pre>
+consultarCNPJ('00000000000191');
+
+// Buscar empresas com filtros
+const buscarEmpresas = async () => {
+  try {
+    const response = await api.get('/search', {
+      params: {
+        uf: 'SP',
+        situacao_cadastral: '02',
+        page: 1,
+        per_page: 20
+      }
+    });
+    console.log('Total:', response.data.total);
+    console.log('Empresas:', response.data.items);
+  } catch (error) {
+    console.error('Erro:', error.response.data);
+  }
+};
+
+buscarEmpresas();
+
+// Listar sócios de uma empresa
+const listarSocios = async (cnpj) => {
+  try {
+    const response = await api.get(\`/cnpj/\${cnpj}/socios\`);
+    console.log('Sócios:', response.data);
+  } catch (error) {
+    console.error('Erro:', error.response.data);
+  }
+};
+
+listarSocios('00000000000191');`}</pre>
             </div>
 
             <h3>Python</h3>
@@ -312,50 +352,158 @@ headers = {
     'X-API-Key': API_KEY
 }
 
-# Consultar CNPJ
+# Consultar CNPJ específico
 def consultar_cnpj(cnpj):
     response = requests.get(
         f'{API_URL}/cnpj/{cnpj}',
         headers=headers
     )
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Erro {response.status_code}: {response.text}")
+        return None
 
 resultado = consultar_cnpj('00000000000191')
-print(resultado)
+if resultado:
+    print(f"Razão Social: {resultado['razao_social']}")
+    print(f"CNPJ: {resultado['cnpj_completo']}")
 
-# Busca com filtros
-def buscar_empresas(uf, situacao='02'):
+# Buscar empresas com filtros
+def buscar_empresas(uf, situacao='02', page=1):
     response = requests.get(
         f'{API_URL}/search',
         headers=headers,
         params={
             'uf': uf,
             'situacao_cadastral': situacao,
-            'page': 1,
+            'page': page,
             'per_page': 50
         }
     )
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Erro {response.status_code}: {response.text}")
+        return None
 
 empresas = buscar_empresas('SP')
-print(f"Total encontrado: {empresas['total']}")
-for empresa in empresas['items']:
-    print(f"{empresa['razao_social']} - {empresa['cnpj_completo']}")`}</pre>
+if empresas:
+    print(f"Total encontrado: {empresas['total']}")
+    for empresa in empresas['items']:
+        print(f"{empresa['razao_social']} - {empresa['cnpj_completo']}")
+
+# Listar sócios
+def listar_socios(cnpj):
+    response = requests.get(
+        f'{API_URL}/cnpj/{cnpj}/socios',
+        headers=headers
+    )
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Erro {response.status_code}: {response.text}")
+        return None
+
+socios = listar_socios('00000000000191')
+if socios:
+    print(f"Encontrados {len(socios)} sócios")
+    for socio in socios:
+        print(f"- {socio['nome_socio']}")`}</pre>
             </div>
 
-            <h3>cURL</h3>
+            <h3>PHP</h3>
             <div className="code-block">
-              <pre>{`# Consultar CNPJ
+              <pre>{`<?php
+
+$apiUrl = '${API_URL}';
+$apiKey = 'sua_chave_api_aqui';
+
+// Função auxiliar para fazer requisições
+function apiRequest($url, $apiKey) {
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'X-API-Key: ' . $apiKey
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode === 200) {
+        return json_decode($response, true);
+    } else {
+        echo "Erro $httpCode: $response\\n";
+        return null;
+    }
+}
+
+// Consultar CNPJ
+$cnpj = '00000000000191';
+$empresa = apiRequest("$apiUrl/cnpj/$cnpj", $apiKey);
+if ($empresa) {
+    echo "Razão Social: " . $empresa['razao_social'] . "\\n";
+}
+
+// Buscar empresas
+$params = http_build_query([
+    'uf' => 'SP',
+    'situacao_cadastral' => '02',
+    'page' => 1
+]);
+$resultado = apiRequest("$apiUrl/search?$params", $apiKey);
+if ($resultado) {
+    echo "Total: " . $resultado['total'] . "\\n";
+    foreach ($resultado['items'] as $emp) {
+        echo $emp['razao_social'] . " - " . $emp['cnpj_completo'] . "\\n";
+    }
+}
+
+?>`}</pre>
+            </div>
+
+            <h3>cURL (Terminal)</h3>
+            <div className="code-block">
+              <pre>{`# Consultar CNPJ específico
 curl -X GET "${API_URL}/cnpj/00000000000191" \\
   -H "X-API-Key: sua_chave_api"
 
-# Busca com filtros
+# Buscar empresas com filtros
 curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1" \\
   -H "X-API-Key: sua_chave_api"
 
-# Listar sócios
+# Listar sócios de uma empresa
 curl -X GET "${API_URL}/cnpj/00000000000191/socios" \\
-  -H "X-API-Key: sua_chave_api"`}</pre>
+  -H "X-API-Key: sua_chave_api"
+
+# Buscar por razão social
+curl -X GET "${API_URL}/search?razao_social=petrobras&page=1" \\
+  -H "X-API-Key: sua_chave_api"
+
+# Ver estatísticas gerais (não requer API Key)
+curl -X GET "${API_URL}/stats"`}</pre>
+            </div>
+
+            <div className="info-card" style={{ marginTop: '32px', background: '#dbeafe', border: '2px solid #3b82f6' }}>
+              <h4 style={{ color: '#1e40af', marginBottom: '12px' }}>💡 Dicas de Integração</h4>
+              <ul style={{ color: '#1e40af', marginLeft: '20px', fontSize: '14px' }}>
+                <li>Sempre trate os erros adequadamente (400, 401, 404, 429, 500)</li>
+                <li>Use paginação para grandes resultados (parâmetros <code>page</code> e <code>per_page</code>)</li>
+                <li>Armazene sua API Key de forma segura (variáveis de ambiente)</li>
+                <li>Implemente cache local para reduzir requisições repetidas</li>
+                <li>Respeite os limites de rate limiting do seu plano</li>
+              </ul>
+            </div>
+
+            <div className="info-card" style={{ marginTop: '20px', background: '#fee2e2', border: '2px solid #ef4444' }}>
+              <h4 style={{ color: '#991b1b', marginBottom: '8px' }}>⚠️ Importante: Segurança</h4>
+              <ul style={{ color: '#991b1b', marginLeft: '20px', fontSize: '14px' }}>
+                <li><strong>NUNCA</strong> exponha sua API Key em código frontend público</li>
+                <li><strong>NUNCA</strong> commit suas chaves no Git/GitHub</li>
+                <li>Use variáveis de ambiente para armazenar credenciais</li>
+                <li>Crie chaves diferentes para ambientes de teste e produção</li>
+                <li>Revogue imediatamente chaves comprometidas</li>
+              </ul>
             </div>
           </section>
 
