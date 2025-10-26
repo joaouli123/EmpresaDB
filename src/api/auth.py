@@ -10,6 +10,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# ℹ️ Este router gerencia autenticação e registro de usuários
+# Usuários são criados no banco configurado em DATABASE_URL (VPS: 72.61.217.143)
+# Empresas terceiras devem usar /auth/register normalmente para criar conta
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 ALGORITHM = "HS256"

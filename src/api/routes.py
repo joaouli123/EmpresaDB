@@ -22,6 +22,9 @@ from datetime import datetime, timedelta
 from src.utils.cnpj_utils import clean_cnpj
 from src.api.security_logger import security_logger
 
+# ℹ️ Todos os dados estão no banco da VPS (72.61.217.143:5432/cnpj_db)
+# DATABASE_URL configurado no .env aponta para a VPS
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()

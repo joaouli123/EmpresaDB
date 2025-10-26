@@ -4,13 +4,23 @@
 
 This project is an ETL (Extract, Transform, Load) system and REST API for querying public CNPJ data from the Brazilian Federal Revenue. Its primary goal is to create an advanced search and filtering system for Brazilian companies, storing and organizing all Federal Revenue data (companies, establishments, CNPJs, partners) in a PostgreSQL database on the user's VPS, complete with a comprehensive REST API for integration. The system aims to provide a robust solution for business intelligence, compliance, and market analysis, handling large volumes of data efficiently.
 
-## User Preferences
+## ⚠️ CONFIGURAÇÃO DE BANCO DE DADOS
 
-**IMPORTANTE - Configuração de Banco de Dados:**
-- O usuário **NÃO USA** o banco de dados do Replit
-- O sistema conecta-se a um PostgreSQL na **VPS própria do usuário** (via .env)
-- O ETL é executado no **Windows local** para popular o banco da VPS (mais rápido)
-- Nunca assumir que o banco é o da Replit - sempre usar o banco configurado no DATABASE_URL
+**IMPORTANTE - ÚNICO BANCO USADO:**
+- ✅ **PostgreSQL na VPS** (72.61.217.143:5432/cnpj_db)
+- ✅ **DATABASE_URL no .env** sempre aponta para a VPS
+- ✅ **Frontend funciona normalmente** - clientes podem criar conta e API keys pela interface
+- ✅ **Tudo centralizado na VPS** - dados de CNPJ, usuários, API keys, logs
+
+**Como funciona:**
+- **Empresas terceiras:** Usam o frontend normalmente (registro → login → gerar API key)
+- **Admin (você):** Pode usar frontend OU script Python para criar usuários
+- **DATABASE_URL:** Deve estar sempre configurado no .env apontando para VPS
+
+**Verificar configuração:**
+```bash
+python3 -c "from src.config import settings; print('✅ VPS' if '72.61.217.143' in settings.DATABASE_URL else '❌ ERRO')"
+```
 
 ## 💼 Modelo de Negócio (Planejamento)
 

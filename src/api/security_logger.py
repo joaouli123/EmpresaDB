@@ -50,3 +50,12 @@ async def log_suspicious_activity(user_id: int, activity: str, details: dict):
         details={**details, "activity": activity},
         severity="CRITICAL"
     )
+
+async def log_query(user_id: int, action: str, resource: str, details: dict = None):
+    """Log de consultas à API"""
+    await log_security_event(
+        action.upper(),
+        user_id=user_id,
+        details={**details, "resource": resource} if details else {"resource": resource},
+        severity="INFO"
+    )
