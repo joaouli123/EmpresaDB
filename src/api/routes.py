@@ -11,7 +11,7 @@ from src.api.models import (
     CNAEModel,
     MunicipioModel
 )
-from src.api.auth import get_current_admin_user
+from src.api.auth import get_current_admin_user, get_current_user
 from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
 from src.api.rate_limiter import rate_limiter
@@ -19,6 +19,8 @@ import logging
 import asyncio
 from functools import lru_cache
 from datetime import datetime, timedelta
+from src.utils.cnpj_utils import clean_cnpj
+from src.api.security_logger import security_logger
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ def set_cache(key: str, value, minutes: int = 60):
 async def verify_api_key(x_api_key: str = Header(None)):
     """
     Verifica se a API Key é válida
-    
+
     Nota: A API externa da Receita Federal pode demorar 30+ segundos para responder.
     Isso é normal e está fora do nosso controle.
     """
@@ -56,14 +58,14 @@ async def verify_api_key(x_api_key: str = Header(None)):
             status_code=401,
             detail="API Key não fornecida. Use o header 'X-API-Key'"
         )
-    
+
     user = await db_manager.verify_api_key(x_api_key)
     if not user:
         raise HTTPException(
             status_code=401,
             detail="API Key inválida ou expirada"
         )
-    
+
     # O método verify_api_key já incrementa automaticamente os contadores
     return user
 
@@ -78,7 +80,7 @@ async def root():
             )
     except Exception as e:
         logger.error(f"Erro no health check: {e}")
-    
+
     return HealthCheck(
         status="online",
         database="error",
@@ -99,38 +101,49 @@ async def get_stats():
         logger.error(f"Erro ao obter estatísticas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/cnpj/{cnpj}", response_model=EstabelecimentoCompleto)
-async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
-    # Rate limiting escalonado por plano
-    user_plan = user.get('subscription_plan', 'free')
-    await rate_limiter.check_rate_limit(user['id'], user_plan=user_plan)
-    
-    cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
-    
-    # Validação contra SQL injection
-    if not cnpj_clean.isdigit():
-        raise HTTPException(
-            status_code=400,
-            detail="CNPJ deve conter apenas números"
-        )
-    
-    if len(cnpj_clean) != 14:
-        raise HTTPException(
-            status_code=400,
-            detail="CNPJ deve ter 14 dígitos"
-        )
-    
-    # Verifica cache primeiro
-    cache_key = f"cnpj:{cnpj_clean}"
-    cached = get_from_cache(cache_key)
-    if cached:
-        logger.info(f"Cache hit para CNPJ {cnpj_clean}")
-        return cached
-    
+@router.get("/cnpj/{cnpj}")
+async def get_cnpj_data(
+    cnpj: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Consulta dados de CNPJ (usuários autenticados)
+    Requer autenticação JWT (qualquer usuário logado)
+    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
+    """
     try:
+        # Log de auditoria
+        await security_logger.log_query(
+            user_id=current_user['id'],
+            action='cnpj_query',
+            resource=f'cnpj/{cnpj}',
+            details={'unlimited': True}
+        )
+
+        cleaned_cnpj = clean_cnpj(cnpj)
+
+        if not cleaned_cnpj.isdigit():
+            raise HTTPException(
+                status_code=400,
+                detail="CNPJ deve conter apenas números"
+            )
+
+        if len(cleaned_cnpj) != 14:
+            raise HTTPException(
+                status_code=400,
+                detail="CNPJ deve ter 14 dígitos"
+            )
+
+        # Verifica cache primeiro
+        cache_key = f"cnpj:{cleaned_cnpj}"
+        cached = get_from_cache(cache_key)
+        if cached:
+            logger.info(f"Cache hit para CNPJ {cleaned_cnpj}")
+            return cached
+
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             query = """
                 SELECT 
                     cnpj_completo, identificador_matriz_filial, razao_social,
@@ -140,18 +153,18 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
                     tipo_logradouro, logradouro, numero, complemento, bairro,
                     cep, uf, municipio_desc, ddd_1, telefone_1,
                     correio_eletronico, natureza_juridica, natureza_juridica_desc,
-                    porte_empresa, capital_social, opcao_simples, opcao_mei
+                    porte_empresa, capital_social, opcao_simples, opcao_mei, cnae_fiscal_secundaria
                 FROM vw_estabelecimentos_completos
                 WHERE cnpj_completo = %s
             """
-            
-            cursor.execute(query, (cnpj_clean,))
+
+            cursor.execute(query, (cleaned_cnpj,))
             result = cursor.fetchone()
             cursor.close()
-            
+
             if not result:
                 raise HTTPException(status_code=404, detail="CNPJ não encontrado")
-            
+
             columns = [
                 'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
                 'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
@@ -160,20 +173,20 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
                 'tipo_logradouro', 'logradouro', 'numero', 'complemento', 'bairro',
                 'cep', 'uf', 'municipio_desc', 'ddd_1', 'telefone_1',
                 'correio_eletronico', 'natureza_juridica', 'natureza_juridica_desc',
-                'porte_empresa', 'capital_social', 'opcao_simples', 'opcao_mei'
+                'porte_empresa', 'capital_social', 'opcao_simples', 'opcao_mei', 'cnae_fiscal_secundaria'
             ]
-            
+
             data = dict(zip(columns, result))
-            data['cnpj_basico'] = cnpj_clean[:8]
-            data['cnpj_ordem'] = cnpj_clean[8:12]
-            data['cnpj_dv'] = cnpj_clean[12:14]
-            
+            data['cnpj_basico'] = cleaned_cnpj[:8]
+            data['cnpj_ordem'] = cleaned_cnpj[8:12]
+            data['cnpj_dv'] = cleaned_cnpj[12:14]
+
             # Buscar CNAEs secundários com descrições
             cnae_secundarios = []
             if data.get('cnae_fiscal_secundaria'):
                 codigos = data['cnae_fiscal_secundaria'].split(',')
                 codigos = [c.strip() for c in codigos if c.strip()]
-                
+
                 if codigos:
                     placeholders = ','.join(['%s'] * len(codigos))
                     query_cnaes = f"""
@@ -186,183 +199,91 @@ async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
                     cursor.execute(query_cnaes, codigos)
                     cnaes_results = cursor.fetchall()
                     cursor.close()
-                    
+
                     cnae_secundarios = [
                         {'codigo': row[0], 'descricao': row[1]}
                         for row in cnaes_results
                     ]
-            
+
             data['cnae_secundarios_completos'] = cnae_secundarios
-            
+
             resultado = EstabelecimentoCompleto(**data)
-            
+
             # Salva no cache (1 hora)
             set_cache(cache_key, resultado, minutes=60)
-            
+
             return resultado
-            
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Erro ao buscar CNPJ {cnpj_clean}: {e}")
+        logger.error(f"Erro ao buscar CNPJ {cleaned_cnpj}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/search", response_model=PaginatedResponse)
-async def search_empresas(
-    user: dict = Depends(verify_api_key),
-    cnpj: Optional[str] = Query(None, description="CNPJ completo ou parcial (apenas números)"),
-    razao_social: Optional[str] = Query(None, description="Razão social (busca parcial)"),
-    nome_fantasia: Optional[str] = Query(None, description="Nome fantasia (busca parcial)"),
-    uf: Optional[str] = Query(None, description="UF (sigla do estado)"),
-    municipio: Optional[str] = Query(None, description="Código do município"),
-    cnae: Optional[str] = Query(None, description="CNAE principal"),
-    cnae_secundario: Optional[str] = Query(None, description="CNAE secundário (busca parcial)"),
-    situacao_cadastral: Optional[str] = Query(None, description="Situação cadastral (01-Nula, 02-Ativa, 03-Suspensa, 04-Inapta, 08-Baixada)"),
-    porte: Optional[str] = Query(None, description="Porte da empresa (1-Micro, 2-Pequena, 3-Média, 4-Grande, 5-Demais)"),
-    simples: Optional[str] = Query(None, description="Optante Simples Nacional (S/N)"),
-    mei: Optional[str] = Query(None, description="Optante MEI (S/N)"),
-    identificador_matriz_filial: Optional[str] = Query(None, description="1-Matriz, 2-Filial"),
-    natureza_juridica: Optional[str] = Query(None, description="Código da natureza jurídica"),
-    capital_social_min: Optional[float] = Query(None, description="Capital social mínimo"),
-    capital_social_max: Optional[float] = Query(None, description="Capital social máximo"),
-    ente_federativo: Optional[str] = Query(None, description="Ente federativo responsável (busca parcial)"),
-    data_inicio_atividade_de: Optional[str] = Query(None, description="Data de início de atividade DE (formato: YYYY-MM-DD)"),
-    data_inicio_atividade_ate: Optional[str] = Query(None, description="Data de início de atividade ATÉ (formato: YYYY-MM-DD)"),
-    data_situacao_cadastral_de: Optional[str] = Query(None, description="Data da situação cadastral DE (formato: YYYY-MM-DD)"),
-    data_situacao_cadastral_ate: Optional[str] = Query(None, description="Data da situação cadastral ATÉ (formato: YYYY-MM-DD)"),
-    motivo_situacao_cadastral: Optional[str] = Query(None, description="Código do motivo da situação cadastral"),
-    cep: Optional[str] = Query(None, description="CEP (completo ou parcial)"),
-    bairro: Optional[str] = Query(None, description="Bairro (busca parcial)"),
-    logradouro: Optional[str] = Query(None, description="Logradouro/Rua (busca parcial)"),
-    tipo_logradouro: Optional[str] = Query(None, description="Tipo de logradouro (ex: RUA, AVENIDA)"),
-    numero: Optional[str] = Query(None, description="Número do estabelecimento"),
-    complemento: Optional[str] = Query(None, description="Complemento (busca parcial)"),
-    email: Optional[str] = Query(None, description="E-mail (busca parcial)"),
-    page: int = Query(1, ge=1, description="Número da página"),
-    per_page: int = Query(20, ge=1, le=100, description="Itens por página")
+@router.get("/search")
+async def search_companies(
+    razao_social: str = Query(None, description="Razão social da empresa"),
+    nome_fantasia: str = Query(None, description="Nome fantasia da empresa"),
+    cnae: str = Query(None, description="CNAE principal"),
+    municipio: str = Query(None, description="Município"),
+    uf: str = Query(None, description="UF"),
+    situacao: str = Query(None, description="Situação cadastral"),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_current_user)
 ):
+    """
+    Pesquisa empresas por múltiplos critérios (usuários autenticados)
+    Requer autenticação JWT (qualquer usuário logado)
+    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
+    """
     try:
+        # Log de auditoria
+        await security_logger.log_query(
+            user_id=current_user['id'],
+            action='search',
+            resource='/search',
+            details={
+                'unlimited': True,
+                'filters': {
+                    'razao_social': razao_social,
+                    'cnae': cnae,
+                    'municipio': municipio
+                }
+            }
+        )
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             conditions = []
             params = []
-            
-            if cnpj:
-                cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
-                conditions.append("cnpj_completo LIKE %s")
-                params.append(f"{cnpj_clean}%")
-            
+
             if razao_social:
                 conditions.append("razao_social ILIKE %s")
                 params.append(f"%{razao_social}%")
-            
+
             if nome_fantasia:
                 conditions.append("nome_fantasia ILIKE %s")
                 params.append(f"%{nome_fantasia}%")
-            
-            if uf:
-                conditions.append("uf = %s")
-                params.append(uf.upper())
-            
-            if municipio:
-                conditions.append("municipio = %s")
-                params.append(municipio)
-            
+
             if cnae:
                 conditions.append("cnae_fiscal_principal = %s")
                 params.append(cnae)
-            
-            if cnae_secundario:
-                conditions.append("cnae_fiscal_secundaria LIKE %s")
-                params.append(f"%{cnae_secundario}%")
-            
-            if situacao_cadastral:
+
+            if municipio:
+                conditions.append("municipio = %s")
+                params.append(municipio)
+
+            if uf:
+                conditions.append("uf = %s")
+                params.append(uf.upper())
+
+            if situacao:
                 conditions.append("situacao_cadastral = %s")
-                params.append(situacao_cadastral)
-            
-            if porte:
-                conditions.append("porte_empresa = %s")
-                params.append(porte)
-            
-            if simples:
-                conditions.append("opcao_simples = %s")
-                params.append(simples.upper())
-            
-            if mei:
-                conditions.append("opcao_mei = %s")
-                params.append(mei.upper())
-            
-            if identificador_matriz_filial:
-                conditions.append("identificador_matriz_filial = %s")
-                params.append(identificador_matriz_filial)
-            
-            if natureza_juridica:
-                conditions.append("natureza_juridica = %s")
-                params.append(natureza_juridica)
-            
-            if capital_social_min is not None:
-                conditions.append("capital_social >= %s")
-                params.append(capital_social_min)
-            
-            if capital_social_max is not None:
-                conditions.append("capital_social <= %s")
-                params.append(capital_social_max)
-            
-            if ente_federativo:
-                conditions.append("ente_federativo_responsavel ILIKE %s")
-                params.append(f"%{ente_federativo}%")
-            
-            if data_inicio_atividade_de:
-                conditions.append("data_inicio_atividade >= %s")
-                params.append(data_inicio_atividade_de)
-            
-            if data_inicio_atividade_ate:
-                conditions.append("data_inicio_atividade <= %s")
-                params.append(data_inicio_atividade_ate)
-            
-            if data_situacao_cadastral_de:
-                conditions.append("data_situacao_cadastral >= %s")
-                params.append(data_situacao_cadastral_de)
-            
-            if data_situacao_cadastral_ate:
-                conditions.append("data_situacao_cadastral <= %s")
-                params.append(data_situacao_cadastral_ate)
-            
-            if motivo_situacao_cadastral:
-                conditions.append("motivo_situacao_cadastral_desc ILIKE %s")
-                params.append(f"%{motivo_situacao_cadastral}%")
-            
-            if cep:
-                conditions.append("cep LIKE %s")
-                params.append(f"{cep}%")
-            
-            if bairro:
-                conditions.append("bairro ILIKE %s")
-                params.append(f"%{bairro}%")
-            
-            if logradouro:
-                conditions.append("logradouro ILIKE %s")
-                params.append(f"%{logradouro}%")
-            
-            if tipo_logradouro:
-                conditions.append("tipo_logradouro ILIKE %s")
-                params.append(f"%{tipo_logradouro}%")
-            
-            if numero:
-                conditions.append("numero = %s")
-                params.append(numero)
-            
-            if complemento:
-                conditions.append("complemento ILIKE %s")
-                params.append(f"%{complemento}%")
-            
-            if email:
-                conditions.append("correio_eletronico ILIKE %s")
-                params.append(f"%{email}%")
-            
+                params.append(situacao)
+
             where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
+
             count_query = f"""
                 SELECT COUNT(*)
                 FROM vw_estabelecimentos_completos
@@ -371,9 +292,7 @@ async def search_empresas(
             cursor.execute(count_query, params)
             total_result = cursor.fetchone()
             total = total_result[0] if total_result else 0
-            
-            offset = (page - 1) * per_page
-            
+
             data_query = f"""
                 SELECT 
                     cnpj_completo, identificador_matriz_filial, razao_social,
@@ -388,11 +307,11 @@ async def search_empresas(
                 ORDER BY razao_social
                 LIMIT %s OFFSET %s
             """
-            
-            cursor.execute(data_query, params + [per_page, offset])
+
+            cursor.execute(data_query, params + [limit, offset])
             results = cursor.fetchall()
             cursor.close()
-            
+
             columns = [
                 'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
                 'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
@@ -402,7 +321,7 @@ async def search_empresas(
                 'correio_eletronico', 'porte_empresa', 'capital_social',
                 'opcao_simples', 'opcao_mei'
             ]
-            
+
             items = []
             for row in results:
                 data = dict(zip(columns, row))
@@ -410,23 +329,23 @@ async def search_empresas(
                 data['cnpj_basico'] = cnpj[:8] if cnpj else ''
                 data['cnpj_ordem'] = cnpj[8:12] if cnpj and len(cnpj) >= 12 else ''
                 data['cnpj_dv'] = cnpj[12:14] if cnpj and len(cnpj) >= 14 else ''
-                
+
                 # Buscar CNAEs secundários (sem JOIN para manter performance)
                 # Para busca em lote, não buscar CNAEs secundários (usar endpoint específico)
                 data['cnae_secundarios_completos'] = []
-                
+
                 items.append(EstabelecimentoCompleto(**data))
-            
-            total_pages = (total + per_page - 1) // per_page
-            
+
+            total_pages = (total + limit - 1) // limit
+
             return PaginatedResponse(
                 total=total,
-                page=page,
-                per_page=per_page,
+                page=offset // limit + 1,
+                per_page=limit,
                 total_pages=total_pages,
                 items=items
             )
-            
+
     except Exception as e:
         logger.error(f"Erro na busca: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -437,46 +356,46 @@ async def get_cnaes_secundarios(cnpj: str, user: dict = Depends(verify_api_key))
     Busca todos os CNAEs secundários de uma empresa com suas descrições
     """
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
-    
+
     if len(cnpj_clean) != 14:
         raise HTTPException(
             status_code=400,
             detail="CNPJ deve ter 14 dígitos"
         )
-    
+
     # Verifica cache primeiro
     cache_key = f"cnaes_sec:{cnpj_clean}"
     cached = get_from_cache(cache_key)
     if cached:
         logger.info(f"Cache hit para CNAEs secundários do CNPJ {cnpj_clean}")
         return cached
-    
+
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Buscar CNAEs secundários do estabelecimento
             query = """
                 SELECT cnae_fiscal_secundaria
                 FROM estabelecimentos
                 WHERE cnpj_completo = %s
             """
-            
+
             cursor.execute(query, (cnpj_clean,))
             result = cursor.fetchone()
-            
+
             if not result or not result[0]:
                 cursor.close()
                 return []
-            
+
             # Processar códigos de CNAE
             codigos = result[0].split(',')
             codigos = [c.strip() for c in codigos if c.strip()]
-            
+
             if not codigos:
                 cursor.close()
                 return []
-            
+
             # Buscar descrições
             placeholders = ','.join(['%s'] * len(codigos))
             query_cnaes = f"""
@@ -485,48 +404,55 @@ async def get_cnaes_secundarios(cnpj: str, user: dict = Depends(verify_api_key))
                 WHERE codigo IN ({placeholders})
                 ORDER BY codigo
             """
-            
+
             cursor.execute(query_cnaes, codigos)
             cnaes_results = cursor.fetchall()
             cursor.close()
-            
+
             cnaes = [CNAEModel(codigo=row[0], descricao=row[1]) for row in cnaes_results]
-            
+
             # Salva no cache (1 hora)
             set_cache(cache_key, cnaes, minutes=60)
-            
+
             return cnaes
-            
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Erro ao buscar CNAEs secundários do CNPJ {cnpj_clean}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/cnpj/{cnpj}/socios", response_model=List[SocioModel])
-async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
+@router.get("/cnpj/{cnpj}/socios")
+async def get_socios(cnpj: str, current_user: dict = Depends(get_current_user)):
     """
-    Busca sócios de uma empresa pelo CNPJ
-    
-    IMPORTANTE: Esta consulta pode retornar muitos resultados para empresas grandes.
-    Banco de dados contém 26,5 milhões de sócios.
+    Consulta sócios de um CNPJ (usuários autenticados)
+    Requer autenticação JWT (qualquer usuário logado)
+    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
-    cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
-    cnpj_basico = cnpj_clean[:8]
-    
-    logger.info(f"🔍 Buscando sócios para CNPJ {cnpj_clean} (básico: {cnpj_basico})")
-    
-    # Verifica cache primeiro
-    cache_key = f"socios:{cnpj_basico}"
-    cached = get_from_cache(cache_key)
-    if cached:
-        logger.info(f"✓ Cache hit para sócios do CNPJ {cnpj_basico}")
-        return cached
-    
     try:
+        # Log de auditoria
+        await security_logger.log_query(
+            user_id=current_user['id'],
+            action='socios_query',
+            resource=f'cnpj/{cnpj}/socios',
+            details={'unlimited': True}
+        )
+
+        cleaned_cnpj = clean_cnpj(cnpj)
+        cnpj_basico = cleaned_cnpj[:8]
+
+        logger.info(f"🔍 Buscando sócios para CNPJ {cleaned_cnpj} (básico: {cnpj_basico})")
+
+        # Verifica cache primeiro
+        cache_key = f"socios:{cnpj_basico}"
+        cached = get_from_cache(cache_key)
+        if cached:
+            logger.info(f"✓ Cache hit para sócios do CNPJ {cnpj_basico}")
+            return cached
+
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Query completa com JOIN para trazer descrições
             query = """
                 SELECT 
@@ -568,14 +494,14 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
                 ORDER BY s.nome_socio
                 LIMIT 1000
             """
-            
+
             cursor.execute(query, (cnpj_basico,))
             results = cursor.fetchall()
-            
+
             logger.info(f"📊 Encontrados {len(results)} sócios para CNPJ básico {cnpj_basico}")
-            
+
             cursor.close()
-            
+
             columns = [
                 'cnpj_basico', 'identificador_socio', 'identificador_socio_desc',
                 'nome_socio', 'cnpj_cpf_socio', 'qualificacao_socio', 'qualificacao_socio_desc',
@@ -583,17 +509,17 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
                 'nome_representante', 'qualificacao_representante', 'qualificacao_representante_desc',
                 'faixa_etaria', 'faixa_etaria_desc'
             ]
-            
+
             socios = [SocioModel(**dict(zip(columns, row))) for row in results]
-            
+
             if len(socios) == 0:
                 logger.info(f"ℹ️ Nenhum sócio encontrado para CNPJ básico {cnpj_basico}")
             else:
                 # Salva no cache (30 minutos)
                 set_cache(cache_key, socios, minutes=30)
-            
+
             return socios
-            
+
     except Exception as e:
         logger.error(f"❌ Erro ao buscar sócios do CNPJ {cnpj_basico}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -605,38 +531,38 @@ async def search_socios(
     identificador_socio: Optional[str] = Query(None, description="Tipo de sócio (1-Pessoa Jurídica, 2-Pessoa Física, 3-Estrangeiro)"),
     qualificacao_socio: Optional[str] = Query(None, description="Código da qualificação do sócio"),
     faixa_etaria: Optional[str] = Query(None, description="Faixa etária do sócio"),
-    limit: int = Query(100, ge=1, le=1000, description="Limite de resultados")
+    limit: int = Query(100, ge=1, le=1000)
 ):
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             conditions = []
             params = []
-            
+
             if nome_socio:
                 conditions.append("nome_socio ILIKE %s")
                 params.append(f"%{nome_socio}%")
-            
+
             if cpf_cnpj:
                 cpf_cnpj_clean = cpf_cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
                 conditions.append("cnpj_cpf_socio LIKE %s")
                 params.append(f"{cpf_cnpj_clean}%")
-            
+
             if identificador_socio:
                 conditions.append("identificador_socio = %s")
                 params.append(identificador_socio)
-            
+
             if qualificacao_socio:
                 conditions.append("qualificacao_socio = %s")
                 params.append(qualificacao_socio)
-            
+
             if faixa_etaria:
                 conditions.append("faixa_etaria = %s")
                 params.append(faixa_etaria)
-            
+
             where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
+
             query = f"""
                 SELECT 
                     cnpj_basico, identificador_socio, nome_socio,
@@ -646,19 +572,19 @@ async def search_socios(
                 ORDER BY nome_socio
                 LIMIT %s
             """
-            
+
             cursor.execute(query, params + [limit])
             results = cursor.fetchall()
             cursor.close()
-            
+
             columns = [
                 'cnpj_basico', 'identificador_socio', 'nome_socio',
                 'cnpj_cpf_socio', 'qualificacao_socio', 'data_entrada_sociedade'
             ]
-            
+
             socios = [SocioModel(**dict(zip(columns, row))) for row in results]
             return socios
-            
+
     except Exception as e:
         logger.error(f"Erro ao buscar sócios: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -671,7 +597,7 @@ async def list_cnaes(
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             if search:
                 query = """
                     SELECT codigo, descricao
@@ -689,12 +615,12 @@ async def list_cnaes(
                     LIMIT %s
                 """
                 cursor.execute(query, (limit,))
-            
+
             results = cursor.fetchall()
             cursor.close()
-            
+
             return [CNAEModel(codigo=row[0], descricao=row[1]) for row in results]
-            
+
     except Exception as e:
         logger.error(f"Erro ao listar CNAEs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -704,7 +630,7 @@ async def list_municipios(uf: str):
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             query = """
                 SELECT DISTINCT m.codigo, m.descricao
                 FROM municipios m
@@ -712,13 +638,13 @@ async def list_municipios(uf: str):
                 WHERE e.uf = %s
                 ORDER BY m.descricao
             """
-            
+
             cursor.execute(query, (uf.upper(),))
             results = cursor.fetchall()
             cursor.close()
-            
+
             return [MunicipioModel(codigo=row[0], descricao=row[1]) for row in results]
-            
+
     except Exception as e:
         logger.error(f"Erro ao listar municípios: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -729,7 +655,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            
+
             if data == "ping":
                 await ws_manager.send_message({"type": "pong"}, websocket)
     except WebSocketDisconnect:
