@@ -11,6 +11,7 @@ from src.api.models import (
     CNAEModel,
     MunicipioModel
 )
+from src.api.auth import get_current_admin_user
 from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
 import logging
@@ -723,9 +724,14 @@ async def websocket_endpoint(websocket: WebSocket):
         ws_manager.disconnect(websocket)
 
 @router.post("/etl/start")
-async def start_etl():
+async def start_etl(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Inicia o processo de ETL (apenas administradores)
+    Requer autenticação JWT com role de admin
+    """
     try:
         asyncio.create_task(etl_controller.run_etl())
+        logger.info(f"ETL iniciado pelo admin: {current_user.get('username')}")
         return {
             "status": "started",
             "message": "Processo ETL iniciado. Acompanhe o progresso via WebSocket."
@@ -735,9 +741,14 @@ async def start_etl():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/etl/stop")
-async def stop_etl():
+async def stop_etl(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Para o processo de ETL (apenas administradores)
+    Requer autenticação JWT com role de admin
+    """
     try:
         stopped = await etl_controller.stop_etl()
+        logger.info(f"ETL parado pelo admin: {current_user.get('username')}")
         return {
             "status": "stopped" if stopped else "not_running",
             "message": "Processo ETL parado" if stopped else "ETL não estava rodando"
@@ -747,7 +758,11 @@ async def stop_etl():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/etl/status")
-async def get_etl_status():
+async def get_etl_status(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Obtém status do ETL (apenas administradores)
+    Requer autenticação JWT com role de admin
+    """
     return {
         "is_running": etl_controller.is_running,
         "stats": etl_controller.stats,
@@ -755,9 +770,14 @@ async def get_etl_status():
     }
 
 @router.post("/etl/config")
-async def update_etl_config(config: Dict[str, Any]):
+async def update_etl_config(config: Dict[str, Any], current_user: dict = Depends(get_current_admin_user)):
+    """
+    Atualiza configurações do ETL (apenas administradores)
+    Requer autenticação JWT com role de admin
+    """
     try:
         updated_config = await etl_controller.update_config(config)
+        logger.info(f"Configuração ETL atualizada pelo admin: {current_user.get('username')}")
         return {
             "status": "updated",
             "config": updated_config
@@ -767,7 +787,11 @@ async def update_etl_config(config: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/etl/database-stats")
-async def get_database_stats():
+async def get_database_stats(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Obtém estatísticas do banco de dados (apenas administradores)
+    Requer autenticação JWT com role de admin
+    """
     try:
         stats = await etl_controller.get_database_stats()
         return stats
