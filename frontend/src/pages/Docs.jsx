@@ -17,8 +17,9 @@ const Docs = () => {
             <li><a href="#intro">Introdução</a></li>
             <li><a href="#auth">Autenticação</a></li>
             <li><a href="#endpoints">Endpoints</a></li>
-            <li><a href="#examples">Exemplos</a></li>
-            <li><a href="#errors">Códigos de Erro</a></li>
+            <li><a href="#examples">Exemplos de Código</a></li>
+            <li><a href="#codes">Códigos de Referência</a></li>
+            <li><a href="#errors">Códigos de Erro HTTP</a></li>
           </ul>
         </div>
 
@@ -137,83 +138,312 @@ X-API-Key: sua_chave_api`}</pre>
                 <span className="method get">GET</span>
                 <code>/search</code>
               </div>
-              <p>Busca avançada com múltiplos filtros. Retorna resultados paginados.</p>
+              <p>Busca avançada com múltiplos filtros. Retorna resultados paginados. <strong>28 filtros disponíveis!</strong></p>
+              
               <div className="params-table">
-                <h4>Parâmetros disponíveis:</h4>
+                <h4>📊 Dados da Empresa:</h4>
                 <table>
                   <thead>
                     <tr>
                       <th>Parâmetro</th>
                       <th>Tipo</th>
                       <th>Descrição</th>
+                      <th>Exemplo</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
+                      <td><code>cnpj</code></td>
+                      <td>string</td>
+                      <td>CNPJ completo ou parcial</td>
+                      <td>33000167</td>
+                    </tr>
+                    <tr>
                       <td><code>razao_social</code></td>
                       <td>string</td>
-                      <td>Busca parcial por razão social</td>
+                      <td>Busca parcial (case-insensitive)</td>
+                      <td>PETROBRAS</td>
                     </tr>
                     <tr>
                       <td><code>nome_fantasia</code></td>
                       <td>string</td>
-                      <td>Busca parcial por nome fantasia</td>
+                      <td>Busca parcial</td>
+                      <td>Extra</td>
                     </tr>
                     <tr>
-                      <td><code>uf</code></td>
+                      <td><code>natureza_juridica</code></td>
                       <td>string</td>
-                      <td>Sigla do estado (ex: SP, RJ)</td>
-                    </tr>
-                    <tr>
-                      <td><code>municipio</code></td>
-                      <td>string</td>
-                      <td>Código do município</td>
-                    </tr>
-                    <tr>
-                      <td><code>situacao_cadastral</code></td>
-                      <td>string</td>
-                      <td>01=Nula, 02=Ativa, 03=Suspensa, etc.</td>
-                    </tr>
-                    <tr>
-                      <td><code>cnae</code></td>
-                      <td>string</td>
-                      <td>Código CNAE da atividade</td>
+                      <td>Código da natureza jurídica</td>
+                      <td>2062</td>
                     </tr>
                     <tr>
                       <td><code>porte</code></td>
                       <td>string</td>
-                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande</td>
+                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais</td>
+                      <td>4</td>
                     </tr>
+                    <tr>
+                      <td><code>capital_social_min</code></td>
+                      <td>number</td>
+                      <td>Capital social mínimo</td>
+                      <td>100000</td>
+                    </tr>
+                    <tr>
+                      <td><code>capital_social_max</code></td>
+                      <td>number</td>
+                      <td>Capital social máximo</td>
+                      <td>1000000</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>📍 Localização:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>uf</code></td>
+                      <td>string</td>
+                      <td>Sigla do estado</td>
+                      <td>SP</td>
+                    </tr>
+                    <tr>
+                      <td><code>municipio</code></td>
+                      <td>string</td>
+                      <td>Código do município (IBGE)</td>
+                      <td>3550308</td>
+                    </tr>
+                    <tr>
+                      <td><code>cep</code></td>
+                      <td>string</td>
+                      <td>CEP completo ou parcial</td>
+                      <td>01310</td>
+                    </tr>
+                    <tr>
+                      <td><code>bairro</code></td>
+                      <td>string</td>
+                      <td>Nome do bairro (busca parcial)</td>
+                      <td>Centro</td>
+                    </tr>
+                    <tr>
+                      <td><code>logradouro</code></td>
+                      <td>string</td>
+                      <td>Nome da rua/avenida (busca parcial)</td>
+                      <td>Paulista</td>
+                    </tr>
+                    <tr>
+                      <td><code>tipo_logradouro</code></td>
+                      <td>string</td>
+                      <td>Tipo do logradouro (busca parcial)</td>
+                      <td>AVENIDA</td>
+                    </tr>
+                    <tr>
+                      <td><code>numero</code></td>
+                      <td>string</td>
+                      <td>Número do estabelecimento</td>
+                      <td>1000</td>
+                    </tr>
+                    <tr>
+                      <td><code>complemento</code></td>
+                      <td>string</td>
+                      <td>Complemento do endereço</td>
+                      <td>SALA</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>📊 Situação Cadastral:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>situacao_cadastral</code></td>
+                      <td>string</td>
+                      <td>01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
+                      <td>02</td>
+                    </tr>
+                    <tr>
+                      <td><code>motivo_situacao_cadastral</code></td>
+                      <td>string</td>
+                      <td>Motivo da situação (busca parcial)</td>
+                      <td>ENCERRAMENTO</td>
+                    </tr>
+                    <tr>
+                      <td><code>data_situacao_cadastral_de</code></td>
+                      <td>date</td>
+                      <td>Data da situação cadastral DE (YYYY-MM-DD)</td>
+                      <td>2020-01-01</td>
+                    </tr>
+                    <tr>
+                      <td><code>data_situacao_cadastral_ate</code></td>
+                      <td>date</td>
+                      <td>Data da situação cadastral ATÉ (YYYY-MM-DD)</td>
+                      <td>2024-12-31</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>📅 Datas:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>data_inicio_atividade_de</code></td>
+                      <td>date</td>
+                      <td>Data de início DE (YYYY-MM-DD)</td>
+                      <td>2020-01-01</td>
+                    </tr>
+                    <tr>
+                      <td><code>data_inicio_atividade_ate</code></td>
+                      <td>date</td>
+                      <td>Data de início ATÉ (YYYY-MM-DD)</td>
+                      <td>2024-12-31</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>🏭 Atividade Econômica:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>cnae</code></td>
+                      <td>string</td>
+                      <td>CNAE principal (atividade econômica)</td>
+                      <td>4712100</td>
+                    </tr>
+                    <tr>
+                      <td><code>cnae_secundario</code></td>
+                      <td>string</td>
+                      <td>CNAE secundário (busca parcial)</td>
+                      <td>6421</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>🏪 Tipo de Estabelecimento:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>identificador_matriz_filial</code></td>
+                      <td>string</td>
+                      <td>1=Matriz, 2=Filial</td>
+                      <td>1</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>💼 Regime Tributário:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     <tr>
                       <td><code>simples</code></td>
                       <td>string</td>
-                      <td>S ou N (Simples Nacional)</td>
+                      <td>Optante pelo Simples Nacional (S/N)</td>
+                      <td>S</td>
                     </tr>
                     <tr>
                       <td><code>mei</code></td>
                       <td>string</td>
-                      <td>S ou N (MEI)</td>
+                      <td>Optante pelo MEI (S/N)</td>
+                      <td>S</td>
                     </tr>
+                  </tbody>
+                </table>
+
+                <h4 style={{ marginTop: '24px' }}>📄 Paginação:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     <tr>
                       <td><code>page</code></td>
                       <td>number</td>
                       <td>Número da página (padrão: 1)</td>
+                      <td>1</td>
                     </tr>
                     <tr>
                       <td><code>per_page</code></td>
                       <td>number</td>
                       <td>Itens por página (padrão: 20, máx: 100)</td>
+                      <td>50</td>
                     </tr>
                   </tbody>
                 </table>
-                <p style={{ marginTop: '12px', fontSize: '14px', color: '#64748b' }}>
-                  📋 <strong>Mais 15+ filtros disponíveis!</strong> Veja a lista completa em FILTROS_COMPLETOS.md
-                </p>
               </div>
+
               <div className="endpoint-example">
-                <h4>Exemplo de Requisição:</h4>
-                <pre>{`GET ${API_URL}/search?razao_social=petrobras&uf=RJ&page=1
-X-API-Key: sua_chave_api`}</pre>
+                <h4>Formato de Resposta:</h4>
+                <pre>{`{
+  "total": 1234,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 62,
+  "items": [...]
+}`}</pre>
+
+                <h4>Exemplos de Requisição:</h4>
+                <pre>{`# Empresas ativas em SP
+GET ${API_URL}/search?uf=SP&situacao_cadastral=02
+
+# Grandes empresas com capital > 1 milhão
+GET ${API_URL}/search?porte=4&capital_social_min=1000000
+
+# MEIs no RJ
+GET ${API_URL}/search?mei=S&uf=RJ&situacao_cadastral=02
+
+# Empresas abertas em 2024
+GET ${API_URL}/search?data_inicio_atividade_de=2024-01-01&data_inicio_atividade_ate=2024-12-31`}</pre>
               </div>
             </div>
 
@@ -233,9 +463,197 @@ X-API-Key: sua_chave_api`}</pre>
             <div className="endpoint">
               <div className="endpoint-header">
                 <span className="method get">GET</span>
+                <code>/cnpj/:cnpj/cnaes-secundarios</code>
+              </div>
+              <p>Retorna todos os CNAEs secundários de uma empresa com suas descrições completas.</p>
+              <div className="endpoint-example">
+                <h4>O que são CNAEs Secundários?</h4>
+                <p style={{ marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
+                  CNAEs secundários são as atividades econômicas complementares que uma empresa pode exercer, além da sua atividade principal (CNAE principal).
+                </p>
+                <h4>Performance:</h4>
+                <p>Resultados em cache por 1 hora para consultas otimizadas</p>
+                <h4>Exemplo de Requisição:</h4>
+                <pre>{`GET ${API_URL}/cnpj/00000000000191/cnaes-secundarios
+X-API-Key: sua_chave_api`}</pre>
+                <h4>Exemplo de Resposta:</h4>
+                <pre>{`[
+  {
+    "codigo": "6421200",
+    "descricao": "Bancos comerciais"
+  },
+  {
+    "codigo": "6422100",
+    "descricao": "Bancos múltiplos, com carteira comercial"
+  },
+  {
+    "codigo": "6423900",
+    "descricao": "Caixas econômicas"
+  }
+]`}</pre>
+                <p style={{ marginTop: '12px', fontSize: '14px', color: '#059669' }}>
+                  ✅ <strong>Dica:</strong> Use este endpoint para entender todas as atividades que a empresa está autorizada a exercer.
+                </p>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/socios/search</code>
+              </div>
+              <p>Busca avançada de sócios com filtros. Ideal para encontrar empresas através de características dos sócios.</p>
+              <div className="params-table">
+                <h4>Parâmetros disponíveis:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Valores/Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>nome_socio</code></td>
+                      <td>string</td>
+                      <td>Nome do sócio (busca parcial, case-insensitive)</td>
+                      <td>JOÃO SILVA</td>
+                    </tr>
+                    <tr>
+                      <td><code>cpf_cnpj</code></td>
+                      <td>string</td>
+                      <td>CPF ou CNPJ do sócio (completo ou parcial)</td>
+                      <td>12345678900</td>
+                    </tr>
+                    <tr>
+                      <td><code>identificador_socio</code></td>
+                      <td>string</td>
+                      <td>Tipo de sócio: 1=PJ, 2=PF, 3=Estrangeiro</td>
+                      <td>2</td>
+                    </tr>
+                    <tr>
+                      <td><code>qualificacao_socio</code></td>
+                      <td>string</td>
+                      <td>Qualificação: 05=Administrador, 10=Diretor, 16=Presidente, 49=Sócio-Administrador</td>
+                      <td>05</td>
+                    </tr>
+                    <tr>
+                      <td><code>faixa_etaria</code></td>
+                      <td>string</td>
+                      <td>Faixa etária: 1=0-12, 2=13-20, 3=21-30, 4=31-40, 5=41-50, 6=51-60, 7=61-70, 8=71-80, 9=80+</td>
+                      <td>4</td>
+                    </tr>
+                    <tr>
+                      <td><code>limit</code></td>
+                      <td>number</td>
+                      <td>Limite de resultados (padrão: 100, máx: 1000)</td>
+                      <td>500</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="endpoint-example">
+                <h4>Exemplos:</h4>
+                <pre>{`# Buscar pessoas físicas que são administradores
+GET ${API_URL}/socios/search?identificador_socio=2&qualificacao_socio=05
+
+# Buscar sócios com CPF específico
+GET ${API_URL}/socios/search?cpf_cnpj=12345678900
+
+# Buscar sócios por nome
+GET ${API_URL}/socios/search?nome_socio=SILVA&limit=50
+
+# Buscar sócios de faixa etária 31-40 anos
+GET ${API_URL}/socios/search?faixa_etaria=4&identificador_socio=2`}</pre>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/cnaes</code>
+              </div>
+              <p>Lista códigos CNAE (atividades econômicas) com suas descrições.</p>
+              <div className="params-table">
+                <h4>Parâmetros opcionais:</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>search</code></td>
+                      <td>string</td>
+                      <td>Busca parcial na descrição</td>
+                    </tr>
+                    <tr>
+                      <td><code>limit</code></td>
+                      <td>number</td>
+                      <td>Limite de resultados (padrão: 100)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="endpoint-example">
+                <h4>Exemplo:</h4>
+                <pre>{`GET ${API_URL}/cnaes?search=comercio&limit=50
+X-API-Key: sua_chave_api`}</pre>
+                <h4>Resposta:</h4>
+                <pre>{`[
+  {
+    "codigo": "4711302",
+    "descricao": "Comércio varejista de mercadorias em geral..."
+  }
+]`}</pre>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/municipios/:uf</code>
+              </div>
+              <p>Lista todos os municípios de um estado.</p>
+              <div className="endpoint-example">
+                <h4>Exemplo:</h4>
+                <pre>{`GET ${API_URL}/municipios/SP
+X-API-Key: sua_chave_api`}</pre>
+                <h4>Resposta:</h4>
+                <pre>{`[
+  {
+    "codigo": "3550308",
+    "descricao": "SAO PAULO"
+  },
+  {
+    "codigo": "3509502",
+    "descricao": "CAMPINAS"
+  }
+]`}</pre>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
                 <code>/stats</code>
               </div>
               <p>Retorna estatísticas gerais do banco de dados (não requer autenticação).</p>
+              <div className="endpoint-example">
+                <h4>Resposta:</h4>
+                <pre>{`{
+  "total_empresas": 52678123,
+  "total_estabelecimentos": 60345892,
+  "total_socios": 31234567,
+  "total_cnaes": 1358,
+  "total_municipios": 5570
+}`}</pre>
+              </div>
             </div>
 
             <div className="endpoint">
@@ -338,7 +756,22 @@ const listarSocios = async (cnpj) => {
   }
 };
 
-listarSocios('00000000000191');`}</pre>
+listarSocios('00000000000191');
+
+// Buscar CNAEs secundários de uma empresa
+const buscarCNAEsSecundarios = async (cnpj) => {
+  try {
+    const response = await api.get(\`/cnpj/\${cnpj}/cnaes-secundarios\`);
+    console.log('CNAEs Secundários:', response.data);
+    response.data.forEach(cnae => {
+      console.log(\`- [\${cnae.codigo}] \${cnae.descricao}\`);
+    });
+  } catch (error) {
+    console.error('Erro:', error.response.data);
+  }
+};
+
+buscarCNAEsSecundarios('00000000000191');`}</pre>
             </div>
 
             <h3>Python</h3>
@@ -409,7 +842,25 @@ socios = listar_socios('00000000000191')
 if socios:
     print(f"Encontrados {len(socios)} sócios")
     for socio in socios:
-        print(f"- {socio['nome_socio']}")`}</pre>
+        print(f"- {socio['nome_socio']}")
+
+# Buscar CNAEs secundários
+def buscar_cnaes_secundarios(cnpj):
+    response = requests.get(
+        f'{API_URL}/cnpj/{cnpj}/cnaes-secundarios',
+        headers=headers
+    )
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Erro {response.status_code}: {response.text}")
+        return None
+
+cnaes = buscar_cnaes_secundarios('00000000000191')
+if cnaes:
+    print(f"Encontrados {len(cnaes)} CNAEs secundários:")
+    for cnae in cnaes:
+        print(f"- [{cnae['codigo']}] {cnae['descricao']}")`}</pre>
             </div>
 
             <h3>PHP</h3>
@@ -459,6 +910,16 @@ if ($resultado) {
     }
 }
 
+// Buscar CNAEs secundários
+$cnpj = '00000000000191';
+$cnaes = apiRequest("$apiUrl/cnpj/$cnpj/cnaes-secundarios", $apiKey);
+if ($cnaes) {
+    echo "Encontrados " . count($cnaes) . " CNAEs secundários:\\n";
+    foreach ($cnaes as $cnae) {
+        echo "- [" . $cnae['codigo'] . "] " . $cnae['descricao'] . "\\n";
+    }
+}
+
 ?>`}</pre>
             </div>
 
@@ -474,6 +935,10 @@ curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1" \\
 
 # Listar sócios de uma empresa
 curl -X GET "${API_URL}/cnpj/00000000000191/socios" \\
+  -H "X-API-Key: sua_chave_api"
+
+# Buscar CNAEs secundários de uma empresa
+curl -X GET "${API_URL}/cnpj/00000000000191/cnaes-secundarios" \\
   -H "X-API-Key: sua_chave_api"
 
 # Buscar por razão social
@@ -507,11 +972,172 @@ curl -X GET "${API_URL}/stats"`}</pre>
             </div>
           </section>
 
+          <section id="codes" className="doc-section">
+            <div className="section-icon">
+              <Database size={32} />
+            </div>
+            <h2>Códigos de Referência</h2>
+            <p>Valores válidos para usar nos filtros da API:</p>
+
+            <div className="info-card" style={{ background: '#f0f9ff', border: '2px solid #0ea5e9', marginBottom: '24px' }}>
+              <h3 style={{ color: '#0c4a6e', marginBottom: '16px' }}>📊 Situação Cadastral</h3>
+              <table className="errors-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Uso Comum</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>01</code></td>
+                    <td>Nula</td>
+                    <td>Empresa sem validade jurídica</td>
+                  </tr>
+                  <tr>
+                    <td><code>02</code></td>
+                    <td>Ativa</td>
+                    <td>⭐ Mais usado - empresa em funcionamento</td>
+                  </tr>
+                  <tr>
+                    <td><code>03</code></td>
+                    <td>Suspensa</td>
+                    <td>Empresa com atividades suspensas</td>
+                  </tr>
+                  <tr>
+                    <td><code>04</code></td>
+                    <td>Inapta</td>
+                    <td>Empresa irregular perante a Receita</td>
+                  </tr>
+                  <tr>
+                    <td><code>08</code></td>
+                    <td>Baixada</td>
+                    <td>Empresa encerrada</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="info-card" style={{ background: '#fef3c7', border: '2px solid #f59e0b', marginBottom: '24px' }}>
+              <h3 style={{ color: '#92400e', marginBottom: '16px' }}>🏢 Porte da Empresa</h3>
+              <table className="errors-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Característica</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>1</code></td>
+                    <td>Micro Empresa</td>
+                    <td>Faturamento até R$ 360 mil/ano</td>
+                  </tr>
+                  <tr>
+                    <td><code>2</code></td>
+                    <td>Empresa de Pequeno Porte</td>
+                    <td>Faturamento até R$ 4,8 milhões/ano</td>
+                  </tr>
+                  <tr>
+                    <td><code>3</code></td>
+                    <td>Empresa de Médio Porte</td>
+                    <td>Faturamento intermediário</td>
+                  </tr>
+                  <tr>
+                    <td><code>4</code></td>
+                    <td>Grande Empresa</td>
+                    <td>Alto faturamento</td>
+                  </tr>
+                  <tr>
+                    <td><code>5</code></td>
+                    <td>Demais</td>
+                    <td>Sem classificação específica</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="info-card" style={{ background: '#f0fdf4', border: '2px solid #22c55e', marginBottom: '24px' }}>
+              <h3 style={{ color: '#14532d', marginBottom: '16px' }}>🏪 Identificador Matriz/Filial</h3>
+              <table className="errors-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Quando Usar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>1</code></td>
+                    <td>Matriz</td>
+                    <td>Sede principal da empresa</td>
+                  </tr>
+                  <tr>
+                    <td><code>2</code></td>
+                    <td>Filial</td>
+                    <td>Unidades secundárias</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="info-card" style={{ background: '#fae8ff', border: '2px solid #a855f7', marginBottom: '24px' }}>
+              <h3 style={{ color: '#581c87', marginBottom: '16px' }}>💼 Regime Tributário</h3>
+              <table className="errors-table">
+                <thead>
+                  <tr>
+                    <th>Parâmetro</th>
+                    <th>Valor</th>
+                    <th>Significado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>simples</code></td>
+                    <td>S</td>
+                    <td>Optante pelo Simples Nacional</td>
+                  </tr>
+                  <tr>
+                    <td><code>simples</code></td>
+                    <td>N</td>
+                    <td>Não optante pelo Simples Nacional</td>
+                  </tr>
+                  <tr>
+                    <td><code>mei</code></td>
+                    <td>S</td>
+                    <td>Microempreendedor Individual</td>
+                  </tr>
+                  <tr>
+                    <td><code>mei</code></td>
+                    <td>N</td>
+                    <td>Não é MEI</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="info-card" style={{ background: '#ffe4e6', border: '2px solid #f43f5e', marginBottom: '24px' }}>
+              <h3 style={{ color: '#881337', marginBottom: '16px' }}>📅 Formato de Datas</h3>
+              <p style={{ color: '#881337', marginBottom: '12px' }}>
+                Todas as datas devem estar no formato <strong>YYYY-MM-DD</strong> (Ano-Mês-Dia):
+              </p>
+              <ul style={{ color: '#881337', marginLeft: '20px' }}>
+                <li>✅ Correto: <code>2024-01-15</code></li>
+                <li>✅ Correto: <code>2020-12-31</code></li>
+                <li>❌ Errado: <code>15/01/2024</code></li>
+                <li>❌ Errado: <code>2024/01/15</code></li>
+              </ul>
+            </div>
+          </section>
+
           <section id="errors" className="doc-section">
             <div className="section-icon">
               <Shield size={32} />
             </div>
-            <h2>Códigos de Erro</h2>
+            <h2>Códigos de Erro HTTP</h2>
             <table className="errors-table">
               <thead>
                 <tr>
