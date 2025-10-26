@@ -347,7 +347,12 @@ async def search_companies(
                 
                 if explain_result and explain_result[0]:
                     import json
-                    plan = json.loads(explain_result[0])
+                    # explain_result[0] pode ser string JSON ou lista/dict já parseado
+                    if isinstance(explain_result[0], str):
+                        plan = json.loads(explain_result[0])
+                    else:
+                        plan = explain_result[0]
+                    
                     estimated_rows = plan[0]['Plan'].get('Plan Rows', 0)
                     total = int(estimated_rows)
                     logger.info(f"⚡ Usando estimativa rápida: ~{total} registros")
