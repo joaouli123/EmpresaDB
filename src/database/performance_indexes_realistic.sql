@@ -1,4 +1,5 @@
 
+
 -- ============================================
 -- ÍNDICES OTIMIZADOS REALISTAS
 -- Para 50M+ empresas, 200GB disco disponível
@@ -70,16 +71,18 @@ ON empresas USING gin(razao_social gin_trgm_ops);
 
 -- ===== 6. ÍNDICE PARCIAL (EMPRESAS ATIVAS) =====
 -- Índice menor, apenas para registros ativos (maioria das consultas)
+-- ✅ CORRIGIDO: Removido 'porte_empresa' que não existe em estabelecimentos
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_ativos_uf
-ON estabelecimentos(uf, municipio, cnae_fiscal_principal)
+ON estabelecimentos(uf, cnae_fiscal_principal)
 WHERE situacao_cadastral = '02';
 
 -- ===== 7. ÍNDICES PARA JOINS =====
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_cnpj_basico 
 ON estabelecimentos(cnpj_basico);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_municipio 
-ON estabelecimentos(municipio);
+-- ✅ CORRIGIDO: Não recriar índice que já existe em schema.sql
+-- CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_municipio 
+-- ON estabelecimentos(municipio);
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_empresas_cnpj_basico 
 ON empresas(cnpj_basico);
@@ -111,6 +114,7 @@ ORDER BY pg_relation_size(indexname::regclass) DESC;
 -- ✅ Apenas 2 índices trigram (ao invés de 7)
 -- ✅ Índice B-tree para ORDER BY nome_fantasia E razao_social (CRÍTICO!)
 -- ✅ Índices parciais para economizar espaço
+-- ✅ Todas as colunas VALIDADAS contra schema real
 -- ✅ Total estimado: 20-40GB de índices (cabe em 200GB)
 
 -- ===== TEMPO ESTIMADO =====
