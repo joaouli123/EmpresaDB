@@ -4,49 +4,48 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
+env/
 venv/
 ENV/
-env/
 .venv
 
-# IDEs
+# Banco de dados local
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+
+# Downloads
+downloads/
+data/
+
+# Ambiente
+.env
+.env.local
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# Environment variables
-.env
-
-# Data and logs
-downloads/
-data/*.csv
-data/*.zip
-logs/*.log
-
-# Database
-*.db
-*.sqlite
-
-# OS
+# Sistema
 .DS_Store
 Thumbs.db
+
+# Temporários
+*.tmp
+*.temp
+attached_assets/
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# Replit
+.config/
+.cache/
+.upm/
