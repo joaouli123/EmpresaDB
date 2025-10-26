@@ -25,33 +25,31 @@ CREATE EXTENSION IF NOT EXISTS btree_gin;
 SELECT 'Passo 1: Extensões verificadas' as status;
 
 -- ===== PASSO 2: CORRIGIR ÍNDICES COM 0 BYTES =====
--- Primeiro verificar se existem
-DO $$
-BEGIN
-    -- Recriar idx_estabelecimentos_cnpj_basico se necessário
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_indexes 
-        WHERE indexname = 'idx_estabelecimentos_cnpj_basico'
-        AND pg_relation_size(indexname::regclass) > 0
-    ) THEN
-        DROP INDEX IF EXISTS idx_estabelecimentos_cnpj_basico;
-        CREATE INDEX CONCURRENTLY idx_estabelecimentos_cnpj_basico 
-        ON estabelecimentos(cnpj_basico);
-    END IF;
-    
-    -- Recriar idx_estabelecimentos_uf_situacao se necessário
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_indexes 
-        WHERE indexname = 'idx_estabelecimentos_uf_situacao'
-        AND pg_relation_size(indexname::regclass) > 0
-    ) THEN
-        DROP INDEX IF EXISTS idx_estabelecimentos_uf_situacao;
-        CREATE INDEX CONCURRENTLY idx_estabelecimentos_uf_situacao 
-        ON estabelecimentos(uf, situacao_cadastral);
-    END IF;
-END $$;
+-- ✅ CREATE INDEX CONCURRENTLY não pode estar em blocos de transação
+-- Então verificamos e criamos fora de DO blocks
 
-SELECT 'Passo 2: Índices base corrigidos' as status;
+-- Verificar índices atuais
+SELECT 
+    indexname, 
+    pg_size_pretty(pg_relation_size(indexname::regclass)) as tamanho
+FROM pg_indexes 
+WHERE indexname IN ('idx_estabelecimentos_cnpj_basico', 'idx_estabelecimentos_uf_situacao')
+AND schemaname = 'public';
+
+-- Se os índices acima mostraram 0 bytes, execute:
+-- (senão, pule para o próximo passo)
+
+-- Recriar idx_estabelecimentos_cnpj_basico
+DROP INDEX IF EXISTS idx_estabelecimentos_cnpj_basico;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_cnpj_basico 
+ON estabelecimentos(cnpj_basico);
+
+-- Recriar idx_estabelecimentos_uf_situacao  
+DROP INDEX IF EXISTS idx_estabelecimentos_uf_situacao;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_uf_situacao 
+ON estabelecimentos(uf, situacao_cadastral);
+
+SELECT 'Passo 2: Índices base corrigidos (se necessário)' as status;
 
 -- ===== PASSO 3: CRIAR MATERIALIZED VIEW TEMPORÁRIA =====
 -- ✅ ESTRATÉGIA ZERO DOWNTIME:
@@ -202,12 +200,23 @@ COMMIT;
 
 SELECT '✅ Passo 6: SWAP COMPLETO! API agora usa MATERIALIZED VIEW otimizada!' as status;
 
--- ===== PASSO 7: LIMPAR VIEW ANTIGA =====
--- Agora podemos dropar a view antiga com segurança
-DROP VIEW IF EXISTS vw_estabelecimentos_completos_old CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_old;
+-- ===== PASSO 7: VERIFICAR VIEW ANTIGA (NÃO DROPAR AINDA!) =====
+-- ⚠️ IMPORTANTE: NÃO drop automaticamente! Deixar como backup para rollback
+-- Só dropar após confirmar que tudo funciona perfeitamente
 
-SELECT 'Passo 7: Cleanup concluído' as status;
+SELECT 
+    'Passo 7: View antiga preservada como backup (_old)' as status,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM pg_views WHERE viewname = 'vw_estabelecimentos_completos_old')
+        THEN 'VIEW antiga existe (backup disponível)'
+        WHEN EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'vw_estabelecimentos_completos_old')
+        THEN 'MATERIALIZED VIEW antiga existe (backup disponível)'
+        ELSE 'Sem backup (primeira instalação)'
+    END as status_backup;
+
+-- ✅ Para dropar a view antiga MANUALMENTE (só após testes OK!):
+-- DROP VIEW IF EXISTS vw_estabelecimentos_completos_old CASCADE;
+-- DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_old;
 
 -- ===== PASSO 8: ATUALIZAR ESTATÍSTICAS GLOBAIS =====
 ANALYZE vw_estabelecimentos_completos;
@@ -306,17 +315,44 @@ OPÇÃO 2 - Automático (cron 1x/dia às 3h):
 ROLLBACK (SE NECESSÁRIO)
 ═════════════════════════════════════════════
 
-Se algo der errado, reverter:
+✅ A view antiga (_old) foi PRESERVADA como backup!
 
--- 1. Parar processo se ainda rodando
--- 2. Dropar materialized view nova
+Se algo der errado após o swap:
+
+-- 1. Conectar no PostgreSQL
+psql -U cnpj_user -d cnpj_db
+
+-- 2. Dropar view nova (com problemas)
 DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos;
-DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_new;
 
--- 3. Restaurar view antiga (se existir backup)
-ALTER VIEW vw_estabelecimentos_completos_old RENAME TO vw_estabelecimentos_completos;
--- ou
-ALTER MATERIALIZED VIEW vw_estabelecimentos_completos_old RENAME TO vw_estabelecimentos_completos;
+-- 3. Restaurar view antiga (backup)
+-- Se era VIEW normal:
+ALTER VIEW vw_estabelecimentos_completos_old 
+RENAME TO vw_estabelecimentos_completos;
+
+-- OU se era MATERIALIZED VIEW:
+ALTER MATERIALIZED VIEW vw_estabelecimentos_completos_old 
+RENAME TO vw_estabelecimentos_completos;
+
+-- 4. Verificar
+SELECT COUNT(*) FROM vw_estabelecimentos_completos;
+
+-- 5. Reiniciar backend no Replit
+
+✅ PRONTO! Sistema restaurado ao estado anterior.
+
+═════════════════════════════════════════════
+LIMPEZA FINAL (APÓS TESTES OK!)
+═════════════════════════════════════════════
+
+Após confirmar que tudo funciona (aguardar 24-48h):
+
+-- Dropar backup antigo
+DROP VIEW IF EXISTS vw_estabelecimentos_completos_old CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos_old;
+
+-- Liberar espaço
+VACUUM FULL;
 
 ═════════════════════════════════════════════
 ' as resumo;
