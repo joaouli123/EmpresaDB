@@ -37,7 +37,7 @@ class RateLimiter:
         self.requests = defaultdict(list)
         self.cleanup_task = None
     
-    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', max_requests: int = None, window_seconds: int = None):
+    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', max_requests: int | None = None, window_seconds: int | None = None):
         """
         Verifica se usuário excedeu limite de requisições
         Suporta limites por plano e limites customizados

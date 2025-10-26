@@ -51,7 +51,7 @@ def set_cache(key: str, value, minutes: int = 60):
 
 async def verify_api_key(x_api_key: str = Header(None)):
     """
-    Verifica se a API Key é válida
+    Verifica se a API Key é válida e aplica rate limiting
 
     Nota: A API externa da Receita Federal pode demorar 30+ segundos para responder.
     Isso é normal e está fora do nosso controle.
@@ -68,6 +68,10 @@ async def verify_api_key(x_api_key: str = Header(None)):
             status_code=401,
             detail="API Key inválida ou expirada"
         )
+
+    # Aplicar rate limiting baseado no plano do usuário
+    user_plan = user.get('plan', 'free')
+    await rate_limiter.check_rate_limit(user['id'], user_plan)
 
     # O método verify_api_key já incrementa automaticamente os contadores
     return user
@@ -128,7 +132,7 @@ async def get_cnpj_data(
     """
     Consulta dados de CNPJ
     Requer autenticação via API Key no header 'X-API-Key'
-    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
+    Rate limit aplicado conforme plano de assinatura
     """
     cleaned_cnpj = clean_cnpj(cnpj)
     
@@ -138,7 +142,7 @@ async def get_cnpj_data(
             user_id=user['id'],
             action='cnpj_query',
             resource=f'cnpj/{cnpj}',
-            details={'unlimited': True}
+            details={'plan': user.get('plan', 'free')}
         )
 
         if not cleaned_cnpj.isdigit():
@@ -262,7 +266,7 @@ async def search_companies(
     """
     Pesquisa empresas por múltiplos critérios
     Requer autenticação via API Key no header 'X-API-Key'
-    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
+    Rate limit aplicado conforme plano de assinatura
     """
     try:
         # Log de auditoria
@@ -271,7 +275,7 @@ async def search_companies(
             action='search',
             resource='/search',
             details={
-                'unlimited': True,
+                'plan': user.get('plan', 'free'),
                 'filters': {
                     'razao_social': razao_social,
                     'cnae': cnae,
@@ -541,7 +545,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     """
     Consulta sócios de um CNPJ
     Requer autenticação via API Key no header 'X-API-Key'
-    ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
+    Rate limit aplicado conforme plano de assinatura
     """
     cleaned_cnpj = clean_cnpj(cnpj)
     cnpj_basico = cleaned_cnpj[:8]
@@ -552,7 +556,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             user_id=user['id'],
             action='socios_query',
             resource=f'cnpj/{cnpj}/socios',
-            details={'unlimited': True}
+            details={'plan': user.get('plan', 'free')}
         )
 
         logger.info(f"🔍 Buscando sócios para CNPJ {cleaned_cnpj} (básico: {cnpj_basico})")
