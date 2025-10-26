@@ -330,14 +330,43 @@ async def search_companies(
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-            count_query = f"""
-                SELECT COUNT(*)
-                FROM vw_estabelecimentos_completos
-                WHERE {where_clause}
-            """
-            cursor.execute(count_query, params)
-            total_result = cursor.fetchone()
-            total = total_result[0] if total_result else 0
+            # OTIMIZAÇÃO: Para buscas com ILIKE, fazer COUNT rápido usando EXPLAIN
+            # Se a busca tem ILIKE (razao_social ou nome_fantasia), usar estimativa
+            use_fast_count = razao_social or nome_fantasia
+            
+            if use_fast_count and offset == 0:
+                # Para primeira página, usar EXPLAIN para estimativa rápida
+                explain_query = f"""
+                    EXPLAIN (FORMAT JSON)
+                    SELECT 1
+                    FROM vw_estabelecimentos_completos
+                    WHERE {where_clause}
+                """
+                cursor.execute(explain_query, params)
+                explain_result = cursor.fetchone()
+                
+                if explain_result and explain_result[0]:
+                    import json
+                    plan = json.loads(explain_result[0])
+                    estimated_rows = plan[0]['Plan'].get('Plan Rows', 0)
+                    total = int(estimated_rows)
+                    logger.info(f"⚡ Usando estimativa rápida: ~{total} registros")
+                else:
+                    total = 0
+            elif not use_fast_count:
+                # Para buscas exatas (sem ILIKE), fazer COUNT normal
+                count_query = f"""
+                    SELECT COUNT(*)
+                    FROM vw_estabelecimentos_completos
+                    WHERE {where_clause}
+                """
+                cursor.execute(count_query, params)
+                total_result = cursor.fetchone()
+                total = total_result[0] if total_result else 0
+                logger.info(f"📊 COUNT exato: {total} registros")
+            else:
+                # Para páginas subsequentes com ILIKE, usar cache ou estimativa
+                total = 1000000  # Estimativa alta para permitir paginação
 
             data_query = f"""
                 SELECT 
