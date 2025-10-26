@@ -1,0 +1,70 @@
+x_parallel_workers_per_gather = 2
+random_page_cost = 1.1
+effective_io_concurrency = 200
+wal_buffers = 16MB
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+log_min_duration_statement = 1000
+log_checkpoints = on
+CONF
+d58bc5ccb5ee:/# tail -20 /var/lib/postgresql/data/postgresql.conf
+
+# ===== CONFIGURAÇÕES OTIMIZADAS PARA VPS 16GB RAM =====
+# ===== OTIMIZAÇÕES VPS 16GB RAM =====
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+max_worker_processes = 4
+max_parallel_workers = 4
+max_parallel_workers_per_gather = 2
+random_page_cost = 1.1
+effective_io_concurrency = 200
+wal_buffers = 16MB
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+log_min_duration_statement = 1000
+log_checkpoints = on
+d58bc5ccb5ee:/# exit
+exit
+root@srv1080561:~# docker restart cnpj_postgres
+cnpj_postgres
+root@srv1080561:~# sleep 3
+root@srv1080561:~# docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT
+    name,
+    setting,
+    unit,
+    CASE
+        WHEN unit = '8kB' THEN pg_size_pretty((setting::bigint * 8192)::bigint)
+        WHEN unit = 'kB' THEN pg_size_pretty((setting::bigint * 1024)::bigint)
+        ELSE setting || ' ' || COALESCE(unit, '')
+    END as valor_legivel
+FROM pg_settings
+WHERE name IN (
+    'shared_buffers',
+    'effective_cache_size',
+    'work_mem',
+    'maintenance_work_mem',
+    'max_worker_processes',
+    'max_parallel_workers'
+)
+ORDER BY name;
+EOF
+         name         | setting | unit | valor_legivel
+----------------------+---------+------+---------------
+ effective_cache_size | 786432  | 8kB  | 6144 MB
+ maintenance_work_mem | 524288  | kB   | 512 MB
+ max_parallel_workers | 4       |      | 4
+ max_worker_processes | 4       |      | 4
+ shared_buffers       | 262144  | 8kB  | 2048 MB
+ work_mem             | 10485   | kB   | 10 MB
+(6 rows)
+
+root@srv1080561:~#
