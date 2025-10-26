@@ -230,21 +230,22 @@ async def search_companies(
     situacao: str = Query(None, description="Situação cadastral"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    x_api_key: str = Header(None),
-    current_user: dict = Depends(get_current_user)
+    x_api_key: str = Header(None)
 ):
     """
-    Pesquisa empresas por múltiplos critérios (usuários autenticados)
-    Requer autenticação JWT OU API Key
+    Pesquisa empresas por múltiplos critérios
+    Requer autenticação via API Key no header 'X-API-Key'
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
-        # Verificar se está usando API Key
-        user = None
-        if x_api_key:
-            user = await verify_api_key(x_api_key)
-        else:
-            user = current_user
+        # Verificar API Key (obrigatório)
+        if not x_api_key:
+            raise HTTPException(
+                status_code=401,
+                detail="API Key não fornecida. Use o header 'X-API-Key'"
+            )
+        
+        user = await verify_api_key(x_api_key)
         
         # Log de auditoria
         await security_logger.log_query(
