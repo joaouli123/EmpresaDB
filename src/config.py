@@ -6,10 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 class Settings(BaseSettings):
-    # ⚠️⚠️⚠️ ATENÇÃO: BANCO DE DADOS EXTERNO VPS - NÃO USAR REPLIT DATABASE! ⚠️⚠️⚠️
-    # DATABASE_URL deve estar sempre configurado no .env apontando para: 72.61.217.143
-    # Banco externo VPS: postgresql://cnpj_user:Proelast1608@72.61.217.143:5432/cnpj_db
-    # NUNCA USAR O BANCO POSTGRESQL DO REPLIT!
+    # ⚠️ ATENÇÃO: BANCO DE DADOS EXTERNO VPS - NÃO USAR REPLIT DATABASE!
+    # DATABASE_URL deve estar sempre configurado no .env
+    # NUNCA COMMITAR CREDENCIAIS NO CÓDIGO!
     DATABASE_URL: Optional[str] = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
@@ -18,18 +17,31 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
 
     # Security - SECRET_KEY OBRIGATÓRIA via .env
-    SECRET_KEY: str  # Sem default - DEVE vir do .env!
+    SECRET_KEY: str  # OBRIGATÓRIO - sem default! Sistema não inicia sem ela!
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
     
-    @property
-    def validate_secret_key(self) -> str:
-        """Valida que SECRET_KEY não está vazia ou insegura"""
+    # API Server Settings
+    API_HOST: str = "0.0.0.0"  # Bind to all interfaces
+    API_PORT: int = 8000
+    
+    # CORS Settings - Configure trusted origins in .env
+    ALLOWED_ORIGINS: str = "*"  # Default: all (MUST be configured in production!)
+    
+    def validate_config(self) -> None:
+        """Valida configurações críticas para produção"""
         if not self.SECRET_KEY or self.SECRET_KEY == "your-secret-key-here-change-in-production":
             raise ValueError("SECRET_KEY não configurada ou insegura! Configure no .env")
         if len(self.SECRET_KEY) < 32:
             raise ValueError("SECRET_KEY muito curta! Use no mínimo 32 caracteres")
-        return self.SECRET_KEY
+        if not self.DATABASE_URL:
+            raise ValueError("DATABASE_URL não configurada! Configure no .env")
+            
+    def get_cors_origins(self) -> list:
+        """Retorna lista de origens permitidas para CORS"""
+        if self.ALLOWED_ORIGINS == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
 
     # ETL
     DOWNLOAD_DIR: str = "./downloads"
@@ -58,12 +70,13 @@ class Settings(BaseSettings):
         ⚠️ IMPORTANTE: Retorna DATABASE_URL do .env (BANCO EXTERNO VPS)
         NÃO USAR BANCO LOCAL REPLIT! Sempre configurar DATABASE_URL no .env
         """
-        if self.DATABASE_URL:
-            return self.DATABASE_URL
-        # Fallback apenas para compatibilidade (NÃO DEVE SER USADO!)
-        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        if not self.DATABASE_URL:
+            raise ValueError("DATABASE_URL não configurada! Configure no .env")
+        return self.DATABASE_URL
 
 
+# ⚠️ Settings é carregado automaticamente do .env pelo Pydantic
+# Falha se SECRET_KEY ou DATABASE_URL não estiverem configurados
 settings = Settings()
 
 

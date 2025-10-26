@@ -15,6 +15,15 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+# ⚠️ VALIDAÇÃO DE CONFIGURAÇÃO CRÍTICA NO STARTUP
+# Garante que SECRET_KEY, DATABASE_URL estão configurados
+try:
+    settings.validate_config()
+except ValueError as e:
+    logging.error(f"❌ ERRO DE CONFIGURAÇÃO: {e}")
+    logging.error("Configure as variáveis obrigatórias no arquivo .env")
+    raise
+
 app = FastAPI(
     title=settings.API_TITLE,
     version=settings.API_VERSION,
@@ -53,11 +62,14 @@ app = FastAPI(
     """
 )
 
+# ⚠️ SEGURANÇA: Configure ALLOWED_ORIGINS no .env para produção!
+# Exemplo: ALLOWED_ORIGINS=https://seu-dominio.com,https://www.seu-dominio.com
+cors_origins = settings.get_cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=cors_origins,
+    allow_credentials=cors_origins != ["*"],  # Só permite credentials se não for wildcard
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

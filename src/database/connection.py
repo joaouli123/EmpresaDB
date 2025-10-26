@@ -16,7 +16,9 @@ class DatabaseManager:
     def __init__(self):
         # ⚠️ ATENÇÃO: ESTAMOS USANDO BANCO DE DADOS EXTERNO NA VPS!
         # NÃO USE O BANCO DO REPLIT - SEMPRE USE DATABASE_URL DO .env
-        # Banco externo: postgresql://cnpj_user:Proelast1608@72.61.217.143:5432/cnpj_db
+        # NUNCA COMMITAR CREDENCIAIS NO CÓDIGO!
+        
+        # Validação já é feita em settings.database_url (property com validação)
         self.connection_string = settings.database_url
         self.engine = None
         self.SessionLocal = None
@@ -191,14 +193,14 @@ class DatabaseManager:
                 elif keyword in ['DROP', 'TRUNCATE']:
                     raise ValueError(f"Comando {keyword} bloqueado por segurança!")
 
-    def execute_query(self, query: str, params: tuple = None):
+    def execute_query(self, query: str, params: Optional[tuple] = None):
         # Validar segurança da query
         self._validate_safe_query(query)
         
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-                cursor.execute(query, params)
+                cursor.execute(query, params or ())
                 result = cursor.fetchall()
                 cursor.close()
                 return result
@@ -206,7 +208,7 @@ class DatabaseManager:
             logger.error(f"Erro ao executar query: {e}")
             raise
 
-    async def create_user(self, username: str, email: str, hashed_password: str, role: str = 'user') -> Dict:
+    async def create_user(self, username: str, email: str, hashed_password: str, role: str = 'user') -> Optional[Dict]:
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
