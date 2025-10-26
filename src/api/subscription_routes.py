@@ -69,6 +69,7 @@ async def get_available_plans():
 async def get_my_subscription(current_user: dict = Depends(get_current_user)):
     """Retorna informações da assinatura do usuário atual"""
     try:
+        print(f"[DEBUG] Buscando assinatura para user_id: {current_user['id']}")
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -88,10 +89,13 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
             result = cursor.fetchone()
             cursor.close()
             
+            print(f"[DEBUG] Resultado da query: {result}")
+            
             if not result or result[0] is None:
+                print("[DEBUG] Nenhuma assinatura encontrada")
                 return None
             
-            return {
+            subscription_data = {
                 "plan_name": result[0],
                 "monthly_limit": result[1],
                 "extra_credits": result[2],
@@ -101,7 +105,10 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
                 "renewal_date": result[6].isoformat() if result[6] else None,
                 "status": result[7]
             }
+            print(f"[DEBUG] Retornando dados: {subscription_data}")
+            return subscription_data
     except Exception as e:
+        print(f"[ERROR] Erro ao buscar assinatura: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao buscar assinatura: {str(e)}")
 
 @router.get("/usage", response_model=UsageStats)

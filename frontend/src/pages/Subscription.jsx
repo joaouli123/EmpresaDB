@@ -29,10 +29,23 @@ const Subscription = () => {
     setLoading(true);
     try {
       const [subRes, transRes, cardsRes] = await Promise.all([
-        api.get('/subscriptions/my-subscription'),
-        api.get('/subscriptions/transactions'),
-        api.get('/subscriptions/payment-methods')
+        api.get('/subscriptions/my-subscription').catch(err => {
+          console.error('Erro ao buscar assinatura:', err);
+          return { data: null };
+        }),
+        api.get('/subscriptions/transactions').catch(err => {
+          console.error('Erro ao buscar transações:', err);
+          return { data: [] };
+        }),
+        api.get('/subscriptions/payment-methods').catch(err => {
+          console.error('Erro ao buscar métodos de pagamento:', err);
+          return { data: [] };
+        })
       ]);
+      
+      console.log('Subscription data:', subRes.data);
+      console.log('Transactions data:', transRes.data);
+      console.log('Cards data:', cardsRes.data);
       
       setSubscription(subRes.data);
       setTransactions(transRes.data || []);

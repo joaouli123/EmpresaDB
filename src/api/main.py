@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from src.api.routes import router
+from src.api.routes import router as api_router
 from src.api.auth import router as auth_router
 from src.api.user_routes import router as user_router
 from src.api.subscription_routes import router as subscription_router
@@ -85,10 +85,10 @@ async def root():
         "docs": "/docs"
     }
 
+app.include_router(api_router)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(subscription_router)
-app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
