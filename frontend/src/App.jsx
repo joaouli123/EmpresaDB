@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
+import LandingPage2 from './pages/LandingPage2';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDatabase from './pages/AdminDatabase';
@@ -45,6 +46,10 @@ function AppRoutes() {
         <Route
           path="/home"
           element={<LandingPage />}
+        />
+        <Route
+          path="/lp2"
+          element={<LandingPage2 />}
         />
         <Route
           path="/login"
