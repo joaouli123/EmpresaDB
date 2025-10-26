@@ -300,12 +300,12 @@ async def search_companies(
 
             if data_inicio_atividade_min:
                 logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min} (>= {data_inicio_atividade_min})")
-                conditions.append("data_inicio_atividade >= %s")
+                conditions.append("data_inicio_atividade IS NOT NULL AND data_inicio_atividade >= %s::date")
                 params.append(data_inicio_atividade_min)
 
             if data_inicio_atividade_max:
                 logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max} (<= {data_inicio_atividade_max})")
-                conditions.append("data_inicio_atividade <= %s")
+                conditions.append("data_inicio_atividade IS NOT NULL AND data_inicio_atividade <= %s::date")
                 params.append(data_inicio_atividade_max)
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
