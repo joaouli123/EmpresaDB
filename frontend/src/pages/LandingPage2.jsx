@@ -49,95 +49,111 @@ const LandingPage2 = () => {
       priceMonthly: '0',
       priceYearly: '0',
       queries: '200',
-      description: 'Para testar e conhecer',
+      description: 'Teste grátis, sem cartão',
       features: [
-        '200 consultas mensais',
-        'Acesso API básico',
-        'Dados atualizados',
-        'Suporte por email'
+        '200 consultas/mês',
+        'Consulta básica por CNPJ',
+        'Dados essenciais da Receita',
+        'Documentação completa'
       ],
       popular: false,
-      badge: null
+      badge: null,
+      highlight: 'Ideal para testar'
     },
     {
       id: 'start',
       name: 'Start',
-      priceMonthly: '49,90',
-      priceYearly: '499,00',
+      priceMonthly: '79,90',
+      priceYearly: '799,00',
       queries: '10.000',
-      description: 'Para pequenas empresas',
+      description: 'Para começar pequeno',
       features: [
-        '10.000 consultas mensais',
-        'Pesquisa Básica',
-        'Exportação CSV/Excel',
-        'Logs & Dashboard',
-        'Cache Redis (desempenho)',
-        'SLA Uptime 95%',
-        'Suporte por email'
+        '10.000 consultas/mês',
+        'Filtros básicos (UF, CNAE, situação)',
+        'Exportação CSV (até 1.000 registros)',
+        'Dashboard com estatísticas',
+        'Logs de uso (7 dias)',
+        'Suporte email (48h)',
+        '✅ SLA 95% uptime'
       ],
       popular: false,
-      badge: null
+      badge: null,
+      highlight: 'R$ 0,008 por consulta'
     },
     {
       id: 'growth',
       name: 'Growth',
-      priceMonthly: '199,90',
-      priceYearly: '1.999,00',
+      priceMonthly: '249,90',
+      priceYearly: '2.499,00',
       queries: '100.000',
-      description: 'Para empresas em crescimento',
+      description: 'Melhor custo-benefício',
       features: [
-        '100.000 consultas mensais',
-        'Pesquisa Avançada Completa',
-        'Exportação Bulk CSV/Excel',
-        'Logs & Dashboard',
-        'Cache Redis (desempenho)',
-        'SLA Uptime 98%',
-        'Suporte Prioritário'
+        '100.000 consultas/mês',
+        '🔥 Todos os 33 filtros avançados',
+        'Busca por texto (razão social/fantasia)',
+        'Exportação ilimitada (CSV/Excel)',
+        'Dashboard avançado + gráficos',
+        'Logs completos (30 dias)',
+        '🔨 Cache Redis (em desenvolvimento)',
+        '🔨 Webhooks (em desenvolvimento)',
+        'Suporte prioritário (24h)',
+        '✅ SLA 98% uptime'
       ],
       popular: true,
-      badge: 'Mais Popular'
+      badge: '🔥 Mais Popular',
+      highlight: 'R$ 0,0025 por consulta'
     },
     {
       id: 'pro',
       name: 'Pro',
-      priceMonthly: '599,90',
-      priceYearly: '5.999,00',
-      queries: '1.000.000',
-      description: 'Para grandes volumes',
+      priceMonthly: '799,90',
+      priceYearly: '7.999,00',
+      queries: '500.000',
+      description: 'Para alto volume',
       features: [
-        '1.000.000 consultas mensais',
-        'Pesquisa Avançada Completa',
-        'Enriquecimento (QSA, e-mail, etc.)',
-        'Exportação Bulk CSV/Excel',
-        'Logs & Dashboard',
-        'Cache Redis (desempenho)',
-        'SLA Uptime 99.9%',
-        'Suporte Premium'
+        '500.000 consultas/mês',
+        'Tudo do Growth +',
+        '💎 Enriquecimento de dados:',
+        '  • QSA completo ✅',
+        '  • CNAEs secundários detalhados ✅',
+        '  • 🔨 Emails corporativos (desenvolvimento)',
+        '  • 🔨 Histórico alterações (desenvolvimento)',
+        'Consultas em lote (batch)',
+        'Logs ilimitados (histórico completo)',
+        'Relatórios personalizados',
+        'IP dedicado (opcional)',
+        'Suporte premium (4h)',
+        '✅ SLA 99.9% uptime'
       ],
       popular: false,
-      badge: 'Melhor Valor'
+      badge: '💎 Melhor Valor',
+      highlight: 'R$ 0,0016 por consulta'
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
-      priceMonthly: 'Sob demanda',
-      priceYearly: 'Sob demanda',
-      queries: 'Ilimitado',
+      priceMonthly: 'Customizado',
+      priceYearly: 'Customizado',
+      queries: '1M+',
       description: 'Solução corporativa completa',
       features: [
-        'Consultas sob demanda',
-        'Pesquisa Avançada Completa',
-        'Enriquecimento (QSA, e-mail, etc.)',
-        'Exportação Bulk CSV/Excel',
-        'Logs & Dashboard',
-        'Cache Redis (desempenho)',
-        'SLA Uptime Custom',
-        'Suporte Dedicado',
-        'Integração personalizada',
-        'Relatórios customizados'
+        'Volume customizado (1M+)',
+        'Tudo do Pro +',
+        '🏢 Recursos corporativos:',
+        '  • Integração dedicada',
+        '  • Onboarding personalizado',
+        '  • Account manager dedicado',
+        '  • White-label (sua marca)',
+        '  • Deploy on-premise (opcional)',
+        'SLA customizado (99.99%)',
+        'Suporte 24/7 (telefone + Slack)',
+        'Consultoria técnica incluída',
+        'Contrato anual',
+        'Nota fiscal e contrato'
       ],
       popular: false,
-      badge: 'Corporativo'
+      badge: '🏢 Corporativo',
+      highlight: 'Fale com nosso time'
     }
   ];
 
@@ -772,6 +788,38 @@ const LandingPage2 = () => {
           <h2>Planos Que Cabem no Seu Bolso</h2>
           <p>Escolha o plano ideal para seu negócio. Sem taxas escondidas, cancele quando quiser</p>
         </div>
+
+        {/* NOTA DE TRANSPARÊNCIA - PROEMINENTE */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, #fef3c7, #fde68a)', 
+          border: '3px solid #f59e0b',
+          padding: '24px', 
+          borderRadius: '16px',
+          marginBottom: '32px',
+          maxWidth: '1000px',
+          margin: '0 auto 32px auto',
+          boxShadow: '0 8px 30px rgba(245, 158, 11, 0.3)'
+        }}>
+          <h3 style={{ 
+            color: '#78350f', 
+            fontSize: '20px', 
+            fontWeight: '800', 
+            marginBottom: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            ⚠️ Transparência Total - Recursos em Desenvolvimento
+          </h3>
+          <p style={{ color: '#78350f', fontSize: '16px', margin: '0 0 12px 0', lineHeight: '1.6' }}>
+            <strong>✅ 100% Funcionais AGORA:</strong> Consultas por CNPJ, 33 filtros avançados, busca por texto, 
+            QSA completo, CNAEs secundários, exportação CSV/Excel, dashboard com gráficos, logs de uso.
+          </p>
+          <p style={{ color: '#92400e', fontSize: '16px', margin: 0, lineHeight: '1.6' }}>
+            <strong>🔨 Em Desenvolvimento:</strong> Cache Redis, Webhooks, Rate limiting customizado por plano, 
+            Enriquecimento de emails corporativos, Histórico de alterações. Estes recursos serão lançados em breve!
+          </p>
+        </div>
         
         <div className="billing-toggle">
           <button 
@@ -851,6 +899,115 @@ const LandingPage2 = () => {
               </button>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Comparison Table Section */}
+      <section className="benefits-section" style={{ background: '#f9fafb', padding: '80px 20px' }}>
+        <div className="section-header">
+          <h2>Comparação Detalhada de Recursos</h2>
+          <p>Veja todos os recursos incluídos em cada plano</p>
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', overflowX: 'auto' }}>
+          <table style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse', 
+            background: 'white',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <thead>
+              <tr style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white' }}>
+                <th style={{ padding: '20px', textAlign: 'left', fontWeight: '700' }}>Recurso / Plano</th>
+                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Free</th>
+                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Start</th>
+                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700', background: 'rgba(251, 191, 36, 0.3)' }}>Growth</th>
+                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Pro</th>
+                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Enterprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Consultas/mês</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>200</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>10.000</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>100.000</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>500.000</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>1M+</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Pesquisa avançada</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Básica</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅ Completa</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Completa</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Completa</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Enriquecimento (QSA ✅, e-mail 🔨)</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Parcial</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Parcial</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Exportação CSV/Excel</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅ Bulk</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Bulk</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Bulk</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Logs & Dashboard</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Cache Redis (desempenho)</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>🔨</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>🔨</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>🔨</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>🔨</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>SLA Uptime</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>–</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>95%</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>98%</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>99.9%</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Custom</td>
+              </tr>
+              <tr style={{ background: '#f9fafb' }}>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Suporte</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>E-mail</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>E-mail</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>Prioritário</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Premium</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Dedicado 24/7</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <p style={{ color: 'var(--gray)', fontSize: '16px', marginBottom: '24px' }}>
+            💡 <strong>Dica:</strong> O plano Growth oferece o melhor custo-benefício para a maioria das empresas. 
+            Recursos marcados com 🔨 estão em desenvolvimento.
+          </p>
+          <a href="#pricing">
+            <button className="btn-primary-large">
+              Ver Todos os Planos
+              <ChevronRight size={20} />
+            </button>
+          </a>
         </div>
       </section>
 
