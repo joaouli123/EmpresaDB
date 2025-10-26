@@ -17,10 +17,19 @@ class Settings(BaseSettings):
     DB_USER: str = "postgres"
     DB_PASSWORD: str = ""
 
-    # Security
-    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    # Security - SECRET_KEY OBRIGATÓRIA via .env
+    SECRET_KEY: str  # Sem default - DEVE vir do .env!
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
+    
+    @property
+    def validate_secret_key(self) -> str:
+        """Valida que SECRET_KEY não está vazia ou insegura"""
+        if not self.SECRET_KEY or self.SECRET_KEY == "your-secret-key-here-change-in-production":
+            raise ValueError("SECRET_KEY não configurada ou insegura! Configure no .env")
+        if len(self.SECRET_KEY) < 32:
+            raise ValueError("SECRET_KEY muito curta! Use no mínimo 32 caracteres")
+        return self.SECRET_KEY
 
     # ETL
     DOWNLOAD_DIR: str = "./downloads"

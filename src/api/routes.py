@@ -14,6 +14,7 @@ from src.api.models import (
 from src.api.auth import get_current_admin_user
 from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
+from src.api.rate_limiter import rate_limiter
 import logging
 import asyncio
 from functools import lru_cache
@@ -100,7 +101,17 @@ async def get_stats():
 
 @router.get("/cnpj/{cnpj}", response_model=EstabelecimentoCompleto)
 async def get_by_cnpj(cnpj: str, user: dict = Depends(verify_api_key)):
+    # Rate limiting: 100 req/min por usuário
+    await rate_limiter.check_rate_limit(user['id'], max_requests=100, window_seconds=60)
+    
     cnpj_clean = cnpj.replace('.', '').replace('/', '').replace('-', '').strip()
+    
+    # Validação contra SQL injection
+    if not cnpj_clean.isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="CNPJ deve conter apenas números"
+        )
     
     if len(cnpj_clean) != 14:
         raise HTTPException(

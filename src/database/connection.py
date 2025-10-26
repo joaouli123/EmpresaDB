@@ -21,7 +21,7 @@ class DatabaseManager:
         self.engine = None
         self.SessionLocal = None
         self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-    
+
     def get_engine(self):
         if not self.engine:
             # ⚠️ IMPORTANTE: Usando DATABASE_URL do .env (banco externo VPS)
@@ -33,7 +33,7 @@ class DatabaseManager:
                 pool_pre_ping=True
             )
         return self.engine
-    
+
     def get_session_maker(self):
         if not self.SessionLocal:
             self.SessionLocal = sessionmaker(
@@ -42,7 +42,7 @@ class DatabaseManager:
                 bind=self.get_engine()
             )
         return self.SessionLocal
-    
+
     @contextmanager
     def get_connection(self):
         # ⚠️ ATENÇÃO: Conectando no banco EXTERNO da VPS via DATABASE_URL
@@ -60,13 +60,13 @@ class DatabaseManager:
         finally:
             if conn:
                 conn.close()
-    
+
     def execute_schema(self, schema_file: str):
         logger.info(f"Executando schema do arquivo: {schema_file}")
         try:
             with open(schema_file, 'r', encoding='utf-8') as f:
                 schema_sql = f.read()
-            
+
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(schema_sql)
@@ -77,7 +77,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao executar schema: {e}")
             return False
-    
+
     def test_connection(self) -> bool:
         try:
             with self.get_connection() as conn:
@@ -91,7 +91,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao testar conexão: {e}")
             return False
-    
+
     def table_exists(self, table_name: str) -> bool:
         try:
             with self.get_connection() as conn:
@@ -110,7 +110,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao verificar tabela {table_name}: {e}")
             return False
-    
+
     def get_table_count(self, table_name: str) -> Optional[int]:
         try:
             with self.get_connection() as conn:
@@ -125,7 +125,35 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao contar registros em {table_name}: {e}")
             return None
-    
+
+    def _validate_safe_query(self, query: str):
+        """Valida que query não contém comandos perigosos"""
+        dangerous_keywords = ['DROP', 'TRUNCATE', 'DELETE FROM']
+        query_upper = query.upper()
+
+        for keyword in dangerous_keywords:
+            if keyword in query_upper:
+                # Permitir apenas se tiver WHERE clause (para DELETE)
+                if keyword == 'DELETE FROM' and 'WHERE' not in query_upper:
+                    raise ValueError(f"Comando {keyword} sem WHERE bloqueado por segurança!")
+                elif keyword in ['DROP', 'TRUNCATE']:
+                    raise ValueError(f"Comando {keyword} bloqueado por segurança!")
+
+    def execute_query(self, query: str, params: tuple = None):
+        # Validar segurança da query
+        self._validate_safe_query(query)
+        
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+                cursor.execute(query, params)
+                result = cursor.fetchall()
+                cursor.close()
+                return result
+        except Exception as e:
+            logger.error(f"Erro ao executar query: {e}")
+            raise
+
     async def create_user(self, username: str, email: str, hashed_password: str, role: str = 'user') -> Dict:
         try:
             with self.get_connection() as conn:
@@ -141,7 +169,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao criar usuário: {e}")
             raise
-    
+
     async def get_user_by_username(self, username: str) -> Optional[Dict]:
         try:
             with self.get_connection() as conn:
@@ -157,7 +185,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao buscar usuário: {e}")
             return None
-    
+
     async def get_user_by_email(self, email: str) -> Optional[Dict]:
         try:
             with self.get_connection() as conn:
@@ -173,7 +201,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao buscar usuário por email: {e}")
             return None
-    
+
     async def update_last_login(self, username: str):
         try:
             with self.get_connection() as conn:
@@ -186,7 +214,7 @@ class DatabaseManager:
                 cursor.close()
         except Exception as e:
             logger.error(f"Erro ao atualizar último login: {e}")
-    
+
     async def get_user_profile(self, user_id: int) -> Optional[Dict]:
         try:
             with self.get_connection() as conn:
@@ -208,7 +236,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao buscar perfil: {e}")
             return None
-    
+
     async def update_user_profile(self, user_id: int, email: str) -> bool:
         try:
             with self.get_connection() as conn:
@@ -223,7 +251,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao atualizar perfil: {e}")
             return False
-    
+
     async def create_api_key(self, user_id: int, name: str) -> Optional[Dict]:
         try:
             key = f"sk_{secrets.token_urlsafe(32)}"
@@ -240,7 +268,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao criar API key: {e}")
             raise
-    
+
     async def get_api_keys(self, user_id: int) -> List[Dict]:
         try:
             with self.get_connection() as conn:
@@ -257,7 +285,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao buscar API keys: {e}")
             return []
-    
+
     async def delete_api_key(self, user_id: int, key_id: int) -> bool:
         try:
             with self.get_connection() as conn:
@@ -272,7 +300,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao deletar API key: {e}")
             return False
-    
+
     async def verify_api_key(self, key: str) -> Optional[Dict]:
         try:
             with self.get_connection() as conn:
@@ -289,7 +317,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao verificar API key: {e}")
             return None
-    
+
     async def get_user_usage(self, user_id: int, days: int = 7) -> List[Dict]:
         try:
             with self.get_connection() as conn:
@@ -306,7 +334,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Erro ao buscar uso: {e}")
             return []
-    
+
     async def track_usage(self, user_id: int):
         try:
             with self.get_connection() as conn:
