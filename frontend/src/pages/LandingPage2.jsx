@@ -171,7 +171,7 @@ const LandingPage2 = () => {
     {
       icon: <Search size={32} />,
       title: 'Busca Avançada',
-      description: 'Filtros por CNAE, localização, porte, situação cadastral, faturamento e muito mais'
+      description: 'Filtros por CNAE, UF, município, situação cadastral, razão social e nome fantasia'
     },
     {
       icon: <TrendingUp size={32} />,
@@ -306,17 +306,12 @@ const LandingPage2 = () => {
     {
       icon: <MapPin size={24} />,
       title: 'Localização',
-      description: 'Filtre por estado, município, CEP ou bairro específico'
+      description: 'Filtre por estado (UF) e município específico'
     },
     {
       icon: <Filter size={24} />,
       title: 'CNAE',
-      description: 'Busque por atividade econômica principal ou secundária'
-    },
-    {
-      icon: <BarChart3 size={24} />,
-      title: 'Porte da Empresa',
-      description: 'MEI, Micro, Pequena, Média ou Grande empresa'
+      description: 'Busque por atividade econômica principal'
     },
     {
       icon: <Calendar size={24} />,
@@ -329,9 +324,14 @@ const LandingPage2 = () => {
       description: 'Ativa, baixada, suspensa, nula ou inapta'
     },
     {
+      icon: <Building2 size={24} />,
+      title: 'Razão Social e Nome Fantasia',
+      description: 'Busca por texto no nome da empresa'
+    },
+    {
       icon: <Users size={24} />,
-      title: 'Sócios e QSA',
-      description: 'Pesquise por CPF/CNPJ de sócios e administradores'
+      title: 'Dados de Sócios (QSA)',
+      description: 'Endpoint dedicado para consultar sócios por CNPJ'
     }
   ];
 
