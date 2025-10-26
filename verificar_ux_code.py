@@ -81,7 +81,7 @@ cursor.execute("""
         identificador_socio, nome_socio, cnpj_cpf_socio,
         qualificacao_socio, data_entrada_sociedade, pais,
         representante_legal, nome_representante, 
-        qualificacao_representante_legal, faixa_etaria
+        qualificacao_representante, faixa_etaria
     FROM socios
     WHERE cnpj_basico = %s
 """, (cnpj_basico,))
@@ -111,7 +111,7 @@ if empresa:
         print(f"  Natureza Jurídica: {nat_jur[0]}")
 
     # Qualificação Responsável
-    cursor.execute("SELECT descricao FROM qualificacoes WHERE codigo = %s", (empresa[3],))
+    cursor.execute("SELECT descricao FROM qualificacoes_socios WHERE codigo = %s", (empresa[3],))
     qual_resp = cursor.fetchone()
     if qual_resp:
         print(f"  Qualificação Responsável: {qual_resp[0]}")
