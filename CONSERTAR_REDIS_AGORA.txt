@@ -1,0 +1,28 @@
+============================================
+COMANDOS PARA CONSERTAR REDIS (COPIE TODOS)
+============================================
+
+# Método 1: Comentar linha antiga e adicionar nova
+sudo sed -i 's/^bind 127.0.0.1/#bind 127.0.0.1/' /etc/redis/redis.conf
+echo "bind 0.0.0.0" | sudo tee -a /etc/redis/redis.conf
+
+# Reiniciar Redis
+sudo systemctl restart redis-server
+
+# Verificar se agora está correto
+grep "^bind" /etc/redis/redis.conf
+
+# Testar conexão local
+redis-cli -a Proelast1608@ ping
+
+# Verificar se está ouvindo em 0.0.0.0
+sudo netstat -tlnp | grep 6379
+
+============================================
+DEVE MOSTRAR:
+============================================
+grep "^bind" → bind 0.0.0.0
+redis-cli ping → PONG
+netstat → tcp  0  0  0.0.0.0:6379
+
+============================================
