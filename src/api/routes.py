@@ -114,6 +114,8 @@ async def get_cnpj_data(
     Requer autenticação via API Key no header 'X-API-Key'
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
+    cleaned_cnpj = clean_cnpj(cnpj)
+    
     try:
         # Log de auditoria
         await log_query(
@@ -122,8 +124,6 @@ async def get_cnpj_data(
             resource=f'cnpj/{cnpj}',
             details={'unlimited': True}
         )
-
-        cleaned_cnpj = clean_cnpj(cnpj)
 
         if not cleaned_cnpj.isdigit():
             raise HTTPException(
@@ -522,6 +522,9 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     Requer autenticação via API Key no header 'X-API-Key'
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
+    cleaned_cnpj = clean_cnpj(cnpj)
+    cnpj_basico = cleaned_cnpj[:8]
+    
     try:
         # Log de auditoria
         await log_query(
@@ -530,9 +533,6 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             resource=f'cnpj/{cnpj}/socios',
             details={'unlimited': True}
         )
-
-        cleaned_cnpj = clean_cnpj(cnpj)
-        cnpj_basico = cleaned_cnpj[:8]
 
         logger.info(f"🔍 Buscando sócios para CNPJ {cleaned_cnpj} (básico: {cnpj_basico})")
 
