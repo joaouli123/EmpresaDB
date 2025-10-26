@@ -1,0 +1,149 @@
+
+~/workspace$ python verificar_ux_code.py
+================================================================================
+VERIFICAÇÃO COMPLETA: UX CODE TECNOLOGIA LTDA
+================================================================================
+
+📋 DADOS DA EMPRESA (tabela empresas):
+  CNPJ Básico: 56054674
+  Razão Social: UX CODE TECNOLOGIA LTDA
+  Natureza Jurídica: 2062
+  Qualificação Responsável: 49
+  Capital Social: R$ 2000.00
+  Porte Empresa: 01
+  Ente Federativo: None
+
+🏢 DADOS DO ESTABELECIMENTO (tabela estabelecimentos):
+  Total de estabelecimentos: 1
+
+  Estabelecimento: 56054674/0001-23
+    Tipo: Matriz
+    Nome Fantasia: None
+    Situação: 02
+    Data Situação: 2024-07-23
+    Motivo Situação: 00
+    Data Início: 2024-07-23
+    CNAE Principal: 6201502
+    CNAEs Secundários: 6201501,6399200,8599604
+    Endereço: RUA URUGUAI, 299
+    Complemento: ANDAR 2                   SALA  01                  BOX   01
+    Bairro: CENTRO
+    CEP: 88302201
+    UF: SC
+    Município: 8161
+    Telefone: (47) 88728618
+    Email: None
+
+👥 SÓCIOS (tabela socios):
+  Total de sócios: 4
+
+  Sócio:
+    Tipo: 2 (1=PJ, 2=PF, 3=Estrangeiro)
+    Nome: NICOLAS REIG MARTINS
+    CPF/CNPJ: ***981309**
+    Qualificação: 49
+    Data Entrada: 2024-07-23
+    País: None
+    Representante Legal: ***000000**
+    Nome Representante: None
+    Qualificação Rep.: 00
+    Faixa Etária: 3
+
+  Sócio:
+    Tipo: 2 (1=PJ, 2=PF, 3=Estrangeiro)
+    Nome: JONAS VIEIRA
+    CPF/CNPJ: ***058209**
+    Qualificação: 22
+    Data Entrada: 2024-07-23
+    País: None
+    Representante Legal: ***000000**
+    Nome Representante: None
+    Qualificação Rep.: 00
+    Faixa Etária: 4
+
+  Sócio:
+    Tipo: 2 (1=PJ, 2=PF, 3=Estrangeiro)
+    Nome: MARIA EDUARDA DE SOUZA IGNACIO CAVALLI
+    CPF/CNPJ: ***258119**
+    Qualificação: 22
+    Data Entrada: 2024-07-23
+    País: None
+    Representante Legal: ***000000**
+    Nome Representante: None
+    Qualificação Rep.: 00
+    Faixa Etária: 4
+
+  Sócio:
+    Tipo: 2 (1=PJ, 2=PF, 3=Estrangeiro)
+    Nome: JOAO LUCAS BARBOSA ULI
+    CPF/CNPJ: ***904349**
+    Qualificação: 49
+    Data Entrada: 2024-07-23
+    País: None
+    Representante Legal: ***000000**
+    Nome Representante: None
+    Qualificação Rep.: 00
+    Faixa Etária: 3
+
+📚 DESCRIÇÕES (tabelas auxiliares):
+  Natureza Jurídica: Sociedade Empresária Limitada
+  Qualificação Responsável: Sócio-Administrador
+  CNAE Principal: Web design
+  Município: ITAJAI
+  Motivo Situação: SEM MOTIVO
+
+🔍 DADOS DA VIEW (vw_estabelecimentos_completos):
+  Colunas disponíveis na view: 29
+    cnpj_completo: 56054674000123
+    identificador_matriz_filial: 1
+    razao_social: UX CODE TECNOLOGIA LTDA
+    situacao_cadastral: 02
+    data_situacao_cadastral: 2024-07-23
+    motivo_situacao_cadastral_desc: SEM MOTIVO
+    data_inicio_atividade: 2024-07-23
+    cnae_fiscal_principal: 6201502
+    cnae_fiscal_secundaria: 6201501,6399200,8599604
+    cnae_principal_desc: Web design
+    tipo_logradouro: RUA
+    logradouro: URUGUAI
+    numero: 299
+    complemento: ANDAR 2                   SALA  01                  BOX   01
+    bairro: CENTRO
+    cep: 88302201
+    uf: SC
+    municipio_desc: ITAJAI
+    ddd_1: 47
+    telefone_1: 88728618
+    correio_eletronico: LEONARDO@SAFECONSULTING.NET
+    natureza_juridica: 2062
+    natureza_juridica_desc: Sociedade Empresária Limitada
+    porte_empresa: 01
+    capital_social: 2000.00
+
+================================================================================
+ANÁLISE COMPARATIVA COM SEU SISTEMA:
+================================================================================
+
+✅ DADOS QUE APARECEM NO SEU SISTEMA:
+  - CNPJ Básico: 56.054.674
+  - Razão Social: UX CODE TECNOLOGIA LTDA
+  - Capital Social: R$ 2.000,00
+  - Simples: Não
+  - MEI: Não
+  - CNPJ Completo: 56.054.674/0001-23
+  - Situação: Ativa
+  - Data Início: 22/07/2024
+  - CNAE Principal: 6201502
+  - Endereço: RUA URUGUAI, 299, ANDAR 2 SALA 01 BOX 01
+  - Bairro: CENTRO
+  - CEP: 88302201
+  - Telefone: (47) 88728618
+  - Email: LEONARDO@SAFECONSULTING.NET
+
+❓ DADOS QUE APARECEM COMO N/A:
+  - Natureza Jurídica
+  - Porte
+  - Qualificação do Responsável
+
+❌ ABA DE SÓCIOS:
+  - Mostra 'Nenhum sócio encontrado'
