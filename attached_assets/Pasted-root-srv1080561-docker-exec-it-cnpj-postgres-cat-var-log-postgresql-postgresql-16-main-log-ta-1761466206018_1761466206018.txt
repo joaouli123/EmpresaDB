@@ -1,0 +1,104 @@
+root@srv1080561:~# docker exec -it cnpj_postgres cat /var/log/postgresql/postgresql-16-main.log | tail -50
+cat: can't open '/var/log/postgresql/postgresql-16-main.log': No such file or directory
+root@srv1080561:~# docker logs cnpj_postgres --tail 100
+2025-10-26 08:02:52.608 UTC [1] LOG:  aborting any active transactions
+2025-10-26 08:02:52.608 UTC [53] FATAL:  canceling authentication due to timeout
+2025-10-26 08:02:52.611 UTC [1] LOG:  background worker "logical replication launcher" (PID 33) exited with exit code 1
+2025-10-26 08:02:52.614 UTC [28] LOG:  shutting down
+2025-10-26 08:02:52.615 UTC [28] LOG:  checkpoint starting: shutdown immediate
+2025-10-26 08:02:52.623 UTC [28] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.001 s, total=0.009 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=80/E49884C0, redo lsn=80/E49884C0
+2025-10-26 08:02:52.640 UTC [1] LOG:  database system is shut down
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2025-10-26 08:02:53.008 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-26 08:02:53.008 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-10-26 08:02:53.008 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-10-26 08:02:53.010 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-26 08:02:53.014 UTC [29] LOG:  database system was shut down at 2025-10-26 08:02:52 UTC
+2025-10-26 08:02:53.020 UTC [1] LOG:  database system is ready to accept connections
+2025-10-26 08:03:22.361 UTC [41] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:03:22.361 UTC [41] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:03:51.970 UTC [66] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:03:51.970 UTC [66] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:03:56.737 UTC [1] LOG:  received fast shutdown request
+2025-10-26 08:03:56.738 UTC [1] LOG:  aborting any active transactions
+2025-10-26 08:03:56.741 UTC [1] LOG:  background worker "logical replication launcher" (PID 32) exited with exit code 1
+2025-10-26 08:03:56.743 UTC [27] LOG:  shutting down
+2025-10-26 08:03:56.744 UTC [27] LOG:  checkpoint starting: shutdown immediate
+2025-10-26 08:03:56.753 UTC [27] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.001 s, total=0.010 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=80/E4988570, redo lsn=80/E4988570
+2025-10-26 08:03:56.775 UTC [1] LOG:  database system is shut down
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2025-10-26 08:03:57.178 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-26 08:03:57.178 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-10-26 08:03:57.178 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-10-26 08:03:57.180 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-26 08:03:57.184 UTC [30] LOG:  database system was shut down at 2025-10-26 08:03:56 UTC
+2025-10-26 08:03:57.189 UTC [1] LOG:  database system is ready to accept connections
+2025-10-26 08:04:23.568 UTC [42] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:04:23.568 UTC [42] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:04:53.277 UTC [44] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:04:53.277 UTC [44] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:05:14.364 UTC [1] LOG:  received fast shutdown request
+2025-10-26 08:05:14.365 UTC [1] LOG:  aborting any active transactions
+2025-10-26 08:05:14.368 UTC [1] LOG:  background worker "logical replication launcher" (PID 33) exited with exit code 1
+2025-10-26 08:05:14.371 UTC [28] LOG:  shutting down
+2025-10-26 08:05:14.372 UTC [28] LOG:  checkpoint starting: shutdown immediate
+2025-10-26 08:05:14.380 UTC [28] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.001 s, total=0.009 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=80/E4988620, redo lsn=80/E4988620
+2025-10-26 08:05:14.402 UTC [1] LOG:  database system is shut down
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2025-10-26 08:05:14.789 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-26 08:05:14.789 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-10-26 08:05:14.789 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-10-26 08:05:14.791 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-26 08:05:14.795 UTC [29] LOG:  database system was shut down at 2025-10-26 08:05:14 UTC
+2025-10-26 08:05:14.801 UTC [1] LOG:  database system is ready to accept connections
+2025-10-26 08:05:37.153 UTC [51] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:05:37.153 UTC [51] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:06:07.646 UTC [53] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:06:07.646 UTC [53] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:06:52.169 UTC [56] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:06:52.169 UTC [56] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:07:22.949 UTC [59] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:07:22.949 UTC [59] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:07:26.504 UTC [1] LOG:  received fast shutdown request
+2025-10-26 08:07:26.505 UTC [1] LOG:  aborting any active transactions
+2025-10-26 08:07:26.507 UTC [1] LOG:  background worker "logical replication launcher" (PID 32) exited with exit code 1
+2025-10-26 08:07:26.509 UTC [27] LOG:  shutting down
+2025-10-26 08:07:26.510 UTC [27] LOG:  checkpoint starting: shutdown immediate
+2025-10-26 08:07:26.518 UTC [27] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.001 s, total=0.009 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=80/E49886D0, redo lsn=80/E49886D0
+2025-10-26 08:07:26.536 UTC [1] LOG:  database system is shut down
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2025-10-26 08:07:26.943 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-26 08:07:26.943 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-10-26 08:07:26.943 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-10-26 08:07:26.945 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-26 08:07:26.949 UTC [29] LOG:  database system was shut down at 2025-10-26 08:07:26 UTC
+2025-10-26 08:07:26.954 UTC [1] LOG:  database system is ready to accept connections
+2025-10-26 08:07:54.261 UTC [34] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:07:54.261 UTC [34] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:08:24.122 UTC [42] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:08:24.122 UTC [42] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:08:53.702 UTC [45] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:08:53.702 UTC [45] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+2025-10-26 08:09:24.205 UTC [47] FATAL:  password authentication failed for user "reader"
+2025-10-26 08:09:24.205 UTC [47] DETAIL:  Role "reader" does not exist.
+        Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+root@srv1080561:~#
