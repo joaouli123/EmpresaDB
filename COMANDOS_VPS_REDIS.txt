@@ -1,0 +1,43 @@
+============================================
+COMANDOS PARA LIBERAR REDIS NA VPS
+============================================
+
+COPIE E COLE ESTES COMANDOS NO SSH DA VPS:
+
+# 1. Fazer backup
+sudo cp /etc/redis/redis.conf /etc/redis/redis.conf.backup
+
+# 2. Liberar conexões remotas (bind 0.0.0.0)
+sudo sed -i 's/^bind 127.0.0.1 ::1/bind 0.0.0.0/' /etc/redis/redis.conf
+
+# 3. Garantir que senha está configurada
+sudo sed -i 's/^# requirepass.*/requirepass Proelast1608@/' /etc/redis/redis.conf
+
+# 4. Liberar porta no firewall
+sudo ufw allow 6379/tcp
+
+# 5. Reiniciar Redis
+sudo systemctl restart redis-server
+
+# 6. Verificar se está funcionando
+redis-cli -a Proelast1608@ ping
+
+# 7. Verificar configuração
+grep "^bind" /etc/redis/redis.conf
+grep "^requirepass" /etc/redis/redis.conf
+
+============================================
+DEVE MOSTRAR:
+============================================
+bind 0.0.0.0
+requirepass Proelast1608@
+
+============================================
+DEPOIS TESTE NO REPLIT:
+============================================
+python3 testar_redis.py
+
+Deve mostrar:
+✅ Redis conectado!
+✅ Dados salvos!
+🎉 REDIS 100% FUNCIONAL!

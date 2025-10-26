@@ -13,3 +13,5 @@ lxml==4.9.3
 pyjwt==2.10.1
 email-validator
 tarsafe
+passlib
+redis
