@@ -1,0 +1,46 @@
+# ============================================
+# DEPENDÊNCIAS PARA API CNPJ OTIMIZADA
+# ============================================
+
+# ===== CORE API =====
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+
+# ===== DATABASE =====
+# PostgreSQL com connection pooling otimizado
+psycopg2-binary>=2.9.9
+SQLAlchemy>=2.0.25
+
+# ===== CACHE REDIS =====
+# Para performance extrema com cache distribuído
+redis>=5.0.1
+hiredis>=2.3.2  # Parser C para Redis (mais rápido)
+
+# ===== AUTENTICAÇÃO =====
+passlib[argon2]>=1.7.4
+PyJWT>=2.8.0
+python-jose[cryptography]>=3.3.0
+
+# ===== ETL =====
+pandas>=2.1.4
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+tqdm>=4.66.1
+
+# ===== UTILITÁRIOS =====
+python-dotenv>=1.0.0
+
+# ===== COMPRESSÃO (CACHE) =====
+# zlib vem com Python, mas podemos adicionar alternativas
+lz4>=4.3.3  # Compressão muito rápida (alternativa ao zlib)
+
+# ===== MONITORAMENTO (OPCIONAL) =====
+# prometheus-client>=0.19.0  # Métricas Prometheus
+# sentry-sdk>=1.39.0  # Error tracking
+
+# ===== DESENVOLVIMENTO =====
+# pytest>=7.4.3
+# httpx>=0.26.0
