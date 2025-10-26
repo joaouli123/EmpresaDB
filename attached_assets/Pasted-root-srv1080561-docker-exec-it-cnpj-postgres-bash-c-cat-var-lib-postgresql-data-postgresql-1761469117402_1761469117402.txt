@@ -1,0 +1,81 @@
+root@srv1080561:~# docker exec -it cnpj_postgres bash -c "cat >> /var/lib/postgresql/data/postgresql.conf << 'CONF'
+# Otimizações VPS (16GB RAM, 4 CPUs, NVMe)
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+max_worker_processes = 4
+max_parallel_workers = 4
+max_parallel_workers_per_gather = 2
+random_page_cost = 1.1
+effective_io_concurrency = 200
+wal_buffers = 16MB
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+log_min_duration_statement = 1000
+log_checkpoints = on
+CONF
+" && \
+docker restart cnpj_postgres && \
+sleep 30 && \
+echo "✅ Verificando configurações..." && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW shared_buffers;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW effective_cache_size;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW work_mem;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW max_worker_processes;"
+cnpj_postgres
+^X^C
+root@srv1080561:~# docker exec -it cnpj_postgres bash -c "cat >> /var/lib/postgresql/data/postgresql.conf << 'CONF'
+# Otimizações VPS (16GB RAM, 4 CPUs, NVMe)
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+max_worker_processes = 4
+max_parallel_workers = 4
+max_parallel_workers_per_gather = 2
+random_page_cost = 1.1
+effective_io_concurrency = 200
+wal_buffers = 16MB
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+log_min_duration_statement = 1000
+log_checkpoints = on
+CONF
+" && \
+docker restart cnpj_postgres && \
+sleep 30 && \
+echo "✅ Verificando configurações..." && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW shared_buffers;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW effective_cache_size;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW work_mem;" && \
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db -c "SHOW max_worker_processes;"
+cnpj_postgres
+✅ Verificando configurações...
+ shared_buffers
+----------------
+ 2GB
+(1 row)
+
+ effective_cache_size
+----------------------
+ 6GB
+(1 row)
+
+ work_mem
+----------
+ 10485kB
+(1 row)
+
+ max_worker_processes
+----------------------
+ 4
+(1 row)
+
+root@srv1080561:~#
