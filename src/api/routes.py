@@ -411,14 +411,45 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             
-            # Query otimizada com índice em cnpj_basico
+            # Query completa com JOIN para trazer descrições
             query = """
                 SELECT 
-                    cnpj_basico, identificador_socio, nome_socio,
-                    cnpj_cpf_socio, qualificacao_socio, data_entrada_sociedade
-                FROM socios
-                WHERE cnpj_basico = %s
-                ORDER BY nome_socio
+                    s.cnpj_basico,
+                    s.identificador_socio,
+                    CASE 
+                        WHEN s.identificador_socio = '1' THEN 'Pessoa Jurídica'
+                        WHEN s.identificador_socio = '2' THEN 'Pessoa Física'
+                        WHEN s.identificador_socio = '3' THEN 'Estrangeiro'
+                        ELSE s.identificador_socio
+                    END as identificador_socio_desc,
+                    s.nome_socio,
+                    s.cnpj_cpf_socio,
+                    s.qualificacao_socio,
+                    qs.descricao as qualificacao_socio_desc,
+                    s.data_entrada_sociedade,
+                    s.pais,
+                    s.representante_legal,
+                    s.nome_representante,
+                    s.qualificacao_representante,
+                    qr.descricao as qualificacao_representante_desc,
+                    s.faixa_etaria,
+                    CASE 
+                        WHEN s.faixa_etaria = '1' THEN '0-12 anos'
+                        WHEN s.faixa_etaria = '2' THEN '13-20 anos'
+                        WHEN s.faixa_etaria = '3' THEN '21-30 anos'
+                        WHEN s.faixa_etaria = '4' THEN '31-40 anos'
+                        WHEN s.faixa_etaria = '5' THEN '41-50 anos'
+                        WHEN s.faixa_etaria = '6' THEN '51-60 anos'
+                        WHEN s.faixa_etaria = '7' THEN '61-70 anos'
+                        WHEN s.faixa_etaria = '8' THEN '71-80 anos'
+                        WHEN s.faixa_etaria = '9' THEN 'Mais de 80 anos'
+                        ELSE 'Não informado'
+                    END as faixa_etaria_desc
+                FROM socios s
+                LEFT JOIN qualificacoes_socios qs ON s.qualificacao_socio = qs.codigo
+                LEFT JOIN qualificacoes_socios qr ON s.qualificacao_representante = qr.codigo
+                WHERE s.cnpj_basico = %s
+                ORDER BY s.nome_socio
                 LIMIT 1000
             """
             
@@ -430,8 +461,11 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
             cursor.close()
             
             columns = [
-                'cnpj_basico', 'identificador_socio', 'nome_socio',
-                'cnpj_cpf_socio', 'qualificacao_socio', 'data_entrada_sociedade'
+                'cnpj_basico', 'identificador_socio', 'identificador_socio_desc',
+                'nome_socio', 'cnpj_cpf_socio', 'qualificacao_socio', 'qualificacao_socio_desc',
+                'data_entrada_sociedade', 'pais', 'representante_legal',
+                'nome_representante', 'qualificacao_representante', 'qualificacao_representante_desc',
+                'faixa_etaria', 'faixa_etaria_desc'
             ]
             
             socios = [SocioModel(**dict(zip(columns, row))) for row in results]

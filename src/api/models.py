@@ -52,10 +52,19 @@ class EstabelecimentoCompleto(BaseModel):
 class SocioModel(BaseModel):
     cnpj_basico: str
     identificador_socio: Optional[str] = None
+    identificador_socio_desc: Optional[str] = None
     nome_socio: Optional[str] = None
     cnpj_cpf_socio: Optional[str] = None
     qualificacao_socio: Optional[str] = None
+    qualificacao_socio_desc: Optional[str] = None
     data_entrada_sociedade: Optional[date] = None
+    pais: Optional[str] = None
+    representante_legal: Optional[str] = None
+    nome_representante: Optional[str] = None
+    qualificacao_representante: Optional[str] = None
+    qualificacao_representante_desc: Optional[str] = None
+    faixa_etaria: Optional[str] = None
+    faixa_etaria_desc: Optional[str] = None
 
     class Config:
         from_attributes = True

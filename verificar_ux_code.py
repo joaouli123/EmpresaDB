@@ -27,14 +27,22 @@ cursor.execute("""
     WHERE cnpj_basico = %s
 """, (cnpj_basico,))
 empresa = cursor.fetchone()
+porte_map = {
+    '00': 'NÃO INFORMADO',
+    '01': 'MICRO EMPRESA',
+    '02': 'EMPRESA DE PEQUENO PORTE',
+    '03': 'DEMAIS (Média/Grande)',
+    '05': 'DEMAIS'
+}
+
 if empresa:
     print(f"  CNPJ Básico: {empresa[0]}")
     print(f"  Razão Social: {empresa[1]}")
     print(f"  Natureza Jurídica: {empresa[2]}")
     print(f"  Qualificação Responsável: {empresa[3]}")
-    print(f"  Capital Social: R$ {empresa[4]}")
-    print(f"  Porte Empresa: {empresa[5]}")
-    print(f"  Ente Federativo: {empresa[6]}")
+    print(f"  Capital Social: R$ {float(empresa[4]):,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
+    print(f"  Porte: {porte_map.get(empresa[5], empresa[5])}")
+    print(f"  Ente Federativo: {empresa[6] if empresa[6] else 'Não se aplica'}")
 else:
     print("  ❌ Empresa não encontrada!")
 
@@ -59,7 +67,14 @@ for est in estabelecimentos:
     print(f"\n  Estabelecimento: {est[0]}/{est[1]}-{est[2]}")
     print(f"    Tipo: {'Matriz' if est[3] == '1' else 'Filial'}")
     print(f"    Nome Fantasia: {est[4]}")
-    print(f"    Situação: {est[5]}")
+    situacao_map = {
+        '01': 'NULA',
+        '02': 'ATIVA',
+        '03': 'SUSPENSA',
+        '04': 'INAPTA',
+        '08': 'BAIXADA'
+    }
+    print(f"    Situação: {situacao_map.get(est[5], est[5])}")
     print(f"    Data Situação: {est[6]}")
     print(f"    Motivo Situação: {est[7]}")
     print(f"    Data Início: {est[10]}")
@@ -87,18 +102,62 @@ cursor.execute("""
 """, (cnpj_basico,))
 socios = cursor.fetchall()
 print(f"  Total de sócios: {len(socios)}")
-for socio in socios:
-    print(f"\n  Sócio:")
-    print(f"    Tipo: {socio[0]} (1=PJ, 2=PF, 3=Estrangeiro)")
+
+# Mapear faixa etária
+faixa_etaria_map = {
+    '1': '0-12 anos',
+    '2': '13-20 anos',
+    '3': '21-30 anos',
+    '4': '31-40 anos',
+    '5': '41-50 anos',
+    '6': '51-60 anos',
+    '7': '61-70 anos',
+    '8': '71-80 anos',
+    '9': 'Mais de 80 anos',
+    '0': 'Não informado'
+}
+
+tipo_socio_map = {
+    '1': 'Pessoa Jurídica',
+    '2': 'Pessoa Física',
+    '3': 'Estrangeiro'
+}
+
+for i, socio in enumerate(socios, 1):
+    print(f"\n  === Sócio {i} ===")
     print(f"    Nome: {socio[1]}")
-    print(f"    CPF/CNPJ: {socio[2]}")
-    print(f"    Qualificação: {socio[3]}")
-    print(f"    Data Entrada: {socio[4]}")
-    print(f"    País: {socio[5]}")
-    print(f"    Representante Legal: {socio[6]}")
-    print(f"    Nome Representante: {socio[7]}")
-    print(f"    Qualificação Rep.: {socio[8]}")
-    print(f"    Faixa Etária: {socio[9]}")
+    print(f"    Tipo: {tipo_socio_map.get(socio[0], socio[0])}")
+    print(f"    CPF/CNPJ: {socio[2]} (mascarado por privacidade)")
+    
+    # Buscar qualificação
+    cursor_temp = conn.cursor()
+    cursor_temp.execute("SELECT descricao FROM qualificacoes_socios WHERE codigo = %s", (socio[3],))
+    qual_desc = cursor_temp.fetchone()
+    qual_texto = qual_desc[0] if qual_desc else socio[3]
+    print(f"    Qualificação: {qual_texto}")
+    
+    print(f"    Data Entrada na Sociedade: {socio[4]}")
+    
+    if socio[5]:
+        print(f"    País: {socio[5]}")
+    
+    if socio[7] and socio[7].strip():
+        print(f"    Representante Legal: {socio[7]}")
+        if socio[8] and socio[8] != '00':
+            cursor_temp.execute("SELECT descricao FROM qualificacoes_socios WHERE codigo = %s", (socio[8],))
+            qual_rep_desc = cursor_temp.fetchone()
+            qual_rep_texto = qual_rep_desc[0] if qual_rep_desc else socio[8]
+            print(f"    Qualificação do Representante: {qual_rep_texto}")
+    
+    faixa = faixa_etaria_map.get(socio[9], 'Não informado')
+    print(f"    Faixa Etária: {faixa}")
+    
+    cursor_temp.close()
+
+print("\n⚠️ IMPORTANTE:")
+print("  - CPF/CNPJ dos sócios são MASCARADOS pela Receita Federal (LGPD)")
+print("  - Email e Telefone dos sócios NÃO são fornecidos pela Receita Federal")
+print("  - Apenas dados de contato da EMPRESA estão disponíveis")
 
 # 4. DESCRIÇÕES DAS TABELAS AUXILIARES
 print("\n📚 DESCRIÇÕES (tabelas auxiliares):")
