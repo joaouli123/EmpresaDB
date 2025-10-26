@@ -299,12 +299,12 @@ async def search_companies(
                 params.append(situacao)
 
             if data_inicio_atividade_min:
-                logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min}")
+                logger.info(f"🔍 Filtro data_inicio_atividade_min: {data_inicio_atividade_min} (>= {data_inicio_atividade_min})")
                 conditions.append("data_inicio_atividade >= %s")
                 params.append(data_inicio_atividade_min)
 
             if data_inicio_atividade_max:
-                logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max}")
+                logger.info(f"🔍 Filtro data_inicio_atividade_max: {data_inicio_atividade_max} (<= {data_inicio_atividade_max})")
                 conditions.append("data_inicio_atividade <= %s")
                 params.append(data_inicio_atividade_max)
 
@@ -334,8 +334,20 @@ async def search_companies(
                 LIMIT %s OFFSET %s
             """
 
+            # Log da query completa para debug
+            logger.info(f"📊 Query WHERE: {where_clause}")
+            logger.info(f"📊 Params: {params}")
+            logger.info(f"📊 Limit: {limit}, Offset: {offset}")
+            
             cursor.execute(data_query, params + [limit, offset])
             results = cursor.fetchall()
+            
+            # Log dos primeiros 3 resultados para debug
+            if results and len(results) > 0:
+                logger.info(f"📊 Total resultados retornados: {len(results)}")
+                for i, row in enumerate(results[:3]):
+                    logger.info(f"📊 Resultado {i+1}: CNPJ={row[0]}, Data Início={row[6]}")
+            
             cursor.close()
 
             columns = [
