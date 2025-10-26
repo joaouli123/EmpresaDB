@@ -90,7 +90,7 @@ const LandingPage2 = () => {
       description: 'Melhor custo-benefício',
       features: [
         '100.000 consultas/mês',
-        '🔥 Todos os 33 filtros avançados',
+        '🔥 Filtros avançados (UF, CNAE, situação, etc)',
         'Busca por texto (razão social/fantasia)',
         'Dashboard avançado + gráficos',
         'Logs completos (30 dias)',
@@ -180,8 +180,8 @@ const LandingPage2 = () => {
     },
     {
       icon: <BarChart3 size={32} />,
-      title: 'Relatórios Detalhados',
-      description: 'Visualize dados, exporte relatórios e tome decisões baseadas em informação real'
+      title: 'Dados Estruturados',
+      description: 'Visualize informações completas em JSON e tome decisões baseadas em dados reais'
     }
   ];
 
