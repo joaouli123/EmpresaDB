@@ -19,6 +19,7 @@ const Subscription = () => {
   const [transactions, setTransactions] = useState([]);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const Subscription = () => {
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [subRes, transRes, cardsRes] = await Promise.all([
         api.get('/subscriptions/my-subscription').catch(err => {
@@ -52,6 +54,7 @@ const Subscription = () => {
       setCards(cardsRes.data || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      setError('Erro ao carregar informações da assinatura');
     } finally {
       setLoading(false);
     }
@@ -91,6 +94,17 @@ const Subscription = () => {
       <div className="loading-container">
         <div className="spinner"></div>
         <p>Carregando informações da assinatura...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="subscription-empty">
+        <AlertCircle size={64} />
+        <h2>Erro ao Carregar</h2>
+        <p>{error}</p>
+        <button onClick={loadData} className="btn-primary">Tentar Novamente</button>
       </div>
     );
   }
