@@ -1,0 +1,121 @@
+cnpj_db=# -- ===== 1. EXTENSÃO TRIGRAM =====
+cnpj_db=# CREATE EXTENSION IF NOT EXISTS pg_trgm;
+NOTICE:  extension "pg_trgm" already exists, skipping
+CREATE EXTENSION
+cnpj_db=# CREATE EXTENSION IF NOT EXISTS btree_gin;
+ntos_situacao
+ON estabelecimentos(situacao_cadastral);
+
+-- CNAE principal (filtro comum)
+CREATENOTICE:  extension "btree_gin" already exists, skipping
+CREATE EXTENSION
+cnpj_db=#
+cnpj_db=# -- ===== 2. ÍNDICES ESSENCIAIS (NÃO TRIGRAM) =====
+cnpj_db=# -- Estes são rápidos de criar e pequenos
+cnpj_db=#
+cnpj_db=# -- CNPJ completo (busca exata - muito comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_cnpj_completo
+cnpj_db-# ON estabelecimentos(cnpj_completo);
+NOTICE:  relation "idx_estabelecimentos_cnpj_completo" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- UF (filtro muito comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_uf
+cnpj_db-# ON estabelecimentos(uf);
+NOTICE:  relation "idx_estabelecimentos_uf" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- Situação cadastral (filtro comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_situacao
+cnpj_db-# ON estabelecimentos(situacao_cadastral);
+NOTICE:  relation "idx_estabelecimentos_situacao" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- CNAE principal (filtro comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_cnae
+cnpj_db-# ON estabelecimentos(cnae_fiscal_principal);
+NOTICE:  relation "idx_estabelecimentos_cnae" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- ===== 3. ÍNDICE COMPOSTO PARA FILTROS COMBINADOS =====
+cnpj_db=# -- UF + Situação (combinação muito comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_uf_situacao
+cnpj_db-# ON estabelecimentos(uf, situacao_cadastral);
+NOTICE:  relation "idx_estabelecimentos_uf_situacao" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- ===== 4. ÍNDICE CRÍTICO PARA ORDER BY =====
+cnpj_db=# -- **ESSENCIAL**: Sem isso, PostgreSQL ordena milhões de registros a cada query!
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_razao_social_btree
+cnpj_db-# ON estabelecimentos(razao_social);
+IGRAM (APENAS OS 2 MAIS IMPORTANTES) =====
+-- ⚠️ ATENÇÃO: Índices trigram são GRANDES (2-5x tamanho da coluna)
+-- Só criar se houver espaço suficiente!
+
+-- Razão social (busca mais comum)
+CREAERROR:  column "razao_social" does not exist
+cnpj_db=#
+cnpj_db=# -- ===== 5. ÍNDICES TRIGRAM (APENAS OS 2 MAIS IMPORTANTES) =====
+cnpj_db=# -- ⚠️ ATENÇÃO: Índices trigram são GRANDES (2-5x tamanho da coluna)
+cnpj_db=# -- Só criar se houver espaço suficiente!
+cnpj_db=#
+cnpj_db=# -- Razão social (busca mais comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_razao_social_trgm
+cnpj_db-# ON estabelecimentos USING gin(razao_social gin_trgm_ops);
+imentos USING giERROR:  column "razao_social" does not exist
+cnpj_db=#
+cnpj_db=# -- Nome fantasia (segunda busca mais comum)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_nome_fantasia_trgm
+cnpj_db-# ON estabelecimentos USING gin(nome_fantasia gin_trgm_ops);
+NOTICE:  relation "idx_estabelecimentos_nome_fantasia_trgm" already exists, skipping
+CREATE INDEX
+cnpj_db=#
+cnpj_db=# -- ===== 6. ÍNDICE PARCIAL (EMPRESAS ATIVAS) =====
+cnpj_db=# -- Índice menor, apenas para registros ativos (maioria das consultas)
+cnpj_db=# CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_ativos_uf
+cnpj_db-# ON estabelecimentos(uf, municipio, cnae_fiscal_principal)
+cnpj_db-# WHERE situacao_cadastral = '02';
+T EXISTS idx_estabelecimentos_cnpj_basico
+ON estabelecimentos(cnpj_basico);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_estabelecimentos_municipio
+ON estabelecimentos(municipio);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_empresas_cnpj_basico
+ON empresas(cnpj_basico);
+
+-- ===== 8. ÍNDICES PARA SÓCIOS =====
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_socios_cnpj_basico
+ON socios(cnpj_basico);
+
+-- CPF/CNPJ do sócio (busca exata)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_socios_cpf_cnpj
+ON socios(cnpj_cpf_socio);
+
+-- ===== 9. ATUALIZAR ESTATÍSTICAS =====
+ANALYZE estabelecimentos;
+ANALYZE empresas;
+ANALYZE socios;
+
+-- ===== 10. VERIFICAR TAMANHO DOS ÍNDICES =====
+SELECT
+    indexname,
+    pg_size_pretty(pg_relation_size(indexname::regclass)) as tamanho
+FROM pg_indexes
+WHERE schemaname = 'public'
+AND tablename IN ('estabelecimentos', 'empresas', 'socios')
+ORDER BY pg_relation_size(indexname::regclass) DESC;
+
+-- ===== RESUMO =====
+-- ✅ CREATE INDEX CONCURRENTLY: não bloqueia escritas
+-- ✅ Apenas 2 índices trigram (ao invés de 7)
+-- ✅ Índice B-tree para ORDER BY razao_social (CRÍTICO!)
+-- ✅ Índices parciais para economizar espaço
+-- ✅ Total estimado: 20-40GB de índices (cabe em 200GB)
+
+-- ===== TEMPO ESTIMADO =====
+-- - Índices B-tree: 5-15 min cada
+-- - Índices trigram: 30-90 min cada
+-- - Total: 2-4 horas (mas API continua funcionando!)
+
+COMMIT;
