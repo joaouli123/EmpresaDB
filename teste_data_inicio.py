@@ -30,8 +30,9 @@ def main():
         print("="*80)
         
         # Teste 1: Buscar com datas específicas (CORRETO)
-        data_min = '2025-09-01'
-        data_max = '2025-09-02'
+        from datetime import date
+        data_min = date(2025, 9, 1)  # Converter string para date
+        data_max = date(2025, 9, 2)
         
         print(f"\n📊 Teste 1: Filtrando data_inicio_atividade ENTRE {data_min} e {data_max}")
         
