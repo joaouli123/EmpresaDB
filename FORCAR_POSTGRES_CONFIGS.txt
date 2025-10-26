@@ -1,0 +1,157 @@
+============================================
+MÉTODO FORÇADO: Sobrescrever TUDO e reiniciar
+============================================
+
+# Passo 1: Fazer backup do arquivo original
+docker exec -it cnpj_postgres cp /var/lib/postgresql/data/postgresql.conf /var/lib/postgresql/data/postgresql.conf.original
+
+# Passo 2: Criar novo postgresql.conf LIMPO (sobrescrever tudo)
+docker exec -it cnpj_postgres bash << 'BASH'
+cat > /var/lib/postgresql/data/postgresql.conf << 'PGCONF'
+# PostgreSQL Configuration - VPS Optimized
+# 16GB RAM, 4 CPUs, NVMe SSD
+
+# CONNECTIONS
+listen_addresses = '*'
+max_connections = 100
+superuser_reserved_connections = 3
+
+# MEMORY
+shared_buffers = 4GB
+huge_pages = try
+temp_buffers = 8MB
+max_prepared_transactions = 0
+work_mem = 40MB
+maintenance_work_mem = 1600MB
+autovacuum_work_mem = -1
+max_stack_depth = 2MB
+dynamic_shared_memory_type = posix
+effective_cache_size = 12GB
+
+# PARALLELISM
+max_worker_processes = 4
+max_parallel_workers_per_gather = 2
+max_parallel_maintenance_workers = 2
+max_parallel_workers = 4
+parallel_leader_participation = on
+
+# DISK
+temp_file_limit = -1
+
+# WRITE AHEAD LOG
+wal_level = replica
+fsync = on
+synchronous_commit = on
+wal_sync_method = fdatasync
+full_page_writes = on
+wal_compression = off
+wal_log_hints = off
+wal_buffers = 16MB
+wal_writer_delay = 200ms
+commit_delay = 0
+commit_siblings = 5
+
+# CHECKPOINTS
+checkpoint_timeout = 5min
+max_wal_size = 2GB
+min_wal_size = 1GB
+checkpoint_completion_target = 0.9
+checkpoint_flush_after = 256kB
+checkpoint_warning = 30s
+
+# ARCHIVING
+archive_mode = off
+
+# REPLICATION
+max_wal_senders = 10
+wal_keep_segments = 0
+wal_sender_timeout = 60s
+max_replication_slots = 10
+track_commit_timestamp = off
+
+# QUERY TUNING
+random_page_cost = 1.1
+effective_io_concurrency = 200
+jit = on
+
+# PLANNER
+enable_partitionwise_join = off
+enable_partitionwise_aggregate = off
+
+# LOGGING
+logging_collector = off
+log_destination = 'stderr'
+log_min_messages = warning
+log_min_error_statement = error
+log_min_duration_statement = 1000
+log_checkpoints = on
+log_connections = off
+log_disconnections = off
+log_duration = off
+log_line_prefix = '%m [%p] '
+log_timezone = 'Etc/UTC'
+
+# AUTOVACUUM
+autovacuum = on
+log_autovacuum_min_duration = -1
+autovacuum_max_workers = 2
+autovacuum_naptime = 1min
+autovacuum_vacuum_threshold = 50
+autovacuum_analyze_threshold = 50
+autovacuum_vacuum_scale_factor = 0.2
+autovacuum_analyze_scale_factor = 0.1
+autovacuum_freeze_max_age = 200000000
+autovacuum_multixact_freeze_max_age = 400000000
+autovacuum_vacuum_cost_delay = 2ms
+autovacuum_vacuum_cost_limit = -1
+
+# CLIENT CONNECTION
+datestyle = 'iso, mdy'
+timezone = 'Etc/UTC'
+lc_messages = 'en_US.utf8'
+lc_monetary = 'en_US.utf8'
+lc_numeric = 'en_US.utf8'
+lc_time = 'en_US.utf8'
+default_text_search_config = 'pg_catalog.english'
+
+# LOCK MANAGEMENT
+deadlock_timeout = 1s
+max_locks_per_transaction = 64
+max_pred_locks_per_transaction = 64
+
+PGCONF
+BASH
+
+# Passo 3: Remover postgresql.auto.conf (para não conflitar)
+docker exec -it cnpj_postgres rm -f /var/lib/postgresql/data/postgresql.auto.conf
+
+# Passo 4: Reiniciar PostgreSQL
+docker restart cnpj_postgres
+
+# Passo 5: Aguardar
+sleep 30
+
+# Passo 6: Verificar
+docker exec -i cnpj_postgres psql -U cnpj_user -d cnpj_db << 'EOF'
+SELECT 
+    name, 
+    setting,
+    unit,
+    source,
+    CASE 
+        WHEN unit = '8kB' THEN pg_size_pretty((setting::bigint * 8192)::bigint)
+        WHEN unit = 'kB' THEN pg_size_pretty((setting::bigint * 1024)::bigint)
+        ELSE setting || COALESCE(' ' || unit, '')
+    END as valor
+FROM pg_settings 
+WHERE name IN (
+    'shared_buffers', 
+    'effective_cache_size', 
+    'work_mem', 
+    'max_worker_processes',
+    'random_page_cost'
+)
+ORDER BY name;
+EOF
+
+============================================
