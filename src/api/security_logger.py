@@ -13,17 +13,10 @@ async def log_security_event(event_type: str, user_id: int = None, details: dict
     Registra eventos de segurança no banco
     """
     try:
-        with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO clientes.security_audit_log 
-                (event_type, user_id, details, severity, created_at)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (event_type, user_id, str(details), severity, datetime.now()))
-            conn.commit()
-            cursor.close()
+        # Log simplificado - apenas registro em arquivo por enquanto
+        security_logger.info(f"{severity} - {event_type} - User: {user_id} - {details}")
     except Exception as e:
-        security_logger.error(f"Erro ao registrar evento de segurança: {e}")
+        security_logger.error(f"Erro ao registrar evento: {e}")
 
 async def log_failed_login(username: str, ip: str):
     """Log de tentativas de login falhadas"""

@@ -20,7 +20,7 @@ import asyncio
 from functools import lru_cache
 from datetime import datetime, timedelta
 from src.utils.cnpj_utils import clean_cnpj
-from src.api.security_logger import security_logger
+from src.api.security_logger import log_query
 
 # ℹ️ Todos os dados estão no banco da VPS (72.61.217.143:5432/cnpj_db)
 # DATABASE_URL configurado no .env aponta para a VPS
@@ -116,7 +116,7 @@ async def get_cnpj_data(
     """
     try:
         # Log de auditoria
-        await security_logger.log_query(
+        await log_query(
             user_id=current_user['id'],
             action='cnpj_query',
             resource=f'cnpj/{cnpj}',
@@ -233,7 +233,7 @@ async def search_companies(
     situacao: str = Query(None, description="Situação cadastral"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    x_api_key: str = Header(None)
+    user: dict = Depends(verify_api_key)
 ):
     """
     Pesquisa empresas por múltiplos critérios
@@ -241,18 +241,9 @@ async def search_companies(
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
-        # Verificar API Key (obrigatório)
-        if not x_api_key:
-            raise HTTPException(
-                status_code=401,
-                detail="API Key não fornecida. Use o header 'X-API-Key'"
-            )
-        
-        user = await verify_api_key(x_api_key)
-        
         # Log de auditoria
-        await security_logger.log_query(
-            user_id=user.get('id') if isinstance(user, dict) else user['id'],
+        await log_query(
+            user_id=user['id'],
             action='search',
             resource='/search',
             details={
@@ -341,6 +332,12 @@ async def search_companies(
                 data['cnpj_basico'] = cnpj[:8] if cnpj else ''
                 data['cnpj_ordem'] = cnpj[8:12] if cnpj and len(cnpj) >= 12 else ''
                 data['cnpj_dv'] = cnpj[12:14] if cnpj and len(cnpj) >= 14 else ''
+
+                # Converter datas para string (formato ISO)
+                if data.get('data_situacao_cadastral'):
+                    data['data_situacao_cadastral'] = str(data['data_situacao_cadastral'])
+                if data.get('data_inicio_atividade'):
+                    data['data_inicio_atividade'] = str(data['data_inicio_atividade'])
 
                 # Buscar CNAEs secundários (sem JOIN para manter performance)
                 # Para busca em lote, não buscar CNAEs secundários (usar endpoint específico)
@@ -443,7 +440,7 @@ async def get_socios(cnpj: str, current_user: dict = Depends(get_current_user)):
     """
     try:
         # Log de auditoria
-        await security_logger.log_query(
+        await log_query(
             user_id=current_user['id'],
             action='socios_query',
             resource=f'cnpj/{cnpj}/socios',

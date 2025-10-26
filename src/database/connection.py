@@ -361,7 +361,7 @@ class DatabaseManager:
                     UPDATE clientes.api_keys
                     SET last_used = CURRENT_TIMESTAMP, total_requests = total_requests + 1
                     WHERE key = %s AND is_active = TRUE
-                    RETURNING user_id
+                    RETURNING user_id AS id
                 """, (key,))
                 result = cursor.fetchone()
                 cursor.close()
