@@ -71,7 +71,6 @@ const LandingPage2 = () => {
       features: [
         '10.000 consultas/mês',
         'Filtros básicos (UF, CNAE, situação)',
-        'Exportação CSV (até 1.000 registros)',
         'Dashboard com estatísticas',
         'Logs de uso (7 dias)',
         'Suporte email (48h)',
@@ -93,10 +92,8 @@ const LandingPage2 = () => {
         '100.000 consultas/mês',
         '🔥 Todos os 33 filtros avançados',
         'Busca por texto (razão social/fantasia)',
-        'Exportação ilimitada (CSV/Excel)',
         'Dashboard avançado + gráficos',
         'Logs completos (30 dias)',
-        '⚡ Cache Redis (respostas 10x mais rápidas)',
         'Suporte prioritário (24h)',
         'Rate limit: 300 req/min',
         '✅ SLA 98% uptime'
@@ -119,8 +116,6 @@ const LandingPage2 = () => {
         '  • QSA completo (todos os sócios)',
         '  • CNAEs secundários detalhados',
         'Logs completos de uso',
-        'Exportação ilimitada (CSV/Excel)',
-        '⚡ Cache Redis otimizado',
         'Suporte premium (4h)',
         'Rate limit: 1000 req/min',
         '✅ SLA 99.9% uptime'
@@ -144,7 +139,6 @@ const LandingPage2 = () => {
         '  • Onboarding personalizado',
         '  • Account manager dedicado',
         '  • White-label (sua marca)',
-        '⚡ Cache Redis dedicado',
         'SLA customizado (99.99%)',
         'Suporte 24/7 (telefone + Slack)',
         'Consultoria técnica incluída',
