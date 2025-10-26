@@ -90,11 +90,21 @@ const Docs = () => {
             <div className="info-card" style={{ marginTop: '20px', background: '#fef3c7', border: '2px solid #f59e0b' }}>
               <h4 style={{ color: '#92400e', marginBottom: '8px' }}>🔑 Como obter sua API Key:</h4>
               <ol style={{ color: '#92400e', marginLeft: '20px' }}>
-                <li>Faça login no sistema</li>
-                <li>Acesse a página "Chaves de API"</li>
+                <li>Acesse a página de registro/login do sistema</li>
+                <li>Crie sua conta ou faça login</li>
+                <li>Acesse a página "Chaves de API" no dashboard</li>
                 <li>Clique em "Nova Chave"</li>
                 <li>Copie sua chave e guarde em local seguro</li>
               </ol>
+            </div>
+
+            <div className="info-card" style={{ marginTop: '20px', background: '#dbeafe', border: '2px solid #3b82f6' }}>
+              <h4 style={{ color: '#1e40af', marginBottom: '8px' }}>💡 Autenticação Simplificada</h4>
+              <p style={{ color: '#1e40af', fontSize: '14px' }}>
+                Este sistema utiliza <strong>apenas API Key</strong> para autenticação. 
+                Não é necessário gerenciar tokens JWT ou sessões. Basta incluir o header 
+                <code>X-API-Key</code> em todas as suas requisições.
+              </p>
             </div>
 
             <h3 style={{ marginTop: '24px' }}>Exemplo de Requisição Autenticada:</h3>

@@ -13,12 +13,15 @@ Todas as requisições exigem autenticação via **API Key** no header `X-API-Ke
 ### Como Obter sua API Key
 
 1. Acesse o painel de clientes: `https://sua-api.com.br`
-2. Faça login com suas credenciais
-3. Vá até a seção **"Chaves de API"**
+2. Crie sua conta ou faça login
+3. Vá até a seção **"Chaves de API"** no dashboard
 4. Clique em **"Nova Chave"**
 5. Copie e guarde sua chave com segurança
 
-⚠️ **IMPORTANTE**: Sua API Key é **permanente** até você revogá-la. Nunca compartilhe publicamente.
+⚠️ **IMPORTANTE**: 
+- Sua API Key é **permanente** até você revogá-la
+- Nunca compartilhe publicamente sua chave
+- Este sistema usa **apenas API Key** - não há tokens JWT ou sessões para gerenciar
 
 ### Exemplo de Autenticação
 

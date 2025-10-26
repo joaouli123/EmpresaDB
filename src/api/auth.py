@@ -11,10 +11,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ℹ️ Este router gerencia autenticação e registro de usuários
-# Usuários são criados no banco configurado em DATABASE_URL (VPS: 72.61.217.143)
-# Empresas terceiras devem usar /auth/register normalmente para criar conta
+# IMPORTANTE: Este módulo é usado APENAS para login no dashboard web
+# A API em si usa apenas API Key (X-API-Key header)
+# Empresas terceiras devem:
+# 1. Criar conta via /auth/register
+# 2. Fazer login no dashboard web
+# 3. Gerar API Key na página de chaves
+# 4. Usar apenas a API Key para todas as requisições da API
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/auth", tags=["Authentication - Dashboard Web Only"])
 
 ALGORITHM = "HS256"
 

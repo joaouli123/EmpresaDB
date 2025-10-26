@@ -5,14 +5,18 @@
 ### Como obtenho minha API Key?
 
 1. Acesse `https://sua-api.com.br`
-2. Faça login ou cadastre-se
-3. Vá até **"Chaves de API"**
+2. Crie sua conta ou faça login
+3. Vá até **"Chaves de API"** no dashboard
 4. Clique em **"Nova Chave"**
 5. Copie e guarde sua chave com segurança
 
 ### A API Key expira?
 
 Não! Sua API Key é **permanente** até você revogá-la manualmente no painel de clientes.
+
+### Preciso usar tokens JWT?
+
+**Não!** Este sistema foi simplificado para usar **apenas API Key**. Você não precisa gerenciar tokens JWT, refresh tokens ou sessões. Basta incluir o header `X-API-Key` em todas as requisições.
 
 ### Posso ter múltiplas API Keys?
 

@@ -104,53 +104,20 @@ async def get_stats():
         logger.error(f"Erro ao obter estatísticas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def get_user_from_jwt_or_api_key(
-    x_api_key: str = Header(None),
-    authorization: str = Header(None)
-) -> dict:
-    """
-    Aceita autenticação via API Key (header X-API-Key) OU JWT token
-    """
-    # Tentar API Key primeiro
-    if x_api_key:
-        user = await db_manager.verify_api_key(x_api_key)
-        if user:
-            return user
-    
-    # Tentar JWT token
-    if authorization and authorization.startswith("Bearer "):
-        from src.api.auth import get_current_user
-        from fastapi import Request
-        # Criar um request fake para get_current_user
-        try:
-            token = authorization.replace("Bearer ", "")
-            # Validar JWT manualmente
-            from src.api.auth import verify_token
-            payload = verify_token(token)
-            if payload:
-                return payload
-        except:
-            pass
-    
-    raise HTTPException(
-        status_code=401,
-        detail="Autenticação necessária. Use API Key (header X-API-Key) ou JWT token (header Authorization)"
-    )
-
 @router.get("/cnpj/{cnpj}")
 async def get_cnpj_data(
     cnpj: str,
-    current_user: dict = Depends(get_user_from_jwt_or_api_key)
+    user: dict = Depends(verify_api_key)
 ):
     """
     Consulta dados de CNPJ
-    Requer autenticação via API Key (X-API-Key) ou JWT token
+    Requer autenticação via API Key no header 'X-API-Key'
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
         # Log de auditoria
         await log_query(
-            user_id=current_user['id'],
+            user_id=user['id'],
             action='cnpj_query',
             resource=f'cnpj/{cnpj}',
             details={'unlimited': True}
@@ -471,16 +438,16 @@ async def get_cnaes_secundarios(cnpj: str, user: dict = Depends(verify_api_key))
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cnpj/{cnpj}/socios")
-async def get_socios(cnpj: str, current_user: dict = Depends(get_current_user)):
+async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     """
-    Consulta sócios de um CNPJ (usuários autenticados)
-    Requer autenticação JWT (qualquer usuário logado)
+    Consulta sócios de um CNPJ
+    Requer autenticação via API Key no header 'X-API-Key'
     ⚠️ CONSULTAS ILIMITADAS TEMPORARIAMENTE
     """
     try:
         # Log de auditoria
         await log_query(
-            user_id=current_user['id'],
+            user_id=user['id'],
             action='socios_query',
             resource=f'cnpj/{cnpj}/socios',
             details={'unlimited': True}

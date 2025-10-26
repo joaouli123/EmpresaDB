@@ -21,6 +21,15 @@ app = FastAPI(
     description="""
     API completa para consulta de dados públicos de CNPJ da Receita Federal.
 
+    ## 🔑 Autenticação
+
+    **Todas as requisições requerem API Key no header `X-API-Key`**
+
+    Para obter sua API Key:
+    1. Registre-se em /auth/register
+    2. Acesse o dashboard web
+    3. Gere sua chave em "Chaves de API"
+
     ## Funcionalidades
 
     * **Consulta por CNPJ** - Busca detalhada por CNPJ completo (14 dígitos)
@@ -32,7 +41,7 @@ app = FastAPI(
 
     ## Como usar
 
-    Todos os endpoints retornam JSON. Use os parâmetros de query para filtrar resultados.
+    Todos os endpoints retornam JSON. Inclua o header `X-API-Key` em todas as requisições.
 
     ### Exemplos:
 
