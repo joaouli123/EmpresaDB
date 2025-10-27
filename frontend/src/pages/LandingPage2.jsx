@@ -601,9 +601,9 @@ const LandingPage2 = () => {
           ))}
         </div>
 
-        <div className="info-card" style={{ marginTop: '40px', background: '#1f2937', color: 'white' }}>
-          <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta</h3>
-          <pre style={{ background: '#111827', padding: '20px', borderRadius: '8px', overflow: 'auto' }}>
+        <div className="info-card" style={{ marginTop: '60px', marginBottom: '60px', background: '#1f2937', color: 'white' }}>
+          <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta por CNPJ</h3>
+          <pre style={{ background: '#111827', padding: '32px', borderRadius: '8px', overflow: 'auto' }}>
 {`GET /api/v1/empresas?cnpj=00000000000191
 
 {
@@ -615,10 +615,21 @@ const LandingPage2 = () => {
   "cnae_principal": "6422-1/00",
   "porte": "DEMAIS",
   "natureza_juridica": "205-1",
-  ...
+  "endereco": {
+    "logradouro": "SBS QUADRA 1 BLOCO G LOJA 32",
+    "numero": "32",
+    "complemento": "LOJA 32 EDIFICIO SEDE III",
+    "bairro": "ASA SUL",
+    "municipio": "BRASILIA",
+    "uf": "DF",
+    "cep": "70073901"
+  },
+  "capital_social": 103000000000.00,
+  "email": null,
+  "telefone": null
 }`}
           </pre>
-          <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.8)' }}>
+          <p style={{ marginTop: '20px', color: 'rgba(255,255,255,0.8)', fontSize: '15px' }}>
             Documentação completa com exemplos em Python, JavaScript, PHP, Java e mais
           </p>
         </div>
