@@ -464,20 +464,20 @@ const LandingPage2 = () => {
 
           <div className="hero-stats">
             <div className="stat">
-              <div className="stat-number">64M+</div>
-              <div className="stat-label">Empresas</div>
+              <div className="stat-number" style={{ color: 'white' }}>64M+</div>
+              <div className="stat-label" style={{ color: 'white', opacity: 0.95 }}>Empresas</div>
             </div>
             <div className="stat">
-              <div className="stat-number">47M+</div>
-              <div className="stat-label">Estabelecimentos</div>
+              <div className="stat-number" style={{ color: 'white' }}>47M+</div>
+              <div className="stat-label" style={{ color: 'white', opacity: 0.95 }}>Estabelecimentos</div>
             </div>
             <div className="stat">
-              <div className="stat-number">26M+</div>
-              <div className="stat-label">Sócios</div>
+              <div className="stat-number" style={{ color: 'white' }}>26M+</div>
+              <div className="stat-label" style={{ color: 'white', opacity: 0.95 }}>Sócios</div>
             </div>
             <div className="stat">
-              <div className="stat-number">99.9%</div>
-              <div className="stat-label">Uptime</div>
+              <div className="stat-number" style={{ color: 'white' }}>99.9%</div>
+              <div className="stat-label" style={{ color: 'white', opacity: 0.95 }}>Uptime</div>
             </div>
           </div>
         </div>
