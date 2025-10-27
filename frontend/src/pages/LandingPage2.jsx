@@ -896,9 +896,26 @@ const LandingPage2 = () => {
                 ))}
               </ul>
 
-              <button className={`btn-plan ${plan.popular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
-                {plan.id === 'enterprise' ? 'Falar com Vendas' : plan.id === 'free' ? 'Começar Grátis' : `Assinar ${plan.name}`}
-              </button>
+              <a href={plan.id === 'enterprise' ? '#contact' : plan.id === 'free' ? '/login' : '#pricing'}>
+                <button className={`btn-plan ${plan.popular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
+                  {plan.id === 'enterprise' ? (
+                    <>
+                      <Mail size={20} />
+                      Falar com Vendas
+                    </>
+                  ) : plan.id === 'free' ? (
+                    <>
+                      <Zap size={20} />
+                      Começar Grátis
+                    </>
+                  ) : (
+                    <>
+                      <Check size={20} />
+                      Assinar {plan.name}
+                    </>
+                  )}
+                </button>
+              </a>
             </div>
           ))}
         </div>

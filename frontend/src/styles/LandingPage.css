@@ -935,7 +935,7 @@
 .plan-features {
   list-style: none;
   padding: 0;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .plan-features li {
@@ -953,6 +953,47 @@
 
 .btn-plan {
   width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.pricing-card a {
+  text-decoration: none;
+  width: 100%;
+}
+
+.btn-plan.btn-primary-large {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-plan.btn-primary-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+}
+
+.btn-plan.btn-secondary-large {
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+.btn-plan.btn-secondary-large:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-2px);
 }
 
 /* Billing Toggle */
