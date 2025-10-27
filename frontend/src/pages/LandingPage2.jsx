@@ -331,8 +331,8 @@ const LandingPage2 = () => {
     },
     {
       icon: <Users size={24} />,
-      title: 'Dados de Sócios (QSA)',
-      description: 'Endpoint dedicado para consultar sócios por CNPJ'
+      title: 'E mais 26 Filtros Avançados',
+      description: 'Capital social, porte, endereço completo, regime tributário e muito mais'
     }
   ];
 
