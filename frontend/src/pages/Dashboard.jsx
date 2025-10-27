@@ -91,36 +91,6 @@ const Dashboard = () => {
         <p>Visão geral do sistema e uso da API</p>
       </div>
 
-      {subscription && subscription.plan_name && (
-        <div className="subscription-card">
-          <h3>Sua Assinatura: {subscription.plan_name}</h3>
-          <div className="subscription-stats">
-            <div className="sub-stat">
-              <p>Limite Mensal</p>
-              <strong>{(subscription.total_limit || 0).toLocaleString('pt-BR')}</strong>
-            </div>
-            <div className="sub-stat">
-              <p>Consultas Usadas</p>
-              <strong>{(subscription.queries_used || 0).toLocaleString('pt-BR')}</strong>
-            </div>
-            <div className="sub-stat">
-              <p>Consultas Restantes</p>
-              <strong>{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</strong>
-            </div>
-            <div className="sub-stat">
-              <p>Renovação</p>
-              <strong>{subscription.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') : 'N/A'}</strong>
-            </div>
-          </div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%` }}
-            />
-          </div>
-        </div>
-      )}
-
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon blue">
@@ -221,30 +191,38 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-header">
-          <Database size={20} />
-          <h2>Estatísticas do Banco de Dados</h2>
+      {subscription && subscription.plan_name && (
+        <div className="card">
+          <div className="card-header">
+            <CheckCircle2 size={20} />
+            <h2>Sua Assinatura: {subscription.plan_name}</h2>
+          </div>
+          <div className="db-stats">
+            <div className="db-stat-item">
+              <p className="db-stat-label">Limite Mensal</p>
+              <p className="db-stat-value">{(subscription.total_limit || 0).toLocaleString('pt-BR')}</p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Consultas Usadas</p>
+              <p className="db-stat-value">{(subscription.queries_used || 0).toLocaleString('pt-BR')}</p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Consultas Restantes</p>
+              <p className="db-stat-value">{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Renovação</p>
+              <p className="db-stat-value">{subscription.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') : 'N/A'}</p>
+            </div>
+          </div>
+          <div className="progress-bar" style={{ marginTop: '20px' }}>
+            <div
+              className="progress-fill"
+              style={{ width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%` }}
+            />
+          </div>
         </div>
-        <div className="db-stats">
-          <div className="db-stat-item">
-            <p className="db-stat-label">CNAEs Cadastrados</p>
-            <p className="db-stat-value">{(stats?.total_cnaes || 0).toLocaleString('pt-BR')}</p>
-          </div>
-          <div className="db-stat-item">
-            <p className="db-stat-label">Municípios</p>
-            <p className="db-stat-value">{(stats?.total_municipios || 0).toLocaleString('pt-BR')}</p>
-          </div>
-          <div className="db-stat-item">
-            <p className="db-stat-label">Taxa de Sucesso</p>
-            <p className="db-stat-value">99.9%</p>
-          </div>
-          <div className="db-stat-item">
-            <p className="db-stat-label">Tempo Médio de Resposta</p>
-            <p className="db-stat-value">45ms</p>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
