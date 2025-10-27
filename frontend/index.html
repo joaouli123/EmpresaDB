@@ -1,10 +1,119 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    
+    <!-- SEO Primary Tags -->
+    <title>API de Consulta CNPJ - Dados Oficiais da Receita Federal | CNPJ API</title>
+    <meta name="title" content="API de Consulta CNPJ - Dados Oficiais da Receita Federal | CNPJ API" />
+    <meta name="description" content="API profissional para consulta de CNPJ com dados oficiais da Receita Federal. Acesse 54M+ empresas cadastradas, QSA completo, CNAEs e muito mais. Integração simples via REST API." />
+    <meta name="keywords" content="API CNPJ, consulta CNPJ, dados empresa, receita federal, QSA, CNAE, API REST, dados empresariais, consulta empresas, validação CNPJ" />
+    <meta name="author" content="CNPJ API" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://cnpjapi.com.br" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cnpjapi.com.br/" />
+    <meta property="og:title" content="API de Consulta CNPJ - Dados Oficiais da Receita Federal" />
+    <meta property="og:description" content="Consulte 54M+ empresas cadastradas na Receita Federal. API profissional com dados completos, QSA, CNAEs e integração simples." />
+    <meta property="og:image" content="https://cnpjapi.com.br/og-image.jpg" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="CNPJ API" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://cnpjapi.com.br/" />
+    <meta property="twitter:title" content="API de Consulta CNPJ - Dados Oficiais da Receita Federal" />
+    <meta property="twitter:description" content="Consulte 54M+ empresas cadastradas na Receita Federal. API profissional com dados completos, QSA, CNAEs e integração simples." />
+    <meta property="twitter:image" content="https://cnpjapi.com.br/twitter-image.jpg" />
+    
+    <!-- Schema.org Markup (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "CNPJ API",
+      "url": "https://cnpjapi.com.br",
+      "description": "API profissional para consulta de CNPJ com dados oficiais da Receita Federal do Brasil",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "BRL",
+        "lowPrice": "0",
+        "highPrice": "799.90",
+        "offerCount": "5"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "CNPJ API",
+        "url": "https://cnpjapi.com.br"
+      },
+      "featureList": [
+        "Consulta de 54M+ empresas cadastradas",
+        "Dados oficiais da Receita Federal",
+        "QSA completo com CPF dos sócios",
+        "CNAEs principal e secundários",
+        "API REST simples e documentada",
+        "Resposta em menos de 50ms",
+        "Dados atualizados mensalmente"
+      ]
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "O que é a CNPJ API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A CNPJ API é uma API profissional que fornece acesso completo aos dados oficiais de empresas cadastradas na Receita Federal do Brasil. Com ela, você pode consultar informações detalhadas de mais de 54 milhões de empresas, incluindo dados cadastrais, QSA (Quadro de Sócios e Administradores), CNAEs e muito mais."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Os dados são oficiais da Receita Federal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim! Todos os dados fornecidos pela CNPJ API são 100% oficiais, extraídos diretamente da base de dados públicos da Receita Federal do Brasil. A base é atualizada mensalmente para garantir precisão e confiabilidade."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quanto custa usar a API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Oferecemos diversos planos: Plano Free (gratuito com 100 consultas/mês), Start (R$ 79,90/mês com 10.000 consultas), Growth (R$ 249,90/mês com 100.000 consultas), Pro (R$ 799,90/mês com 500.000 consultas) e Enterprise (customizado)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como integrar a API no meu sistema?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A integração é muito simples! Basta fazer uma requisição REST para nossos endpoints com sua API Key. Fornecemos documentação completa com exemplos em Python, JavaScript, PHP, Java e cURL. A maioria dos desenvolvedores consegue integrar em menos de 1 hora."
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Additional Meta Tags -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   </head>
   <body>
     <div id="root"></div>

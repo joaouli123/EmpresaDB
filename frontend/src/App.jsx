@@ -48,10 +48,6 @@ function AppRoutes() {
           element={<LandingPage />}
         />
         <Route
-          path="/lp2"
-          element={<LandingPage2 />}
-        />
-        <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
         />
@@ -65,7 +61,7 @@ function AppRoutes() {
         />
         <Route
           path="/"
-          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />}
+          element={user ? <Navigate to="/dashboard" replace /> : <LandingPage2 />}
         />
         <Route path="/" element={
           <ProtectedRoute>

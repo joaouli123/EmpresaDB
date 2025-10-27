@@ -17,7 +17,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #f0f0f0;
-  border-top-color: #667eea;
+  border-top-color: #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -112,7 +112,7 @@
 .plan-main-info h3 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #667eea;
+  color: #3b82f6;
   margin-bottom: 1.5rem;
 }
 
@@ -132,7 +132,7 @@
 }
 
 .limit-item svg {
-  color: #667eea;
+  color: #3b82f6;
   flex-shrink: 0;
 }
 
@@ -176,7 +176,7 @@
   display: block;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #667eea;
+  color: #3b82f6;
   margin-bottom: 0.25rem;
 }
 
@@ -196,7 +196,7 @@
 
 .usage-bar-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   transition: width 0.3s ease;
 }
 
@@ -231,19 +231,19 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .btn-secondary {
   background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
 }
 
 .btn-secondary:hover {
@@ -261,7 +261,7 @@
 
 .btn-link {
   background: none;
-  color: #667eea;
+  color: #3b82f6;
   padding: 0.5rem 1rem;
   text-decoration: none;
 }
@@ -333,7 +333,7 @@
 }
 
 .payment-card.default {
-  border-color: #667eea;
+  border-color: #3b82f6;
   background: #f0f4ff;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .card-icon {
-  color: #667eea;
+  color: #3b82f6;
 }
 
 .card-info {
@@ -373,7 +373,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: #667eea;
+  background: #3b82f6;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;

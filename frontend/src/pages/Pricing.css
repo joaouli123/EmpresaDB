@@ -111,7 +111,7 @@
   display: flex;
   align-items: baseline;
   margin-bottom: 1.5rem;
-  color: #667eea;
+  color: #3b82f6;
 }
 
 .plan-price .currency {
@@ -132,12 +132,12 @@
 }
 
 .plan-limit {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   padding: 1rem;
   border-radius: 0.75rem;
   text-align: center;
   margin-bottom: 2rem;
-  color: #667eea;
+  color: #3b82f6;
   font-size: 1.125rem;
 }
 
@@ -188,23 +188,23 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
 
 .btn-secondary {
   background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #667eea;
+  background: #3b82f6;
   color: white;
 }
 
@@ -236,7 +236,7 @@
 
 .faq-item h4 {
   font-size: 1.25rem;
-  color: #667eea;
+  color: #3b82f6;
   margin-bottom: 0.75rem;
 }
 
