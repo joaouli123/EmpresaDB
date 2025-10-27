@@ -144,12 +144,12 @@ const LandingPage2 = () => {
         'Cache Redis dedicado',
         'Dashboard personalizado',
         'Account manager dedicado',
-        'Integração e onboarding dedicados',
+        'Consultoria técnica',
         'Documentação da API',
         'Suporte 24/7 prioritário',
         'SLA 99.99% uptime',
         'Rate limit customizado',
-        'Possibilidade de white-label'
+        'Sua marca (white-label)'
       ],
       popular: false,
       badge: 'Corporativo',
