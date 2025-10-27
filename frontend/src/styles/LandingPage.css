@@ -26,7 +26,7 @@
 
 .navbar-content {
   max-width: 1400px;
-  margin: 20px auto 0;
+  margin: 20px auto;
   padding: 16px 32px;
   display: flex;
   flex-direction: row;
@@ -43,7 +43,7 @@
 /* Mobile: navbar mais compacto */
 @media (max-width: 991px) {
   .navbar-content {
-    margin: 0 16px 0;
+    margin: 0 16px;
     padding: 14px 20px;
     border-radius: 16px;
     gap: 0;
@@ -295,10 +295,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 120px 20px 80px;
+  padding: 100px 20px 80px;
   position: relative;
   overflow: hidden;
-  margin-top: -20px;
+  margin-top: -40px;
 }
 
 /* Mobile: hero sem padding superior (header já não sobrepõe) */
@@ -306,7 +306,7 @@
   .hero-section {
     padding: 40px 20px 60px;
     min-height: auto;
-    margin-top: 0;
+    margin-top: -20px;
   }
 }
 
