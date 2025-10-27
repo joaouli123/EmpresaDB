@@ -29,8 +29,35 @@ const Pricing = () => {
   };
 
   const handleSubscribe = async (planId) => {
-    // Sempre redireciona para login para assinar (usuário precisa estar autenticado)
-    navigate('/login');
+    // Verificar se está autenticado
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Redireciona para login
+      navigate('/login');
+      return;
+    }
+    
+    setSubscribing(planId);
+    
+    try {
+      // Criar sessão de checkout no Stripe
+      const response = await api.post('/stripe/create-checkout-session', {
+        plan_id: planId,
+        success_url: `${window.location.origin}/subscription?success=true`,
+        cancel_url: `${window.location.origin}/pricing?canceled=true`
+      });
+      
+      // Redirecionar para Stripe Checkout
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('URL de checkout não retornada');
+      }
+    } catch (error) {
+      console.error('Erro ao criar checkout:', error);
+      alert('Erro ao iniciar processo de pagamento. Tente novamente.');
+      setSubscribing(null);
+    }
   };
 
   if (loading) {

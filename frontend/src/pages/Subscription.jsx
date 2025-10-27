@@ -62,18 +62,29 @@ const Subscription = () => {
 
   const handleCancelSubscription = async () => {
     try {
-      await api.post('/subscriptions/cancel');
+      await api.post('/stripe/cancel-subscription');
       setShowCancelModal(false);
       loadData();
-      alert('Assinatura cancelada com sucesso!');
+      alert('Assinatura cancelada com sucesso! Seu acesso continuará até o final do período pago.');
     } catch (error) {
       console.error('Erro ao cancelar assinatura:', error);
       alert('Erro ao cancelar assinatura. Tente novamente.');
     }
   };
 
-  const handleViewSubscriptionDetails = () => {
-    alert('Redirecionando para o portal de gerenciamento do Stripe...\n\n(Demo: Esta integração será ativada quando você configurar suas chaves do Stripe)');
+  const handleViewSubscriptionDetails = async () => {
+    try {
+      const response = await api.post('/stripe/customer-portal', {
+        return_url: `${window.location.origin}/subscription`
+      });
+      
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Erro ao abrir portal:', error);
+      alert('Erro ao abrir portal de gerenciamento. Tente novamente.');
+    }
   };
 
   const handleRemoveCard = async (cardId) => {

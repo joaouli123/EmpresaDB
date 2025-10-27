@@ -51,7 +51,7 @@ def set_cache(key: str, value, minutes: int = 60):
 
 async def verify_api_key(x_api_key: str = Header(None)):
     """
-    Verifica se a API Key é válida e aplica rate limiting
+    Verifica se a API Key é válida, verifica assinatura ativa e aplica rate limiting
 
     Nota: A API externa da Receita Federal pode demorar 30+ segundos para responder.
     Isso é normal e está fora do nosso controle.
@@ -68,6 +68,71 @@ async def verify_api_key(x_api_key: str = Header(None)):
             status_code=401,
             detail="API Key inválida ou expirada"
         )
+
+    # VERIFICAÇÃO DE ASSINATURA ATIVA
+    # Buscar assinatura do usuário
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    ss.status,
+                    ss.current_period_end,
+                    ss.cancel_at_period_end,
+                    p.name as plan_name,
+                    p.monthly_queries
+                FROM clientes.stripe_subscriptions ss
+                JOIN clientes.plans p ON ss.plan_id = p.id
+                WHERE ss.user_id = %s 
+                    AND ss.status IN ('active', 'trialing')
+                    AND ss.current_period_end > NOW()
+                ORDER BY ss.created_at DESC
+                LIMIT 1
+            """, (user['id'],))
+            subscription = cursor.fetchone()
+            cursor.close()
+            
+            # Se não tem assinatura ativa, verificar se tem plano free
+            if not subscription:
+                # Verificar se usuário está no plano free (sempre permitido)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT p.name 
+                    FROM clientes.subscriptions s
+                    JOIN clientes.plans p ON s.plan_id = p.id
+                    WHERE s.user_id = %s AND s.status = 'active'
+                """, (user['id'],))
+                free_plan = cursor.fetchone()
+                cursor.close()
+                
+                if not free_plan or free_plan[0] != 'free':
+                    # Não tem assinatura ativa e não está no plano free
+                    raise HTTPException(
+                        status_code=403,
+                        detail={
+                            "error": "subscription_required",
+                            "message": "Sua assinatura expirou ou não foi renovada. Por favor, renove sua assinatura para continuar usando a API.",
+                            "action_url": "/pricing"
+                        }
+                    )
+                # Se está no free, deixa continuar com plano free
+                user['plan'] = 'free'
+                user['monthly_queries'] = 200
+            else:
+                # Tem assinatura ativa
+                user['plan'] = subscription[3]  # plan_name
+                user['monthly_queries'] = subscription[4]  # monthly_queries
+                
+                # Verificar se está marcada para cancelar
+                if subscription[2]:  # cancel_at_period_end
+                    logger.info(f"Usuário {user['id']} tem assinatura marcada para cancelar no final do período")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao verificar assinatura: {e}")
+        # Em caso de erro na verificação, permitir acesso mas logar
+        user['plan'] = 'free'
 
     # Aplicar rate limiting baseado no plano do usuário
     user_plan = user.get('plan', 'free')

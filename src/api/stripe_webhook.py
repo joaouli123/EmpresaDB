@@ -283,9 +283,11 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None, 
                 event = stripe.Webhook.construct_event(
                     payload, stripe_signature, webhook_secret
                 )
-            except stripe.error.SignatureVerificationError as e:
-                logger.error(f"❌ Assinatura inválida do webhook: {e}")
-                raise HTTPException(status_code=400, detail="Invalid signature")
+            except Exception as e:
+                if "Signature" in str(e):
+                    logger.error(f"❌ Assinatura inválida do webhook: {e}")
+                    raise HTTPException(status_code=400, detail="Invalid signature")
+                raise
         
         # Registrar evento no banco para auditoria
         with db_manager.get_connection() as conn:
