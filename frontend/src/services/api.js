@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Em desenvolvimento no Replit, usar a URL do workspace
+const baseURL = import.meta.env.VITE_API_URL || (
+  window.location.hostname.includes('replit.dev') 
+    ? `https://${window.location.hostname.split('-')[0]}-00-${window.location.hostname.split('-00-')[1].split('.')[0]}.${window.location.hostname.split('.').slice(-2).join('.')}:8000`
+    : 'http://localhost:8000'
+);
 console.log('[API] Base URL configurada:', baseURL);
 
 const api = axios.create({
