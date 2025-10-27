@@ -69,12 +69,13 @@ const LandingPage2 = () => {
       description: 'Para começar pequeno',
       features: [
         '10.000 consultas/mês',
-        'Filtros básicos (UF, CNAE, situação)',
+        'Filtros avançados (CNAEs, sócios, endereço, etc...)',
         'Dashboard com estatísticas',
-        'Logs de uso (7 dias)',
-        'Suporte email (48h)',
+        'Documentação completa',
+        'Dados atualizados da Receita',
+        'Suporte email',
         'Rate limit: 60 req/min',
-        '✅ SLA 95% uptime'
+        'SLA 95% uptime'
       ],
       popular: false,
       badge: null,
