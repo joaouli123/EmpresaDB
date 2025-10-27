@@ -70,7 +70,7 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
     """Retorna informações da assinatura do usuário atual"""
     try:
         # Se for usuário demo, retorna dados demo
-        if current_user.get('username') == 'demo':
+        if current_user.get('username') in ['demo', 'usuario_demo', 'admin_jl']:
             renewal_date = (datetime.now() + timedelta(days=15)).isoformat()
             return {
                 "plan_name": "Plano Profissional",
@@ -84,6 +84,24 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
             }
         
         print(f"[DEBUG] Buscando assinatura para user_id: {current_user['id']}")
+        
+        # Verificar se a tabela user_limits existe
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'clientes' 
+                    AND table_name = 'user_limits'
+                );
+            """)
+            table_exists = cursor.fetchone()[0]
+            cursor.close()
+        
+        if not table_exists:
+            print("[DEBUG] Tabela user_limits não existe, retornando None")
+            return None
+        
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -123,7 +141,8 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
             return subscription_data
     except Exception as e:
         print(f"[ERROR] Erro ao buscar assinatura: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar assinatura: {str(e)}")
+        # Retorna None em vez de erro 500 se houver problema
+        return None
 
 @router.get("/usage", response_model=UsageStats)
 async def get_usage_stats(current_user: dict = Depends(get_current_user)):
