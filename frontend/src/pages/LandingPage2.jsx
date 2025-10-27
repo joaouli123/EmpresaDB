@@ -433,7 +433,7 @@ const LandingPage2 = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={16} />
-            <span>Dados mais recentes do Brasil • Atualização diária</span>
+            <span>Dados mais recentes do Brasil • Atualização mensal</span>
           </div>
 
           <h1 className="hero-title">
@@ -647,8 +647,8 @@ const LandingPage2 = () => {
             <Clock size={48} style={{ color: 'var(--primary)', margin: '0 auto 16px' }} />
             <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Dados Totalmente Atualizados</h3>
             <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
-              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha 
-              acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
+              Nossa base é sincronizada <strong>mensalmente</strong> com a Receita Federal, garantindo que você sempre tenha 
+              acesso às informações mais recentes sobre empresas brasileiras conforme disponibilizado pela RF.
             </p>
           </div>
         </div>
