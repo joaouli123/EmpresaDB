@@ -15,3 +15,4 @@ email-validator
 tarsafe
 passlib
 redis
+stripe
