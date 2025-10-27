@@ -439,7 +439,7 @@ const LandingPage2 = () => {
           <h1 className="hero-title">
             Acesso Completo aos Dados
             <br />
-            <span className="gradient-text">Atualizados de CNPJ</span>
+            <span className="gradient-text">Oficiais de CNPJ</span>
           </h1>
 
           <p className="hero-description">
