@@ -47,13 +47,13 @@ const LandingPage2 = () => {
       name: 'Free',
       priceMonthly: '0',
       priceYearly: '0',
-      queries: '200',
+      queries: '100',
       description: 'Teste grátis, sem cartão',
       features: [
-        '200 consultas/mês',
+        '100 consultas/mês',
         'Consulta básica por CNPJ',
-        'Dados atualizados da Receita',
-        'Documentação completa',
+        'Dados atualizados mensalmente',
+        'Documentação da API',
         'Rate limit: 10 req/min'
       ],
       popular: false,
@@ -69,14 +69,14 @@ const LandingPage2 = () => {
       description: 'Para começar pequeno',
       features: [
         '10.000 consultas/mês',
-        'Filtros avançados (33 filtros disponíveis)',
-        'Dashboard com estatísticas e gráficos',
+        'Consulta por CNPJ completa',
+        'Filtros avançados (CNAE, UF, município, etc)',
+        'Dashboard com estatísticas',
         'Exportação CSV/Excel',
-        'Logs detalhados de uso',
-        'Documentação completa',
+        'Logs detalhados de consultas',
+        'Documentação da API',
         'Suporte por email',
-        'Rate limit: 60 req/min',
-        'SLA 95% uptime'
+        'Rate limit: 60 req/min'
       ],
       popular: false,
       badge: null,
@@ -91,15 +91,14 @@ const LandingPage2 = () => {
       description: 'Melhor custo-benefício',
       features: [
         '100.000 consultas/mês',
-        'Filtros avançados (33 filtros disponíveis)',
-        'Cache Redis - respostas ultra-rápidas',
-        'Dashboard com estatísticas e gráficos',
+        'Todos os filtros avançados (33+)',
+        'Cache Redis para máxima performance',
+        'Dashboard completo com gráficos',
         'Exportação CSV/Excel em lote',
-        'Logs detalhados de uso',
-        'Documentação completa',
-        'Suporte prioritário (24h)',
-        'Rate limit: 300 req/min',
-        'SLA 98% uptime'
+        'Logs detalhados e histórico',
+        'Documentação completa da API',
+        'Suporte prioritário',
+        'Rate limit: 300 req/min'
       ],
       popular: true,
       badge: 'Mais Popular',
@@ -114,16 +113,17 @@ const LandingPage2 = () => {
       description: 'Para alto volume',
       features: [
         '500.000 consultas/mês',
-        'Filtros avançados (CNAEs, sócios, endereço, etc...)',
-        'Dashboard com estatísticas',
+        'Todos os filtros avançados',
+        'Cache Redis dedicado',
+        'Dashboard completo e customizável',
+        'Exportação em lote otimizada',
+        'API com alta disponibilidade',
         'Documentação completa',
-        'Cache Redis para máxima performance',
-        'Suporte prioritário (24h)',
-        'Rate limit: 1000 req/min',
-        'SLA 99.9% uptime'
+        'Suporte prioritário',
+        'Rate limit: 1000 req/min'
       ],
       popular: false,
-      badge: 'Melhor Valor',
+      badge: 'Alto Volume',
       highlight: 'R$ 0,0016 por consulta'
     },
     {
@@ -157,32 +157,32 @@ const LandingPage2 = () => {
     {
       icon: <Database size={32} />,
       title: 'Dados Completos da Receita Federal',
-      description: 'Acesso a 54M+ empresas, 64M+ estabelecimentos e 26M+ sócios. Base atualizada mensalmente pela RF'
+      description: 'Acesso a 54M+ empresas cadastradas, dados de estabelecimentos e QSA completo. Base sincronizada mensalmente com a RF'
     },
     {
       icon: <Zap size={32} />,
-      title: 'API Ultra Rápida - 45ms',
-      description: 'Consultas em milissegundos com cache Redis (Growth+) e infraestrutura otimizada PostgreSQL'
+      title: 'Performance Otimizada',
+      description: 'Consultas rápidas com cache Redis nos planos Growth+ e infraestrutura PostgreSQL otimizada'
     },
     {
       icon: <Shield size={32} />,
       title: '100% Seguro e Confiável',
-      description: 'Dados oficiais da Receita Federal com autenticação JWT, rate limiting e conformidade LGPD'
+      description: 'Dados oficiais da RF, autenticação JWT por API Key, rate limiting inteligente e conformidade LGPD'
     },
     {
       icon: <Search size={32} />,
-      title: '33 Filtros Avançados',
-      description: 'CNAE, UF, município, situação cadastral, razão social, nome fantasia, porte, natureza jurídica e mais'
+      title: 'Filtros Avançados',
+      description: 'Busque por CNAE, UF, município, situação cadastral, razão social, nome fantasia, porte e natureza jurídica'
     },
     {
       icon: <TrendingUp size={32} />,
-      title: 'Dashboard com Analytics',
-      description: 'Gráficos em tempo real, estatísticas de uso, logs detalhados e insights para seu negócio'
+      title: 'Dashboard Completo',
+      description: 'Gráficos em tempo real, estatísticas de uso diário/mensal, logs detalhados de todas as consultas'
     },
     {
       icon: <BarChart3 size={32} />,
-      title: 'Exportação em Lote',
-      description: 'Exporte resultados em CSV/Excel, dados estruturados em JSON prontos para análise'
+      title: 'Exportação de Dados',
+      description: 'Exporte resultados em CSV/Excel ou JSON estruturado, pronto para análise e integração'
     }
   ];
 
@@ -450,8 +450,8 @@ const LandingPage2 = () => {
 
           <p className="hero-description">
             API profissional com dados oficiais da Receita Federal atualizados mensalmente. 
-            Consulte 54M+ empresas, 64M+ estabelecimentos e QSA completo com 33 filtros avançados. 
-            Integração em minutos, respostas em 45ms e dados 100% confiáveis para seu negócio.
+            Consulte 54M+ empresas cadastradas, estabelecimentos e QSA completo com filtros avançados. 
+            Integração simples via REST API, performance otimizada e dados 100% confiáveis.
           </p>
 
           <div className="hero-cta">
@@ -474,16 +474,16 @@ const LandingPage2 = () => {
               <div className="stat-label">Empresas</div>
             </div>
             <div className="stat">
-              <div className="stat-number">64M+</div>
-              <div className="stat-label">Estabelecimentos</div>
+              <div className="stat-number">100%</div>
+              <div className="stat-label">Dados Oficiais RF</div>
             </div>
             <div className="stat">
-              <div className="stat-number">26M+</div>
-              <div className="stat-label">Sócios (QSA)</div>
+              <div className="stat-number">33+</div>
+              <div className="stat-label">Filtros Avançados</div>
             </div>
             <div className="stat">
-              <div className="stat-number">45ms</div>
-              <div className="stat-label">Tempo Resposta</div>
+              <div className="stat-number">API</div>
+              <div className="stat-label">REST Simples</div>
             </div>
           </div>
         </div>
@@ -948,10 +948,10 @@ const LandingPage2 = () => {
                 <td style={{ padding: '16px', textAlign: 'center' }}>✅ Completa</td>
               </tr>
               <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Dados Enriquecidos (QSA + CNAEs)</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>❌</td>
+                <td style={{ padding: '16px', fontWeight: '600' }}>Consulta QSA (Quadro de Sócios)</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
+                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅</td>
                 <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
                 <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
               </tr>
