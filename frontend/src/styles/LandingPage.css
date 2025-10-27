@@ -62,7 +62,7 @@
     outline: none !important;
     box-sizing: border-box;
   }
-  
+
   .navbar-content * {
     border: none !important;
     outline: none !important;
@@ -1602,5 +1602,41 @@ body {
     right: 20px;
     width: 56px;
     height: 56px;
+  }
+}
+
+/* Tablets e menores (max-width: 1024px) */
+@media (max-width: 1024px) {
+  /* Navbar */
+  .navbar-content {
+    margin: 16px 20px 0;
+    padding: 12px 20px;
+    gap: 20px;
+  }
+
+  .navbar-links {
+    gap: 16px;
+  }
+
+  .navbar-links a {
+    font-size: 14px;
+  }
+
+  /* Hero */
+  .hero-section {
+    padding: 140px 20px 60px;
+    min-height: auto;
+  }
+
+  .hero-title {
+    font-size: 48px;
+  }
+
+  .hero-description {
+    font-size: 18px;
+  }
+
+  .hero-badge {
+    margin-top: 60px;
   }
 }
