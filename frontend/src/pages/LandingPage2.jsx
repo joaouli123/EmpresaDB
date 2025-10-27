@@ -813,7 +813,11 @@ const LandingPage2 = () => {
                 ))}
               </ul>
 
-              <a href={plan.id === 'enterprise' ? '#contact' : plan.id === 'free' ? '/login' : '#pricing'}>
+              <a href={
+                plan.id === 'enterprise' ? '#contact' : 
+                plan.id === 'free' ? '/login?plan=free' : 
+                `/login?plan=${plan.id}`
+              }>
                 <button className={`btn-plan ${plan.popular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
                   {plan.id === 'enterprise' ? (
                     <>

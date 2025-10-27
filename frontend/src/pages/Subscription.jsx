@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { 
   CreditCard, 
@@ -15,14 +16,23 @@ import {
 import './Subscription.css';
 
 const Subscription = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [subscription, setSubscription] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
+    const success = searchParams.get('success');
+    if (success === 'true') {
+      setShowSuccessMessage(true);
+      searchParams.delete('success');
+      setSearchParams(searchParams);
+      setTimeout(() => setShowSuccessMessage(false), 8000);
+    }
     loadData();
   }, []);
 
@@ -109,6 +119,34 @@ const Subscription = () => {
     );
   }
 
+  const renderSuccessMessage = () => {
+    if (!showSuccessMessage) return null;
+    
+    return (
+      <div style={{
+        padding: '20px',
+        backgroundColor: '#10b981',
+        color: 'white',
+        borderRadius: '12px',
+        marginBottom: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+      }}>
+        <Check size={28} />
+        <div>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
+            🎉 Assinatura realizada com sucesso!
+          </h3>
+          <p style={{ margin: '4px 0 0 0', fontSize: '14px', opacity: 0.9 }}>
+            Bem-vindo! Sua assinatura já está ativa e você pode começar a usar agora mesmo.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <div className="subscription-empty">
@@ -161,6 +199,8 @@ const Subscription = () => {
         <h1>Minha Assinatura</h1>
         <p>Gerencie seu plano, pagamentos e histórico</p>
       </div>
+
+      {renderSuccessMessage()}
 
       {/* Plano Ativo */}
       <div className="subscription-card">

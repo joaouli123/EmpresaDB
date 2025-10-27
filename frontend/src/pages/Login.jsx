@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Database, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { api } from '../services/api';
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
@@ -14,6 +16,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const planParam = searchParams.get('plan');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +29,36 @@ const Login = () => {
         : await register(formData);
 
       if (result.success) {
+        if (planParam && planParam !== 'free') {
+          const planIds = {
+            'start': 2,
+            'growth': 3,
+            'pro': 4
+          };
+          
+          const planId = planIds[planParam];
+          
+          if (planId) {
+            try {
+              const checkoutResponse = await api.post('/stripe/create-checkout-session', {
+                plan_id: planId,
+                success_url: `${window.location.origin}/subscription?success=true`,
+                cancel_url: `${window.location.origin}/pricing?canceled=true`
+              });
+              
+              if (checkoutResponse.data.url) {
+                window.location.href = checkoutResponse.data.url;
+                return;
+              }
+            } catch (checkoutError) {
+              console.error('Erro ao criar checkout:', checkoutError);
+              setError('Erro ao iniciar pagamento. Redirecionando para dashboard...');
+              setTimeout(() => navigate('/dashboard'), 2000);
+              return;
+            }
+          }
+        }
+        
         navigate('/dashboard');
       } else {
         setError(result.error);
@@ -41,6 +74,13 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const planNames = {
+    'free': 'Free',
+    'start': 'Start',
+    'growth': 'Growth',
+    'pro': 'Pro'
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -49,6 +89,23 @@ const Login = () => {
           <h1>Sistema CNPJ</h1>
           <p>Consulta e Gestão de Dados da Receita Federal</p>
         </div>
+
+        {planParam && (
+          <div style={{
+            padding: '12px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            textAlign: 'center',
+            fontWeight: '500'
+          }}>
+            {planParam === 'free' 
+              ? '🎉 Plano Free selecionado - Comece grátis agora!'
+              : `✨ Plano ${planNames[planParam]} selecionado - Faça login para continuar o pagamento`
+            }
+          </div>
+        )}
 
         <div className="login-tabs">
           <button
