@@ -19,8 +19,8 @@
 @media (max-width: 991px) {
   .floating-navbar {
     position: relative;
-    padding-top: 20px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    padding-top: 0;
+    background: transparent;
   }
 }
 
@@ -43,13 +43,14 @@
 /* Mobile: navbar mais compacto */
 @media (max-width: 991px) {
   .navbar-content {
-    margin: 0 16px;
+    margin: 16px 16px 0;
     padding: 14px 20px;
     border-radius: 16px;
     gap: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba(255, 255, 255, 0.95);
   }
 }
 
@@ -304,7 +305,7 @@
 /* Mobile: hero sem padding superior (header já não sobrepõe) */
 @media (max-width: 991px) {
   .hero-section {
-    padding: 20px 20px 40px;
+    padding: 12px 20px 40px;
     min-height: auto;
     margin-top: 0;
   }
@@ -347,8 +348,8 @@
 /* Mobile: reduzir espaçamento drasticamente */
 @media (max-width: 991px) {
   .hero-badge {
-    margin-top: 8px;
-    margin-bottom: 20px;
+    margin-top: 4px;
+    margin-bottom: 16px;
     font-size: 12px;
     padding: 6px 16px;
   }
