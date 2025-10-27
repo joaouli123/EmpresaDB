@@ -1,16 +1,84 @@
-# React + Vite
+# Frontend - Sistema CNPJ API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## ⚠️ Configuração CRÍTICA para Replit
 
-Currently, two official plugins are available:
+**Este frontend foi projetado para rodar no Replit com um proxy automático.**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Configuração Obrigatória
 
-## React Compiler
+O arquivo `.env` **DEVE** estar assim:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+VITE_API_URL=
+```
 
-## Expanding the ESLint configuration
+**❌ NUNCA faça isso no Replit:**
+```bash
+VITE_API_URL=http://localhost:8000
+VITE_API_URL=https://seu-dominio.replit.dev:8000
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Por quê?
+
+No Replit, **apenas a porta 5000 é acessível externamente**. A porta 8000 (backend) só é acessível internamente.
+
+O arquivo `vite.config.js` já tem um **proxy configurado** que automaticamente encaminha:
+- `/auth/*` → Backend (porta 8000)
+- `/api/*` → Backend (porta 8000)
+- `/cnpj/*` → Backend (porta 8000)
+- `/search` → Backend (porta 8000)
+- `/stats` → Backend (porta 8000)
+- etc.
+
+### Instalação
+
+```bash
+npm install
+```
+
+### Desenvolvimento (Replit)
+
+O workflow já está configurado. Se precisar rodar manualmente:
+
+```bash
+npm run dev
+```
+
+O servidor inicia na porta 5000 e o proxy encaminha automaticamente as requisições ao backend.
+
+### Build para Produção
+
+```bash
+npm run build
+```
+
+### Estrutura
+
+```
+frontend/
+├── .env              # Config (DEVE estar vazio no Replit)
+├── .env.example      # Exemplo com instruções
+├── vite.config.js    # Proxy automático (NÃO MODIFICAR)
+├── src/
+│   ├── contexts/     # Auth e outros contextos
+│   ├── pages/        # Páginas da aplicação
+│   ├── services/     # API client (axios)
+│   └── components/   # Componentes reutilizáveis
+└── package.json
+```
+
+### Solução de Problemas
+
+**Login retorna "Network Error":**
+1. Verifique se `.env` tem `VITE_API_URL=` (vazio)
+2. Reinicie o frontend
+3. Limpe o cache do navegador
+
+**Backend não responde:**
+1. Verifique se o workflow "Backend API" está rodando
+2. Verifique os logs do backend
+3. Confirme que o banco de dados está acessível
+
+---
+
+Para mais detalhes, veja `REPLIT_SETUP.md` na raiz do projeto.

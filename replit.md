@@ -7,6 +7,7 @@ This project is an ETL system and REST API designed for querying public CNPJ dat
 ## User Preferences
 
 - **Database Configuration**: The PostgreSQL database on the VPS (72.61.217.143:5432/cnpj_db) is the only database to be used. The `DATABASE_URL` in the `.env` file must always point to this VPS. All data (CNPJ, users, API keys, logs) is centralized on the VPS.
+- **Replit Configuration (CRITICAL)**: The `frontend/.env` file MUST have `VITE_API_URL=` (empty string). NEVER set a URL in this variable on Replit. The Vite proxy (configured in `vite.config.js`) automatically routes all API requests to the backend on port 8000. Accessing port 8000 directly via external URL will fail on Replit.
 - **Frontend Interaction**: Third-party companies should use the frontend normally (registration -> login -> generate API key). The admin can use either the frontend or a Python script to create users.
 - **ETL Configuration**: `chunk_size` and `max_workers` for ETL processing should be dynamically adjustable via the admin interface.
 - **Security**: Hardcoded credentials must be removed from the codebase and managed via `.env` files. `SECRET_KEY` must be mandatory, at least 32 characters long, and validated at startup. CORS origins must be configurable.
