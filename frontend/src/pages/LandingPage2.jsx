@@ -69,8 +69,8 @@ const LandingPage2 = () => {
       description: 'Para começar pequeno',
       features: [
         '10.000 consultas/mês',
-        'Consulta por CNPJ completa',
-        'Filtros avançados (CNAE, UF, município, etc)',
+        'Consulta completa por CNPJ',
+        'Acesso a todos os dados cadastrais',
         'Dashboard com estatísticas',
         'Exportação CSV/Excel',
         'Logs detalhados de consultas',
@@ -91,7 +91,7 @@ const LandingPage2 = () => {
       description: 'Melhor custo-benefício',
       features: [
         '100.000 consultas/mês',
-        'Todos os filtros avançados (33+)',
+        'Acesso a 33+ campos de dados',
         'Cache Redis para máxima performance',
         'Dashboard completo com gráficos',
         'Exportação CSV/Excel em lote',
@@ -113,7 +113,7 @@ const LandingPage2 = () => {
       description: 'Para alto volume',
       features: [
         '500.000 consultas/mês',
-        'Todos os filtros avançados',
+        'Acesso completo a todos os dados',
         'Cache Redis dedicado',
         'Dashboard completo e customizável',
         'Exportação em lote otimizada',
@@ -135,7 +135,7 @@ const LandingPage2 = () => {
       description: 'Solução corporativa completa',
       features: [
         'Consultas ilimitadas',
-        'Filtros avançados (33+ filtros)',
+        'Acesso completo a todos os dados',
         'Cache Redis dedicado',
         'Dashboard personalizado',
         'Exportação em lote otimizada',
@@ -171,8 +171,8 @@ const LandingPage2 = () => {
     },
     {
       icon: <Search size={32} />,
-      title: 'Filtros Avançados',
-      description: 'Busque por CNAE, UF, município, situação cadastral, razão social, nome fantasia, porte e natureza jurídica'
+      title: 'Consultas Avançadas',
+      description: 'Busque empresas por CNPJ, CNAE, UF, município, situação cadastral, razão social, nome fantasia, porte e natureza jurídica'
     },
     {
       icon: <TrendingUp size={32} />,
@@ -307,17 +307,17 @@ const LandingPage2 = () => {
     {
       icon: <MapPin size={24} />,
       title: 'Localização',
-      description: 'Filtre por estado (UF) e município específico'
+      description: 'Estado (UF) e município da empresa'
     },
     {
       icon: <Filter size={24} />,
       title: 'CNAE',
-      description: 'Busque por atividade econômica principal'
+      description: 'Atividade econômica principal e secundárias'
     },
     {
       icon: <Calendar size={24} />,
       title: 'Data de Abertura',
-      description: 'Encontre empresas por período de constituição'
+      description: 'Data de constituição da empresa'
     },
     {
       icon: <FileCheck size={24} />,
@@ -327,12 +327,12 @@ const LandingPage2 = () => {
     {
       icon: <Building2 size={24} />,
       title: 'Razão Social e Nome Fantasia',
-      description: 'Busca por texto no nome da empresa'
+      description: 'Nome completo e nome de fantasia'
     },
     {
       icon: <Users size={24} />,
-      title: 'E mais 26 Filtros Avançados',
-      description: 'Capital social, porte, endereço completo, regime tributário e muito mais'
+      title: 'E mais 26+ Campos',
+      description: 'Capital social, porte, endereço completo, QSA, regime tributário e muito mais'
     }
   ];
 
@@ -360,7 +360,7 @@ const LandingPage2 = () => {
       role: 'CEO, TechStart Consultoria',
       avatar: 'CS',
       rating: 5,
-      text: 'Transformou nossa prospecção B2B! Conseguimos identificar leads qualificados 3x mais rápido com os filtros avançados.'
+      text: 'Transformou nossa prospecção B2B! Conseguimos identificar e consultar leads qualificados 3x mais rápido com dados precisos da API.'
     },
     {
       name: 'Marina Costa',
@@ -450,7 +450,7 @@ const LandingPage2 = () => {
 
           <p className="hero-description">
             API profissional com dados oficiais da Receita Federal atualizados mensalmente. 
-            Consulte 54M+ empresas cadastradas, estabelecimentos e QSA completo com filtros avançados. 
+            Consulte 54M+ empresas cadastradas, estabelecimentos e QSA completo. 
             Integração simples via REST API, performance otimizada e dados 100% confiáveis.
           </p>
 
@@ -479,7 +479,7 @@ const LandingPage2 = () => {
             </div>
             <div className="stat">
               <div className="stat-number">33+</div>
-              <div className="stat-label">Filtros Avançados</div>
+              <div className="stat-label">Campos de Dados</div>
             </div>
             <div className="stat">
               <div className="stat-number">API</div>
@@ -559,8 +559,8 @@ const LandingPage2 = () => {
       {/* Advanced Filters Section */}
       <section id="filters" className="benefits-section filters-section">
         <div className="section-header">
-          <h2>Filtros Poderosos Para Sua Busca</h2>
-          <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
+          <h2>Dados Detalhados Disponíveis</h2>
+          <p>Acesse informações completas sobre qualquer empresa através da nossa API</p>
         </div>
 
         <div className="benefits-grid">
@@ -575,10 +575,10 @@ const LandingPage2 = () => {
 
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
           <p style={{ color: 'var(--gray)', fontSize: '18px', marginBottom: '24px' }}>
-            <strong>Combine múltiplos filtros</strong> para encontrar seu público-alvo perfeito
+            <strong>Todos os dados</strong> que você precisa em uma única consulta
           </p>
           <button className="btn-primary-large">
-            Ver Todos os Filtros Disponíveis
+            Ver Documentação Completa
             <ChevronRight size={20} />
           </button>
         </div>
@@ -671,162 +671,11 @@ const LandingPage2 = () => {
         </div>
       </section>
 
-      {/* Lookalike/Meta Ads Section */}
-      <section id="marketing" className="lookalike-section">
-        <div className="section-header">
-          <h2>Potencialize Suas Campanhas com Públicos Lookalike</h2>
-          <p>Use nossos dados para criar audiências personalizadas no Meta Ads e treinar a inteligência artificial para encontrar clientes ideais</p>
-        </div>
-
-        <div className="benefits-grid" style={{ marginBottom: '48px' }}>
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Target size={32} />
-            </div>
-            <h3>Público-Alvo Preciso</h3>
-            <p>Exporte listas segmentadas de CNPJs para criar audiências personalizadas (Custom Audiences) no Facebook e Instagram Ads</p>
-          </div>
-
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Brain size={32} />
-            </div>
-            <h3>Treinar a IA do Meta</h3>
-            <p>Alimente o algoritmo com dados precisos de empresas similares ao seu cliente ideal, melhorando drasticamente a performance das campanhas</p>
-          </div>
-
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Sparkles size={32} />
-            </div>
-            <h3>Lookalike Inteligente</h3>
-            <p>A partir da sua lista de CNPJs, o Meta cria públicos semelhantes (Lookalike Audiences) com milhões de prospects qualificados</p>
-          </div>
-        </div>
-
-        <div style={{ 
-          background: 'white', 
-          padding: '40px', 
-          borderRadius: '20px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.1)',
-          border: '2px solid #fbbf24'
-        }}>
-          <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--dark)', marginBottom: '16px', textAlign: 'center' }}>
-            Como Funciona na Prática
-          </h3>
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>1</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Filtre empresas do seu nicho</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Use nossa API para buscar CNPJs por CNAE, localização, porte e situação cadastral</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>2</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Exporte e carregue no Meta Ads</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Crie uma Custom Audience com os CNPJs das empresas-alvo no Gerenciador de Anúncios</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>3</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Deixe a IA do Meta trabalhar</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>O algoritmo analisa padrões e encontra empresas similares, expandindo seu alcance com precisão</p>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ 
-            marginTop: '32px', 
-            padding: '20px', 
-            background: 'linear-gradient(135deg, #fef3c7, #fde68a)', 
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <p style={{ color: '#78350f', fontWeight: '600', margin: 0 }}>
-              💡 <strong>Resultado:</strong> Campanhas mais eficientes, menor CPA e melhor ROI nas suas estratégias de marketing digital
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="pricing" className="pricing-section">
         <div className="section-header">
           <h2>Planos Que Cabem no Seu Bolso</h2>
           <p>Escolha o plano ideal para seu negócio. Sem taxas escondidas, cancele quando quiser</p>
-        </div>
-
-        {/* NOTA DE TRANSPARÊNCIA - 100% FUNCIONAL */}
-        <div style={{ 
-          background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)', 
-          border: '3px solid #10b981',
-          padding: '24px', 
-          borderRadius: '16px',
-          marginBottom: '32px',
-          maxWidth: '1000px',
-          margin: '0 auto 32px auto',
-          boxShadow: '0 8px 30px rgba(16, 185, 129, 0.3)'
-        }}>
-          <h3 style={{ 
-            color: '#065f46', 
-            fontSize: '20px', 
-            fontWeight: '800', 
-            marginBottom: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            ✅ Sistema 100% Funcional e em Produção
-          </h3>
-          <p style={{ color: '#065f46', fontSize: '16px', margin: '0 0 12px 0', lineHeight: '1.6' }}>
-            <strong>Recursos Ativos:</strong> Consultas por CNPJ em 45ms, 33 filtros avançados (CNAE, UF, município, situação, razão social, etc), 
-            QSA completo com dados de todos os sócios, CNAEs secundários, exportação CSV/Excel, dashboard com gráficos e estatísticas em tempo real, 
-            logs detalhados de todas as consultas, Rate Limit por plano e Cache Redis (Growth+ e Pro) para máxima performance!
-          </p>
-          <p style={{ color: '#047857', fontSize: '16px', margin: 0, lineHeight: '1.6' }}>
-            <strong>💡 Garantia:</strong> Todos os recursos listados estão ativos, testados e prontos para uso em produção. 
-            Dados oficiais da Receita Federal atualizados mensalmente com 54M+ empresas e 26M+ sócios cadastrados.
-          </p>
         </div>
 
         <div className="billing-toggle">
@@ -929,115 +778,6 @@ const LandingPage2 = () => {
               </a>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Comparison Table Section */}
-      <section className="benefits-section" style={{ background: '#f9fafb', padding: '80px 20px' }}>
-        <div className="section-header">
-          <h2>Comparação Detalhada de Recursos</h2>
-          <p>Veja todos os recursos incluídos em cada plano</p>
-        </div>
-
-        <div style={{ maxWidth: '1200px', margin: '0 auto', overflowX: 'auto' }}>
-          <table style={{ 
-            width: '100%', 
-            borderCollapse: 'collapse', 
-            background: 'white',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-          }}>
-            <thead>
-              <tr style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white' }}>
-                <th style={{ padding: '20px', textAlign: 'left', fontWeight: '700' }}>Recurso / Plano</th>
-                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Free</th>
-                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Start</th>
-                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700', background: 'rgba(251, 191, 36, 0.3)' }}>Growth</th>
-                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Pro</th>
-                <th style={{ padding: '20px', textAlign: 'center', fontWeight: '700' }}>Enterprise</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Consultas/mês</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>200</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>10.000</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>100.000</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>500.000</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>Personalizado</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Pesquisa avançada</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>Básica</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅ Completa</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Completa</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Completa</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Consulta QSA (Quadro de Sócios)</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Exportação CSV/Excel</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅ Bulk</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Bulk</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅ Bulk</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Logs & Dashboard</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Cache Redis (desempenho)</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>❌</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>✅</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>SLA Uptime</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>–</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>95%</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>98%</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>99.9%</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>Custom</td>
-              </tr>
-              <tr style={{ background: '#f9fafb' }}>
-                <td style={{ padding: '16px', fontWeight: '600' }}>Suporte</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>E-mail</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>E-mail</td>
-                <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>Prioritário</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>Premium</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>Dedicado 24/7</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <p style={{ color: 'var(--gray)', fontSize: '16px', marginBottom: '24px' }}>
-            💡 <strong>Dica:</strong> O plano Growth oferece o melhor custo-benefício para a maioria das empresas 
-            com Cache Redis para máxima performance!
-          </p>
-          <a href="#pricing">
-            <button className="btn-primary-large">
-              Ver Todos os Planos
-              <ChevronRight size={20} />
-            </button>
-          </a>
         </div>
       </section>
 
