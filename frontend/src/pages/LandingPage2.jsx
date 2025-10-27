@@ -510,7 +510,7 @@ const LandingPage2 = () => {
           <div className="hero-cta">
             <a href="#pricing">
               <button className="btn-primary-large btn-hero-primary">
-                Começar Agora
+                Teste gratuitamente
                 <ChevronRight size={20} />
               </button>
             </a>
