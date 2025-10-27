@@ -48,10 +48,10 @@ const LandingPage2 = () => {
       name: 'Free',
       priceMonthly: '0',
       priceYearly: '0',
-      queries: '100',
+      queries: '200',
       description: 'Teste grátis, sem cartão',
       features: [
-        '100 consultas/mês',
+        '200 consultas/mês',
         'Consulta completa por CNPJ',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
