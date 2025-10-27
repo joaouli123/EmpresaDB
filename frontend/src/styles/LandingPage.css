@@ -295,18 +295,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px 20px 80px;
+  padding: 80px 20px 80px;
   position: relative;
   overflow: hidden;
-  margin-top: -40px;
+  margin-top: -20px;
 }
 
 /* Mobile: hero sem padding superior (header já não sobrepõe) */
 @media (max-width: 991px) {
   .hero-section {
-    padding: 40px 20px 60px;
+    padding: 30px 20px 60px;
     min-height: auto;
-    margin-top: -20px;
+    margin-top: -10px;
   }
 }
 
