@@ -69,70 +69,104 @@ async def verify_api_key(x_api_key: str = Header(None)):
             detail="API Key inválida ou expirada"
         )
 
-    # VERIFICAÇÃO DE ASSINATURA ATIVA
-    # Buscar assinatura do usuário
+    # VERIFICAÇÃO DE ASSINATURA ATIVA (apenas Stripe Subscriptions)
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT 
-                    ss.status,
-                    ss.current_period_end,
-                    ss.cancel_at_period_end,
-                    p.name as plan_name,
-                    p.monthly_queries
-                FROM clientes.stripe_subscriptions ss
-                JOIN clientes.plans p ON ss.plan_id = p.id
-                WHERE ss.user_id = %s 
-                    AND ss.status IN ('active', 'trialing')
-                    AND ss.current_period_end > NOW()
-                ORDER BY ss.created_at DESC
-                LIMIT 1
-            """, (user['id'],))
-            subscription = cursor.fetchone()
-            cursor.close()
             
-            # Se não tem assinatura ativa, verificar se tem plano free
-            if not subscription:
-                # Verificar se usuário está no plano free (sempre permitido)
-                cursor = conn.cursor()
+            try:
+                # Buscar assinatura do usuário no Stripe
+                # Aceita 'active', 'trialing' OU 'canceled' se ainda dentro do período pago
                 cursor.execute("""
-                    SELECT p.name 
-                    FROM clientes.subscriptions s
-                    JOIN clientes.plans p ON s.plan_id = p.id
-                    WHERE s.user_id = %s AND s.status = 'active'
+                    SELECT 
+                        ss.status,
+                        ss.current_period_end,
+                        ss.cancel_at_period_end,
+                        p.name as plan_name,
+                        p.monthly_queries,
+                        p.id as plan_id
+                    FROM clientes.stripe_subscriptions ss
+                    JOIN clientes.plans p ON ss.plan_id = p.id
+                    WHERE ss.user_id = %s 
+                        AND ss.current_period_end > NOW()
+                        AND ss.status IN ('active', 'trialing', 'canceled')
+                    ORDER BY ss.created_at DESC
+                    LIMIT 1
                 """, (user['id'],))
-                free_plan = cursor.fetchone()
-                cursor.close()
+                subscription = cursor.fetchone()
                 
-                if not free_plan or free_plan[0] != 'free':
-                    # Não tem assinatura ativa e não está no plano free
+                # Se não tem assinatura válida, bloquear acesso
+                if not subscription:
                     raise HTTPException(
                         status_code=403,
                         detail={
                             "error": "subscription_required",
-                            "message": "Sua assinatura expirou ou não foi renovada. Por favor, renove sua assinatura para continuar usando a API.",
+                            "message": "Você não possui uma assinatura ativa. Por favor, assine um plano para usar a API.",
                             "action_url": "/pricing"
                         }
                     )
-                # Se está no free, deixa continuar com plano free
-                user['plan'] = 'free'
-                user['monthly_queries'] = 200
-            else:
-                # Tem assinatura ativa
+                
+                # Tem assinatura válida (ainda dentro do período pago)
                 user['plan'] = subscription[3]  # plan_name
                 user['monthly_queries'] = subscription[4]  # monthly_queries
+                plan_id = subscription[5]
                 
-                # Verificar se está marcada para cancelar
-                if subscription[2]:  # cancel_at_period_end
+                # Avisar se está cancelada mas ainda ativa
+                if subscription[0] == 'canceled':
+                    logger.info(f"Usuário {user['id']} tem assinatura cancelada mas ainda válida até {subscription[1]}")
+                elif subscription[2]:  # cancel_at_period_end
                     logger.info(f"Usuário {user['id']} tem assinatura marcada para cancelar no final do período")
+                
+                # VERIFICAÇÃO DE LIMITE MENSAL DE CONSULTAS
+                month_year = datetime.now().strftime('%Y-%m')
+                cursor.execute("""
+                    SELECT queries_used 
+                    FROM clientes.monthly_usage
+                    WHERE user_id = %s AND month_year = %s
+                """, (user['id'], month_year))
+                usage = cursor.fetchone()
+                
+                queries_used = usage[0] if usage else 0
+                
+                # Verificar se excedeu o limite
+                if queries_used >= user['monthly_queries']:
+                    raise HTTPException(
+                        status_code=429,
+                        detail={
+                            "error": "monthly_limit_exceeded",
+                            "message": f"Você atingiu o limite mensal de {user['monthly_queries']} consultas. Por favor, aguarde a renovação ou faça upgrade do seu plano.",
+                            "queries_used": queries_used,
+                            "monthly_limit": user['monthly_queries'],
+                            "action_url": "/pricing"
+                        }
+                    )
+                
+                # Incrementar contador de uso mensal
+                cursor.execute("""
+                    INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
+                    VALUES (%s, %s, 1, NOW())
+                    ON CONFLICT (user_id, month_year) 
+                    DO UPDATE SET 
+                        queries_used = clientes.monthly_usage.queries_used + 1,
+                        last_query_at = NOW()
+                """, (user['id'], month_year))
+                
+                # Armazenar informações de uso para logging
+                user['queries_used'] = queries_used + 1  # Incluir esta consulta
+                user['queries_remaining'] = user['monthly_queries'] - (queries_used + 1)
+                
+            finally:
+                # Garantir que cursor sempre seja fechado
+                cursor.close()
     
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Erro ao verificar assinatura: {e}")
-        # Em caso de erro na verificação, permitir acesso mas logar
-        user['plan'] = 'free'
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao verificar assinatura. Por favor, tente novamente."
+        )
 
     # Aplicar rate limiting baseado no plano do usuário
     user_plan = user.get('plan', 'free')

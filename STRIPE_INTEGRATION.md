@@ -4,14 +4,17 @@
 
 Este sistema implementa integração completa com Stripe para gerenciar pagamentos recorrentes, assinaturas e controle de acesso à API baseado em planos.
 
+**🎉 ATUALIZAÇÃO 2025-10-27:** Sistema migrado para usar **APENAS** `stripe_subscriptions`. Tabela antiga `subscriptions` foi deprecada e renomeada para `subscriptions_legacy` (mantida apenas para histórico).
+
 ## 🎯 Funcionalidades Implementadas
 
 ### 1. **Planos de Assinatura**
-- ✅ Free (200 consultas/mês) - Sem pagamento
 - ✅ Start (10.000 consultas/mês) - R$ 79,90/mês
 - ✅ Growth (100.000 consultas/mês) - R$ 249,90/mês
 - ✅ Pro (500.000 consultas/mês) - R$ 799,90/mês
 - ❌ Enterprise (customizado) - Contato comercial (não integrado com Stripe)
+
+**IMPORTANTE:** Todos os planos agora requerem assinatura Stripe ativa. Sem assinatura = acesso bloqueado.
 
 ### 2. **Fluxo de Pagamento**
 
@@ -35,20 +38,23 @@ O sistema implementa bloqueio automático em **3 camadas**:
 
 #### Camada 1: Verificação na API (verify_api_key)
 ```python
-# src/api/routes.py - linha 75-145
+# src/api/routes.py - linha 75-158
 async def verify_api_key(x_api_key: str = Header(None)):
     # 1. Verifica se API Key é válida
-    # 2. Busca assinatura ativa do usuário
-    # 3. Se não tem assinatura E não está no plano free → BLOQUEIA (HTTP 403)
-    # 4. Atualiza plano e limites do usuário
-    # 5. Aplica rate limiting baseado no plano
+    # 2. Busca assinatura ativa no Stripe (stripe_subscriptions)
+    # 3. Se não tem assinatura ativa → BLOQUEIA (HTTP 403)
+    # 4. Verifica limite mensal de consultas (monthly_usage)
+    # 5. Se excedeu limite → BLOQUEIA (HTTP 429)
+    # 6. Atualiza plano e limites do usuário
+    # 7. Aplica rate limiting baseado no plano
 ```
 
 **Critérios de Bloqueio:**
 - ❌ Assinatura expirada (current_period_end < NOW)
-- ❌ Status != 'active' ou 'trialing'
-- ❌ Sem assinatura no Stripe E sem plano free ativo
-- ✅ Plano free sempre permitido (200 consultas/mês)
+- ❌ Limite mensal de consultas excedido (queries_used >= monthly_queries)
+- ✅ Assinaturas canceladas continuam funcionando até o fim do período pago
+- ✅ Contador de consultas (`monthly_usage`) atualizado automaticamente a cada requisição
+- ✅ Apenas assinaturas Stripe válidas são permitidas
 
 #### Camada 2: Webhook Automático
 Quando assinatura é cancelada/expira, webhook do Stripe:
@@ -90,8 +96,11 @@ await api.post('/stripe/customer-portal');
 # .env ou Secrets do Replit
 STRIPE_SECRET_KEY=sk_test_xxx        # Secret Key do Stripe
 VITE_STRIPE_PUBLIC_KEY=pk_test_xxx   # Publishable Key do Stripe
-STRIPE_WEBHOOK_SECRET=whsec_xxx      # Webhook Signing Secret
+STRIPE_WEBHOOK_SECRET=whsec_xxx      # ⚠️ OBRIGATÓRIO em produção!
+ENVIRONMENT=production               # Define ambiente (development/production)
 ```
+
+**⚠️ IMPORTANTE:** `STRIPE_WEBHOOK_SECRET` é **OBRIGATÓRIO** em produção. Sem ele, webhooks serão rejeitados por segurança.
 
 ### 2. Configurar Webhook no Stripe
 
@@ -139,11 +148,17 @@ clientes.plans
 clientes.stripe_customers
   - user_id, stripe_customer_id, email
 
--- Assinaturas ativas
+-- ⭐ Assinaturas ativas (ÚNICA FONTE DE VERDADE)
 clientes.stripe_subscriptions
   - user_id, stripe_subscription_id, plan_id
   - status, current_period_start, current_period_end
   - cancel_at_period_end
+  - CONSTRAINT: Apenas 1 assinatura ativa por usuário
+
+-- Uso mensal de consultas
+clientes.monthly_usage
+  - user_id, month_year, queries_used
+  - last_query_at
 
 -- Faturas/Transações
 clientes.stripe_invoices
@@ -154,6 +169,10 @@ clientes.stripe_invoices
 clientes.stripe_webhook_events
   - stripe_event_id, event_type, event_data
   - processed, error_message
+
+-- ⚠️ DEPRECATED: Tabela antiga (apenas histórico)
+clientes.subscriptions_legacy
+  - NÃO USAR! Mantida apenas para referência histórica
 ```
 
 ### Views Úteis
@@ -224,8 +243,10 @@ stripe trigger checkout.session.completed
 
 ### 1. Validação de Webhook
 - ✅ Assinatura do webhook verificada com `STRIPE_WEBHOOK_SECRET`
+- ✅ **Webhook secret OBRIGATÓRIO em produção** (retorna HTTP 500 se ausente)
 - ✅ Eventos duplicados ignorados (ON CONFLICT)
 - ✅ Erros registrados no banco para auditoria
+- ✅ Cancelamento automático de assinaturas duplicadas (apenas 1 ativa por usuário)
 
 ### 2. Controle de Acesso
 - ✅ Endpoints de Stripe requerem autenticação (JWT token)
@@ -283,6 +304,56 @@ WHERE status = 'open' OR status = 'uncollectible';
 - Teste em modo de desenvolvimento do Stripe
 - Verifique console do navegador para erros
 
+## 🔄 Migração para Stripe-Only (2025-10-27)
+
+### O que mudou?
+
+**ANTES:**
+- Sistema mantinha 2 tabelas: `subscriptions` (antiga) e `stripe_subscriptions` (nova)
+- Webhook duplicava dados em ambas as tabelas
+- `verify_api_key` tinha fallback para tabela antiga
+- Permitia múltiplas assinaturas ativas por usuário
+- Webhook secret era opcional
+
+**DEPOIS:**
+- ✅ **Apenas `stripe_subscriptions`** é usada
+- ✅ Tabela antiga renomeada para `subscriptions_legacy`
+- ✅ Webhook atualiza apenas `stripe_subscriptions`
+- ✅ Constraint UNIQUE: apenas 1 assinatura ativa por usuário
+- ✅ Cancelamento automático de assinaturas duplicadas
+- ✅ Verificação de limite mensal implementada
+- ✅ Webhook secret obrigatório em produção
+
+### Executar Migração
+
+```bash
+# Executar script de migração
+psql $DATABASE_URL -f src/database/migrations/001_stripe_only_migration.sql
+
+# Verificar consistência
+psql $DATABASE_URL -c "SELECT * FROM clientes.check_subscription_consistency();"
+```
+
+### Verificações Pós-Migração
+
+```sql
+-- Verificar assinaturas ativas
+SELECT user_id, COUNT(*) 
+FROM clientes.stripe_subscriptions 
+WHERE status IN ('active', 'trialing') 
+GROUP BY user_id 
+HAVING COUNT(*) > 1;
+-- Resultado esperado: 0 linhas (nenhuma duplicata)
+
+-- Verificar tabela antiga foi renomeada
+SELECT tablename FROM pg_tables 
+WHERE schemaname = 'clientes' AND tablename LIKE 'subscriptions%';
+-- Deve mostrar: subscriptions_legacy
+
+-- Testar view atualizada
+SELECT * FROM clientes.active_subscriptions LIMIT 5;
+```
+
 ## 🚀 Próximos Passos
 
 - [ ] Adicionar métricas de conversão (funil de vendas)
@@ -294,8 +365,11 @@ WHERE status = 'open' OR status = 'uncollectible';
 
 ## 📝 Notas Importantes
 
-1. **Plano Free**: Sempre disponível, não requer pagamento
+1. **Assinatura Obrigatória**: Todos os usuários precisam de assinatura Stripe ativa
 2. **Enterprise**: Não integrado com Stripe, requer contato comercial
 3. **Teste vs Produção**: Use chaves de teste durante desenvolvimento
 4. **Segurança**: NUNCA commite chaves secretas no código
 5. **Webhooks**: Essenciais para funcionamento automático
+6. **Limite Mensal**: Sistema verifica `queries_used` a cada requisição
+7. **Única Assinatura**: Cada usuário pode ter apenas 1 assinatura ativa por vez
+8. **Migração**: Execute `001_stripe_only_migration.sql` para atualizar schema

@@ -45,6 +45,18 @@ async def handle_checkout_session_completed(event_data: dict):
             existing = cursor.fetchone()
             
             if not existing:
+                # Cancelar qualquer assinatura ativa anterior deste usuário
+                cursor.execute("""
+                    UPDATE clientes.stripe_subscriptions
+                    SET status = 'canceled',
+                        canceled_at = CURRENT_TIMESTAMP,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE user_id = %s 
+                        AND status IN ('active', 'trialing')
+                        AND stripe_subscription_id != %s
+                """, (user_id, subscription_id))
+                
+                # Criar nova assinatura
                 cursor.execute("""
                     INSERT INTO clientes.stripe_subscriptions (
                         user_id, stripe_subscription_id, stripe_customer_id,
@@ -61,33 +73,6 @@ async def handle_checkout_session_completed(event_data: dict):
                     datetime.fromtimestamp(subscription['current_period_end']),
                     subscription.get('cancel_at_period_end', False)
                 ))
-                
-                # Atualizar user_limits também
-                cursor.execute("""
-                    SELECT monthly_queries FROM clientes.plans WHERE id = %s
-                """, (plan_id,))
-                plan_result = cursor.fetchone()
-                
-                if plan_result:
-                    monthly_limit = plan_result[0]
-                    
-                    # Criar ou atualizar limites do usuário
-                    cursor.execute("""
-                        INSERT INTO clientes.subscriptions (
-                            user_id, plan_id, status, monthly_limit, renewal_date
-                        ) VALUES (%s, %s, 'active', %s, %s)
-                        ON CONFLICT (user_id) DO UPDATE SET
-                            plan_id = EXCLUDED.plan_id,
-                            status = 'active',
-                            monthly_limit = EXCLUDED.monthly_limit,
-                            renewal_date = EXCLUDED.renewal_date,
-                            updated_at = CURRENT_TIMESTAMP
-                    """, (
-                        user_id,
-                        plan_id,
-                        monthly_limit,
-                        datetime.fromtimestamp(subscription['current_period_end'])
-                    ))
                 
                 logger.info(f"✅ Assinatura criada: {subscription_id} para user_id: {user_id}")
             else:
@@ -150,17 +135,6 @@ async def handle_subscription_deleted(event_data: dict):
                     canceled_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE stripe_subscription_id = %s
-            """, (subscription_id,))
-            
-            # Desativar assinatura antiga também
-            cursor.execute("""
-                UPDATE clientes.subscriptions
-                SET status = 'cancelled',
-                    cancelled_at = CURRENT_TIMESTAMP
-                WHERE user_id = (
-                    SELECT user_id FROM clientes.stripe_subscriptions
-                    WHERE stripe_subscription_id = %s
-                )
             """, (subscription_id,))
             
             cursor.close()
@@ -271,12 +245,20 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None, 
         
         # Verificar se o webhook secret está configurado
         if not webhook_secret:
-            logger.error("STRIPE_WEBHOOK_SECRET não configurado!")
-            # Em desenvolvimento, processar mesmo sem validação (não recomendado em produção!)
-            event = stripe.Event.construct_from(
-                await request.json(),
-                stripe.api_key
-            )
+            # Em produção, o webhook secret é OBRIGATÓRIO
+            environment = os.getenv('ENVIRONMENT', 'development')
+            if environment == 'production':
+                logger.error("STRIPE_WEBHOOK_SECRET não configurado em produção!")
+                raise HTTPException(
+                    status_code=500, 
+                    detail="Webhook secret not configured in production"
+                )
+            else:
+                logger.warning("⚠️ STRIPE_WEBHOOK_SECRET não configurado! Processando sem validação (DEV ONLY)")
+                event = stripe.Event.construct_from(
+                    await request.json(),
+                    stripe.api_key
+                )
         else:
             # Validar assinatura do webhook
             try:

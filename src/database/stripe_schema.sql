@@ -75,6 +75,15 @@ CREATE INDEX IF NOT EXISTS idx_stripe_invoices_stripe_id ON clientes.stripe_invo
 CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_type ON clientes.stripe_webhook_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_processed ON clientes.stripe_webhook_events(processed);
 
+-- Constraint UNIQUE: Garante que cada usuário tenha no máximo uma assinatura ativa
+-- Permite múltiplas assinaturas canceladas, mas apenas uma ativa/trialing por vez
+CREATE UNIQUE INDEX IF NOT EXISTS idx_stripe_subscriptions_user_active
+ON clientes.stripe_subscriptions(user_id)
+WHERE status IN ('active', 'trialing');
+
+COMMENT ON INDEX clientes.idx_stripe_subscriptions_user_active IS 
+'Garante que cada usuário tenha no máximo uma assinatura ativa (active ou trialing). Previne cobranças duplicadas.';
+
 -- View consolidada de assinaturas ativas com informações do Stripe
 CREATE OR REPLACE VIEW clientes.active_subscriptions AS
 SELECT 
