@@ -90,10 +90,9 @@ const LandingPage2 = () => {
       description: 'Melhor custo-benefício',
       features: [
         '100.000 consultas/mês',
-        'Filtros avançados (UF, CNAE, situação, etc)',
-        'Busca por texto (razão social/fantasia)',
-        'Dashboard avançado + gráficos',
-        'Logs completos (30 dias)',
+        'Filtros avançados (CNAEs, sócios, endereço, etc...)',
+        'Dashboard com estatísticas',
+        'Documentação completa',
         'Suporte prioritário (24h)',
         'Rate limit: 300 req/min',
         'SLA 98% uptime'
