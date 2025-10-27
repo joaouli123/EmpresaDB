@@ -15,10 +15,10 @@
   transition: all 0.3s ease;
 }
 
-/* Mobile: header relativo e não sobreposto */
+/* Mobile: header flutuante sobreposto */
 @media (max-width: 991px) {
   .floating-navbar {
-    position: relative;
+    position: absolute;
     padding-top: 0;
     background: transparent;
   }
@@ -302,12 +302,12 @@
   margin-top: -40px;
 }
 
-/* Mobile: hero sem padding superior (header já não sobrepõe) */
+/* Mobile: hero com margem negativa para sobrepor o header */
 @media (max-width: 991px) {
   .hero-section {
-    padding: 12px 20px 40px;
+    padding: 80px 20px 40px;
     min-height: auto;
-    margin-top: 0;
+    margin-top: -80px;
   }
 }
 
@@ -348,7 +348,7 @@
 /* Mobile: reduzir espaçamento drasticamente */
 @media (max-width: 991px) {
   .hero-badge {
-    margin-top: 4px;
+    margin-top: 20px;
     margin-bottom: 16px;
     font-size: 12px;
     padding: 6px 16px;
