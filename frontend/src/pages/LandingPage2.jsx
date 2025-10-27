@@ -52,7 +52,7 @@ const LandingPage2 = () => {
       features: [
         '200 consultas/mês',
         'Consulta básica por CNPJ',
-        'Dados essenciais da Receita',
+        'Dados atualizados da Receita',
         'Documentação completa',
         'Rate limit: 10 req/min'
       ],
@@ -146,7 +146,7 @@ const LandingPage2 = () => {
         'Nota fiscal e contrato'
       ],
       popular: false,
-      badge: '🏢 Corporativo',
+      badge: 'Corporativo',
       highlight: 'Fale com nosso time'
     }
   ];
@@ -839,7 +839,12 @@ const LandingPage2 = () => {
               className={`pricing-card ${plan.popular ? 'popular' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
               onClick={() => setSelectedPlan(plan.id)}
             >
-              {plan.badge && <div className="popular-badge">{plan.badge}</div>}
+              {plan.badge && (
+                <div className="popular-badge">
+                  {plan.id === 'enterprise' && <Building2 size={14} style={{ marginRight: '6px' }} />}
+                  {plan.badge}
+                </div>
+              )}
 
               <div className="plan-header">
                 <h3>{plan.name}</h3>
