@@ -40,6 +40,7 @@ const LandingPage2 = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const plans = [
     {
@@ -360,21 +361,70 @@ const LandingPage2 = () => {
       role: 'CEO, TechStart Consultoria',
       avatar: 'CS',
       rating: 5,
-      text: 'Transformou nossa prospecção B2B! Conseguimos identificar e consultar leads qualificados 3x mais rápido com dados precisos da API.'
+      text: 'Antes gastávamos horas pesquisando manualmente dados de empresas. Com a API, conseguimos automatizar todo o processo de prospecção e validar leads em segundos. Valeu cada centavo!'
     },
     {
       name: 'Marina Costa',
-      role: 'Analista de Compliance',
+      role: 'Analista de Compliance, Banco Regional',
       avatar: 'MC',
       rating: 5,
-      text: 'Ferramenta essencial para due diligence. Dados precisos e atualizados que fazem toda diferença no nosso trabalho.'
+      text: 'Para fazer due diligence essa API é essencial. Os dados do QSA são completos e atualizados, o que nos dá segurança nas análises de crédito e onboarding de clientes.'
     },
     {
       name: 'Roberto Almeida',
       role: 'Desenvolvedor Full Stack',
       avatar: 'RA',
       rating: 5,
-      text: 'API muito bem documentada e fácil de integrar. Em 30 minutos já estava consultando dados no meu sistema!'
+      text: 'Integrei a API no nosso sistema em menos de 1 hora. A documentação é clara, os endpoints são intuitivos e o suporte respondeu minhas dúvidas super rápido. Recomendo demais!'
+    },
+    {
+      name: 'Juliana Mendes',
+      role: 'Gerente de Marketing, AgênciaPro',
+      avatar: 'JM',
+      rating: 5,
+      text: 'Usamos para segmentar campanhas B2B por setor e região. A qualidade dos dados de CNAE e localização nos ajudou a reduzir custo de aquisição em 40%. Resultado incrível!'
+    },
+    {
+      name: 'Pedro Oliveira',
+      role: 'Founder, StartupHub',
+      avatar: 'PO',
+      rating: 5,
+      text: 'Como startup, precisávamos de algo acessível e confiável. O plano Growth tem um custo-benefício excelente e já validamos mais de 50 mil leads. Super satisfeito!'
+    },
+    {
+      name: 'Fernanda Santos',
+      role: 'Analista de Dados, LogísticaExpress',
+      avatar: 'FS',
+      rating: 5,
+      text: 'A exportação em CSV facilitou muito nossas análises. Cruzamos dados de empresas com nosso CRM e identificamos oportunidades que estavam invisíveis. Ferramenta poderosa!'
+    },
+    {
+      name: 'Lucas Ferreira',
+      role: 'Head de Vendas, SolutionTech',
+      avatar: 'LF',
+      rating: 5,
+      text: 'Nosso time de SDRs usa diariamente para qualificar prospects. Ter acesso ao porte da empresa, faturamento e sócios na hora do cold call aumentou nossa taxa de conversão.'
+    },
+    {
+      name: 'Beatriz Rocha',
+      role: 'Contadora, Contábil Moderna',
+      avatar: 'BR',
+      rating: 5,
+      text: 'Simplesmente perfeito para validar CNPJs de clientes novos. Consigo verificar situação cadastral, endereço e atividades em segundos. Economizo muito tempo no dia a dia.'
+    },
+    {
+      name: 'Ricardo Gomes',
+      role: 'CTO, FinTech Inovadora',
+      avatar: 'RG',
+      rating: 5,
+      text: 'Performance impecável! Mesmo com milhares de consultas por dia, a API se mantém estável e rápida. O cache Redis faz diferença real. Infraestrutura de primeiro mundo.'
+    },
+    {
+      name: 'Camila Andrade',
+      role: 'Analista Jurídico, Advocacia & Cia',
+      avatar: 'CA',
+      rating: 5,
+      text: 'Essencial para nossas pesquisas societárias. O QSA completo com CPF dos sócios nos economiza idas ao cartório. Já pagou o investimento só no primeiro mês de uso!'
     }
   ];
 
@@ -789,27 +839,124 @@ const LandingPage2 = () => {
       <section id="testimonials" className="testimonials-section">
         <div className="section-header">
           <h2>O Que Nossos Clientes Dizem</h2>
-          <p>Empresas de todos os tamanhos confiam em nossa plataforma</p>
+          <p>Mais de 500 empresas confiam em nossa plataforma todos os dias</p>
         </div>
 
-        <div className="testimonials-grid">
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="testimonial-card">
-              <div className="stars">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
-                ))}
-              </div>
-              <p className="testimonial-text">"{testimonial.text}"</p>
-              <div className="testimonial-author">
-                <div className="author-avatar">{testimonial.avatar}</div>
-                <div className="author-info">
-                  <div className="author-name">{testimonial.name}</div>
-                  <div className="author-role">{testimonial.role}</div>
+        <div style={{ position: 'relative', maxWidth: '1400px', margin: '0 auto', padding: '0 60px' }}>
+          <div className="testimonials-carousel">
+            <div className="testimonials-grid" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(3, 1fr)', 
+              gap: '24px',
+              transition: 'transform 0.5s ease'
+            }}>
+              {testimonials.slice(currentTestimonial, currentTestimonial + 3).map((testimonial, index) => (
+                <div key={index} className="testimonial-card">
+                  <div className="stars">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
+                    ))}
+                  </div>
+                  <p className="testimonial-text">"{testimonial.text}"</p>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">{testimonial.avatar}</div>
+                    <div className="author-info">
+                      <div className="author-name">{testimonial.name}</div>
+                      <div className="author-role">{testimonial.role}</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Botões de Navegação */}
+          <button
+            onClick={() => setCurrentTestimonial(prev => prev > 0 ? prev - 1 : testimonials.length - 3)}
+            style={{
+              position: 'absolute',
+              left: '0',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'white',
+              border: '2px solid #e5e7eb',
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s',
+              zIndex: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#3b82f6';
+              e.currentTarget.style.borderColor = '#3b82f6';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            <ChevronRight size={24} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
+          </button>
+
+          <button
+            onClick={() => setCurrentTestimonial(prev => prev < testimonials.length - 3 ? prev + 1 : 0)}
+            style={{
+              position: 'absolute',
+              right: '0',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'white',
+              border: '2px solid #e5e7eb',
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s',
+              zIndex: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#3b82f6';
+              e.currentTarget.style.borderColor = '#3b82f6';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            <ChevronRight size={24} style={{ color: '#3b82f6' }} />
+          </button>
+
+          {/* Indicadores */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+            {Array.from({ length: testimonials.length - 2 }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentTestimonial(index)}
+                style={{
+                  width: currentTestimonial === index ? '32px' : '12px',
+                  height: '12px',
+                  borderRadius: '6px',
+                  background: currentTestimonial === index ? '#3b82f6' : '#e5e7eb',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
