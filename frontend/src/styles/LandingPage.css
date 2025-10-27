@@ -37,13 +37,13 @@
   -webkit-backdrop-filter: blur(12px);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: none;
 }
 
 /* Mobile: navbar mais compacto */
 @media (max-width: 991px) {
   .navbar-content {
-    margin: 0 16px 20px;
+    margin: 0 16px 0;
     padding: 14px 20px;
     border-radius: 16px;
     gap: 0;
@@ -295,16 +295,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 160px 20px 80px;
+  padding: 120px 20px 80px;
   position: relative;
   overflow: hidden;
+  margin-top: -20px;
 }
 
 /* Mobile: hero sem padding superior (header já não sobrepõe) */
 @media (max-width: 991px) {
   .hero-section {
-    padding: 60px 20px 60px;
+    padding: 40px 20px 60px;
     min-height: auto;
+    margin-top: 0;
   }
 }
 
