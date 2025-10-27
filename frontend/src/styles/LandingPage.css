@@ -42,6 +42,11 @@
   box-sizing: border-box;
 }
 
+.navbar-content * {
+  border: none !important;
+  outline: none !important;
+}
+
 /* Mobile: navbar mais compacto */
 @media (max-width: 991px) {
   .navbar-content {
@@ -56,6 +61,11 @@
     border: none !important;
     outline: none !important;
     box-sizing: border-box;
+  }
+  
+  .navbar-content * {
+    border: none !important;
+    outline: none !important;
   }
 }
 
