@@ -12,6 +12,7 @@ This project is an ETL system and REST API designed for querying public CNPJ dat
 - **Security**: Hardcoded credentials must be removed from the codebase and managed via `.env` files. `SECRET_KEY` must be mandatory, at least 32 characters long, and validated at startup. CORS origins must be configurable.
 - **Performance**: Dashboard loading times and API query performance are critical. Optimizations for database queries (indexing, materialized views) and efficient counting strategies are highly valued.
 - **Data Integrity**: ETL processes should be idempotent, support automatic recovery, and include integrity validation (CSV vs. DB record counts).
+- **Stripe Payments (Updated 2025-10-27)**: System now uses ONLY `stripe_subscriptions` table. Old `subscriptions` table deprecated and renamed to `subscriptions_legacy`. All subscription logic centralized in Stripe webhooks. Monthly usage automatically tracked and enforced. Webhook secret mandatory in production.
 
 ## System Architecture
 
@@ -27,6 +28,7 @@ The frontend provides a modern, responsive interface with a dashboard for metric
 - **ETL Process**: Handles downloading, extraction, and importation of data from Receita Federal. It features retry mechanisms for downloads, efficient CSV processing using `COPY`, data transformations, and intelligent foreign key handling. The process is idempotent with SHA-256 hash checking, supports automatic recovery, validates data integrity, and provides structured logging.
 - **REST API**: Built with FastAPI, offering authenticated endpoints for user and API key management, CNPJ data queries with advanced filtering (social reason, trade name, UF, CNAE, cadastral status, company size, Simples Nacional, MEI, pagination), and admin-only ETL process control. Includes automatic Swagger UI/ReDoc documentation.
 - **Security**: Incorporates Argon2 for password hashing, JWT for authentication with configurable expiration, role-based access control (admin/user), API key management with usage tracking, configurable CORS, and flexible login allowing both username and email. Customer data is isolated in a separate database schema.
+- **Stripe Integration (2025-10-27)**: Full Stripe payment integration for subscription management. Uses ONLY `clientes.stripe_subscriptions` as the single source of truth. Features include: automatic subscription creation via webhooks, monthly usage tracking (`clientes.monthly_usage`), automatic blocking when limits exceeded, support for canceled subscriptions until period end, webhook signature validation (mandatory in production), and prevention of duplicate active subscriptions per user via UNIQUE constraint.
 - **Performance Optimizations**: Critical performance fixes include using PostgreSQL statistics (`pg_class.reltuples`) for fast counts and aggressive in-memory caching for dashboard statistics. Database indexing has been extensively optimized with B-tree and composite indexes on key columns (`data_inicio_atividade`, `uf`, `cnae`, `situacao_cadastral`, `porte`, `mei`, `simples`) for significantly faster queries. API search optimizations use intelligent counting strategies (EXPLAIN for ILIKE, accurate COUNT for exact matches). Connection pooling (`psycopg2.pool.ThreadedConnectionPool`) is implemented for efficient database connection management. Materialized views with a zero-downtime migration strategy are used to accelerate complex queries.
 - **Dynamic Configurations**: ETL parameters like `chunk_size` and `max_workers` can be adjusted in real-time via the admin interface.
 
@@ -38,6 +40,7 @@ The frontend provides a modern, responsive interface with a dashboard for metric
     - **User & API Keys**: Profile management, API key generation/listing/revocation, usage tracking.
     - **CNPJ Data**: API info, health check, database stats, query by CNPJ, advanced search with multiple filters, company partners, lists of CNAEs and municipalities.
     - **ETL (Admin Only)**: WebSocket for real-time control, start/stop ETL, status updates, configuration updates, database statistics.
+    - **Stripe Payments**: Checkout session creation, customer portal, webhook handler, subscription cancellation.
 
 ## External Dependencies
 
