@@ -126,7 +126,7 @@ const LandingPage2 = () => {
       name: 'Enterprise',
       priceMonthly: 'Customizado',
       priceYearly: 'Customizado',
-      queries: '1M+',
+      queries: 'Personalizado',
       description: 'Solução corporativa completa',
       features: [
         'Volume customizado',
@@ -931,7 +931,7 @@ const LandingPage2 = () => {
                 <td style={{ padding: '16px', textAlign: 'center' }}>10.000</td>
                 <td style={{ padding: '16px', textAlign: 'center', background: '#fef3c7' }}>100.000</td>
                 <td style={{ padding: '16px', textAlign: 'center' }}>500.000</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>1M+</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>Personalizado</td>
               </tr>
               <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
                 <td style={{ padding: '16px', fontWeight: '600' }}>Pesquisa avançada</td>
