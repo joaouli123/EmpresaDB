@@ -845,120 +845,65 @@ const LandingPage2 = () => {
           <p>Mais de 500 empresas confiam em nossa plataforma todos os dias</p>
         </div>
 
-        <div style={{ position: 'relative', maxWidth: '1400px', margin: '0 auto', padding: '0 60px' }}>
+        <div className="testimonials-carousel-wrapper">
           <div className="testimonials-carousel">
-            <div className="testimonials-grid" style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(3, 1fr)', 
-              gap: '24px',
-              transition: 'transform 0.5s ease'
-            }}>
-              {testimonials.slice(currentTestimonial, currentTestimonial + 3).map((testimonial, index) => (
-                <div key={index} className="testimonial-card">
-                  <div className="stars">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
-                    ))}
-                  </div>
-                  <p className="testimonial-text">"{testimonial.text}"</p>
-                  <div className="testimonial-author">
-                    <div className="author-avatar">{testimonial.avatar}</div>
-                    <div className="author-info">
-                      <div className="author-name">{testimonial.name}</div>
-                      <div className="author-role">{testimonial.role}</div>
+            <div className="testimonials-carousel-grid">
+              {(() => {
+                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+                return testimonials.slice(currentTestimonial, currentTestimonial + itemsToShow).map((testimonial, index) => (
+                  <div key={index} className="testimonial-card">
+                    <div className="stars">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
+                      ))}
+                    </div>
+                    <p className="testimonial-text">"{testimonial.text}"</p>
+                    <div className="testimonial-author">
+                      <div className="author-avatar">{testimonial.avatar}</div>
+                      <div className="author-info">
+                        <div className="author-name">{testimonial.name}</div>
+                        <div className="author-role">{testimonial.role}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           </div>
 
           {/* Botões de Navegação */}
           <button
-            onClick={() => setCurrentTestimonial(prev => prev > 0 ? prev - 1 : testimonials.length - 3)}
-            style={{
-              position: 'absolute',
-              left: '0',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'white',
-              border: '2px solid #e5e7eb',
-              borderRadius: '50%',
-              width: '48px',
-              height: '48px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s',
-              zIndex: 10
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#3b82f6';
-              e.currentTarget.style.borderColor = '#3b82f6';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'white';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            className="carousel-nav-button prev"
+            onClick={() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              setCurrentTestimonial(prev => prev > 0 ? prev - 1 : testimonials.length - itemsToShow);
             }}
           >
             <ChevronRight size={24} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
           </button>
 
           <button
-            onClick={() => setCurrentTestimonial(prev => prev < testimonials.length - 3 ? prev + 1 : 0)}
-            style={{
-              position: 'absolute',
-              right: '0',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'white',
-              border: '2px solid #e5e7eb',
-              borderRadius: '50%',
-              width: '48px',
-              height: '48px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s',
-              zIndex: 10
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#3b82f6';
-              e.currentTarget.style.borderColor = '#3b82f6';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'white';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            className="carousel-nav-button next"
+            onClick={() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              setCurrentTestimonial(prev => prev < testimonials.length - itemsToShow ? prev + 1 : 0);
             }}
           >
             <ChevronRight size={24} style={{ color: '#3b82f6' }} />
           </button>
 
           {/* Indicadores */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
-            {Array.from({ length: testimonials.length - 2 }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentTestimonial(index)}
-                style={{
-                  width: currentTestimonial === index ? '32px' : '12px',
-                  height: '12px',
-                  borderRadius: '6px',
-                  background: currentTestimonial === index ? '#3b82f6' : '#e5e7eb',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s'
-                }}
-              />
-            ))}
+          <div className="carousel-indicators">
+            {(() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              return Array.from({ length: testimonials.length - itemsToShow + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonial(index)}
+                  className={`carousel-indicator ${currentTestimonial === index ? 'active' : ''}`}
+                />
+              ));
+            })()}
           </div>
         </div>
       </section>
