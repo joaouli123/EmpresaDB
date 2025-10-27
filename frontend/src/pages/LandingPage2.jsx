@@ -601,9 +601,9 @@ const LandingPage2 = () => {
           ))}
         </div>
 
-        <div className="info-card" style={{ marginTop: '60px', marginBottom: '60px', background: '#1f2937', color: 'white' }}>
-          <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta por CNPJ</h3>
-          <pre style={{ background: '#111827', padding: '32px', borderRadius: '8px', overflow: 'auto' }}>
+        <div className="info-card" style={{ marginTop: '60px', marginBottom: '60px', background: '#1f2937', color: 'white', padding: '40px', borderRadius: '16px' }}>
+          <h3 style={{ color: 'white', marginBottom: '24px', marginTop: '0' }}>Exemplo de Consulta por CNPJ</h3>
+          <pre style={{ background: '#111827', padding: '24px', borderRadius: '8px', overflow: 'auto', fontSize: '14px' }}>
 {`GET /api/v1/empresas?cnpj=00000000000191
 
 {
@@ -614,24 +614,28 @@ const LandingPage2 = () => {
   "data_abertura": "1966-04-19",
   "cnae_principal": "6422-1/00",
   "porte": "DEMAIS",
-  "natureza_juridica": "205-1",
   "endereco": {
-    "logradouro": "SBS QUADRA 1 BLOCO G LOJA 32",
-    "numero": "32",
-    "complemento": "LOJA 32 EDIFICIO SEDE III",
-    "bairro": "ASA SUL",
     "municipio": "BRASILIA",
     "uf": "DF",
-    "cep": "70073901"
+    ...
   },
   "capital_social": 103000000000.00,
-  "email": null,
-  "telefone": null
+  "qsa": [...],
+  "cnaes_secundarios": [...],
+  ...
 }`}
           </pre>
-          <p style={{ marginTop: '20px', color: 'rgba(255,255,255,0.8)', fontSize: '15px' }}>
-            Documentação completa com exemplos em Python, JavaScript, PHP, Java e mais
-          </p>
+          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+            <p style={{ marginBottom: '20px', color: 'rgba(255,255,255,0.8)', fontSize: '15px' }}>
+              Documentação completa com exemplos em Python, JavaScript, PHP, Java e mais
+            </p>
+            <a href="#pricing">
+              <button className="btn-primary-large" style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#1f2937' }}>
+                Criar Conta para Acessar Documentação
+                <ChevronRight size={20} />
+              </button>
+            </a>
+          </div>
         </div>
       </section>
 
