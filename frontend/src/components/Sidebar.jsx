@@ -8,7 +8,8 @@ import {
   LogOut,
   Database,
   Activity,
-  CreditCard
+  CreditCard,
+  Mail
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -27,6 +28,7 @@ const Sidebar = () => {
     { path: '/admin', icon: Activity, label: 'Admin Dashboard' },
     { path: '/admin/etl', icon: RefreshCw, label: 'Atualização ETL' },
     { path: '/admin/database', icon: Database, label: 'Banco de Dados' },
+    { path: '/admin/email-logs', icon: Mail, label: 'Logs de Email' },
   ];
 
   return (

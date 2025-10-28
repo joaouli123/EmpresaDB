@@ -66,6 +66,12 @@ export const userAPI = {
   getUsage: () => api.get('/user/usage'),
 };
 
+export const emailLogsAPI = {
+  getEmailLogs: (params) => api.get('/admin/email-logs', { params }),
+  getFollowupTracking: (params) => api.get('/admin/followup-tracking', { params }),
+  getUsageNotifications: (params) => api.get('/admin/usage-notifications', { params }),
+};
+
 // Exportar api para uso em outros componentes
 export { api };
 export default api;

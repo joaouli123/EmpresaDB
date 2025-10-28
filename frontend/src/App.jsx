@@ -8,6 +8,7 @@ import LandingPage2 from './pages/LandingPage2';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDatabase from './pages/AdminDatabase';
+import EmailLogs from './pages/admin/EmailLogs';
 import Profile from './pages/Profile';
 import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
@@ -86,6 +87,11 @@ function AppRoutes() {
           <Route path="admin/database" element={
             <ProtectedRoute adminOnly={true}>
               <AdminDatabase />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/email-logs" element={
+            <ProtectedRoute adminOnly={true}>
+              <EmailLogs />
             </ProtectedRoute>
           } />
         </Route>

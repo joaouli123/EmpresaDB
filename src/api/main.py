@@ -8,6 +8,7 @@ from src.api.user_routes import router as user_router
 from src.api.subscription_routes import router as subscription_router
 from src.api.stripe_routes import router as stripe_router
 from src.api.stripe_webhook import router as stripe_webhook_router
+from src.api.email_logs import router as email_logs_router
 from src.config import settings
 import logging
 from pathlib import Path
@@ -93,6 +94,7 @@ app.include_router(user_router)
 app.include_router(subscription_router)
 app.include_router(stripe_router)
 app.include_router(stripe_webhook_router)
+app.include_router(email_logs_router)
 
 if __name__ == "__main__":
     import uvicorn
