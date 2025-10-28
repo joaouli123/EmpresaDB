@@ -63,7 +63,8 @@ class EmailService:
         
         try:
             msg = MIMEMultipart('alternative')
-            msg['From'] = self.from_email
+            # Usar nome personalizado ao invés de só o email
+            msg['From'] = f"DB Empresas <{self.from_email}>"
             msg['To'] = to_email
             msg['Subject'] = subject
             msg['Date'] = datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
@@ -114,14 +115,15 @@ class EmailService:
         username: str, 
         plan_name: str,
         plan_price: float,
-        next_billing_date: str
+        next_billing_date: str,
+        monthly_queries: int = None
     ) -> bool:
         """Envia email quando assinatura é contratada"""
         from src.services.email_templates import get_subscription_created_template
         
         subject = "Assinatura Confirmada - DB Empresas"
         html_content = get_subscription_created_template(
-            username, plan_name, plan_price, next_billing_date
+            username, plan_name, plan_price, next_billing_date, monthly_queries
         )
         
         return self.send_email(to_email, subject, html_content)
@@ -132,14 +134,15 @@ class EmailService:
         username: str, 
         plan_name: str,
         amount_paid: float,
-        next_billing_date: str
+        next_billing_date: str,
+        monthly_queries: int = None
     ) -> bool:
         """Envia email quando assinatura é renovada"""
         from src.services.email_templates import get_subscription_renewed_template
         
         subject = "Assinatura Renovada - DB Empresas"
         html_content = get_subscription_renewed_template(
-            username, plan_name, amount_paid, next_billing_date
+            username, plan_name, amount_paid, next_billing_date, monthly_queries
         )
         
         return self.send_email(to_email, subject, html_content)
@@ -155,7 +158,8 @@ class EmailService:
         """Envia email de follow-up para assinatura vencida"""
         from src.services.email_templates import get_subscription_expired_template
         
-        subject = f"Sua assinatura venceu - DB Empresas (Lembrete {attempt}/5)"
+        # Removido (Lembrete X/5) do assunto
+        subject = "Sua assinatura venceu - DB Empresas"
         html_content = get_subscription_expired_template(
             username, plan_name, expired_date, attempt
         )
@@ -167,14 +171,15 @@ class EmailService:
         to_email: str, 
         username: str, 
         plan_name: str,
-        end_date: str
+        end_date: str,
+        monthly_queries: int = None
     ) -> bool:
         """Envia email quando assinatura é cancelada"""
         from src.services.email_templates import get_subscription_cancelled_template
         
         subject = "Assinatura Cancelada - DB Empresas"
         html_content = get_subscription_cancelled_template(
-            username, plan_name, end_date
+            username, plan_name, end_date, monthly_queries
         )
         
         return self.send_email(to_email, subject, html_content)

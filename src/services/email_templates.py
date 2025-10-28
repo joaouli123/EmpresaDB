@@ -125,9 +125,21 @@ def get_subscription_created_template(
     username: str, 
     plan_name: str, 
     plan_price: float,
-    next_billing_date: str
+    next_billing_date: str,
+    monthly_queries: int = None
 ) -> str:
     """Template de email de assinatura contratada"""
+    
+    # Linha de consultas se fornecida
+    queries_row = ""
+    if monthly_queries:
+        queries_formatted = f"{monthly_queries:,}".replace(",", ".")
+        queries_row = f"""
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Consultas mensais:</td>
+                    <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{queries_formatted}</td>
+                </tr>"""
+    
     content = f"""
         <h2 style="margin: 0 0 20px 0; color: #1e3a8a; font-size: 24px; font-weight: 600;">
             Assinatura Confirmada
@@ -150,7 +162,7 @@ def get_subscription_created_template(
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Valor:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">R$ {plan_price:.2f}/mês</td>
-                </tr>
+                </tr>{queries_row}
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Próxima cobrança:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{next_billing_date}</td>
@@ -175,9 +187,21 @@ def get_subscription_renewed_template(
     username: str, 
     plan_name: str, 
     amount_paid: float,
-    next_billing_date: str
+    next_billing_date: str,
+    monthly_queries: int = None
 ) -> str:
     """Template de email de assinatura renovada"""
+    
+    # Linha de consultas se fornecida
+    queries_row = ""
+    if monthly_queries:
+        queries_formatted = f"{monthly_queries:,}".replace(",", ".")
+        queries_row = f"""
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Consultas mensais:</td>
+                    <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{queries_formatted}</td>
+                </tr>"""
+    
     content = f"""
         <h2 style="margin: 0 0 20px 0; color: #1e3a8a; font-size: 24px; font-weight: 600;">
             Assinatura Renovada
@@ -200,7 +224,7 @@ def get_subscription_renewed_template(
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Valor pago:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">R$ {amount_paid:.2f}</td>
-                </tr>
+                </tr>{queries_row}
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Próxima renovação:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{next_billing_date}</td>
@@ -279,9 +303,21 @@ def get_subscription_expired_template(
 def get_subscription_cancelled_template(
     username: str, 
     plan_name: str, 
-    end_date: str
+    end_date: str,
+    monthly_queries: int = None
 ) -> str:
     """Template de email de assinatura cancelada"""
+    
+    # Linha de consultas se fornecida
+    queries_row = ""
+    if monthly_queries:
+        queries_formatted = f"{monthly_queries:,}".replace(",", ".")
+        queries_row = f"""
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Consultas mensais:</td>
+                    <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{queries_formatted}</td>
+                </tr>"""
+    
     content = f"""
         <h2 style="margin: 0 0 20px 0; color: #1e3a8a; font-size: 24px; font-weight: 600;">
             Assinatura Cancelada
@@ -304,7 +340,7 @@ def get_subscription_cancelled_template(
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Plano:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{plan_name}</td>
-                </tr>
+                </tr>{queries_row}
                 <tr>
                     <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Acesso até:</td>
                     <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{end_date}</td>
