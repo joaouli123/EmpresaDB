@@ -22,9 +22,14 @@ const APIKeys = () => {
       const response = await userAPI.getAPIKeys();
       const keys = Array.isArray(response.data) ? response.data : [];
       setApiKeys(keys);
+      setMessage({ type: '', text: '' });
     } catch (error) {
       console.error('Error loading API keys:', error);
       setApiKeys([]);
+      setMessage({ 
+        type: 'error', 
+        text: 'Erro ao carregar chaves de API. Por favor, recarregue a página.' 
+      });
     } finally {
       setLoading(false);
     }
