@@ -1,5 +1,6 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import model_validator
 from typing import Optional
 from urllib.parse import urlparse, unquote
 from fastapi.security import OAuth2PasswordBearer
@@ -32,6 +33,19 @@ class Settings(BaseSettings):
     
     # CORS Settings - Configure trusted origins in .env
     ALLOWED_ORIGINS: str = "*"  # Default: all (MUST be configured in production!)
+    
+    @model_validator(mode='after')
+    def strip_email_fields(self):
+        """Remove espaços em branco dos campos de email"""
+        if self.EMAIL_HOST:
+            self.EMAIL_HOST = self.EMAIL_HOST.strip()
+        if self.EMAIL_USER:
+            self.EMAIL_USER = self.EMAIL_USER.strip()
+        if self.EMAIL_PASSWORD:
+            self.EMAIL_PASSWORD = self.EMAIL_PASSWORD.strip()
+        if self.EMAIL_FROM:
+            self.EMAIL_FROM = self.EMAIL_FROM.strip()
+        return self
     
     def validate_config(self) -> None:
         """Valida configurações críticas para produção"""
