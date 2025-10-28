@@ -126,7 +126,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Requisições Hoje</p>
             <h3 className="stat-value">
-              {(usage?.queries_used_today || 0).toLocaleString('pt-BR')}
+              {loading ? '...' : (usage?.queries_used_today || usage?.requests_today || 0).toLocaleString('pt-BR')}
             </h3>
           </div>
         </div>
