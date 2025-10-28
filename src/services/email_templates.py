@@ -317,3 +317,66 @@ def get_subscription_cancelled_template(
         </p>
     """
     return get_email_base_template(content)
+
+
+def get_usage_warning_template(
+    username: str, 
+    plan_name: str,
+    queries_used: int,
+    queries_limit: int,
+    percentage_used: int
+) -> str:
+    """Template de email de alerta de uso (50% ou 80%)"""
+    
+    if percentage_used >= 80:
+        alert_color = "#dc2626"
+        alert_bg = "#fef2f2"
+        alert_title = "Atenção: Limite de Consultas Próximo"
+        alert_message = "Você já utilizou 80% da sua cota mensal de consultas. Considere fazer upgrade do seu plano para evitar interrupções."
+    else:
+        alert_color = "#f59e0b"
+        alert_bg = "#fffbeb"
+        alert_title = "Aviso: Metade da Cota Utilizada"
+        alert_message = "Você já utilizou 50% da sua cota mensal de consultas. Monitore seu uso para não exceder o limite."
+    
+    content = f"""
+        <h2 style="margin: 0 0 20px 0; color: #1e3a8a; font-size: 24px; font-weight: 600;">
+            {alert_title}
+        </h2>
+        
+        <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
+            Olá <strong>{username}</strong>,
+        </p>
+        
+        <p style="margin: 0 0 24px 0; color: #334155; font-size: 16px;">
+            {alert_message}
+        </p>
+        
+        <div style="background-color: {alert_bg}; border-left: 4px solid {alert_color}; padding: 20px; margin: 24px 0; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Plano atual:</td>
+                    <td style="padding: 8px 0; color: #1e3a8a; font-size: 14px; font-weight: 600; text-align: right;">{plan_name}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Consultas utilizadas:</td>
+                    <td style="padding: 8px 0; color: {alert_color}; font-size: 14px; font-weight: 600; text-align: right;">{queries_used:,} / {queries_limit:,}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Porcentagem utilizada:</td>
+                    <td style="padding: 8px 0; color: {alert_color}; font-size: 14px; font-weight: 600; text-align: right;">{percentage_used}%</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 500; font-size: 16px;">
+                Ver Planos Disponíveis
+            </a>
+        </div>
+        
+        <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px;">
+            Se precisar de mais consultas, você pode fazer upgrade do seu plano a qualquer momento.
+        </p>
+    """
+    return get_email_base_template(content)

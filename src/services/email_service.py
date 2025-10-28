@@ -178,6 +178,25 @@ class EmailService:
         )
         
         return self.send_email(to_email, subject, html_content)
+    
+    def send_usage_warning_email(
+        self, 
+        to_email: str, 
+        username: str, 
+        plan_name: str,
+        queries_used: int,
+        queries_limit: int,
+        percentage_used: int
+    ) -> bool:
+        """Envia email de alerta de uso de consultas (50% ou 80%)"""
+        from src.services.email_templates import get_usage_warning_template
+        
+        subject = f"Alerta de Uso: {percentage_used}% da Cota Utilizada - DB Empresas"
+        html_content = get_usage_warning_template(
+            username, plan_name, queries_used, queries_limit, percentage_used
+        )
+        
+        return self.send_email(to_email, subject, html_content)
 
 
 email_service = EmailService()
