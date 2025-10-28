@@ -62,7 +62,9 @@ app = FastAPI(
     * `GET /search?razao_social=PETROBRAS` - Busca por nome
     * `GET /cnpj/00000000000191/socios` - Sócios da empresa
 
-    """
+    """,
+    docs_url="/api-docs",  # Swagger UI em /api-docs
+    redoc_url="/api-redoc"  # ReDoc em /api-redoc
 )
 
 # ⚠️ SEGURANÇA: Configure ALLOWED_ORIGINS no .env para produção!
@@ -85,7 +87,7 @@ async def root():
     return {
         "message": "API de Consulta CNPJ",
         "version": settings.API_VERSION,
-        "docs": "/docs"
+        "docs": "/api-docs"
     }
 
 app.include_router(api_router)
