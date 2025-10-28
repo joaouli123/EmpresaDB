@@ -195,7 +195,7 @@ const Dashboard = () => {
         <div className="card">
           <div className="card-header">
             <CheckCircle2 size={20} />
-            <h2>Sua Assinatura: {subscription.plan_name}</h2>
+            <h2>Seu Plano: {subscription.plan_name}</h2>
           </div>
           <div className="db-stats">
             <div className="db-stat-item">
@@ -212,15 +212,43 @@ const Dashboard = () => {
             </div>
             <div className="db-stat-item">
               <p className="db-stat-label">Renovação</p>
-              <p className="db-stat-value">{subscription.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') : 'N/A'}</p>
+              <p className="db-stat-value">
+                {subscription.plan_name === 'Free' 
+                  ? 'Mensal (Gratuito)' 
+                  : subscription.renewal_date 
+                    ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') 
+                    : 'N/A'}
+              </p>
             </div>
           </div>
           <div className="progress-bar" style={{ marginTop: '20px' }}>
             <div
               className="progress-fill"
-              style={{ width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%` }}
+              style={{ 
+                width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%`,
+                backgroundColor: subscription.plan_name === 'Free' && ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) > 80 ? '#ef4444' : '#3b82f6'
+              }}
             />
           </div>
+          {subscription.plan_name === 'Free' && (
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+              <a 
+                href="/pricing" 
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Fazer Upgrade do Plano
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

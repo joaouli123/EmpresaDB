@@ -158,16 +158,19 @@ const Subscription = () => {
     );
   }
 
+  // Não remover este bloco - usuários sempre terão subscription (Free ou paga)
   if (!subscription) {
     return (
       <div className="subscription-empty">
         <AlertCircle size={64} />
-        <h2>Nenhuma Assinatura Ativa</h2>
-        <p>Você ainda não possui uma assinatura ativa.</p>
-        <a href="/pricing" className="btn-primary">Ver Planos Disponíveis</a>
+        <h2>Erro ao Carregar Assinatura</h2>
+        <p>Não foi possível carregar suas informações de assinatura.</p>
+        <button onClick={loadData} className="btn-primary">Tentar Novamente</button>
       </div>
     );
   }
+
+  const isFree = subscription.plan_name === 'Free';
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -202,6 +205,46 @@ const Subscription = () => {
 
       {renderSuccessMessage()}
 
+      {/* Banner de Upgrade para usuários Free */}
+      {isFree && (
+        <div style={{
+          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+          padding: '24px',
+          borderRadius: '12px',
+          marginBottom: '24px',
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
+              Aproveite mais com um plano pago!
+            </h3>
+            <p style={{ margin: '8px 0 0 0', opacity: 0.9, fontSize: '14px' }}>
+              Desbloqueie milhares de consultas mensais e recursos exclusivos
+            </p>
+          </div>
+          <a 
+            href="/pricing" 
+            style={{
+              display: 'inline-block',
+              backgroundColor: 'white',
+              color: '#2563eb',
+              padding: '12px 24px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontWeight: '600',
+              fontSize: '14px'
+            }}
+          >
+            Ver Planos Disponíveis
+          </a>
+        </div>
+      )}
+
       {/* Plano Ativo */}
       <div className="subscription-card">
         <div className="card-header">
@@ -229,13 +272,24 @@ const Subscription = () => {
                   <span className="limit-value">{subscription.extra_credits}</span>
                 </div>
               </div>
-              <div className="limit-item">
-                <Calendar size={20} />
-                <div>
-                  <span className="limit-label">Próxima Renovação</span>
-                  <span className="limit-value">{formatDate(subscription.renewal_date)}</span>
+              {!isFree && (
+                <div className="limit-item">
+                  <Calendar size={20} />
+                  <div>
+                    <span className="limit-label">Próxima Renovação</span>
+                    <span className="limit-value">{formatDate(subscription.renewal_date)}</span>
+                  </div>
                 </div>
-              </div>
+              )}
+              {isFree && (
+                <div className="limit-item">
+                  <Clock size={20} />
+                  <div>
+                    <span className="limit-label">Renovação</span>
+                    <span className="limit-value">Mensal (Gratuito)</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -269,21 +323,34 @@ const Subscription = () => {
         </div>
 
         <div className="plan-actions">
-          <button 
-            className="btn-secondary"
-            onClick={handleViewSubscriptionDetails}
-          >
-            <Eye size={18} />
-            Ver Detalhes da Assinatura
-          </button>
-          {subscription.status === 'active' && (
-            <button 
-              className="btn-danger"
-              onClick={() => setShowCancelModal(true)}
+          {isFree ? (
+            <a 
+              href="/pricing" 
+              className="btn-primary"
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
             >
-              <X size={18} />
-              Cancelar Assinatura
-            </button>
+              <TrendingUp size={18} />
+              Fazer Upgrade do Plano
+            </a>
+          ) : (
+            <>
+              <button 
+                className="btn-secondary"
+                onClick={handleViewSubscriptionDetails}
+              >
+                <Eye size={18} />
+                Ver Detalhes da Assinatura
+              </button>
+              {subscription.status === 'active' && (
+                <button 
+                  className="btn-danger"
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  <X size={18} />
+                  Cancelar Assinatura
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

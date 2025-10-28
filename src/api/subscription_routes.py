@@ -119,13 +119,35 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
             """, (current_user['id'],))
             
             result = cursor.fetchone()
-            cursor.close()
             
             print(f"[DEBUG] Resultado da query: {result}")
             
             if not result or result[0] is None:
-                print("[DEBUG] Nenhuma assinatura encontrada")
-                return None
+                print("[DEBUG] Nenhuma assinatura paga encontrada, retornando plano Free")
+                # Retornar dados do plano Free (200 consultas gratuitas)
+                # Buscar uso mensal do usuário (cursor ainda está aberto)
+                cursor.execute("""
+                    SELECT queries_used FROM clientes.monthly_usage
+                    WHERE user_id = %s AND month_year = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
+                """, (current_user['id'],))
+                usage_result = cursor.fetchone()
+                queries_used = usage_result[0] if usage_result else 0
+                
+                cursor.close()
+                
+                free_limit = 200
+                queries_remaining = max(0, free_limit - queries_used)
+                
+                return {
+                    "plan_name": "Free",
+                    "monthly_limit": free_limit,
+                    "extra_credits": 0,
+                    "total_limit": free_limit,
+                    "queries_used": queries_used,
+                    "queries_remaining": queries_remaining,
+                    "renewal_date": None,
+                    "status": "active"
+                }
             
             subscription_data = {
                 "plan_name": result[0],
@@ -167,7 +189,7 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
             today_result = cursor.fetchone()
             queries_today = today_result[0] if today_result else 0
             
-            # Limite total
+            # Limite total - buscar da assinatura ou usar Free (200)
             cursor.execute("""
                 SELECT total_limit, queries_remaining
                 FROM clientes.user_limits
@@ -176,8 +198,9 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
             limit_result = cursor.fetchone()
             
             if not limit_result:
-                total_limit = 0
-                remaining = 0
+                # Usuário Free - 200 consultas/mês
+                total_limit = 200
+                remaining = max(0, 200 - queries_this_month)
             else:
                 total_limit = limit_result[0] or 0
                 remaining = limit_result[1] or 0
