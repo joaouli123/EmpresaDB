@@ -65,21 +65,25 @@ def get_account_creation_template(username: str) -> str:
         </p>
         
         <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
-            Sua conta foi criada com sucesso! Agora você tem acesso à nossa plataforma de consultas CNPJ.
+            Parabéns! Sua conta foi criada com sucesso e você já pode começar a explorar nossa plataforma de consultas CNPJ.
+        </p>
+        
+        <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
+            Para você experimentar nossos serviços, oferecemos o <strong>Plano Free</strong> com <strong>200 consultas gratuitas</strong> por mês. É perfeito para conhecer a plataforma sem compromisso!
         </p>
         
         <p style="margin: 0 0 24px 0; color: #334155; font-size: 16px;">
-            Para começar a usar nossos serviços, você precisa escolher um plano de assinatura adequado às suas necessidades.
+            Quando precisar de mais recursos, você pode escolher um plano pago que melhor atenda às suas necessidades.
         </p>
         
         <div style="text-align: center; margin: 30px 0;">
             <a href="#" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 500; font-size: 16px;">
-                Escolher Plano
+                Acessar Minha Conta
             </a>
         </div>
         
         <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px;">
-            Se você tiver alguma dúvida, entre em contato com nosso suporte.
+            Aproveite suas consultas gratuitas! Se tiver dúvidas, estamos aqui para ajudar.
         </p>
     """
     return get_email_base_template(content)
