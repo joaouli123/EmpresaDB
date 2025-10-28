@@ -3,6 +3,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 from urllib.parse import urlparse, unquote
 from fastapi.security import OAuth2PasswordBearer
+from dotenv import load_dotenv
+
+# ⚠️ FORÇAR CARREGAMENTO DO .ENV ANTES DE TUDO
+# Isso garante que o .env tenha prioridade sobre variáveis de ambiente do Replit
+load_dotenv(override=True)
 
 
 class Settings(BaseSettings):
@@ -61,7 +66,11 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',
-        extra='ignore'  # Ignorar campos extras ao invés de proibir
+        extra='ignore',  # Ignorar campos extras ao invés de proibir
+        env_prefix='',
+        case_sensitive=True,
+        env_nested_delimiter='__',
+        validate_default=True
     )
     
     @property
