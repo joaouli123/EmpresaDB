@@ -63,23 +63,16 @@ const Dashboard = () => {
     );
   }
 
-  // Dados de uso para o gráfico (últimos 7 dias)
+  // Dados de uso para o gráfico (últimos 7 dias) - DADOS REAIS DO USUÁRIO
   const generateUsageData = () => {
-    const data = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' });
-      
-      // Simular dados de uso baseados nos dados reais
-      const requests = i === 0 ? (usage?.queries_used_today || 0) : Math.floor(Math.random() * 50);
-      
-      data.push({
-        date: dayName,
-        requests: requests
-      });
+    if (!usage || !usage.daily_usage) {
+      return [];
     }
-    return data;
+    
+    return usage.daily_usage.map(item => ({
+      date: item.date,
+      requests: item.requests || 0
+    }));
   };
 
   const usageData = generateUsageData();
