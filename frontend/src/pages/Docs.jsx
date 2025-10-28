@@ -2,6 +2,9 @@ import { Code, Book, Zap, Shield, Database } from 'lucide-react';
 
 const Docs = () => {
   const API_URL = window.location.origin;
+  // Assume isAdmin is true for admin users and false for regular users.
+  // This would typically come from authentication context or user role.
+  const isAdmin = true; 
 
   return (
     <div className="docs-page">
@@ -143,298 +146,299 @@ X-API-Key: sua_chave_api`}</pre>
               </div>
             </div>
 
-            <div className="endpoint">
-              <div className="endpoint-header">
-                <span className="method get">GET</span>
-                <code>/search</code>
-              </div>
-              <p>Busca avançada com múltiplos filtros. Retorna resultados paginados. <strong>28 filtros disponíveis!</strong></p>
-              
-              <div className="params-table">
-                <h4>📊 Dados da Empresa:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>cnpj</code></td>
-                      <td>string</td>
-                      <td>CNPJ completo ou parcial</td>
-                      <td>33000167</td>
-                    </tr>
-                    <tr>
-                      <td><code>razao_social</code></td>
-                      <td>string</td>
-                      <td>Busca parcial (case-insensitive)</td>
-                      <td>PETROBRAS</td>
-                    </tr>
-                    <tr>
-                      <td><code>nome_fantasia</code></td>
-                      <td>string</td>
-                      <td>Busca parcial</td>
-                      <td>Extra</td>
-                    </tr>
-                    <tr>
-                      <td><code>natureza_juridica</code></td>
-                      <td>string</td>
-                      <td>Código da natureza jurídica</td>
-                      <td>2062</td>
-                    </tr>
-                    <tr>
-                      <td><code>porte</code></td>
-                      <td>string</td>
-                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais</td>
-                      <td>4</td>
-                    </tr>
-                    <tr>
-                      <td><code>capital_social_min</code></td>
-                      <td>number</td>
-                      <td>Capital social mínimo</td>
-                      <td>100000</td>
-                    </tr>
-                    <tr>
-                      <td><code>capital_social_max</code></td>
-                      <td>number</td>
-                      <td>Capital social máximo</td>
-                      <td>1000000</td>
-                    </tr>
-                  </tbody>
-                </table>
+            {isAdmin && (
+              <div className="endpoint">
+                <div className="endpoint-header">
+                  <span className="method get">GET</span>
+                  <code>/search</code>
+                </div>
+                <p>Busca avançada com múltiplos filtros. Retorna resultados paginados. <strong>28 filtros disponíveis!</strong></p>
 
-                <h4 style={{ marginTop: '24px' }}>📍 Localização:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>uf</code></td>
-                      <td>string</td>
-                      <td>Sigla do estado</td>
-                      <td>SP</td>
-                    </tr>
-                    <tr>
-                      <td><code>municipio</code></td>
-                      <td>string</td>
-                      <td>Código do município (IBGE)</td>
-                      <td>3550308</td>
-                    </tr>
-                    <tr>
-                      <td><code>cep</code></td>
-                      <td>string</td>
-                      <td>CEP completo ou parcial</td>
-                      <td>01310</td>
-                    </tr>
-                    <tr>
-                      <td><code>bairro</code></td>
-                      <td>string</td>
-                      <td>Nome do bairro (busca parcial)</td>
-                      <td>Centro</td>
-                    </tr>
-                    <tr>
-                      <td><code>logradouro</code></td>
-                      <td>string</td>
-                      <td>Nome da rua/avenida (busca parcial)</td>
-                      <td>Paulista</td>
-                    </tr>
-                    <tr>
-                      <td><code>tipo_logradouro</code></td>
-                      <td>string</td>
-                      <td>Tipo do logradouro (busca parcial)</td>
-                      <td>AVENIDA</td>
-                    </tr>
-                    <tr>
-                      <td><code>numero</code></td>
-                      <td>string</td>
-                      <td>Número do estabelecimento</td>
-                      <td>1000</td>
-                    </tr>
-                    <tr>
-                      <td><code>complemento</code></td>
-                      <td>string</td>
-                      <td>Complemento do endereço</td>
-                      <td>SALA</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="params-table">
+                  <h4>📊 Dados da Empresa:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>cnpj</code></td>
+                        <td>string</td>
+                        <td>CNPJ completo ou parcial</td>
+                        <td>33000167</td>
+                      </tr>
+                      <tr>
+                        <td><code>razao_social</code></td>
+                        <td>string</td>
+                        <td>Busca parcial (case-insensitive)</td>
+                        <td>PETROBRAS</td>
+                      </tr>
+                      <tr>
+                        <td><code>nome_fantasia</code></td>
+                        <td>string</td>
+                        <td>Busca parcial</td>
+                        <td>Extra</td>
+                      </tr>
+                      <tr>
+                        <td><code>natureza_juridica</code></td>
+                        <td>string</td>
+                        <td>Código da natureza jurídica</td>
+                        <td>2062</td>
+                      </tr>
+                      <tr>
+                        <td><code>porte</code></td>
+                        <td>string</td>
+                        <td>1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <td><code>capital_social_min</code></td>
+                        <td>number</td>
+                        <td>Capital social mínimo</td>
+                        <td>100000</td>
+                      </tr>
+                      <tr>
+                        <td><code>capital_social_max</code></td>
+                        <td>number</td>
+                        <td>Capital social máximo</td>
+                        <td>1000000</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>📊 Situação Cadastral:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>situacao_cadastral</code></td>
-                      <td>string</td>
-                      <td>01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
-                      <td>02</td>
-                    </tr>
-                    <tr>
-                      <td><code>motivo_situacao_cadastral</code></td>
-                      <td>string</td>
-                      <td>Motivo da situação (busca parcial)</td>
-                      <td>ENCERRAMENTO</td>
-                    </tr>
-                    <tr>
-                      <td><code>data_situacao_cadastral_de</code></td>
-                      <td>date</td>
-                      <td>Data da situação cadastral DE (YYYY-MM-DD)</td>
-                      <td>2020-01-01</td>
-                    </tr>
-                    <tr>
-                      <td><code>data_situacao_cadastral_ate</code></td>
-                      <td>date</td>
-                      <td>Data da situação cadastral ATÉ (YYYY-MM-DD)</td>
-                      <td>2024-12-31</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <h4 style={{ marginTop: '24px' }}>📍 Localização:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>uf</code></td>
+                        <td>string</td>
+                        <td>Sigla do estado</td>
+                        <td>SP</td>
+                      </tr>
+                      <tr>
+                        <td><code>municipio</code></td>
+                        <td>string</td>
+                        <td>Código do município (IBGE)</td>
+                        <td>3550308</td>
+                      </tr>
+                      <tr>
+                        <td><code>cep</code></td>
+                        <td>string</td>
+                        <td>CEP completo ou parcial</td>
+                        <td>01310</td>
+                      </tr>
+                      <tr>
+                        <td><code>bairro</code></td>
+                        <td>string</td>
+                        <td>Nome do bairro (busca parcial)</td>
+                        <td>Centro</td>
+                      </tr>
+                      <tr>
+                        <td><code>logradouro</code></td>
+                        <td>string</td>
+                        <td>Nome da rua/avenida (busca parcial)</td>
+                        <td>Paulista</td>
+                      </tr>
+                      <tr>
+                        <td><code>tipo_logradouro</code></td>
+                        <td>string</td>
+                        <td>Tipo do logradouro (busca parcial)</td>
+                        <td>AVENIDA</td>
+                      </tr>
+                      <tr>
+                        <td><code>numero</code></td>
+                        <td>string</td>
+                        <td>Número do estabelecimento</td>
+                        <td>1000</td>
+                      </tr>
+                      <tr>
+                        <td><code>complemento</code></td>
+                        <td>string</td>
+                        <td>Complemento do endereço</td>
+                        <td>SALA</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>📅 Datas:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>data_inicio_atividade_min</code></td>
-                      <td>date</td>
-                      <td>Data de início mínima (YYYY-MM-DD)</td>
-                      <td>2020-01-01</td>
-                    </tr>
-                    <tr>
-                      <td><code>data_inicio_atividade_max</code></td>
-                      <td>date</td>
-                      <td>Data de início máxima (YYYY-MM-DD)</td>
-                      <td>2024-12-31</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <h4 style={{ marginTop: '24px' }}>📊 Situação Cadastral:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>situacao_cadastral</code></td>
+                        <td>string</td>
+                        <td>01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
+                        <td>02</td>
+                      </tr>
+                      <tr>
+                        <td><code>motivo_situacao_cadastral</code></td>
+                        <td>string</td>
+                        <td>Motivo da situação (busca parcial)</td>
+                        <td>ENCERRAMENTO</td>
+                      </tr>
+                      <tr>
+                        <td><code>data_situacao_cadastral_de</code></td>
+                        <td>date</td>
+                        <td>Data da situação cadastral DE (YYYY-MM-DD)</td>
+                        <td>2020-01-01</td>
+                      </tr>
+                      <tr>
+                        <td><code>data_situacao_cadastral_ate</code></td>
+                        <td>date</td>
+                        <td>Data da situação cadastral ATÉ (YYYY-MM-DD)</td>
+                        <td>2024-12-31</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>🏭 Atividade Econômica:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>cnae</code></td>
-                      <td>string</td>
-                      <td>CNAE principal (atividade econômica)</td>
-                      <td>4712100</td>
-                    </tr>
-                    <tr>
-                      <td><code>cnae_secundario</code></td>
-                      <td>string</td>
-                      <td>CNAE secundário (busca parcial)</td>
-                      <td>6421</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <h4 style={{ marginTop: '24px' }}>📅 Datas:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>data_inicio_atividade_min</code></td>
+                        <td>date</td>
+                        <td>Data de início mínima (YYYY-MM-DD)</td>
+                        <td>2020-01-01</td>
+                      </tr>
+                      <tr>
+                        <td><code>data_inicio_atividade_max</code></td>
+                        <td>date</td>
+                        <td>Data de início máxima (YYYY-MM-DD)</td>
+                        <td>2024-12-31</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>🏪 Tipo de Estabelecimento:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>identificador_matriz_filial</code></td>
-                      <td>string</td>
-                      <td>1=Matriz, 2=Filial</td>
-                      <td>1</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <h4 style={{ marginTop: '24px' }}>🏭 Atividade Econômica:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>cnae</code></td>
+                        <td>string</td>
+                        <td>CNAE principal (atividade econômica)</td>
+                        <td>4712100</td>
+                      </tr>
+                      <tr>
+                        <td><code>cnae_secundario</code></td>
+                        <td>string</td>
+                        <td>CNAE secundário (busca parcial)</td>
+                        <td>6421</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>💼 Regime Tributário:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>simples</code></td>
-                      <td>string</td>
-                      <td>Optante pelo Simples Nacional (S/N)</td>
-                      <td>S</td>
-                    </tr>
-                    <tr>
-                      <td><code>mei</code></td>
-                      <td>string</td>
-                      <td>Optante pelo MEI (S/N)</td>
-                      <td>S</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <h4 style={{ marginTop: '24px' }}>🏪 Tipo de Estabelecimento:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>identificador_matriz_filial</code></td>
+                        <td>string</td>
+                        <td>1=Matriz, 2=Filial</td>
+                        <td>1</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                <h4 style={{ marginTop: '24px' }}>📄 Paginação:</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parâmetro</th>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Exemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>page</code></td>
-                      <td>number</td>
-                      <td>Número da página (padrão: 1)</td>
-                      <td>1</td>
-                    </tr>
-                    <tr>
-                      <td><code>per_page</code></td>
-                      <td>number</td>
-                      <td>Itens por página (padrão: 20, máx: 100)</td>
-                      <td>50</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  <h4 style={{ marginTop: '24px' }}>💼 Regime Tributário:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>simples</code></td>
+                        <td>string</td>
+                        <td>Optante pelo Simples Nacional (S/N)</td>
+                        <td>S</td>
+                      </tr>
+                      <tr>
+                        <td><code>mei</code></td>
+                        <td>string</td>
+                        <td>Optante pelo MEI (S/N)</td>
+                        <td>S</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-              <div className="endpoint-example">
-                <h4>Formato de Resposta:</h4>
-                <pre>{`{
+                  <h4 style={{ marginTop: '24px' }}>📄 Paginação:</h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Exemplo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>page</code></td>
+                        <td>number</td>
+                        <td>Número da página (padrão: 1)</td>
+                        <td>1</td>
+                      </tr>
+                      <tr>
+                        <td><code>per_page</code></td>
+                        <td>number</td>
+                        <td>Itens por página (padrão: 20, máx: 100)</td>
+                        <td>50</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="endpoint-example">
+                  <h4>Formato de Resposta:</h4>
+                  <pre>{`{
   "total": 1234,
   "page": 1,
   "per_page": 20,
@@ -442,8 +446,8 @@ X-API-Key: sua_chave_api`}</pre>
   "items": [...]
 }`}</pre>
 
-                <h4>Exemplos de Requisição:</h4>
-                <pre>{`# Empresas ativas em SP
+                  <h4>Exemplos de Requisição:</h4>
+                  <pre>{`# Empresas ativas em SP
 GET ${API_URL}/search?uf=SP&situacao_cadastral=02
 
 # Grandes empresas com capital > 1 milhão
@@ -454,8 +458,9 @@ GET ${API_URL}/search?mei=S&uf=RJ&situacao_cadastral=02
 
 # Empresas abertas em 2024
 GET ${API_URL}/search?data_inicio_atividade_de=2024-01-01&data_inicio_atividade_ate=2024-12-31`}</pre>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="endpoint">
               <div className="endpoint-header">
@@ -736,7 +741,8 @@ const consultarCNPJ = async (cnpj) => {
 
 consultarCNPJ('00000000000191');
 
-// Buscar empresas com filtros
+${isAdmin ? `
+// Buscar empresas com filtros (APENAS ADMIN)
 const buscarEmpresas = async () => {
   try {
     const response = await api.get('/search', {
@@ -754,7 +760,7 @@ const buscarEmpresas = async () => {
   }
 };
 
-buscarEmpresas();
+buscarEmpresas();` : '// Endpoint /search disponível apenas para administrador'}
 
 // Listar sócios de uma empresa
 const listarSocios = async (cnpj) => {
@@ -788,7 +794,7 @@ buscarCNAEsSecundarios('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-API_URL = '${API_URL}'
+API_BASE_URL = '${API_URL}'
 API_KEY = 'sua_chave_api_aqui'
 
 headers = {
@@ -798,7 +804,7 @@ headers = {
 # Consultar CNPJ específico
 def consultar_cnpj(cnpj):
     response = requests.get(
-        f'{API_URL}/cnpj/{cnpj}',
+        f'{API_BASE_URL}/cnpj/{cnpj}',
         headers=headers
     )
     if response.status_code == 200:
@@ -812,34 +818,41 @@ if resultado:
     print(f"Razão Social: {resultado['razao_social']}")
     print(f"CNPJ: {resultado['cnpj_completo']}")
 
-# Buscar empresas com filtros
-def buscar_empresas(uf, situacao='02', page=1):
+${isAdmin ? `
+# 2. Buscar empresas com filtros (APENAS ADMIN)
+def buscar_empresas(filtros):
     response = requests.get(
-        f'{API_URL}/search',
+        f'{API_BASE_URL}/search',
         headers=headers,
-        params={
-            'uf': uf,
-            'situacao_cadastral': situacao,
-            'page': page,
-            'per_page': 50
-        }
+        params=filtros
     )
+
     if response.status_code == 200:
         return response.json()
-    else:
-        print(f"Erro {response.status_code}: {response.text}")
-        return None
 
-empresas = buscar_empresas('SP')
-if empresas:
-    print(f"Total encontrado: {empresas['total']}")
-    for empresa in empresas['items']:
-        print(f"{empresa['razao_social']} - {empresa['cnpj_completo']}")
+    return None
+
+# Exemplo: Buscar empresas de grande porte em SP, ativas
+filtros = {
+    "uf": "SP",
+    "porte": "4",
+    "situacao_cadastral": "02",
+    "page": 1,
+    "per_page": 50
+}
+
+resultado = buscar_empresas(filtros)
+if resultado:
+    print(f"Total de empresas encontradas: {resultado['total']}")
+    print(f"Página {resultado['page']} de {resultado['total_pages']}")
+
+    for empresa in resultado['items']:
+        print(f"{empresa['cnpj_completo']} - {empresa['razao_social']}")` : '# Endpoint /search disponível apenas para administrador'}
 
 # Listar sócios
 def listar_socios(cnpj):
     response = requests.get(
-        f'{API_URL}/cnpj/{cnpj}/socios',
+        f'{API_BASE_URL}/cnpj/{cnpj}/socios',
         headers=headers
     )
     if response.status_code == 200:
@@ -857,7 +870,7 @@ if socios:
 # Buscar CNAEs secundários
 def buscar_cnaes_secundarios(cnpj):
     response = requests.get(
-        f'{API_URL}/cnpj/{cnpj}/cnaes-secundarios',
+        f'{API_BASE_URL}/cnpj/{cnpj}/cnaes-secundarios',
         headers=headers
     )
     if response.status_code == 200:
@@ -890,7 +903,7 @@ function apiRequest($url, $apiKey) {
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
+
     if ($httpCode === 200) {
         return json_decode($response, true);
     } else {
@@ -906,7 +919,8 @@ if ($empresa) {
     echo "Razão Social: " . $empresa['razao_social'] . "\\n";
 }
 
-// Buscar empresas
+${isAdmin ? `
+// Buscar empresas com filtros (APENAS ADMIN)
 $params = http_build_query([
     'uf' => 'SP',
     'situacao_cadastral' => '02',
@@ -918,7 +932,7 @@ if ($resultado) {
     foreach ($resultado['items'] as $emp) {
         echo $emp['razao_social'] . " - " . $emp['cnpj_completo'] . "\\n";
     }
-}
+}` : '// Endpoint /search disponível apenas para administrador'}
 
 // Buscar CNAEs secundários
 $cnpj = '00000000000191';
@@ -939,9 +953,13 @@ if ($cnaes) {
 curl -X GET "${API_URL}/cnpj/00000000000191" \\
   -H "X-API-Key: sua_chave_api"
 
-# Buscar empresas com filtros
-curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1" \\
+${isAdmin ? `# 2. Buscar empresas ativas em SP (APENAS ADMIN)
+curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1&per_page=20" \\
   -H "X-API-Key: sua_chave_api"
+
+# 3. Buscar empresas com múltiplos filtros (APENAS ADMIN)
+curl -X GET "${API_URL}/search?uf=RJ&porte=4&capital_social_min=1000000&simples=N&identificador_matriz_filial=1" \\
+  -H "X-API-Key: sua_chave_api"` : '# Endpoints /search disponíveis apenas para administrador'}
 
 # Listar sócios de uma empresa
 curl -X GET "${API_URL}/cnpj/00000000000191/socios" \\
