@@ -95,7 +95,8 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
                     AND table_name = 'user_limits'
                 );
             """)
-            table_exists = cursor.fetchone()[0]
+            result = cursor.fetchone()
+            table_exists = result[0] if result else False
             cursor.close()
         
         if not table_exists:
@@ -138,6 +139,9 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
                 free_limit = 200
                 queries_remaining = max(0, free_limit - queries_used)
                 
+                next_month = datetime.now().replace(day=1) + timedelta(days=32)
+                renewal_date = next_month.replace(day=1).isoformat()
+                
                 return {
                     "plan_name": "Free",
                     "monthly_limit": free_limit,
@@ -145,9 +149,12 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
                     "total_limit": free_limit,
                     "queries_used": queries_used,
                     "queries_remaining": queries_remaining,
-                    "renewal_date": None,
+                    "renewal_date": renewal_date,
                     "status": "active"
                 }
+            
+            next_month = datetime.now().replace(day=1) + timedelta(days=32)
+            default_renewal = next_month.replace(day=1).isoformat()
             
             subscription_data = {
                 "plan_name": result[0],
@@ -156,7 +163,7 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
                 "total_limit": result[3],
                 "queries_used": result[4] or 0,
                 "queries_remaining": result[5] or result[3],
-                "renewal_date": result[6].isoformat() if result[6] else None,
+                "renewal_date": result[6].isoformat() if result[6] else default_renewal,
                 "status": result[7]
             }
             print(f"[DEBUG] Retornando dados: {subscription_data}")
