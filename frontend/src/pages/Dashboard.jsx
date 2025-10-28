@@ -15,11 +15,15 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const Dashboard = () => {
   const [usage, setUsage] = useState(null);
   const [subscription, setSubscription] = useState(null);
-  const [dbStats, setDbStats] = useState(null); // State to store database statistics
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Removed staticStats as we will fetch real data
+  // Números fixos do banco de dados (não consulta API)
+  const dbStats = {
+    total_empresas: 64000000,
+    total_estabelecimentos: 47000000,
+    total_socios: 26000000
+  };
 
   useEffect(() => {
     loadData();
@@ -29,14 +33,12 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [usageRes, subRes, statsRes] = await Promise.all([
+      const [usageRes, subRes] = await Promise.all([
         userAPI.getUsage(),
-        api.get('/subscriptions/my-subscription'),
-        api.get('/stats') // Fetch actual database stats
+        api.get('/subscriptions/my-subscription')
       ]);
       setUsage(usageRes.data);
       setSubscription(subRes.data);
-      setDbStats(statsRes.data); // Set the fetched database stats
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setError('Falha ao carregar dados do dashboard.');
@@ -93,9 +95,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Total de Empresas</p>
-            <h3 className="stat-value">
-              {dbStats?.total_empresas?.toLocaleString('pt-BR') || '0'}
-            </h3>
+            <h3 className="stat-value">64.000.000</h3>
           </div>
         </div>
 
@@ -105,9 +105,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Estabelecimentos</p>
-            <h3 className="stat-value">
-              {dbStats?.total_estabelecimentos?.toLocaleString('pt-BR') || '0'}
-            </h3>
+            <h3 className="stat-value">47.000.000</h3>
           </div>
         </div>
 
@@ -117,9 +115,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Total de Sócios</p>
-            <h3 className="stat-value">
-              {dbStats?.total_socios?.toLocaleString('pt-BR') || '0'}
-            </h3>
+            <h3 className="stat-value">26.000.000</h3>
           </div>
         </div>
 
