@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI } from '../services/api';
-import { Key, Plus, Trash2, Copy, CheckCircle2, Calendar, Eye, EyeOff } from 'lucide-react';
+import { Key, Plus, Trash2, Copy, CheckCircle2, Calendar } from 'lucide-react';
 
 const APIKeys = () => {
   const [apiKeys, setApiKeys] = useState([]);
@@ -11,7 +11,6 @@ const APIKeys = () => {
   const [newKeyName, setNewKeyName] = useState('');
   const [copiedKey, setCopiedKey] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [visibleKeys, setVisibleKeys] = useState({});
 
   useEffect(() => {
     loadAPIKeys();
@@ -33,10 +32,10 @@ const APIKeys = () => {
   const handleCreateKey = async (e) => {
     e.preventDefault();
     if (creating) return; // Previne múltiplos cliques
-
+    
     setCreating(true);
     setMessage({ type: '', text: '' });
-
+    
     try {
       await userAPI.createAPIKey({ name: newKeyName });
       setNewKeyName('');
@@ -76,18 +75,6 @@ const APIKeys = () => {
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
   };
-
-  const toggleKeyVisibility = (keyId) => {
-    setVisibleKeys(prev => ({
-      ...prev,
-      [keyId]: !prev[keyId]
-    }));
-  };
-
-  const maskKey = (key) => {
-    return '•'.repeat(key.length);
-  };
-
 
   if (loading) {
     return (
@@ -167,76 +154,53 @@ const APIKeys = () => {
             </button>
           </div>
         ) : (
-          <div className="api-keys-grid">
+          <div className="keys-list">
             {apiKeys.map((key) => (
-              <div key={key.id} className="api-key-card-compact">
-                <div className="api-key-header-compact">
-                  <div className="api-key-icon-compact">
-                    <Key size={20} />
+              <div key={key.id} className="key-card">
+                <div className="key-header">
+                  <div className="key-icon">
+                    <Key size={24} />
                   </div>
-                  <div className="api-key-info-compact">
+                  <div className="key-info">
                     <h3>{key.name}</h3>
-                    <span className="api-key-date">
-                      <Calendar size={12} />
-                      {new Date(key.created_at).toLocaleDateString('pt-BR')}
-                    </span>
+                    <div className="key-meta">
+                      <Calendar size={14} />
+                      <span>Criada em {new Date(key.created_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
                   </div>
-                  <button
+                  <button 
+                    className="btn-icon-danger"
                     onClick={() => handleDeleteKey(key.id)}
-                    className="btn-icon-danger-sm"
-                    title="Excluir chave"
+                    disabled={deleting === key.id}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
-
-                <div className="api-key-value-compact">
-                  <code>{visibleKeys[key.id] ? key.key : maskKey(key.key)}</code>
-                  <div className="api-key-actions">
-                    <button
-                      onClick={() => toggleKeyVisibility(key.id)}
-                      className="btn-icon-sm"
-                      title={visibleKeys[key.id] ? "Ocultar chave" : "Mostrar chave"}
-                    >
-                      {visibleKeys[key.id] ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                    <button
-                      onClick={() => handleCopyKey(key.key)}
-                      className="btn-icon-sm"
-                      title="Copiar chave"
-                    >
-                      {copiedKey === key.key ? (
-                        <CheckCircle2 size={16} className="success" />
-                      ) : (
-                        <Copy size={16} />
-                      )}
-                    </button>
-                  </div>
+                <div className="key-value">
+                  <code>{key.key}</code>
+                  <button 
+                    className="btn-icon"
+                    onClick={() => handleCopyKey(key.key)}
+                  >
+                    {copiedKey === key.key ? (
+                      <CheckCircle2 size={18} className="success" />
+                    ) : (
+                      <Copy size={18} />
+                    )}
+                  </button>
                 </div>
-
-                <div className="api-key-stats-compact">
-                  <div className="stat-compact">
-                    <span className="stat-label-compact">Requisições</span>
-                    <span className="stat-value-compact">{(key.total_requests || 0).toLocaleString('pt-BR')}</span>
+                <div className="key-stats">
+                  <div className="key-stat">
+                    <p className="label">Total de Requisições</p>
+                    <p className="value">{(key.total_requests || 0).toLocaleString('pt-BR')}</p>
                   </div>
-                  <div className="stat-compact">
-                    <span className="stat-label-compact">Última Utilização</span>
-                    <span className="stat-value-compact">
-                      {key.last_used_at
-                        ? new Date(key.last_used_at).toLocaleString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        : 'Nunca'}
-                    </span>
+                  <div className="key-stat">
+                    <p className="label">Última Utilização</p>
+                    <p className="value">{key.last_used || 'Nunca'}</p>
                   </div>
-                  <div className="stat-compact">
-                    <span className={`status-badge-compact ${key.is_active ? 'active' : 'inactive'}`}>
-                      {key.is_active ? 'Ativa' : 'Inativa'}
-                    </span>
+                  <div className="key-stat">
+                    <p className="label">Status</p>
+                    <p className="value status-active">Ativa</p>
                   </div>
                 </div>
               </div>
