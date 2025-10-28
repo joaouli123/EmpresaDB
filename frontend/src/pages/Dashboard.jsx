@@ -15,14 +15,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const Dashboard = () => {
   const [usage, setUsage] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const [dbStats, setDbStats] = useState(null); // State to store database statistics
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const staticStats = {
-    total_empresas: 64000000,
-    total_estabelecimentos: 47000000,
-    total_socios: 26000000
-  };
+  // Removed staticStats as we will fetch real data
 
   useEffect(() => {
     loadData();
@@ -32,12 +29,14 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [usageRes, subRes] = await Promise.all([
+      const [usageRes, subRes, statsRes] = await Promise.all([
         userAPI.getUsage(),
-        api.get('/subscriptions/my-subscription')
+        api.get('/subscriptions/my-subscription'),
+        api.get('/stats') // Fetch actual database stats
       ]);
       setUsage(usageRes.data);
       setSubscription(subRes.data);
+      setDbStats(statsRes.data); // Set the fetched database stats
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setError('Falha ao carregar dados do dashboard.');
@@ -71,7 +70,7 @@ const Dashboard = () => {
     if (!usage || !usage.daily_usage) {
       return [];
     }
-    
+
     return usage.daily_usage.map(item => ({
       date: item.date,
       requests: item.requests || 0
@@ -95,7 +94,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Total de Empresas</p>
             <h3 className="stat-value">
-              {staticStats.total_empresas.toLocaleString('pt-BR')}
+              {dbStats?.total_empresas?.toLocaleString('pt-BR') || '0'}
             </h3>
           </div>
         </div>
@@ -107,7 +106,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Estabelecimentos</p>
             <h3 className="stat-value">
-              {staticStats.total_estabelecimentos.toLocaleString('pt-BR')}
+              {dbStats?.total_estabelecimentos?.toLocaleString('pt-BR') || '0'}
             </h3>
           </div>
         </div>
@@ -119,7 +118,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Total de Sócios</p>
             <h3 className="stat-value">
-              {staticStats.total_socios.toLocaleString('pt-BR')}
+              {dbStats?.total_socios?.toLocaleString('pt-BR') || '0'}
             </h3>
           </div>
         </div>
@@ -209,10 +208,10 @@ const Dashboard = () => {
             <div className="db-stat-item">
               <p className="db-stat-label">Renovação</p>
               <p className="db-stat-value">
-                {subscription.plan_name === 'Free' 
-                  ? 'Mensal (Gratuito)' 
-                  : subscription.renewal_date 
-                    ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR') 
+                {subscription.plan_name === 'Free'
+                  ? 'Mensal (Gratuito)'
+                  : subscription.renewal_date
+                    ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR')
                     : 'N/A'}
               </p>
             </div>
@@ -220,7 +219,7 @@ const Dashboard = () => {
           <div className="progress-bar" style={{ marginTop: '20px' }}>
             <div
               className="progress-fill"
-              style={{ 
+              style={{
                 width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%`,
                 backgroundColor: subscription.plan_name === 'Free' && ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) > 80 ? '#ef4444' : '#3b82f6'
               }}
@@ -228,8 +227,8 @@ const Dashboard = () => {
           </div>
           {subscription.plan_name === 'Free' && (
             <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <a 
-                href="/home#pricing" 
+              <a
+                href="/home#pricing"
                 style={{
                   display: 'inline-block',
                   backgroundColor: '#3b82f6',
