@@ -18,7 +18,7 @@ from src.api.rate_limiter import rate_limiter
 import logging
 import asyncio
 from functools import lru_cache
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.utils.cnpj_utils import clean_cnpj
 from src.api.security_logger import log_query
 
@@ -75,8 +75,8 @@ async def verify_api_key(x_api_key: str = Header(None)):
             cursor = conn.cursor()
             
             try:
-                # Buscar assinatura do usuário no Stripe
-                # Aceita 'active', 'trialing' OU 'canceled' se ainda dentro do período pago
+                # Buscar assinatura válida e ativa do usuário
+                # Filtra apenas status válidos (active, trialing, canceled) E que ainda estejam no período pago
                 cursor.execute("""
                     SELECT 
                         ss.status,
@@ -95,14 +95,93 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 """, (user['id'],))
                 subscription = cursor.fetchone()
                 
-                # Se não tem assinatura válida, bloquear acesso
+                # Se não tem assinatura válida, retornar erro informativo
                 if not subscription:
+                    # Verificar se tem assinatura mas com status problemático (past_due, unpaid, etc)
+                    cursor.execute("""
+                        SELECT ss.status, ss.current_period_end
+                        FROM clientes.stripe_subscriptions ss
+                        WHERE ss.user_id = %s
+                        ORDER BY ss.created_at DESC
+                        LIMIT 1
+                    """, (user['id'],))
+                    any_subscription = cursor.fetchone()
+                    
+                    if any_subscription:
+                        status = any_subscription[0]
+                        period_end = any_subscription[1]
+                        
+                        # Status com pagamento pendente
+                        if status == 'past_due':
+                            raise HTTPException(
+                                status_code=402,
+                                detail={
+                                    "error": "payment_past_due",
+                                    "message": "Sua assinatura está com pagamento pendente. Por favor, atualize suas informações de pagamento.",
+                                    "action_url": "/subscription",
+                                    "help": "Acesse a página de assinatura para atualizar seu método de pagamento",
+                                    "suggestions": [
+                                        "Atualize suas informações de pagamento",
+                                        "Verifique se seu cartão não está expirado",
+                                        "Entre em contato com seu banco se o problema persistir"
+                                    ]
+                                }
+                            )
+                        
+                        # Status não pago
+                        if status == 'unpaid':
+                            raise HTTPException(
+                                status_code=402,
+                                detail={
+                                    "error": "payment_failed",
+                                    "message": "Sua assinatura não foi paga. Por favor, atualize suas informações de pagamento para continuar usando a API.",
+                                    "action_url": "/subscription",
+                                    "help": "Verifique seu método de pagamento e tente novamente",
+                                    "suggestions": [
+                                        "Atualize seu método de pagamento",
+                                        "Verifique se há saldo suficiente",
+                                        "Tente usar outro cartão de crédito"
+                                    ]
+                                }
+                            )
+                        
+                        # Verificar se período expirou (comparação timezone-aware)
+                        if period_end:
+                            # Garantir que period_end seja timezone-aware
+                            if period_end.tzinfo is None:
+                                period_end = period_end.replace(tzinfo=timezone.utc)
+                            
+                            now_utc = datetime.now(timezone.utc)
+                            if period_end < now_utc:
+                                raise HTTPException(
+                                    status_code=403,
+                                    detail={
+                                        "error": "subscription_expired",
+                                        "message": f"Sua assinatura expirou em {period_end.strftime('%d/%m/%Y')}. Por favor, renove sua assinatura para continuar usando a API.",
+                                        "expired_date": period_end.strftime('%d/%m/%Y'),
+                                        "action_url": "/home#pricing",
+                                        "help": "Renove sua assinatura ou escolha um novo plano",
+                                        "suggestions": [
+                                            "Renove sua assinatura para continuar usando",
+                                            "Escolha um novo plano que atenda suas necessidades",
+                                            "Entre em contato com o suporte para opções de renovação"
+                                        ]
+                                    }
+                                )
+                    
+                    # Nenhuma assinatura encontrada ou status inválido
                     raise HTTPException(
                         status_code=403,
                         detail={
                             "error": "subscription_required",
                             "message": "Você não possui uma assinatura ativa. Por favor, assine um plano para usar a API.",
-                            "action_url": "/pricing"
+                            "action_url": "/home#pricing",
+                            "help": "Escolha um dos nossos planos para começar a usar a API",
+                            "suggestions": [
+                                "Escolha um plano que atenda suas necessidades",
+                                "Compare os recursos de cada plano",
+                                "Entre em contato para planos personalizados"
+                            ]
                         }
                     )
                 
@@ -130,14 +209,28 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 
                 # Verificar se excedeu o limite
                 if queries_used >= user['monthly_queries']:
+                    # Calcular data de renovação
+                    period_end = subscription[1]
+                    if period_end and period_end.tzinfo is None:
+                        period_end = period_end.replace(tzinfo=timezone.utc)
+                    renewal_date = period_end.strftime('%d/%m/%Y') if period_end else "N/A"
+                    
                     raise HTTPException(
                         status_code=429,
                         detail={
                             "error": "monthly_limit_exceeded",
-                            "message": f"Você atingiu o limite mensal de {user['monthly_queries']} consultas. Por favor, aguarde a renovação ou faça upgrade do seu plano.",
+                            "message": f"Você atingiu o limite mensal de {user['monthly_queries']:,} consultas do plano {user['plan']}.",
                             "queries_used": queries_used,
                             "monthly_limit": user['monthly_queries'],
-                            "action_url": "/pricing"
+                            "current_plan": user['plan'],
+                            "renewal_date": renewal_date,
+                            "action_url": "/home#pricing",
+                            "help": f"Seu plano será renovado em {renewal_date}. Para continuar usando a API agora, faça upgrade para um plano superior com mais consultas mensais.",
+                            "suggestions": [
+                                "Aguarde a renovação do plano",
+                                "Faça upgrade para um plano com mais consultas",
+                                "Entre em contato com o suporte para opções personalizadas"
+                            ]
                         }
                     )
                 
@@ -248,13 +341,35 @@ async def get_cnpj_data(
         if not cleaned_cnpj.isdigit():
             raise HTTPException(
                 status_code=400,
-                detail="CNPJ deve conter apenas números"
+                detail={
+                    "error": "invalid_cnpj_format",
+                    "message": "CNPJ inválido. O CNPJ deve conter apenas números.",
+                    "received": cnpj,
+                    "help": "Forneça um CNPJ válido com 14 dígitos numéricos. Exemplo: 00000000000191 ou 00.000.000/0001-91",
+                    "suggestions": [
+                        "Remova caracteres especiais (pontos, traços, barras)",
+                        "Use apenas números de 0 a 9",
+                        "Verifique se o CNPJ foi copiado corretamente"
+                    ]
+                }
             )
 
         if len(cleaned_cnpj) != 14:
             raise HTTPException(
                 status_code=400,
-                detail="CNPJ deve ter 14 dígitos"
+                detail={
+                    "error": "invalid_cnpj_length",
+                    "message": f"CNPJ inválido. O CNPJ deve ter exatamente 14 dígitos, mas recebeu {len(cleaned_cnpj)}.",
+                    "received": cnpj,
+                    "received_length": len(cleaned_cnpj),
+                    "expected_length": 14,
+                    "help": "Forneça um CNPJ válido com 14 dígitos. Exemplo: 00000000000191",
+                    "suggestions": [
+                        "Verifique se todos os 14 dígitos foram fornecidos",
+                        "Não inclua caracteres especiais, apenas números",
+                        "Confirme o CNPJ em documentos oficiais"
+                    ]
+                }
             )
 
         # Verifica cache primeiro
@@ -286,7 +401,20 @@ async def get_cnpj_data(
             cursor.close()
 
             if not result:
-                raise HTTPException(status_code=404, detail="CNPJ não encontrado")
+                raise HTTPException(
+                    status_code=404,
+                    detail={
+                        "error": "cnpj_not_found",
+                        "message": f"CNPJ {cnpj} não foi encontrado em nossa base de dados.",
+                        "cnpj": cnpj,
+                        "help": "Verifique se o CNPJ está correto. Nossa base é atualizada periodicamente com dados oficiais da Receita Federal.",
+                        "suggestions": [
+                            "Confirme se o CNPJ está digitado corretamente",
+                            "Verifique se o estabelecimento está ativo na Receita Federal",
+                            "Entre em contato com o suporte se acredita que este CNPJ deveria estar disponível"
+                        ]
+                    }
+                )
 
             columns = [
                 'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
