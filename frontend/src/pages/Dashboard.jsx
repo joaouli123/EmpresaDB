@@ -13,11 +13,16 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(null);
   const [usage, setUsage] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const staticStats = {
+    total_empresas: 64000000,
+    total_estabelecimentos: 47000000,
+    total_socios: 26000000
+  };
 
   useEffect(() => {
     loadData();
@@ -27,12 +32,10 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, usageRes, subRes] = await Promise.all([
-        cnpjAPI.getStats(),
+      const [usageRes, subRes] = await Promise.all([
         userAPI.getUsage(),
         api.get('/subscriptions/my-subscription')
       ]);
-      setStats(statsRes.data);
       setUsage(usageRes.data);
       setSubscription(subRes.data);
     } catch (error) {
@@ -92,7 +95,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Total de Empresas</p>
             <h3 className="stat-value">
-              {(stats?.total_empresas || 0).toLocaleString('pt-BR')}
+              {staticStats.total_empresas.toLocaleString('pt-BR')}
             </h3>
           </div>
         </div>
@@ -104,7 +107,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Estabelecimentos</p>
             <h3 className="stat-value">
-              {(stats?.total_estabelecimentos || 0).toLocaleString('pt-BR')}
+              {staticStats.total_estabelecimentos.toLocaleString('pt-BR')}
             </h3>
           </div>
         </div>
@@ -116,7 +119,7 @@ const Dashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Total de Sócios</p>
             <h3 className="stat-value">
-              {(stats?.total_socios || 0).toLocaleString('pt-BR')}
+              {staticStats.total_socios.toLocaleString('pt-BR')}
             </h3>
           </div>
         </div>
