@@ -77,19 +77,37 @@ async def get_current_user(token: str = Depends(db_manager.oauth2_scheme)):
     # token_data.username já foi validado como não-None acima
     if token_data.username is None:
         raise credentials_exception
-    
+
     user = await db_manager.get_user_by_username(token_data.username)
     if user is None:
         raise credentials_exception
     return user
 
-async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
-    if current_user.get('role') != 'admin':
+async def get_current_admin_user(token: str = Depends(db_manager.oauth2_scheme)) -> dict:
+    """
+    Verifica se o usuário atual é um administrador.
+    Requer token JWT válido com role 'admin'.
+    """
+    user = await get_current_user(token)
+
+    if user.get('role') != 'admin':
         raise HTTPException(
             status_code=403,
-            detail="Not enough permissions"
+            detail={
+                "error": "admin_only",
+                "message": "Este endpoint é exclusivo para administradores.",
+                "endpoint": "/search",
+                "current_user": user.get('email'),
+                "required_role": "admin",
+                "help": "O endpoint /search agora é restrito apenas ao administrador do sistema. Use o endpoint /cnpj/{cnpj} para consultas individuais.",
+                "suggestions": [
+                    "Use GET /cnpj/{cnpj} para consultar empresas específicas",
+                    "Entre em contato com o suporte se precisar de acesso especial"
+                ]
+            }
         )
-    return current_user
+
+    return user
 
 @router.get("/activate/{token}", response_class=HTMLResponse)
 async def activate_account(token: str):
@@ -98,7 +116,7 @@ async def activate_account(token: str):
     Retorna HTML com mensagem de sucesso/erro e redireciona para login
     """
     user = await db_manager.activate_user_by_token(token)
-    
+
     if not user:
         # Token inválido ou expirado
         return HTMLResponse(content=f"""
@@ -166,17 +184,17 @@ async def activate_account(token: str):
 </body>
 </html>
         """, status_code=400)
-    
+
     # Sucesso! Enviar email de boas-vindas
     try:
         from src.services.email_service import email_service
         from src.services.email_tracking import email_tracking_service
-        
+
         email_sent = email_service.send_account_creation_email(
             to_email=user['email'],
             username=user['username']
         )
-        
+
         email_tracking_service.log_email_sent(
             user_id=user["id"],
             email_type='account_created',
@@ -186,7 +204,7 @@ async def activate_account(token: str):
         )
     except Exception as e:
         logger.error(f"Erro ao enviar email de boas-vindas: {e}")
-    
+
     # Retornar HTML de sucesso com redirecionamento
     return HTMLResponse(content=f"""
 <!DOCTYPE html>
@@ -272,7 +290,7 @@ async def activate_account(token: str):
         function createConfetti() {{
             const colors = ['#3b82f6', '#38a169', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
             const confettiCount = 50;
-            
+
             for (let i = 0; i < confettiCount; i++) {{
                 setTimeout(() => {{
                     const confetti = document.createElement('div');
@@ -283,14 +301,14 @@ async def activate_account(token: str):
                     confetti.style.opacity = Math.random();
                     confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
                     document.body.appendChild(confetti);
-                    
+
                     setTimeout(() => {{
                         confetti.remove();
                     }}, 5000);
                 }}, i * 30);
             }}
         }}
-        
+
         createConfetti();
     </script>
 </body>
@@ -309,7 +327,7 @@ async def register(user: UserCreate):
 
     # Gerar token de ativação
     activation_token = db_manager.generate_activation_token()
-    
+
     # Criar usuário INATIVO (is_active=False)
     hashed_password = get_password_hash(user.password)
     new_user = await db_manager.create_user(
@@ -319,13 +337,13 @@ async def register(user: UserCreate):
         activation_token=activation_token,
         is_active=False
     )
-    
+
     if not new_user or "id" not in new_user:
         raise HTTPException(
             status_code=500,
             detail="Erro ao criar usuário. Tente novamente."
         )
-    
+
     # Construir link de ativação (aponta para o backend endpoint)
     # O endpoint retorna HTML que redireciona para o frontend
     replit_domain = os.getenv('REPLIT_DOMAINS', '')
@@ -334,20 +352,20 @@ async def register(user: UserCreate):
     else:
         # Fallback para desenvolvimento local
         base_url = "http://localhost:8000"
-    
+
     activation_link = f"{base_url}/auth/activate/{activation_token}"
-    
+
     # Enviar email de ATIVAÇÃO (não boas-vindas!)
     try:
         from src.services.email_service import email_service
         from src.services.email_tracking import email_tracking_service
-        
+
         email_sent = email_service.send_account_activation_email(
             to_email=user.email,
             username=user.username,
             activation_link=activation_link
         )
-        
+
         # Registrar envio no tracking
         email_tracking_service.log_email_sent(
             user_id=new_user["id"],
@@ -362,7 +380,7 @@ async def register(user: UserCreate):
             status_code=500,
             detail="Erro ao enviar email de ativação. Tente novamente."
         )
-    
+
     # NÃO retornar access_token - usuário precisa ativar primeiro!
     # NÃO enviar email de boas-vindas - será enviado após ativação
     return {
@@ -374,17 +392,17 @@ async def register(user: UserCreate):
 async def login(form_data: UserLogin):
     # Tenta buscar por username primeiro
     user = await db_manager.get_user_by_username(form_data.username)
-    
+
     # Se não encontrou, tenta buscar por email
     if not user:
         user = await db_manager.get_user_by_email(form_data.username)
-    
+
     if not user or not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=400,
             detail="Usuário/email ou senha incorretos",
         )
-    
+
     # Verificar se usuário está ativo
     if not user.get("is_active", True):
         raise HTTPException(
@@ -398,7 +416,7 @@ async def login(form_data: UserLogin):
     access_token = create_access_token(
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )
-    
+
     user_data = {k: v for k, v in user.items() if k != 'password'}
     return {"access_token": access_token, "token_type": "bearer", "user": user_data}
 

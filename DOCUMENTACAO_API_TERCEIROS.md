@@ -110,7 +110,15 @@ GET /cnpj/00000000000191
 
 Busca empresas com filtros avançados e paginação.
 
+**⚠️ ENDPOINT EXCLUSIVO PARA ADMINISTRADOR**
+
 **Endpoint**: `GET /search`
+
+**Autenticação**: Requer token JWT de administrador (role: admin)  
+**Acesso**: Apenas jl.uli1996@gmail.com (acesso ilimitado)
+
+> **Nota**: Este endpoint não está disponível para usuários regulares via API Key.  
+> Para consultas individuais, use `GET /cnpj/{cnpj}`.
 
 #### 📋 Parâmetros de Filtro
 

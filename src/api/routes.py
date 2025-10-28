@@ -489,21 +489,22 @@ async def search_companies(
     data_inicio_atividade_max: str = Query(None, description="Data início atividade máxima (YYYY-MM-DD)"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    user: dict = Depends(verify_api_key)
+    current_user: dict = Depends(get_current_admin_user)
 ):
     """
     Pesquisa empresas por múltiplos critérios
-    Requer autenticação via API Key no header 'X-API-Key'
-    Rate limit aplicado conforme plano de assinatura
+    ⚠️ ENDPOINT EXCLUSIVO PARA ADMINISTRADOR
+    Acesso ilimitado apenas para: jl.uli1996@gmail.com
     """
     try:
-        # Log de auditoria
+        # Log de auditoria (admin tem acesso ilimitado)
         await log_query(
-            user_id=user['id'],
-            action='search',
+            user_id=current_user['id'],
+            action='search_admin',
             resource='/search',
             details={
-                'plan': user.get('plan', 'free'),
+                'admin_email': current_user.get('email'),
+                'unlimited_access': True,
                 'filters': {
                     'razao_social': razao_social,
                     'cnae': cnae,

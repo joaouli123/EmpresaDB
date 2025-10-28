@@ -65,7 +65,6 @@ No mesmo dia do mês em que você contratou. Ex: Se contratou dia 15, renova tod
 
 Cada requisição aos seguintes endpoints conta:
 - `GET /cnpj/{cnpj}` = 1 consulta
-- `GET /search` = 1 consulta (independente da quantidade de resultados)
 - `GET /cnpj/{cnpj}/socios` = 1 consulta
 
 Endpoints que NÃO consomem limite:
@@ -73,6 +72,11 @@ Endpoints que NÃO consomem limite:
 - `GET /stats`
 - `GET /cnaes`
 - `GET /municipios/{uf}`
+
+Endpoints RESTRITOS (apenas administrador):
+- `GET /search` - Exclusivo para admin (jl.uli1996@gmail.com)
+  - **Acesso ilimitado** para o administrador
+  - Usuários regulares devem usar `GET /cnpj/{cnpj}` para consultas individuais
 
 ---
 
