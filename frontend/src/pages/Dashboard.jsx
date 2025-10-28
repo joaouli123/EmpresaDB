@@ -95,7 +95,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Total de Empresas</p>
-            <h3 className="stat-value">64.000.000</h3>
+            <h3 className="stat-value">+64Mi</h3>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Estabelecimentos</p>
-            <h3 className="stat-value">47.000.000</h3>
+            <h3 className="stat-value">+47Mi</h3>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Total de Sócios</p>
-            <h3 className="stat-value">26.000.000</h3>
+            <h3 className="stat-value">+26Mi</h3>
           </div>
         </div>
 
