@@ -194,9 +194,10 @@ async def root():
     )
 
 @router.get("/stats", response_model=StatsResponse)
-async def get_stats():
+async def get_stats(current_user: dict = Depends(get_current_user)):
     """
-    Retorna estatísticas do banco de dados
+    Retorna estatísticas do banco de dados (DADOS GLOBAIS DO SISTEMA)
+    Requer autenticação
     Cache: 10 minutos (contagens são estimativas rápidas)
     """
     cache_key = "stats_cached"

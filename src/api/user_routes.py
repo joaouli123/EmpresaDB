@@ -101,27 +101,28 @@ async def delete_api_key(
 
 @router.get("/usage")
 async def get_usage(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna dados de uso REAIS do usuário autenticado
+    NÃO retorna dados simulados/aleatórios
+    """
     try:
         usage_data = await db_manager.get_user_usage(current_user['id'], days=7)
         
-        # Se não houver dados, gerar dados demo
+        # Se não houver dados, retornar zeros (usuário novo ou sem consultas)
         if not usage_data or len(usage_data) == 0:
-            import random
             daily_usage = []
-            total_today = random.randint(15, 50)
-            
             for i in range(6, -1, -1):
                 date_obj = datetime.now() - timedelta(days=i)
                 daily_usage.append({
                     'date': date_obj.strftime('%d/%m'),
-                    'requests': random.randint(10, 60) if i > 0 else total_today
+                    'requests': 0
                 })
             
             return {
                 'daily_usage': daily_usage,
-                'queries_used_today': total_today,
-                'requests_today': total_today,
-                'avg_response_time': '45ms',
+                'queries_used_today': 0,
+                'requests_today': 0,
+                'avg_response_time': '0ms',
                 'last_update': 'Hoje'
             }
         
@@ -144,14 +145,7 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
         }
     except Exception as e:
         logger.error(f"Error getting usage: {e}")
-        import random
-        return {
-            'daily_usage': [],
-            'queries_used_today': random.randint(15, 50),
-            'requests_today': random.randint(15, 50),
-            'avg_response_time': '45ms',
-            'last_update': 'Hoje'
-        }
+        raise HTTPException(status_code=500, detail="Error getting usage data")
 
 @router.get("/rate-limit-status")
 async def get_rate_limit_status(current_user: dict = Depends(get_current_user)):
