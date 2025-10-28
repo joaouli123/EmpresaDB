@@ -5,9 +5,9 @@ from urllib.parse import urlparse, unquote
 from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 
-# ⚠️ FORÇAR CARREGAMENTO DO .ENV ANTES DE TUDO
-# Isso garante que o .env tenha prioridade sobre variáveis de ambiente do Replit
-load_dotenv(override=True)
+# ✅ Carrega .env mas NÃO sobrescreve Replit Secrets (override=False)
+# Prioridade: 1. Replit Secrets → 2. .env → 3. Defaults
+load_dotenv(override=False)
 
 
 class Settings(BaseSettings):
