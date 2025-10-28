@@ -95,7 +95,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Total de Empresas</p>
-            <h3 className="stat-value">+64Mi</h3>
+            <h3 className="stat-value">+65Mi</h3>
           </div>
         </div>
 
