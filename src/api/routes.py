@@ -73,7 +73,7 @@ async def verify_api_key(x_api_key: str = Header(None)):
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             try:
                 # Buscar assinatura válida e ativa do usuário
                 # Filtra apenas status válidos (active, trialing, canceled) E que ainda estejam no período pago
@@ -94,8 +94,8 @@ async def verify_api_key(x_api_key: str = Header(None)):
                     LIMIT 1
                 """, (user['id'],))
                 subscription = cursor.fetchone()
-                
-                # Se não tem assinatura válida, retornar erro informativo
+
+                # Se não tem assinatura Stripe, verificar se deve usar Free Plan
                 if not subscription:
                     # Verificar se tem assinatura mas com status problemático (past_due, unpaid, etc)
                     cursor.execute("""
@@ -106,11 +106,11 @@ async def verify_api_key(x_api_key: str = Header(None)):
                         LIMIT 1
                     """, (user['id'],))
                     any_subscription = cursor.fetchone()
-                    
+
                     if any_subscription:
                         status = any_subscription[0]
                         period_end = any_subscription[1]
-                        
+
                         # Status com pagamento pendente
                         if status == 'past_due':
                             raise HTTPException(
@@ -127,7 +127,7 @@ async def verify_api_key(x_api_key: str = Header(None)):
                                     ]
                                 }
                             )
-                        
+
                         # Status não pago
                         if status == 'unpaid':
                             raise HTTPException(
@@ -144,13 +144,13 @@ async def verify_api_key(x_api_key: str = Header(None)):
                                     ]
                                 }
                             )
-                        
+
                         # Verificar se período expirou (comparação timezone-aware)
                         if period_end:
                             # Garantir que period_end seja timezone-aware
                             if period_end.tzinfo is None:
                                 period_end = period_end.replace(tzinfo=timezone.utc)
-                            
+
                             now_utc = datetime.now(timezone.utc)
                             if period_end < now_utc:
                                 raise HTTPException(
@@ -168,34 +168,26 @@ async def verify_api_key(x_api_key: str = Header(None)):
                                         ]
                                     }
                                 )
-                    
+
                     # Nenhuma assinatura encontrada ou status inválido
-                    raise HTTPException(
-                        status_code=403,
-                        detail={
-                            "error": "subscription_required",
-                            "message": "Você não possui uma assinatura ativa. Por favor, assine um plano para usar a API.",
-                            "action_url": "/home#pricing",
-                            "help": "Escolha um dos nossos planos para começar a usar a API",
-                            "suggestions": [
-                                "Escolha um plano que atenda suas necessidades",
-                                "Compare os recursos de cada plano",
-                                "Entre em contato para planos personalizados"
-                            ]
-                        }
-                    )
-                
-                # Tem assinatura válida (ainda dentro do período pago)
-                user['plan'] = subscription[3]  # plan_name
-                user['monthly_queries'] = subscription[4]  # monthly_queries
-                plan_id = subscription[5]
-                
-                # Avisar se está cancelada mas ainda ativa
-                if subscription[0] == 'canceled':
-                    logger.info(f"Usuário {user['id']} tem assinatura cancelada mas ainda válida até {subscription[1]}")
-                elif subscription[2]:  # cancel_at_period_end
-                    logger.info(f"Usuário {user['id']} tem assinatura marcada para cancelar no final do período")
-                
+                    # Assumir plano Free (200 consultas/mês)
+                    user['plan'] = 'free'
+                    user['monthly_queries'] = 200
+                    user['queries_remaining'] = 200 # Inicialmente
+
+                    logger.info(f"Usuário {user['id']} usando plano Free (sem assinatura Stripe ativa)")
+
+                else: # Tem assinatura Stripe válida
+                    user['plan'] = subscription[3]  # plan_name
+                    user['monthly_queries'] = subscription[4]  # monthly_queries
+                    plan_id = subscription[5]
+
+                    # Avisar se está cancelada mas ainda ativa
+                    if subscription[0] == 'canceled':
+                        logger.info(f"Usuário {user['id']} tem assinatura cancelada mas ainda válida até {subscription[1]}")
+                    elif subscription[2]:  # cancel_at_period_end
+                        logger.info(f"Usuário {user['id']} tem assinatura marcada para cancelar no final do período")
+
                 # VERIFICAÇÃO DE LIMITE MENSAL DE CONSULTAS
                 month_year = datetime.now().strftime('%Y-%m')
                 cursor.execute("""
@@ -204,25 +196,33 @@ async def verify_api_key(x_api_key: str = Header(None)):
                     WHERE user_id = %s AND month_year = %s
                 """, (user['id'], month_year))
                 usage = cursor.fetchone()
-                
+
                 queries_used = usage[0] if usage else 0
-                
+                monthly_limit = user.get('monthly_queries', 200) # Default para 200 se não encontrado
+
                 # Verificar se excedeu o limite
-                if queries_used >= user['monthly_queries']:
+                if queries_used >= monthly_limit:
                     # Calcular data de renovação
-                    period_end = subscription[1]
-                    if period_end and period_end.tzinfo is None:
-                        period_end = period_end.replace(tzinfo=timezone.utc)
-                    renewal_date = period_end.strftime('%d/%m/%Y') if period_end else "N/A"
-                    
+                    period_end = subscription[1] if subscription else None # Pega do subscription se existir
+                    renewal_date = "N/A"
+                    if period_end:
+                        if period_end.tzinfo is None:
+                            period_end = period_end.replace(tzinfo=timezone.utc)
+                        renewal_date = period_end.strftime('%d/%m/%Y')
+                    elif user.get('plan') == 'free':
+                        # Para plano Free, renova no início do próximo mês
+                        now = datetime.now(timezone.utc)
+                        next_month = now.replace(day=1, month=now.month % 12 + 1, year=now.year if now.month < 12 else now.year + 1)
+                        renewal_date = next_month.strftime('%d/%m/%Y')
+
                     raise HTTPException(
                         status_code=429,
                         detail={
                             "error": "monthly_limit_exceeded",
-                            "message": f"Você atingiu o limite mensal de {user['monthly_queries']:,} consultas do plano {user['plan']}.",
+                            "message": f"Você atingiu o limite mensal de {monthly_limit:,} consultas do plano {user.get('plan', 'free')}.",
                             "queries_used": queries_used,
-                            "monthly_limit": user['monthly_queries'],
-                            "current_plan": user['plan'],
+                            "monthly_limit": monthly_limit,
+                            "current_plan": user.get('plan', 'free'),
                             "renewal_date": renewal_date,
                             "action_url": "/home#pricing",
                             "help": f"Seu plano será renovado em {renewal_date}. Para continuar usando a API agora, faça upgrade para um plano superior com mais consultas mensais.",
@@ -233,7 +233,7 @@ async def verify_api_key(x_api_key: str = Header(None)):
                             ]
                         }
                     )
-                
+
                 # Incrementar contador de uso mensal
                 cursor.execute("""
                     INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
@@ -243,15 +243,15 @@ async def verify_api_key(x_api_key: str = Header(None)):
                         queries_used = clientes.monthly_usage.queries_used + 1,
                         last_query_at = NOW()
                 """, (user['id'], month_year))
-                
+
                 # Armazenar informações de uso para logging
                 user['queries_used'] = queries_used + 1  # Incluir esta consulta
-                user['queries_remaining'] = user['monthly_queries'] - (queries_used + 1)
-                
+                user['queries_remaining'] = monthly_limit - (queries_used + 1)
+
             finally:
                 # Garantir que cursor sempre seja fechado
                 cursor.close()
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -294,12 +294,12 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
     Cache: 10 minutos (contagens são estimativas rápidas)
     """
     cache_key = "stats_cached"
-    
+
     # Verifica cache primeiro (10 minutos)
     cached_stats = get_from_cache(cache_key)
     if cached_stats:
         return cached_stats
-    
+
     try:
         stats = StatsResponse(
             total_empresas=db_manager.get_table_count('empresas') or 0,
@@ -308,10 +308,10 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
             total_cnaes=db_manager.get_table_count('cnaes') or 0,
             total_municipios=db_manager.get_table_count('municipios') or 0
         )
-        
+
         # Cacheia por 10 minutos
         set_cache(cache_key, stats, minutes=10)
-        
+
         return stats
     except Exception as e:
         logger.error(f"Erro ao obter estatísticas: {e}")
@@ -328,7 +328,7 @@ async def get_cnpj_data(
     Rate limit aplicado conforme plano de assinatura
     """
     cleaned_cnpj = clean_cnpj(cnpj)
-    
+
     try:
         # Log de auditoria
         await log_query(
@@ -515,7 +515,7 @@ async def search_companies(
         )
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # IMPORTANTE: Desabilitar parallel workers para evitar erro de memória no Replit
             cursor.execute("SET max_parallel_workers_per_gather = 0")
 
@@ -581,7 +581,7 @@ async def search_companies(
             # OTIMIZAÇÃO: Para buscas com ILIKE, fazer COUNT rápido usando EXPLAIN
             # Se a busca tem ILIKE (razao_social ou nome_fantasia), usar estimativa
             use_fast_count = razao_social or nome_fantasia
-            
+
             if use_fast_count and offset == 0:
                 # Para primeira página, usar EXPLAIN para estimativa rápida
                 explain_query = f"""
@@ -592,7 +592,7 @@ async def search_companies(
                 """
                 cursor.execute(explain_query, params)
                 explain_result = cursor.fetchone()
-                
+
                 if explain_result and explain_result[0]:
                     import json
                     # explain_result[0] pode ser string JSON ou lista/dict já parseado
@@ -600,7 +600,7 @@ async def search_companies(
                         plan = json.loads(explain_result[0])
                     else:
                         plan = explain_result[0]
-                    
+
                     estimated_rows = plan[0]['Plan'].get('Plan Rows', 0)
                     total = int(estimated_rows)
                     logger.info(f"⚡ Usando estimativa rápida: ~{total} registros")
@@ -640,16 +640,16 @@ async def search_companies(
             logger.info(f"📊 Query WHERE: {where_clause}")
             logger.info(f"📊 Params: {params}")
             logger.info(f"📊 Limit: {limit}, Offset: {offset}")
-            
+
             cursor.execute(data_query, params + [limit, offset])
             results = cursor.fetchall()
-            
+
             # Log dos primeiros 3 resultados para debug
             if results and len(results) > 0:
                 logger.info(f"📊 Total resultados retornados: {len(results)}")
                 for i, row in enumerate(results[:3]):
                     logger.info(f"📊 Resultado {i+1}: CNPJ={row[0]}, Data Início={row[6]}")
-            
+
             cursor.close()
 
             columns = [
@@ -777,7 +777,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     """
     cleaned_cnpj = clean_cnpj(cnpj)
     cnpj_basico = cleaned_cnpj[:8]
-    
+
     try:
         # Log de auditoria
         await log_query(
