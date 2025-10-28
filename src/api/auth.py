@@ -74,6 +74,10 @@ async def get_current_user(token: str = Depends(db_manager.oauth2_scheme)):
         logger.error(f"Error decoding token: {e}")
         raise credentials_exception
 
+    # token_data.username já foi validado como não-None acima
+    if token_data.username is None:
+        raise credentials_exception
+    
     user = await db_manager.get_user_by_username(token_data.username)
     if user is None:
         raise credentials_exception
@@ -244,6 +248,12 @@ async def register(user: UserCreate):
         activation_token=activation_token,
         is_active=False
     )
+    
+    if not new_user or "id" not in new_user:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao criar usuário. Tente novamente."
+        )
     
     # Construir link de ativação (aponta para o backend endpoint)
     # O endpoint retorna HTML que redireciona para o frontend
