@@ -12,7 +12,6 @@ import EmailLogs from './pages/admin/EmailLogs';
 import Profile from './pages/Profile';
 import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
-import Pricing from './pages/Pricing';
 import Subscription from './pages/Subscription';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -51,14 +50,6 @@ function AppRoutes() {
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
-        <Route
-          path="/pricing"
-          element={
-            <PublicLayout>
-              <Pricing />
-            </PublicLayout>
-          }
         />
         <Route
           path="/"

@@ -54,7 +54,7 @@ const Login = () => {
                 const checkoutResponse = await api.post('/stripe/create-checkout-session', {
                   plan_id: planId,
                   success_url: `${window.location.origin}/subscription?success=true`,
-                  cancel_url: `${window.location.origin}/pricing?canceled=true`
+                  cancel_url: `${window.location.origin}/home#pricing`
                 });
                 
                 if (checkoutResponse.data.url) {

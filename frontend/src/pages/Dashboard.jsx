@@ -226,7 +226,7 @@ const Dashboard = () => {
           {subscription.plan_name === 'Free' && (
             <div style={{ marginTop: '16px', textAlign: 'center' }}>
               <a 
-                href="/pricing" 
+                href="/home#pricing" 
                 style={{
                   display: 'inline-block',
                   backgroundColor: '#3b82f6',

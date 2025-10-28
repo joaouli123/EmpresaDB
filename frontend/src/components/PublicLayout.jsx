@@ -16,9 +16,9 @@ const PublicLayout = ({ children }) => {
               <Home size={18} />
               Início
             </Link>
-            <Link to="/pricing" className="nav-link">
+            <a href="/home#pricing" className="nav-link">
               Preços
-            </Link>
+            </a>
             <Link to="/login" className="nav-link nav-login">
               <LogIn size={18} />
               Entrar

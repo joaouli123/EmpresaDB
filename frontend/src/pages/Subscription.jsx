@@ -228,7 +228,7 @@ const Subscription = () => {
             </p>
           </div>
           <a 
-            href="/pricing" 
+            href="/home#pricing" 
             style={{
               display: 'inline-block',
               backgroundColor: 'white',
@@ -325,7 +325,7 @@ const Subscription = () => {
         <div className="plan-actions">
           {isFree ? (
             <a 
-              href="/pricing" 
+              href="/home#pricing" 
               className="btn-primary"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
             >
