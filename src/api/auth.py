@@ -98,6 +98,25 @@ async def register(user: UserCreate):
     hashed_password = get_password_hash(user.password)
     new_user = await db_manager.create_user(user.username, user.email, hashed_password)
     
+    try:
+        from src.services.email_service import email_service
+        from src.services.email_tracking import email_tracking_service
+        
+        email_sent = email_service.send_account_creation_email(
+            to_email=user.email,
+            username=user.username
+        )
+        
+        email_tracking_service.log_email_sent(
+            user_id=new_user["id"],
+            email_type='account_created',
+            recipient_email=user.email,
+            subject="Bem-vindo ao DB Empresas",
+            status='sent' if email_sent else 'failed'
+        )
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de boas-vindas: {e}")
+    
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": new_user["username"]}, expires_delta=access_token_expires

@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS clientes.email_logs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    email_type VARCHAR(50) NOT NULL, -- 'account_created', 'activation', 'subscription_created', 'subscription_renewed', 'subscription_expired', 'subscription_cancelled'
+    email_type VARCHAR(50) NOT NULL, -- 'account_created', 'activation', 'subscription_created', 'subscription_renewed', 'subscription_expired', 'subscription_cancelled', 'usage_50', 'usage_80'
     recipient_email VARCHAR(255) NOT NULL,
     subject VARCHAR(500),
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -12,6 +12,21 @@ CREATE TABLE IF NOT EXISTS clientes.email_logs (
     error_message TEXT,
     metadata JSONB, -- Dados adicionais (plan_name, etc)
     FOREIGN KEY (user_id) REFERENCES clientes.users(id) ON DELETE CASCADE
+);
+
+-- Tabela para controle de notificações de uso enviadas
+CREATE TABLE IF NOT EXISTS clientes.usage_notifications_sent (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    month_year VARCHAR(7) NOT NULL,
+    notification_50_sent BOOLEAN DEFAULT FALSE,
+    notification_80_sent BOOLEAN DEFAULT FALSE,
+    sent_50_at TIMESTAMP,
+    sent_80_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES clientes.users(id) ON DELETE CASCADE,
+    UNIQUE(user_id, month_year)
 );
 
 -- Tabela para controle de follow-ups de assinaturas vencidas

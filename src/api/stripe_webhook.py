@@ -63,6 +63,7 @@ async def handle_checkout_session_completed(event_data: dict):
                         plan_id, status, current_period_start, current_period_end,
                         cancel_at_period_end
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
                 """, (
                     user_id,
                     subscription_id,
@@ -74,11 +75,53 @@ async def handle_checkout_session_completed(event_data: dict):
                     subscription.get('cancel_at_period_end', False)
                 ))
                 
+                new_subscription_id = cursor.fetchone()[0]
+                
+                # Buscar dados do usuário e plano para enviar email
+                cursor.execute("""
+                    SELECT u.username, u.email, p.display_name, p.price_brl
+                    FROM clientes.users u
+                    INNER JOIN clientes.plans p ON p.id = %s
+                    WHERE u.id = %s
+                """, (plan_id, user_id))
+                
+                user_data = cursor.fetchone()
+                cursor.close()
+                
+                if user_data:
+                    username, email, plan_name, plan_price = user_data
+                    next_billing = datetime.fromtimestamp(subscription['current_period_end']).strftime('%d/%m/%Y')
+                    
+                    try:
+                        from src.services.email_service import email_service
+                        from src.services.email_tracking import email_tracking_service
+                        
+                        email_sent = email_service.send_subscription_created_email(
+                            to_email=email,
+                            username=username,
+                            plan_name=plan_name,
+                            plan_price=float(plan_price),
+                            next_billing_date=next_billing
+                        )
+                        
+                        email_tracking_service.log_email_sent(
+                            user_id=user_id,
+                            email_type='subscription_created',
+                            recipient_email=email,
+                            subject="Assinatura Confirmada - DB Empresas",
+                            status='sent' if email_sent else 'failed',
+                            metadata={'plan_name': plan_name, 'plan_price': float(plan_price)}
+                        )
+                        
+                        # Marcar follow-ups anteriores como abandonados (assinatura foi renovada)
+                        email_tracking_service.mark_followup_abandoned(user_id, new_subscription_id)
+                        
+                    except Exception as e:
+                        logger.error(f"Erro ao enviar email de assinatura criada: {e}")
+                
                 logger.info(f"✅ Assinatura criada: {subscription_id} para user_id: {user_id}")
             else:
                 logger.info(f"Assinatura {subscription_id} já existe no banco")
-            
-            cursor.close()
             
     except Exception as e:
         logger.error(f"Erro ao processar checkout.session.completed: {e}")
@@ -148,13 +191,14 @@ async def handle_subscription_deleted(event_data: dict):
 async def handle_invoice_paid(event_data: dict):
     """
     Processa evento de fatura paga
-    Registra a transação no histórico
+    Registra a transação no histórico e envia email de renovação
     """
     try:
         invoice = event_data['object']
         
         # Buscar user_id pela customer_id
         customer_id = invoice.get('customer')
+        subscription_id = invoice.get('subscription')
         
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
@@ -182,7 +226,7 @@ async def handle_invoice_paid(event_data: dict):
                     user_id,
                     invoice['id'],
                     invoice.get('subscription'),
-                    invoice.get('amount_due', 0) / 100,  # Converter de centavos
+                    invoice.get('amount_due', 0) / 100,
                     invoice.get('amount_paid', 0) / 100,
                     invoice.get('currency', 'brl'),
                     invoice['status'],
@@ -190,6 +234,63 @@ async def handle_invoice_paid(event_data: dict):
                     invoice.get('hosted_invoice_url'),
                     datetime.fromtimestamp(invoice['status_transitions']['paid_at']) if invoice.get('status_transitions', {}).get('paid_at') else None
                 ))
+                
+                # Verificar se é renovação (não é primeira fatura)
+                if subscription_id:
+                    cursor.execute("""
+                        SELECT 
+                            u.username, u.email, p.display_name, 
+                            ss.current_period_end, ss.id
+                        FROM clientes.users u
+                        INNER JOIN clientes.stripe_subscriptions ss ON u.id = ss.user_id
+                        INNER JOIN clientes.plans p ON ss.plan_id = p.id
+                        WHERE ss.stripe_subscription_id = %s
+                            AND ss.user_id = %s
+                    """, (subscription_id, user_id))
+                    
+                    sub_data = cursor.fetchone()
+                    
+                    if sub_data:
+                        username, email, plan_name, period_end, db_subscription_id = sub_data
+                        amount_paid = invoice.get('amount_paid', 0) / 100
+                        
+                        # Verificar se não é a primeira fatura (renovação)
+                        cursor.execute("""
+                            SELECT COUNT(*) FROM clientes.stripe_invoices
+                            WHERE user_id = %s AND stripe_subscription_id = %s
+                        """, (user_id, subscription_id))
+                        
+                        invoice_count = cursor.fetchone()[0]
+                        
+                        if invoice_count > 1:  # É renovação
+                            next_billing = period_end.strftime('%d/%m/%Y') if period_end else 'N/A'
+                            
+                            try:
+                                from src.services.email_service import email_service
+                                from src.services.email_tracking import email_tracking_service
+                                
+                                email_sent = email_service.send_subscription_renewed_email(
+                                    to_email=email,
+                                    username=username,
+                                    plan_name=plan_name,
+                                    amount_paid=amount_paid,
+                                    next_billing_date=next_billing
+                                )
+                                
+                                email_tracking_service.log_email_sent(
+                                    user_id=user_id,
+                                    email_type='subscription_renewed',
+                                    recipient_email=email,
+                                    subject="Assinatura Renovada - DB Empresas",
+                                    status='sent' if email_sent else 'failed',
+                                    metadata={'plan_name': plan_name, 'amount_paid': amount_paid}
+                                )
+                                
+                                # Marcar follow-ups como abandonados (assinatura renovada)
+                                email_tracking_service.mark_followup_abandoned(user_id, db_subscription_id)
+                                
+                            except Exception as e:
+                                logger.error(f"Erro ao enviar email de renovação: {e}")
                 
                 logger.info(f"✅ Fatura paga registrada: {invoice['id']} para user_id: {user_id}")
             
@@ -202,10 +303,12 @@ async def handle_invoice_paid(event_data: dict):
 async def handle_invoice_payment_failed(event_data: dict):
     """
     Processa evento de falha no pagamento
+    Inicia processo de follow-up para assinatura vencida
     """
     try:
         invoice = event_data['object']
         subscription_id = invoice.get('subscription')
+        customer_id = invoice.get('customer')
         
         if subscription_id:
             with db_manager.get_connection() as conn:
@@ -215,7 +318,22 @@ async def handle_invoice_payment_failed(event_data: dict):
                     SET status = 'past_due',
                         updated_at = CURRENT_TIMESTAMP
                     WHERE stripe_subscription_id = %s
+                    RETURNING user_id, id
                 """, (subscription_id,))
+                
+                result = cursor.fetchone()
+                
+                if result:
+                    user_id, db_subscription_id = result
+                    
+                    # Iniciar tracking de follow-up para assinatura vencida
+                    try:
+                        from src.services.email_tracking import email_tracking_service
+                        email_tracking_service.get_or_create_followup_tracking(user_id, db_subscription_id)
+                        logger.info(f"Follow-up tracking iniciado para user_id={user_id}, subscription_id={db_subscription_id}")
+                    except Exception as e:
+                        logger.error(f"Erro ao criar tracking de follow-up: {e}")
+                
                 cursor.close()
                 
         logger.warning(f"⚠️ Falha no pagamento da fatura: {invoice['id']}")
