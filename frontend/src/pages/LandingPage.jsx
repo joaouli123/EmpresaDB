@@ -72,7 +72,7 @@ const LandingPage = () => {
         'Dados atualizados diariamente',
         'Suporte prioritário',
         'Dashboard avançado',
-        'Exportação em Excel/CSV',
+        'Consulta de sócios (QSA)',
         'Filtros personalizados'
       ],
       popular: true
@@ -90,9 +90,9 @@ const LandingPage = () => {
         'Dados em tempo real',
         'Suporte 24/7',
         'Dashboard personalizado',
-        'Exportação ilimitada',
-        'Webhooks e integrações',
-        'Relatórios customizados'
+        'Todos os filtros avançados',
+        'Integração via API Key',
+        'Histórico completo de uso'
       ],
       popular: false
     }
@@ -131,8 +131,8 @@ const LandingPage = () => {
     },
     {
       icon: <BarChart3 size={32} />,
-      title: 'Relatórios Detalhados',
-      description: 'Visualize dados, exporte relatórios e tome decisões baseadas em informação real'
+      title: 'Dados Estruturados',
+      description: 'Receba dados em JSON organizados e prontos para análise e integração com suas ferramentas'
     }
   ];
 
@@ -310,21 +310,21 @@ const LandingPage = () => {
       role: 'CEO, TechStart Consultoria',
       avatar: 'CS',
       rating: 5,
-      text: 'Transformou nossa prospecção B2B! Conseguimos identificar leads qualificados 3x mais rápido com os filtros avançados.'
+      text: 'Transformou nossa prospecção B2B! Os filtros avançados por CNAE, localização e porte nos ajudam a identificar leads qualificados 3x mais rápido.'
     },
     {
       name: 'Marina Costa',
       role: 'Analista de Compliance',
       avatar: 'MC',
       rating: 5,
-      text: 'Ferramenta essencial para due diligence. Dados precisos e atualizados que fazem toda diferença no nosso trabalho.'
+      text: 'Ferramenta essencial para due diligence. Consultar sócios, situação cadastral e dados atualizados faz toda diferença no nosso trabalho.'
     },
     {
       name: 'Roberto Almeida',
       role: 'Desenvolvedor Full Stack',
       avatar: 'RA',
       rating: 5,
-      text: 'API muito bem documentada e fácil de integrar. Em 30 minutos já estava consultando dados no meu sistema!'
+      text: 'API RESTful muito bem documentada e fácil de integrar. Em 30 minutos já estava consultando CNPJs e filtrando empresas no meu sistema!'
     }
   ];
 
@@ -623,7 +623,7 @@ const LandingPage = () => {
               <Target size={32} />
             </div>
             <h3>Público-Alvo Preciso</h3>
-            <p>Exporte listas segmentadas de CNPJs para criar audiências personalizadas (Custom Audiences) no Facebook e Instagram Ads</p>
+            <p>Obtenha listas segmentadas de CNPJs via API para criar audiências personalizadas (Custom Audiences) no Facebook e Instagram Ads</p>
           </div>
 
           <div className="benefit-card" style={{ background: 'white' }}>
@@ -689,8 +689,8 @@ const LandingPage = () => {
                 flexShrink: 0
               }}>2</div>
               <div>
-                <strong style={{ color: 'var(--dark)' }}>Exporte e carregue no Meta Ads</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Crie uma Custom Audience com os CNPJs das empresas-alvo no Gerenciador de Anúncios</p>
+                <strong style={{ color: 'var(--dark)' }}>Colete via API e carregue no Meta Ads</strong>
+                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Use os dados retornados pela API para criar uma Custom Audience com os CNPJs no Gerenciador de Anúncios</p>
               </div>
             </div>
 
