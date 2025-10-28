@@ -111,7 +111,7 @@ async def activate_account(token: str):
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -126,23 +126,39 @@ async def activate_account(token: str):
             max-width: 500px;
             text-align: center;
         }}
-        h1 {{ color: #e53e3e; }}
+        h1 {{ 
+            color: #e53e3e; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }}
+        .icon {{
+            width: 48px;
+            height: 48px;
+        }}
         p {{ color: #4a5568; line-height: 1.6; }}
         .btn {{
             display: inline-block;
-            background: #667eea;
+            background: #3b82f6;
             color: white;
             padding: 12px 30px;
             border-radius: 5px;
             text-decoration: none;
             margin-top: 20px;
         }}
-        .btn:hover {{ background: #5a67d8; }}
+        .btn:hover {{ background: #2563eb; }}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>❌ Link Inválido ou Expirado</h1>
+        <h1>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="#e53e3e" stroke-width="2"/>
+                <path d="M15 9L9 15M9 9L15 15" stroke="#e53e3e" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Link Inválido ou Expirado
+        </h1>
         <p>O link de ativação é inválido ou expirou (24 horas).</p>
         <p>Por favor, entre em contato com o suporte ou solicite um novo link de ativação.</p>
         <a href="/login" class="btn">Voltar para Login</a>
@@ -183,7 +199,7 @@ async def activate_account(token: str):
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -198,11 +214,21 @@ async def activate_account(token: str):
             max-width: 500px;
             text-align: center;
         }}
-        h1 {{ color: #38a169; }}
+        h1 {{ 
+            color: #38a169; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }}
+        .icon {{
+            width: 48px;
+            height: 48px;
+        }}
         p {{ color: #4a5568; line-height: 1.6; }}
         .spinner {{
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -213,15 +239,60 @@ async def activate_account(token: str):
             0% {{ transform: rotate(0deg); }}
             100% {{ transform: rotate(360deg); }}
         }}
+        .confetti {{
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f;
+            position: absolute;
+            animation: confetti-fall linear forwards;
+        }}
+        @keyframes confetti-fall {{
+            to {{
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✅ Conta Ativada com Sucesso!</h1>
+        <h1>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="#38a169" stroke-width="2"/>
+                <path d="M8 12L11 15L16 9" stroke="#38a169" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Conta Ativada com Sucesso!
+        </h1>
         <p>Sua conta foi ativada. Você será redirecionado para o login em 3 segundos...</p>
         <div class="spinner"></div>
         <p><a href="/login?activated=true">Clique aqui se não for redirecionado</a></p>
     </div>
+    <script>
+        function createConfetti() {{
+            const colors = ['#3b82f6', '#38a169', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {{
+                setTimeout(() => {{
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.opacity = Math.random();
+                    confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {{
+                        confetti.remove();
+                    }}, 5000);
+                }}, i * 30);
+            }}
+        }}
+        
+        createConfetti();
+    </script>
 </body>
 </html>
     """)
@@ -257,10 +328,9 @@ async def register(user: UserCreate):
     
     # Construir link de ativação (aponta para o backend endpoint)
     # O endpoint retorna HTML que redireciona para o frontend
-    repl_url = os.getenv('REPL_SLUG', '')
-    repl_owner = os.getenv('REPL_OWNER', '')
-    if repl_url and repl_owner:
-        base_url = f"https://{repl_url}.{repl_owner}.repl.co"
+    replit_domain = os.getenv('REPLIT_DOMAINS', '')
+    if replit_domain:
+        base_url = f"https://{replit_domain}"
     else:
         # Fallback para desenvolvimento local
         base_url = "http://localhost:8000"
