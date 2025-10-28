@@ -216,21 +216,116 @@ class DatabaseManager:
             logger.error(f"Erro ao executar query: {e}")
             raise
 
-    async def create_user(self, username: str, email: str, hashed_password: str, role: str = 'user') -> Optional[Dict]:
+    def generate_activation_token(self) -> str:
+        """Gera um token único para ativação de conta"""
+        return secrets.token_urlsafe(32)
+
+    async def create_user(
+        self, 
+        username: str, 
+        email: str, 
+        hashed_password: str, 
+        role: str = 'user',
+        activation_token: Optional[str] = None,
+        is_active: bool = True
+    ) -> Optional[Dict]:
+        """
+        Cria um novo usuário
+        
+        Args:
+            username: Nome de usuário
+            email: Email do usuário
+            hashed_password: Senha hash
+            role: Papel do usuário (user ou admin)
+            activation_token: Token de ativação (se fornecido, usuário é criado inativo)
+            is_active: Se True, usuário já está ativo; se False, precisa ativar
+        """
         try:
+            from datetime import datetime, timedelta
+            
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-                cursor.execute("""
-                    INSERT INTO clientes.users (username, email, password, role)
-                    VALUES (%s, %s, %s, %s)
-                    RETURNING id, username, email, role, created_at
-                """, (username, email, hashed_password, role))
+                
+                if activation_token:
+                    # Se tem token, calcular data de expiração (24 horas)
+                    token_expires = datetime.now() + timedelta(hours=24)
+                    cursor.execute("""
+                        INSERT INTO clientes.users (
+                            username, email, password, role, is_active, 
+                            activation_token, activation_token_expires
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id, username, email, role, created_at, is_active
+                    """, (username, email, hashed_password, role, is_active, activation_token, token_expires))
+                else:
+                    cursor.execute("""
+                        INSERT INTO clientes.users (username, email, password, role, is_active)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING id, username, email, role, created_at, is_active
+                    """, (username, email, hashed_password, role, is_active))
+                
                 user = cursor.fetchone()
                 cursor.close()
                 return dict(user) if user else None
         except Exception as e:
             logger.error(f"Erro ao criar usuário: {e}")
             raise
+
+    async def activate_user_by_token(self, token: str) -> Optional[Dict]:
+        """
+        Ativa um usuário usando o token de ativação
+        
+        Returns:
+            Dict com dados do usuário se sucesso
+            None se token inválido ou expirado
+        """
+        try:
+            from datetime import datetime
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+                
+                # Buscar usuário com token válido e não expirado
+                cursor.execute("""
+                    SELECT id, username, email, role, is_active, activation_token_expires
+                    FROM clientes.users
+                    WHERE activation_token = %s
+                """, (token,))
+                
+                user = cursor.fetchone()
+                
+                if not user:
+                    cursor.close()
+                    return None
+                
+                # Verificar se já está ativo
+                if user['is_active']:
+                    cursor.close()
+                    return dict(user)
+                
+                # Verificar se token expirou
+                if user['activation_token_expires'] < datetime.now():
+                    cursor.close()
+                    return None
+                
+                # Ativar usuário e limpar token
+                cursor.execute("""
+                    UPDATE clientes.users
+                    SET is_active = TRUE,
+                        activation_token = NULL,
+                        activation_token_expires = NULL,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                    RETURNING id, username, email, role, is_active
+                """, (user['id'],))
+                
+                activated_user = cursor.fetchone()
+                cursor.close()
+                return dict(activated_user) if activated_user else None
+                
+        except Exception as e:
+            logger.error(f"Erro ao ativar usuário: {e}")
+            return None
 
     async def get_user_by_username(self, username: str) -> Optional[Dict]:
         try:
@@ -239,7 +334,7 @@ class DatabaseManager:
                 cursor.execute("""
                     SELECT id, username, email, password, role, created_at, last_login, is_active
                     FROM clientes.users
-                    WHERE username = %s AND is_active = TRUE
+                    WHERE username = %s
                 """, (username,))
                 user = cursor.fetchone()
                 cursor.close()
@@ -255,7 +350,7 @@ class DatabaseManager:
                 cursor.execute("""
                     SELECT id, username, email, password, role, created_at, last_login, is_active
                     FROM clientes.users
-                    WHERE email = %s AND is_active = TRUE
+                    WHERE email = %s
                 """, (email,))
                 user = cursor.fetchone()
                 cursor.close()

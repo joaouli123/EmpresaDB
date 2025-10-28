@@ -13,55 +13,90 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const planParam = searchParams.get('plan');
+  const activatedParam = searchParams.get('activated');
+
+  useEffect(() => {
+    // Mostrar mensagem de ativação bem-sucedida
+    if (activatedParam === 'true') {
+      setSuccess('Conta ativada com sucesso! Faça login para continuar.');
+      setIsLogin(true);
+    }
+  }, [activatedParam]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      const result = isLogin
-        ? await login({ username: formData.username, password: formData.password })
-        : await register(formData);
-
-      if (result.success) {
-        if (planParam && planParam !== 'free') {
-          const planIds = {
-            'start': 2,
-            'growth': 3,
-            'pro': 4
-          };
-          
-          const planId = planIds[planParam];
-          
-          if (planId) {
-            try {
-              const checkoutResponse = await api.post('/stripe/create-checkout-session', {
-                plan_id: planId,
-                success_url: `${window.location.origin}/subscription?success=true`,
-                cancel_url: `${window.location.origin}/pricing?canceled=true`
-              });
-              
-              if (checkoutResponse.data.url) {
-                window.location.href = checkoutResponse.data.url;
+      if (isLogin) {
+        // LOGIN
+        const result = await login({ username: formData.username, password: formData.password });
+        
+        if (result.success) {
+          if (planParam && planParam !== 'free') {
+            const planIds = {
+              'start': 2,
+              'growth': 3,
+              'pro': 4
+            };
+            
+            const planId = planIds[planParam];
+            
+            if (planId) {
+              try {
+                const checkoutResponse = await api.post('/stripe/create-checkout-session', {
+                  plan_id: planId,
+                  success_url: `${window.location.origin}/subscription?success=true`,
+                  cancel_url: `${window.location.origin}/pricing?canceled=true`
+                });
+                
+                if (checkoutResponse.data.url) {
+                  window.location.href = checkoutResponse.data.url;
+                  return;
+                }
+              } catch (checkoutError) {
+                console.error('Erro ao criar checkout:', checkoutError);
+                setError('Erro ao iniciar pagamento. Redirecionando para dashboard...');
+                setTimeout(() => navigate('/dashboard'), 2000);
                 return;
               }
-            } catch (checkoutError) {
-              console.error('Erro ao criar checkout:', checkoutError);
-              setError('Erro ao iniciar pagamento. Redirecionando para dashboard...');
-              setTimeout(() => navigate('/dashboard'), 2000);
-              return;
             }
           }
+          
+          navigate('/dashboard');
+        } else {
+          setError(result.error);
         }
-        
-        navigate('/dashboard');
       } else {
-        setError(result.error);
+        // REGISTRO - novo fluxo sem auto-login
+        try {
+          const response = await api.post('/auth/register', formData);
+          
+          if (response.data.message && response.data.email) {
+            // Registro bem-sucedido - mostrar mensagem e mudar para aba de login
+            setSuccess(`Conta criada com sucesso! Enviamos um email para ${response.data.email} com o link de ativação. Verifique sua caixa de entrada (e spam).`);
+            setIsLogin(true);
+            // Limpar formulário
+            setFormData({
+              username: '',
+              email: '',
+              password: '',
+            });
+          }
+        } catch (registerError) {
+          if (registerError.response?.data?.detail) {
+            setError(registerError.response.data.detail);
+          } else {
+            setError('Erro ao criar conta. Tente novamente.');
+          }
+        }
       }
     } catch (err) {
       setError('Ocorreu um erro. Tente novamente.');
@@ -124,6 +159,19 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="error-message">{error}</div>}
+          {success && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#38a169',
+              color: 'white',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              fontSize: '14px',
+              lineHeight: '1.5'
+            }}>
+              {success}
+            </div>
+          )}
 
           <div className="form-group">
             <div className="input-with-icon">
