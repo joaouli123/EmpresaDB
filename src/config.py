@@ -63,6 +63,14 @@ class Settings(BaseSettings):
     CNPJ_API_URL: Optional[str] = None
     CNPJ_API_TOKEN: Optional[str] = None
 
+    # Email Configuration
+    EMAIL_HOST: str = "smtp.hostinger.com"
+    EMAIL_PORT: int = 465
+    EMAIL_USER: str = ""
+    EMAIL_PASSWORD: str = ""
+    EMAIL_FROM: str = ""
+    EMAIL_USE_SSL: bool = True
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',
