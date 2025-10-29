@@ -861,7 +861,7 @@ const LandingPage = () => {
                       <Check size={18} />
                       {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
                     </li>
-                    
+
                     <li>
                       <Check size={18} />
                       {plan.name === 'free' && '0 consultas em lote/mês'}
@@ -869,12 +869,12 @@ const LandingPage = () => {
                       {plan.name === 'growth' && '2.000 consultas em lote/mês'}
                       {plan.name === 'pro' && '10.000 consultas em lote/mês'}
                     </li>
-                    
+
                     <li>
                       <Check size={18} />
                       +45 filtros avançados
                     </li>
-                    
+
                     <li>
                       <Check size={18} />
                       Consulta completa por CNPJ
@@ -1044,7 +1044,6 @@ const LandingPage = () => {
         {batchPackages.length > 0 && (
           <div className="addons-section">
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <Sparkles size={32} style={{ color: 'var(--primary)', marginBottom: '10px' }} />
               <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
               <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
                 Pesquise milhares de empresas de uma vez com +45 filtros avançados
@@ -1234,7 +1233,7 @@ const LandingPage = () => {
                   }}
                 />
               </button>
-              
+
               {openFaqIndex === index && (
                 <div style={{
                   padding: '0 24px 24px 24px',
