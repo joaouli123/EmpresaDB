@@ -543,7 +543,9 @@ const LandingPage = () => {
           <div className="navbar-links">
             <a href="#features">Funcionalidades</a>
             <a href="#categories">Setores</a>
+            <a href="#filters">Filtros</a>
             <a href="#pricing">Planos</a>
+            <a href="#testimonials">Depoimentos</a>
             <a href="#faq">FAQ</a>
             <a href="#contact">Contato</a>
           </div>
@@ -569,7 +571,9 @@ const LandingPage = () => {
           <div className="mobile-menu-links">
             <a href="#features" onClick={() => setMenuOpen(false)}>Funcionalidades</a>
             <a href="#categories" onClick={() => setMenuOpen(false)}>Setores</a>
+            <a href="#filters" onClick={() => setMenuOpen(false)}>Filtros</a>
             <a href="#pricing" onClick={() => setMenuOpen(false)}>Planos</a>
+            <a href="#testimonials" onClick={() => setMenuOpen(false)}>Depoimentos</a>
             <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
             <a href="#contact" onClick={() => setMenuOpen(false)}>Contato</a>
           </div>
