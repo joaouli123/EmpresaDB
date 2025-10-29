@@ -52,6 +52,7 @@ const LandingPage2 = () => {
       description: 'Teste grátis, sem cartão',
       features: [
         '200 consultas/mês',
+        '0 consultas em lote/mês',
         'Consulta completa por CNPJ',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
@@ -72,6 +73,9 @@ const LandingPage2 = () => {
       description: 'Para começar pequeno',
       features: [
         '10.000 consultas/mês',
+        '500 consultas em lote/mês',
+        '+45 filtros avançados',
+        'Créditos batch nunca expiram',
         'Consulta completa por CNPJ',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
@@ -93,6 +97,9 @@ const LandingPage2 = () => {
       description: 'Melhor custo-benefício',
       features: [
         '100.000 consultas/mês',
+        '2.000 consultas em lote/mês',
+        '+45 filtros avançados',
+        'Créditos batch nunca expiram',
         'Consulta completa por CNPJ',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
@@ -115,6 +122,9 @@ const LandingPage2 = () => {
       description: 'Para alto volume',
       features: [
         '500.000 consultas/mês',
+        '10.000 consultas em lote/mês',
+        '+45 filtros avançados',
+        'Créditos batch nunca expiram',
         'Consulta completa por CNPJ',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
