@@ -40,7 +40,7 @@ import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
 
 const LandingPage = () => {
-  const [selectedPlan, setSelectedPlan] = useState('growth');
+  const [selectedPlan, setSelectedPlan] = useState('professional');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
@@ -958,7 +958,7 @@ const LandingPage = () => {
                         marginTop: '20px'
                       } : {}}>
                         {plan.name === 'enterprise' ? (
-                          plan.features.map((feature, idx) => (
+                          (plan.features || []).map((feature, idx) => (
                             <li key={idx} style={{ color: 'rgba(255,255,255,0.85)' }}>
                               <Check size={18} style={{ color: '#10b981' }} />
                               {feature}

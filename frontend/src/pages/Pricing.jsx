@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Check, Zap, Shield, TrendingUp, Package, Sparkles, Crown } from 'lucide-react';
 import './Pricing.css';
 
