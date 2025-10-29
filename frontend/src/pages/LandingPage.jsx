@@ -545,7 +545,7 @@ const LandingPage = () => {
         <div className="navbar-content">
           <div className="navbar-logo">
             <Database size={28} />
-            <span>CNPJ API</span>
+            <span>DB Empresas</span>
           </div>
 
           {/* Links de navegação (visível no desktop) */}
@@ -947,7 +947,7 @@ const LandingPage = () => {
                           )}
 
                           <div className="plan-queries">
-                            <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                            <strong>{(plan.monthly_queries || 0).toLocaleString('pt-BR')}</strong> consultas/mês
                           </div>
                         </>
                       )}
@@ -968,12 +968,12 @@ const LandingPage = () => {
                           <>
                             <li>
                               <Check size={18} />
-                              {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
+                              {(plan.monthly_queries || 0).toLocaleString('pt-BR')} consultas/mês
                             </li>
 
                             <li>
                               <Check size={18} />
-                              {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                              {(plan.monthly_batch_queries || 0).toLocaleString('pt-BR')} consultas em lote/mês
                             </li>
 
                             <li>
@@ -1179,7 +1179,7 @@ const LandingPage = () => {
                       </td>
                       <td data-label="Preço Total" style={{ padding: '20px 24px', textAlign: 'center' }}>
                         <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '20px' }}>
-                          R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
+                          R$ {(pkg.price_brl || 0).toFixed(2).replace('.', ',')}
                         </div>
                       </td>
                       <td data-label="Preço/Crédito" style={{ padding: '20px 24px', textAlign: 'center' }}>
