@@ -19,6 +19,8 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import UseCases from './pages/UseCases';
 import BlogPage from './pages/BlogPage';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -64,6 +66,8 @@ function AppRoutes() {
         <Route path="/contato" element={<Contact />} />
         <Route path="/casos-de-uso" element={<UseCases />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/privacidade" element={<Privacy />} />
+        <Route path="/termos" element={<Terms />} />
         <Route path="/api" element={<Docs />} />
         <Route
           path="/login"
