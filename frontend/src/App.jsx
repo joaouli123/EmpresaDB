@@ -4,7 +4,6 @@ import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
-import LandingPage2 from './pages/LandingPage2';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDatabase from './pages/AdminDatabase';
@@ -45,8 +44,8 @@ function AppRoutes() {
     <Router>
       <Routes>
         <Route
-          path="/home"
-          element={<LandingPage />}
+          path="/"
+          element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
         />
         <Route
           path="/pricing"
@@ -55,10 +54,6 @@ function AppRoutes() {
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
-        <Route
-          path="/"
-          element={user ? <Navigate to="/dashboard" replace /> : <LandingPage2 />}
         />
         <Route path="/" element={
           <ProtectedRoute>
