@@ -160,9 +160,19 @@ class BatchStripeService:
         """
         try:
             metadata = session_data.get('metadata', {})
-            user_id = int(metadata.get('user_id'))
-            package_id = int(metadata.get('package_id'))
-            credits = int(metadata.get('credits'))
+            
+            # Validar metadata obrigatória
+            if not metadata or not metadata.get('user_id') or not metadata.get('package_id') or not metadata.get('credits'):
+                logger.error(f"Metadata incompleta no session_data: {metadata}")
+                return False
+            
+            try:
+                user_id = int(metadata.get('user_id'))
+                package_id = int(metadata.get('package_id'))
+                credits = int(metadata.get('credits'))
+            except (ValueError, TypeError) as e:
+                logger.error(f"Erro ao converter metadata para inteiros: {e}")
+                return False
             
             payment_intent = session_data.get('payment_intent')
             amount_total = session_data.get('amount_total', 0) / 100  # Converter de centavos para reais

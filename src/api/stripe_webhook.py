@@ -34,9 +34,18 @@ async def handle_checkout_session_completed(event_data: dict):
         customer_id = session.get('customer')
         subscription_id = session.get('subscription')
         
+        # Validar metadata obrigatória
+        if not metadata or not metadata.get('user_id') or not metadata.get('plan_id'):
+            logger.error(f"Metadata incompleta no checkout session: {metadata}")
+            raise ValueError(f"Metadata obrigatória ausente no checkout session. Dados recebidos: {metadata}")
+        
         # Buscar metadata
-        user_id = int(session['metadata'].get('user_id'))
-        plan_id = int(session['metadata'].get('plan_id'))
+        try:
+            user_id = int(metadata.get('user_id'))
+            plan_id = int(metadata.get('plan_id'))
+        except (ValueError, TypeError) as e:
+            logger.error(f"Erro ao converter metadata para inteiros: user_id={metadata.get('user_id')}, plan_id={metadata.get('plan_id')}")
+            raise ValueError(f"IDs de metadata inválidos: {e}")
         
         # Buscar informações da assinatura no Stripe
         subscription = stripe.Subscription.retrieve(subscription_id)
@@ -83,7 +92,13 @@ async def handle_checkout_session_completed(event_data: dict):
                     subscription.get('cancel_at_period_end', False)
                 ))
                 
-                new_subscription_id = cursor.fetchone()[0]
+                result = cursor.fetchone()
+                if not result:
+                    logger.error(f"Falha ao criar assinatura no banco para user_id={user_id}")
+                    cursor.close()
+                    raise ValueError("Falha ao criar assinatura no banco de dados")
+                
+                new_subscription_id = result[0]
                 
                 # Buscar dados do usuário e plano para enviar email
                 cursor.execute("""
@@ -268,7 +283,8 @@ async def handle_invoice_paid(event_data: dict):
                             WHERE user_id = %s AND stripe_subscription_id = %s
                         """, (user_id, subscription_id))
                         
-                        invoice_count = cursor.fetchone()[0]
+                        count_result = cursor.fetchone()
+                        invoice_count = count_result[0] if count_result else 0
                         
                         if invoice_count > 1:  # É renovação
                             next_billing = period_end.strftime('%d/%m/%Y') if period_end else 'N/A'

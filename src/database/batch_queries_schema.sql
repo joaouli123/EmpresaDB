@@ -156,6 +156,7 @@ LEFT JOIN clientes.monthly_usage mu ON u.id = mu.user_id
 COMMENT ON VIEW clientes.vw_user_batch_credits IS 'View consolidada mostrando créditos de consultas em lote por usuário com info do plano';
 
 -- FUNCTION PARA CONSUMIR CRÉDITOS
+-- CORRIGIDO: Adicionado FOR UPDATE para prevenir race conditions
 CREATE OR REPLACE FUNCTION clientes.consume_batch_credits(
     p_user_id INTEGER,
     p_credits_to_consume INTEGER,
@@ -166,23 +167,36 @@ CREATE OR REPLACE FUNCTION clientes.consume_batch_credits(
 ) RETURNS BOOLEAN AS $$
 DECLARE
     v_available_credits INTEGER;
+    v_current_total INTEGER;
+    v_current_used INTEGER;
 BEGIN
-    -- Verificar créditos disponíveis
-    SELECT COALESCE(available_credits, 0) INTO v_available_credits
+    -- CRITICAL FIX: Verificar créditos disponíveis COM LOCK (FOR UPDATE)
+    -- Isso previne race conditions onde múltiplas threads poderiam consumir mais créditos do que disponível
+    SELECT COALESCE(total_credits, 0), COALESCE(used_credits, 0), COALESCE(available_credits, 0)
+    INTO v_current_total, v_current_used, v_available_credits
     FROM clientes.batch_query_credits
-    WHERE user_id = p_user_id;
+    WHERE user_id = p_user_id
+    FOR UPDATE;  -- LOCK: Garante que apenas uma transação por vez pode modificar os créditos deste usuário
     
+    -- Se não existe registro, criar com 0 créditos
+    IF NOT FOUND THEN
+        INSERT INTO clientes.batch_query_credits (user_id, total_credits, used_credits)
+        VALUES (p_user_id, 0, 0);
+        v_available_credits := 0;
+    END IF;
+    
+    -- Verificar se tem créditos suficientes
     IF v_available_credits < p_credits_to_consume THEN
         RAISE EXCEPTION 'Créditos insuficientes. Disponível: %, Necessário: %', v_available_credits, p_credits_to_consume;
     END IF;
     
-    -- Consumir créditos
+    -- Consumir créditos (já está bloqueado pelo FOR UPDATE)
     UPDATE clientes.batch_query_credits
     SET used_credits = used_credits + p_credits_to_consume,
         updated_at = CURRENT_TIMESTAMP
     WHERE user_id = p_user_id;
     
-    -- Registrar uso
+    -- Registrar uso para auditoria
     INSERT INTO clientes.batch_query_usage (
         user_id, api_key_id, credits_used, filters_used, results_returned, endpoint
     ) VALUES (
