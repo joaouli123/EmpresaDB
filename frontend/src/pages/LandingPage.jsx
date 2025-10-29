@@ -867,7 +867,7 @@ const LandingPage = () => {
                           background: '#fbbf24',
                           color: '#1f2937'
                         }}>
-                          CUSTOMIZADO
+                          WHITE LABEL
                         </div>
                       )}
 
