@@ -872,6 +872,69 @@ const LandingPage2 = () => {
                 </div>
               );
             })}
+
+            {/* Enterprise Card */}
+            <div className="pricing-card" style={{ background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)', border: '3px solid #ffd700' }}>
+              <div className="plan-header">
+                <h3 style={{ color: 'white' }}>Enterprise</h3>
+                <p className="plan-description" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                  Solução personalizada para grandes volumes
+                </p>
+              </div>
+
+              <div className="plan-price" style={{ marginBottom: '24px' }}>
+                <span className="currency" style={{ color: 'white' }}>Customizado</span>
+              </div>
+
+              <div className="plan-queries" style={{ background: 'rgba(255, 215, 0, 0.1)', color: 'white', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
+                <strong>Ilimitadas*</strong> consultas
+              </div>
+
+              <ul className="plan-features" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Consultas ilimitadas*
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Consultas em lote ilimitadas*
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  SLA garantido com uptime de 99.9%
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Gerente de conta dedicado
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Infraestrutura dedicada disponível
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Integração e onboarding personalizados
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Relatórios e analytics customizados
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Desenvolvimento de features sob demanda
+                </li>
+                <li>
+                  <Check size={18} style={{ color: '#10b981' }} />
+                  Suporte prioritário 24/7
+                </li>
+              </ul>
+
+              <a href="#contact">
+                <button className="btn-plan" style={{ background: 'linear-gradient(135deg, #ffd700, #f59e0b)', color: '#1f2937', fontWeight: '700' }}>
+                  Falar com Especialista
+                </button>
+              </a>
+            </div>
           </div>
         )}
 
