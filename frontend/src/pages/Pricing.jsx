@@ -131,6 +131,26 @@ const Pricing = () => {
             'Relatórios customizados',
             'Créditos batch comprados nunca expiram'
           ]
+        },
+        {
+          id: 5,
+          name: 'enterprise',
+          display_name: 'Enterprise',
+          monthly_queries: 0,
+          monthly_batch_queries: 0,
+          price_brl: 0,
+          is_custom: true,
+          features: [
+            'Consultas ilimitadas*',
+            'Consultas em lote ilimitadas*',
+            'SLA garantido com uptime de 99,9%',
+            'Gerente de conta dedicado',
+            'Infraestrutura dedicada disponível',
+            'Integração e onboarding personalizados',
+            'Relatórios e analytics customizados',
+            'Desenvolvimento de features sob demanda',
+            'Suporte prioritário 24/7'
+          ]
         }
       ]);
     } finally {
@@ -277,49 +297,67 @@ const Pricing = () => {
 
       <div className="plans-grid">
         {plans.map((plan) => (
-          <div key={plan.id} className={`plan-card ${plan.name === 'professional' ? 'featured' : ''}`}>
+          <div key={plan.id} className={`plan-card ${plan.name === 'professional' ? 'featured' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''}`}>
             {plan.name === 'professional' && <div className="popular-badge">Mais Popular</div>}
+            {plan.name === 'enterprise' && <div className="custom-badge">Customizado</div>}
+            
             <h3>{plan.display_name}</h3>
-            <div className="plan-price">
-              <span className="currency">R$</span>
-              <span className="amount">{plan.price_brl.toFixed(2)}</span>
-              <span className="period">/mês</span>
-            </div>
-            <div className="plan-limit">
-              <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
-            </div>
-            {plan.monthly_batch_queries > 0 && (
-              <div className="batch-included-badge" style={{
-                marginTop: '12px',
-                padding: '10px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: '6px',
-                textAlign: 'center',
-                fontSize: '14px',
-                color: '#fff',
-                fontWeight: '600',
-                boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
-              }}>
-                ⚡ {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
-              </div>
+            
+            {plan.name === 'enterprise' ? (
+              <>
+                <p className="enterprise-subtitle">Solução personalizada para grandes volumes</p>
+                <div className="enterprise-pricing">
+                  <span className="unlimited-text">ilimitadas*</span>
+                  <span className="unlimited-label">consultas</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="plan-price">
+                  <span className="currency">R$</span>
+                  <span className="amount">{plan.price_brl.toFixed(2)}</span>
+                  <span className="period">/mês</span>
+                </div>
+                <div className="plan-limit">
+                  <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                </div>
+                {plan.monthly_batch_queries > 0 && (
+                  <div className="batch-included-badge" style={{
+                    marginTop: '12px',
+                    padding: '10px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '6px',
+                    textAlign: 'center',
+                    fontSize: '14px',
+                    color: '#fff',
+                    fontWeight: '600',
+                    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                  }}>
+                    ⚡ {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                  </div>
+                )}
+                <div className="plan-rate-limit" style={{
+                  marginTop: '12px',
+                  padding: '10px',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  borderRadius: '6px',
+                  textAlign: 'center',
+                  fontSize: '14px',
+                  color: '#3b82f6',
+                  fontWeight: '500'
+                }}>
+                  ⚡ {rateLimits[plan.name] || 10} requisições/min
+                </div>
+              </>
             )}
-            <div className="plan-rate-limit" style={{
-              marginTop: '12px',
-              padding: '10px',
-              background: 'rgba(59, 130, 246, 0.1)',
-              borderRadius: '6px',
-              textAlign: 'center',
-              fontSize: '14px',
-              color: '#3b82f6',
-              fontWeight: '500'
-            }}>
-              ⚡ {rateLimits[plan.name] || 10} requisições/min
-            </div>
+            
             <ul className="plan-features">
-              <li>
-                <Check size={18} />
-                {rateLimits[plan.name] || 10} req/min (Rate Limit)
-              </li>
+              {plan.name !== 'enterprise' && (
+                <li>
+                  <Check size={18} />
+                  {rateLimits[plan.name] || 10} req/min (Rate Limit)
+                </li>
+              )}
               {plan.features.map((feature, index) => (
                 <li key={index}>
                   <Check size={18} />
@@ -327,12 +365,13 @@ const Pricing = () => {
                 </li>
               ))}
             </ul>
+            
             <button
-              className={`btn-plan ${plan.name === 'professional' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => handleSubscribe(plan.id)}
+              className={`btn-plan ${plan.name === 'professional' ? 'btn-primary' : plan.name === 'enterprise' ? 'btn-enterprise' : 'btn-secondary'}`}
+              onClick={() => plan.name === 'enterprise' ? window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise' : handleSubscribe(plan.id)}
               disabled={subscribing === plan.id}
             >
-              {subscribing === plan.id ? 'Processando...' : 'Assinar Agora'}
+              {plan.name === 'enterprise' ? 'Falar com Especialista' : subscribing === plan.id ? 'Processando...' : 'Assinar Agora'}
             </button>
           </div>
         ))}
