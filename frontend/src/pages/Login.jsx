@@ -246,10 +246,6 @@ const Login = () => {
           )}
 
           <div className="form-group">
-            <label>
-              <UserIcon size={16} />
-              {isLogin ? 'Usuário ou E-mail' : 'Nome de Usuário'}
-            </label>
             <div className={`input-with-icon ${getInputClassName('username')}`}>
               <UserIcon size={18} />
               <input
@@ -258,7 +254,7 @@ const Login = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
-                placeholder={isLogin ? "usuario ou email@exemplo.com" : "seu_usuario"}
+                placeholder={isLogin ? "Usuário ou E-mail" : "Nome de Usuário"}
                 autoComplete="username"
               />
               {!isLogin && validations.username.valid === true && <CheckCircle size={18} className="icon-success" />}
@@ -273,10 +269,6 @@ const Login = () => {
 
           {!isLogin && (
             <div className="form-group">
-              <label>
-                <Mail size={16} />
-                E-mail
-              </label>
               <div className={`input-with-icon ${getInputClassName('email')}`}>
                 <Mail size={18} />
                 <input
@@ -285,7 +277,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  placeholder="seu@email.com"
+                  placeholder="E-mail"
                   autoComplete="email"
                 />
                 {validations.email.valid === true && <CheckCircle size={18} className="icon-success" />}
@@ -300,10 +292,6 @@ const Login = () => {
           )}
 
           <div className="form-group">
-            <label>
-              <Lock size={16} />
-              Senha {!isLogin && '(mínimo 6 caracteres com letras e números)'}
-            </label>
             <div className={`input-with-icon ${getInputClassName('password')}`}>
               <Lock size={18} />
               <input
@@ -312,7 +300,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                placeholder="••••••••"
+                placeholder={isLogin ? "Senha" : "Senha (mínimo 6 caracteres)"}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
               <button
@@ -333,10 +321,6 @@ const Login = () => {
 
           {!isLogin && (
             <div className="form-group">
-              <label>
-                <Lock size={16} />
-                Confirmar Senha
-              </label>
               <div className={`input-with-icon ${getInputClassName('confirmPassword')}`}>
                 <Lock size={18} />
                 <input
@@ -345,7 +329,7 @@ const Login = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  placeholder="••••••••"
+                  placeholder="Confirmar Senha"
                   autoComplete="new-password"
                 />
                 <button
