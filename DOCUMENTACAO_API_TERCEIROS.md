@@ -106,19 +106,28 @@ GET /cnpj/00000000000191
 
 ---
 
-### 2. **Busca Avançada de Empresas**
+### 2. **🔥 NOVO! Busca Avançada de Empresas (Consultas em Lote)**
 
 Busca empresas com filtros avançados e paginação.
 
-**⚠️ ENDPOINT EXCLUSIVO PARA ADMINISTRADOR**
+**⚡ AGORA DISPONÍVEL VIA API KEY!**
 
-**Endpoint**: `GET /search`
+**Endpoint**: `POST /batch/search`
 
-**Autenticação**: Requer token JWT de administrador (role: admin)  
-**Acesso**: Apenas jl.uli1996@gmail.com (acesso ilimitado)
+**Autenticação**: Requer API Key no header `X-API-Key`  
+**Cobrança**: Cada empresa retornada = 1 crédito consumido
 
-> **Nota**: Este endpoint não está disponível para usuários regulares via API Key.  
-> Para consultas individuais, use `GET /cnpj/{cnpj}`.
+> **💡 Como funciona:**
+> - Compre pacotes de créditos na página de preços
+> - Use este endpoint para fazer buscas avançadas com múltiplos filtros
+> - Cada resultado retornado consome 1 crédito do seu saldo
+> - Créditos comprados não expiram!
+
+> **📦 Pacotes Disponíveis:**
+> - Starter: 1.000 créditos (R$ 0,0499/crédito)
+> - Basic: 5.000 créditos (R$ 0,0399/crédito) - **Economize 20%**
+> - Professional: 10.000 créditos (R$ 0,0349/crédito) - **Economize 30%**
+> - Enterprise: 50.000 créditos (R$ 0,0299/crédito) - **Economize 40%**
 
 #### 📋 Parâmetros de Filtro
 
@@ -247,6 +256,176 @@ Busca empresas com filtros avançados e paginação.
     }
   ]
 }
+```
+
+**Exemplo de Requisição**:
+
+```bash
+# Buscar empresas ativas em SP que sejam MEI
+curl -X POST "https://sua-api.com.br/api/v1/batch/search?uf=SP&mei=S&situacao_cadastral=02&limit=100" \
+  -H "X-API-Key: sua_chave_api_aqui"
+
+# Buscar empresas por CNAE em determinada cidade
+curl -X POST "https://sua-api.com.br/api/v1/batch/search?cnae=4712100&municipio=3550308&limit=50" \
+  -H "X-API-Key: sua_chave_api_aqui"
+
+# Buscar empresas grandes (porte 4) abertas em 2024
+curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_atividade_min=2024-01-01&limit=200" \
+  -H "X-API-Key: sua_chave_api_aqui"
+```
+
+**Resposta de Sucesso (200)**:
+
+```json
+{
+  "total": 1234,
+  "page": 1,
+  "per_page": 100,
+  "total_pages": 13,
+  "items": [
+    {
+      "cnpj_completo": "12345678000195",
+      "identificador_matriz_filial": "1",
+      "razao_social": "EXEMPLO COMERCIO LTDA",
+      "nome_fantasia": "EXEMPLO",
+      "situacao_cadastral": "02",
+      "data_situacao_cadastral": "2024-01-15",
+      "data_inicio_atividade": "2024-01-10",
+      "cnae_fiscal_principal": "4712100",
+      "cnae_principal_desc": "Comércio varejista de mercadorias em geral",
+      "uf": "SP",
+      "municipio_desc": "SAO PAULO",
+      "porte_empresa": "1",
+      "opcao_mei": "S"
+    }
+  ]
+}
+```
+
+**Códigos de Erro**:
+- `400`: Parâmetros inválidos
+- `401`: API Key ausente ou inválida
+- `402`: Créditos insuficientes (detalhes no response)
+- `500`: Erro interno do servidor
+
+**Resposta de Erro 402 (Créditos Insuficientes)**:
+
+```json
+{
+  "detail": {
+    "error": "insufficient_batch_credits",
+    "message": "Você não tem créditos de consultas em lote suficientes.",
+    "action_url": "/batch/packages",
+    "help": "Adquira pacotes de consultas em lote para usar este endpoint",
+    "available_credits": 0,
+    "suggestions": [
+      "Compre um pacote de consultas em lote",
+      "Faça upgrade do seu plano para incluir consultas em lote mensais",
+      "Verifique seu saldo em /batch/credits"
+    ]
+  }
+}
+```
+
+---
+
+### 2b. **Gerenciar Créditos de Consultas em Lote**
+
+#### Consultar Saldo de Créditos
+
+**Endpoint**: `GET /batch/credits`
+
+**Autenticação**: Requer token JWT (login no painel)
+
+**Resposta**:
+
+```json
+{
+  "total_credits": 5000,
+  "used_credits": 1234,
+  "available_credits": 3766,
+  "monthly_included_credits": 0,
+  "purchased_credits": 5000,
+  "plan_monthly_batch_queries": 0,
+  "batch_queries_this_month": 1234
+}
+```
+
+#### Listar Pacotes Disponíveis
+
+**Endpoint**: `GET /batch/packages`
+
+**Autenticação**: Não requer
+
+**Resposta**:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "starter",
+    "display_name": "Pacote Starter",
+    "description": "1.000 consultas em lote - Ideal para começar",
+    "credits": 1000,
+    "price_brl": 49.90,
+    "price_per_unit": 0.0499,
+    "sort_order": 1,
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "basic",
+    "display_name": "Pacote Basic",
+    "description": "5.000 consultas em lote - Melhor custo-benefício",
+    "credits": 5000,
+    "price_brl": 199.90,
+    "price_per_unit": 0.0399,
+    "sort_order": 2,
+    "is_active": true
+  }
+]
+```
+
+#### Comprar Pacote
+
+**Endpoint**: `POST /batch/packages/{package_id}/purchase`
+
+**Autenticação**: Requer token JWT (login no painel)
+
+**Resposta**:
+
+```json
+{
+  "success": true,
+  "message": "Redirecionando para checkout...",
+  "session_url": "https://checkout.stripe.com/...",
+  "credits_added": null
+}
+```
+
+#### Histórico de Uso
+
+**Endpoint**: `GET /batch/usage?limit=100`
+
+**Autenticação**: Requer token JWT (login no painel)
+
+**Resposta**:
+
+```json
+[
+  {
+    "id": 123,
+    "credits_used": 45,
+    "filters_used": {
+      "uf": "SP",
+      "mei": "S",
+      "limit": 100
+    },
+    "results_returned": 45,
+    "endpoint": "/batch/search",
+    "created_at": "2025-10-28T15:30:00"
+  }
+]
 ```
 
 ---

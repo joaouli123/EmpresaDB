@@ -79,11 +79,11 @@ class Settings(BaseSettings):
 
     # Email Configuration
     EMAIL_HOST: str = "smtp.hostinger.com"
-    EMAIL_PORT: int = 465
+    EMAIL_PORT: Optional[int] = 465
     EMAIL_USER: str = ""
     EMAIL_PASSWORD: str = ""
     EMAIL_FROM: str = ""
-    EMAIL_USE_SSL: bool = True
+    EMAIL_USE_SSL: Optional[bool] = True
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -20,9 +20,17 @@ async def handle_checkout_session_completed(event_data: dict):
     """
     Processa evento de checkout concluído
     Cria a assinatura no banco quando o pagamento é confirmado
+    OU processa compra de pacote de consultas em lote
     """
     try:
         session = event_data['object']
+        metadata = session.get('metadata', {})
+        
+        # Verificar se é compra de pacote de batch queries
+        if metadata.get('type') == 'batch_package_purchase':
+            await handle_batch_package_purchase(event_data)
+            return
+        
         customer_id = session.get('customer')
         subscription_id = session.get('subscription')
         
@@ -340,6 +348,32 @@ async def handle_invoice_payment_failed(event_data: dict):
         
     except Exception as e:
         logger.error(f"Erro ao processar invoice.payment_failed: {e}")
+        raise
+
+async def handle_batch_package_purchase(event_data: dict):
+    """
+    Processa compra de pacote de consultas em lote
+    Evento: checkout.session.completed com metadata.type = 'batch_package_purchase'
+    """
+    try:
+        session = event_data['object']
+        metadata = session.get('metadata', {})
+        
+        # Verificar se é compra de pacote de batch queries
+        if metadata.get('type') != 'batch_package_purchase':
+            # Não é compra de pacote, deixar para o handler padrão
+            return
+        
+        from src.api.batch_stripe_service import batch_stripe_service
+        success = await batch_stripe_service.process_package_purchase(session)
+        
+        if success:
+            logger.info(f"✅ Compra de pacote processada com sucesso")
+        else:
+            logger.error(f"❌ Falha ao processar compra de pacote")
+            
+    except Exception as e:
+        logger.error(f"Erro ao processar compra de pacote: {e}")
         raise
 
 # Mapeamento de eventos para handlers
