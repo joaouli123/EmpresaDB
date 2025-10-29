@@ -13,6 +13,8 @@ router = APIRouter(prefix="/user", tags=["User"])
 
 class ProfileUpdate(BaseModel):
     email: EmailStr
+    phone: str
+    cpf: str
 
 class APIKeyCreate(BaseModel):
     name: str
@@ -39,7 +41,16 @@ async def update_profile(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        success = await db_manager.update_user_profile(current_user['id'], profile_data.email)
+        # Remove formatação do telefone e CPF
+        phone = profile_data.phone.replace(/\D/g, '')
+        cpf = profile_data.cpf.replace(/\D/g, '')
+        
+        success = await db_manager.update_user_profile(
+            current_user['id'], 
+            profile_data.email,
+            phone,
+            cpf
+        )
         if not success:
             raise HTTPException(status_code=500, detail="Error updating profile")
         return {"message": "Profile updated successfully"}

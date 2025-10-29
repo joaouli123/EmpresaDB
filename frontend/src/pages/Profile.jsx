@@ -41,8 +41,29 @@ const Profile = () => {
     }
   };
 
+  const formatPhone = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    }
+    return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  };
+
+  const formatCPF = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  };
+
   const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    
+    if (e.target.name === 'phone') {
+      value = formatPhone(value);
+    } else if (e.target.name === 'cpf') {
+      value = formatCPF(value);
+    }
+    
+    setProfile({ ...profile, [e.target.name]: value });
   };
 
   if (loading) {
@@ -107,6 +128,34 @@ const Profile = () => {
                 name="email"
                 value={profile?.email || ''}
                 onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                <User size={18} />
+                Telefone
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={profile?.phone || ''}
+                onChange={handleChange}
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                <Shield size={18} />
+                CPF
+              </label>
+              <input
+                type="text"
+                name="cpf"
+                value={profile?.cpf || ''}
+                onChange={handleChange}
+                placeholder="000.000.000-00"
               />
             </div>
 
