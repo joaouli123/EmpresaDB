@@ -1090,7 +1090,7 @@
 /* Addons */
 .addons-section {
   text-align: center;
-  margin-top: 80px;
+  margin-top: 0;
   padding: 60px 40px;
   border-radius: 20px;
 }
@@ -1599,6 +1599,12 @@ body {
 section#faq.benefits-section {
   background: #f9fafb !important;
   padding: 100px 20px;
+  max-width: none !important;
+}
+
+section#faq.benefits-section > * {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Pricing Carousel - Igual aos depoimentos */
