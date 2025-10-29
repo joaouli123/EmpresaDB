@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import logging
 from typing import Optional, Dict, List
 from src.config import settings
-from fastapi.security import OAuth2Scheme
+from fastapi.security import OAuth2PasswordBearer
 import secrets
 
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +22,7 @@ class DatabaseManager:
         self.connection_string = settings.database_url
         self.engine = None
         self.SessionLocal = None
-        self.oauth2_scheme = OAuth2Scheme(tokenUrl="auth/login")
+        self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
         # ✅ CONNECTION POOL: Reutiliza conexões (10x mais rápido!)
         # VPS: 4 CPUs, 16GB RAM → pool de 5-20 conexões
