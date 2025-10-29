@@ -40,8 +40,8 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const data = await subscriptionAPI.getMySubscription();
-        setSubscription(data);
+        const response = await subscriptionAPI.getMySubscription();
+        setSubscription(response.data);
       } catch (error) {
         console.error('Erro ao buscar assinatura:', error);
       }
@@ -49,12 +49,20 @@ const Sidebar = () => {
     
     if (user) {
       fetchSubscription();
+      
+      // Atualizar em tempo real a cada 10 segundos
+      const interval = setInterval(fetchSubscription, 10000);
+      return () => clearInterval(interval);
     }
   }, [user]);
 
-  const percentageUsed = subscription 
-    ? Math.min((subscription.queries_used / subscription.total_limit) * 100, 100)
-    : 0;
+  // Valores padrão se subscription ainda não carregou
+  const queries_used = subscription?.queries_used || 0;
+  const total_limit = subscription?.total_limit || 200;
+  const plan_name = subscription?.plan_name || 'Free';
+  
+  const percentageUsed = Math.min((queries_used / total_limit) * 100, 100);
+  const isExhausted = queries_used >= total_limit;
 
   return (
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>

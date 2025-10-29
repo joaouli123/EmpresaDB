@@ -187,95 +187,189 @@ const Dashboard = () => {
       </div>
 
       {subscription && subscription.plan_name && (
-        <div className="card">
-          <div className="card-header">
-            <CheckCircle2 size={20} />
-            <h2>Seu Plano: {subscription.plan_name}</h2>
+        <>
+          {/* MODELO 1: Compacto com barra grande */}
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>MODELO 1</span>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '4px 0', color: '#1f2937' }}>
+                  {subscription.queries_used || 0}/{subscription.total_limit || 0} <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: '400' }}>consultas</span>
+                </h3>
+              </div>
+              {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+                <a href="/home#pricing" style={{ fontSize: '11px', color: '#3b82f6', textDecoration: 'none', fontWeight: '500' }}>Fazer upgrade →</a>
+              )}
+            </div>
+            <div style={{ 
+              height: '12px', 
+              backgroundColor: '#f3f4f6', 
+              borderRadius: '999px', 
+              overflow: 'hidden',
+              position: 'relative'
+            }}>
+              <div style={{
+                height: '100%',
+                width: `${((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 100}%`,
+                backgroundColor: (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6',
+                borderRadius: '999px',
+                transition: 'all 0.3s ease'
+              }}></div>
+            </div>
           </div>
-          <div className="db-stats">
-            <div className="db-stat-item">
-              <p className="db-stat-label">Limite Mensal</p>
-              <p className="db-stat-value">{(subscription.total_limit || 0).toLocaleString('pt-BR')}</p>
+
+          {/* MODELO 2: Cards lado a lado minimalista */}
+          <div className="card">
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '12px', display: 'block' }}>MODELO 2</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '16px', alignItems: 'center' }}>
+              <div>
+                <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>Usadas</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', margin: 0 }}>{subscription.queries_used || 0}</p>
+              </div>
+              <div style={{ width: '1px', height: '40px', backgroundColor: '#e5e7eb' }}></div>
+              <div>
+                <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>Restantes</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#10b981', margin: 0 }}>
+                  {(subscription.total_limit || 0) - (subscription.queries_used || 0)}
+                </p>
+              </div>
             </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Consultas Usadas</p>
-              <p className="db-stat-value">{(subscription.queries_used || 0).toLocaleString('pt-BR')}</p>
-            </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Consultas Restantes</p>
-              <p className="db-stat-value">{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</p>
-            </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Renovação</p>
-              <p className="db-stat-value">
-                {subscription.plan_name === 'Free'
-                  ? 'Mensal (Gratuito)'
-                  : subscription.renewal_date
-                    ? new Date(subscription.renewal_date).toLocaleDateString('pt-BR')
-                    : 'N/A'}
-              </p>
+            {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+              <a href="/home#pricing" style={{ 
+                display: 'block',
+                marginTop: '12px',
+                textAlign: 'center',
+                fontSize: '11px',
+                color: '#3b82f6',
+                textDecoration: 'none',
+                padding: '8px',
+                backgroundColor: '#eff6ff',
+                borderRadius: '6px',
+                fontWeight: '500'
+              }}>Fazer upgrade do plano</a>
+            )}
+          </div>
+
+          {/* MODELO 3: Circular progress */}
+          <div className="card">
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '12px', display: 'block' }}>MODELO 3</span>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <div style={{ position: 'relative', width: '80px', height: '80px' }}>
+                <svg width="80" height="80" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#f3f4f6" strokeWidth="8"></circle>
+                  <circle 
+                    cx="40" 
+                    cy="40" 
+                    r="32" 
+                    fill="none" 
+                    stroke={(subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6'}
+                    strokeWidth="8"
+                    strokeDasharray={`${((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 201} 201`}
+                    strokeLinecap="round"
+                  ></circle>
+                </svg>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
+                    {Math.round(((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 100)}%
+                  </p>
+                </div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 4px 0' }}>
+                  {subscription.queries_used || 0} de {subscription.total_limit || 0} consultas usadas
+                </p>
+                {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+                  <a href="/home#pricing" style={{ fontSize: '11px', color: '#3b82f6', textDecoration: 'none', fontWeight: '500' }}>Fazer upgrade →</a>
+                )}
+              </div>
             </div>
           </div>
-          <div className="progress-bar" style={{ marginTop: '20px' }}>
-            <div
-              className="progress-fill"
-              style={{
-                width: `${((subscription.total_limit || 0) > 0 ? ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) : 0)}%`,
-                backgroundColor: subscription.plan_name === 'Free' && ((subscription.queries_used || 0) / (subscription.total_limit || 1) * 100) > 80 ? '#ef4444' : '#3b82f6'
-              }}
-            />
-          </div>
-          {subscription.plan_name === 'Free' && (
-            <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <a
-                href="/home#pricing"
-                style={{
-                  display: 'inline-block',
+
+          {/* MODELO 4: Super compacto inline */}
+          <div className="card">
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginBottom: '12px', display: 'block' }}>MODELO 4</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ 
+                flex: 1,
+                height: '8px',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '999px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 100}%`,
+                  backgroundColor: (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6',
+                  borderRadius: '999px'
+                }}></div>
+              </div>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', whiteSpace: 'nowrap' }}>
+                {subscription.queries_used || 0}/{subscription.total_limit || 0}
+              </span>
+              {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+                <a href="/home#pricing" style={{ 
+                  fontSize: '11px',
+                  color: '#fff',
                   backgroundColor: '#3b82f6',
-                  color: 'white',
-                  padding: '10px 20px',
-                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  borderRadius: '4px',
                   textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Fazer Upgrade do Plano
-              </a>
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
+                }}>Upgrade</a>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        </>
       )}
 
       {batchCredits && (
         <div className="card">
-          <div className="card-header">
-            <Package size={20} />
-            <h2>Créditos de Consultas em Lote</h2>
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Package size={18} />
+              <h2 style={{ fontSize: '16px', margin: 0 }}>Créditos de Consultas em Lote</h2>
+            </div>
+            {batchCredits.available_credits === 0 && (
+              <a
+                href="/home#pricing"
+                style={{
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}
+              >
+                Comprar Mais Créditos
+              </a>
+            )}
           </div>
-          <div className="db-stats">
-            <div className="db-stat-item">
-              <p className="db-stat-label">Créditos Totais</p>
-              <p className="db-stat-value">{(batchCredits.total_credits || 0).toLocaleString('pt-BR')}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', padding: '16px 0' }}>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Totais</p>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{(batchCredits.total_credits || 0).toLocaleString('pt-BR')}</p>
             </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Créditos Usados</p>
-              <p className="db-stat-value">{(batchCredits.used_credits || 0).toLocaleString('pt-BR')}</p>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Usados</p>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{(batchCredits.used_credits || 0).toLocaleString('pt-BR')}</p>
             </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Créditos Restantes</p>
-              <p className="db-stat-value" style={{ color: '#10b981', fontWeight: 'bold' }}>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Restantes</p>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#10b981', margin: 0 }}>
                 {(batchCredits.available_credits || 0).toLocaleString('pt-BR')}
               </p>
             </div>
-            <div className="db-stat-item">
-              <p className="db-stat-label">Status</p>
-              <p className="db-stat-value" style={{ fontSize: '14px' }}>
-                {batchCredits.available_credits > 0 ? '✅ Ativo' : '⚠️ Sem créditos'}
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Status</p>
+              <p style={{ fontSize: '16px', fontWeight: '600', color: batchCredits.available_credits > 0 ? '#10b981' : '#f59e0b', margin: 0 }}>
+                {batchCredits.available_credits > 0 ? 'Ativo' : 'Sem créditos'}
               </p>
             </div>
           </div>
-          <div className="progress-bar" style={{ marginTop: '20px' }}>
+          <div className="progress-bar" style={{ marginTop: '8px' }}>
             <div
               className="progress-fill"
               style={{
@@ -285,11 +379,11 @@ const Dashboard = () => {
             />
           </div>
           <div style={{ 
-            marginTop: '16px', 
-            padding: '12px', 
+            marginTop: '12px', 
+            padding: '10px', 
             background: 'rgba(16, 185, 129, 0.1)', 
             borderRadius: '6px',
-            fontSize: '14px',
+            fontSize: '12px',
             color: '#059669'
           }}>
             <p style={{ margin: 0 }}>
@@ -297,25 +391,6 @@ const Dashboard = () => {
               Cada resultado retornado consome 1 crédito. Créditos não expiram!
             </p>
           </div>
-          {batchCredits.available_credits === 0 && (
-            <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <a
-                href="/home#pricing"
-                style={{
-                  display: 'inline-block',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  padding: '10px 20px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Comprar Mais Créditos
-              </a>
-            </div>
-          )}
         </div>
       )}
     </div>
