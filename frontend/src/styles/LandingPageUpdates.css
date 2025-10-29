@@ -461,6 +461,7 @@ html {
   .hero-badge {
     font-size: 12px !important;
     padding: 6px 16px !important;
+    margin-bottom: 24px;
   }
 
   .section-header h2 {
