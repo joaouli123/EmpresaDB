@@ -48,6 +48,7 @@ const LandingPage = () => {
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   useEffect(() => {
     loadPlans();
@@ -1200,27 +1201,69 @@ const LandingPage = () => {
       <section id="testimonials" className="testimonials-section">
         <div className="section-header">
           <h2>O Que Nossos Clientes Dizem</h2>
-          <p>Empresas de todos os tamanhos confiam em nossa plataforma</p>
+          <p>Mais de 500 empresas confiam em nossa plataforma todos os dias</p>
         </div>
 
-        <div className="testimonials-grid">
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="testimonial-card">
-              <div className="stars">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
-                ))}
-              </div>
-              <p className="testimonial-text">"{testimonial.text}"</p>
-              <div className="testimonial-author">
-                <div className="author-avatar">{testimonial.avatar}</div>
-                <div className="author-info">
-                  <div className="author-name">{testimonial.name}</div>
-                  <div className="author-role">{testimonial.role}</div>
-                </div>
-              </div>
+        <div className="testimonials-carousel-wrapper">
+          <div className="testimonials-carousel">
+            <div className="testimonials-carousel-grid">
+              {(() => {
+                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+                return testimonials.slice(currentTestimonial, currentTestimonial + itemsToShow).map((testimonial, index) => (
+                  <div key={index} className="testimonial-card">
+                    <div className="stars">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
+                      ))}
+                    </div>
+                    <p className="testimonial-text">"{testimonial.text}"</p>
+                    <div className="testimonial-author">
+                      <div className="author-avatar">{testimonial.avatar}</div>
+                      <div className="author-info">
+                        <div className="author-name">{testimonial.name}</div>
+                        <div className="author-role">{testimonial.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
-          ))}
+          </div>
+
+          {/* Botões de Navegação */}
+          <button
+            className="carousel-nav-button prev"
+            onClick={() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              setCurrentTestimonial(prev => prev > 0 ? prev - 1 : testimonials.length - itemsToShow);
+            }}
+          >
+            <ChevronRight size={24} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
+          </button>
+
+          <button
+            className="carousel-nav-button next"
+            onClick={() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              setCurrentTestimonial(prev => prev < testimonials.length - itemsToShow ? prev + 1 : 0);
+            }}
+          >
+            <ChevronRight size={24} style={{ color: '#3b82f6' }} />
+          </button>
+
+          {/* Indicadores */}
+          <div className="carousel-indicators">
+            {(() => {
+              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+              return Array.from({ length: testimonials.length - itemsToShow + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonial(index)}
+                  className={`carousel-indicator ${currentTestimonial === index ? 'active' : ''}`}
+                />
+              ));
+            })()}
+          </div>
         </div>
       </section>
 
