@@ -1042,7 +1042,7 @@ const LandingPage = () => {
                       </ul>
 
                       {plan.name === 'enterprise' ? (
-                        <a href="mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise">
+                        <a href="mailto:contato@dbempresas.com.br?subject=Interesse no Plano Enterprise">
                           <button className="btn-plan btn-secondary-large" style={{
                             background: '#fbbf24',
                             color: '#1f2937',
@@ -1449,7 +1449,7 @@ const LandingPage = () => {
                 <Mail size={20} />
                 <div>
                   <strong>Email</strong>
-                  <p>contato@cnpjapi.com.br</p>
+                  <p>contato@dbempresas.com.br</p>
                 </div>
               </div>
 
@@ -1457,7 +1457,7 @@ const LandingPage = () => {
                 <Phone size={20} />
                 <div>
                   <strong>Telefone</strong>
-                  <p>(11) 9 9999-9999</p>
+                  <p>(41) 98785-7413</p>
                 </div>
               </div>
 
@@ -1571,7 +1571,7 @@ const LandingPage = () => {
 
       {/* WhatsApp Floating Button */}
       <a
-        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ"
+        href="https://wa.me/5541987857413?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20DB%20Empresas"
         className="whatsapp-float"
         target="_blank"
         rel="noopener noreferrer"
