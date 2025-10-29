@@ -217,29 +217,44 @@ code {
   font-size: 14px;
 }
 
-.login-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 32px;
-  border-bottom: 2px solid var(--border);
+.forgot-password-link {
+  text-align: right;
+  margin-bottom: 16px;
 }
 
-.tab {
-  flex: 1;
-  padding: 12px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  color: var(--gray);
-  font-weight: 600;
-  cursor: pointer;
+.forgot-password-link a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 14px;
   transition: all 0.2s;
 }
 
-.tab.active {
+.forgot-password-link a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.toggle-mode {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.toggle-mode p {
+  color: var(--gray);
+  font-size: 14px;
+  margin: 0;
+}
+
+.toggle-mode a {
   color: var(--primary);
-  border-bottom-color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.toggle-mode a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 .login-form {

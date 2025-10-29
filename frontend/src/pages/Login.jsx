@@ -231,29 +231,6 @@ const Login = () => {
           </div>
         )}
 
-        <div className="login-tabs">
-          <button
-            className={`tab ${isLogin ? 'active' : ''}`}
-            onClick={() => {
-              setIsLogin(true);
-              setError('');
-              setSuccess('');
-            }}
-          >
-            Entrar
-          </button>
-          <button
-            className={`tab ${!isLogin ? 'active' : ''}`}
-            onClick={() => {
-              setIsLogin(false);
-              setError('');
-              setSuccess('');
-            }}
-          >
-            Cadastrar
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="login-form">
           {error && (
             <div className="message error-message">
@@ -390,6 +367,17 @@ const Login = () => {
             </div>
           )}
 
+          {isLogin && (
+            <div className="forgot-password-link">
+              <a href="#" onClick={(e) => {
+                e.preventDefault();
+                alert('Funcionalidade de redefinir senha em desenvolvimento');
+              }}>
+                Esqueceu sua senha?
+              </a>
+            </div>
+          )}
+
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
               <>
@@ -400,6 +388,34 @@ const Login = () => {
               isLogin ? 'Entrar' : 'Cadastrar'
             )}
           </button>
+
+          <div className="toggle-mode">
+            {isLogin ? (
+              <p>
+                Não tem uma conta?{' '}
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  setIsLogin(false);
+                  setError('');
+                  setSuccess('');
+                }}>
+                  Cadastre-se
+                </a>
+              </p>
+            ) : (
+              <p>
+                Já tem uma conta?{' '}
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  setIsLogin(true);
+                  setError('');
+                  setSuccess('');
+                }}>
+                  Entrar
+                </a>
+              </p>
+            )}
+          </div>
         </form>
       </div>
     </div>
