@@ -875,103 +875,110 @@ const LandingPage2 = () => {
           </div>
         )}
 
-        <div className="enterprise-card" style={{
-          marginTop: '60px',
-          background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
-          borderRadius: '24px',
-          padding: '48px',
-          color: 'white',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
-            opacity: 0.3
-          }} />
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h3 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '16px', color: 'white' }}>
-              Enterprise
-            </h3>
-            <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
-              Solução personalizada para grandes volumes e necessidades específicas
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', maxWidth: '800px', margin: '0 auto 40px' }}>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Consultas</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Ilimitadas*</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Rate Limit</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Customizado</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Suporte</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Prioritário</div>
+        {batchPackages.length > 0 && (
+          <div className="addons-section">
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <Sparkles size={32} style={{ color: 'var(--primary)', marginBottom: '10px' }} />
+              <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
+              <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
+                Pesquise milhares de empresas de uma vez com +45 filtros avançados
+              </p>
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+                Cada resultado retornado = 1 crédito.
+              </p>
+              <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
+                ✨ Créditos comprados nunca expiram!
+              </p>
+              <div style={{
+                marginTop: '15px',
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                borderLeft: '4px solid #667eea',
+                borderRadius: '6px',
+                fontSize: '14px',
+                maxWidth: '900px',
+                margin: '16px auto 0'
+              }}>
+                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
+                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
               </div>
             </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 40px', maxWidth: '600px', textAlign: 'left' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                SLA garantido com uptime de 99.9%
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Gerente de conta dedicado
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Infraestrutura dedicada disponível
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Integração e onboarding personalizados
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Relatórios e analytics customizados
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Desenvolvimento de features sob demanda
-              </li>
-            </ul>
-            <button 
-              onClick={() => window.location.href = '#contact'}
-              style={{
-                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                color: '#1f2937',
-                border: 'none',
-                padding: '16px 48px',
-                fontSize: '18px',
-                fontWeight: '700',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                boxShadow: '0 8px 24px rgba(251, 191, 36, 0.3)',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 12px 32px rgba(251, 191, 36, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 8px 24px rgba(251, 191, 36, 0.3)';
-              }}
-            >
-              Falar com Especialista
-            </button>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '16px' }}>
-              * Sujeito a fair use policy
-            </p>
+            <div className="addons-grid">
+              {batchPackages.map((pkg) => {
+                const pricePerUnit = pkg.price_per_unit;
+                const savingsPercent = batchPackages[0] && pkg.id !== batchPackages[0].id 
+                  ? Math.round((1 - (pricePerUnit / batchPackages[0].price_per_unit)) * 100)
+                  : 0;
+
+                return (
+                  <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
+                    {savingsPercent > 0 && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '10px', 
+                        right: '10px', 
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        Economize {savingsPercent}%
+                      </div>
+                    )}
+                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                      <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                      <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
+                    </div>
+                    <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
+                      {pkg.credits.toLocaleString('pt-BR')}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
+                    <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
+                      R$ {pkg.price_brl.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
+                      R$ {(pricePerUnit * 100).toFixed(2)} centavos/crédito
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
+                      {pkg.description}
+                    </p>
+                    <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
+                      Comprar Agora
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ 
+              marginTop: '30px', 
+              padding: '20px', 
+              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+              borderRadius: '12px',
+              border: '2px solid #bae6fd'
+            }}>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
+                {batchPackages.length > 1 && (
+                  <li style={{ fontSize: '14px', color: '#374151' }}>
+                    ✅ Economize até {Math.max(...batchPackages.map(p => {
+                      const savings = batchPackages[0] && p.id !== batchPackages[0].id 
+                        ? Math.round((1 - (p.price_per_unit / batchPackages[0].price_per_unit)) * 100)
+                        : 0;
+                      return savings;
+                    }))}% comprando pacotes maiores
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
-        </div>
-      </section>
+        )}
       </section>
 
       {/* Testimonials Section */}
