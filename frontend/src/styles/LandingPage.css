@@ -510,6 +510,14 @@
   transition: all 0.3s;
   border-bottom: 3px solid transparent;
   position: relative;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
 }
 
 .tab-button:hover {
@@ -640,6 +648,14 @@
   border: 2px solid transparent;
   transition: all 0.3s;
   cursor: pointer;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
 }
 
 .cnae-card:hover {
@@ -826,6 +842,14 @@
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
 }
 
 .benefit-card:hover {
@@ -874,6 +898,14 @@
   position: relative;
   cursor: pointer;
   border: 3px solid transparent;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
 }
 
 .pricing-card:hover {
@@ -1125,6 +1157,14 @@
   padding: 32px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
 }
 
 .stars {
@@ -1666,4 +1706,21 @@ section#faq.benefits-section > * {
   font-size: 18px;
   color: var(--gray);
   margin-left: 4px; /* Ensure separation from the amount */
+}
+
+/* Otimizar imagens para performance */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Lazy loading nativo para imagens */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
 }

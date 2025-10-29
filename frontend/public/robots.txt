@@ -1,0 +1,17 @@
+
+# Robots.txt para CNPJ API Brasil
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://cnpjapi.com.br/sitemap.xml
+
+# Crawl-delay para bots específicos
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 0
