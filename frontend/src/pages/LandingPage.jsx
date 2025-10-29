@@ -30,7 +30,9 @@ import {
   Brain,
   Menu,
   X,
-  Package
+  Package,
+  ChevronDown,
+  HelpCircle
 } from 'lucide-react';
 import { api } from '../services/api';
 import '../styles/LandingPage.css';
@@ -45,6 +47,7 @@ const LandingPage = () => {
   const [batchPackages, setBatchPackages] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   useEffect(() => {
     loadPlans();
@@ -318,21 +321,44 @@ const LandingPage = () => {
       role: 'CEO, TechStart Consultoria',
       avatar: 'CS',
       rating: 5,
-      text: 'Transformou nossa prospecção B2B! Os filtros avançados por CNAE, localização e porte nos ajudam a identificar leads qualificados 3x mais rápido.'
+      text: 'Economizamos 80% do tempo com pesquisa de empresas após integrar a API. Nossa prospecção B2B ficou 3x mais rápida e identificamos leads qualificados em segundos!'
     },
     {
       name: 'Marina Costa',
-      role: 'Analista de Compliance',
+      role: 'Analista de Compliance, Banco Regional',
       avatar: 'MC',
       rating: 5,
-      text: 'Ferramenta essencial para due diligence. Consultar sócios, situação cadastral e dados atualizados faz toda diferença no nosso trabalho.'
+      text: 'Integração fácil e dados precisos! Validamos mais de 5 mil CNPJs por mês e reduzimos em 70% o tempo de due diligence. Essencial para nosso compliance!'
     },
     {
       name: 'Roberto Almeida',
       role: 'Desenvolvedor Full Stack',
       avatar: 'RA',
       rating: 5,
-      text: 'API RESTful muito bem documentada e fácil de integrar. Em 30 minutos já estava consultando CNPJs e filtrando empresas no meu sistema!'
+      text: 'Integrei a API em menos de 1 hora! A documentação é clara, os endpoints são intuitivos e o suporte respondeu minhas dúvidas super rápido. Recomendo demais!'
+    }
+  ];
+
+  const faqs = [
+    {
+      question: 'Como funcionam as consultas em lote?',
+      answer: 'As consultas em lote permitem buscar múltiplas empresas de uma vez usando filtros avançados (CNAE, UF, município, porte, etc). Você pode consultar milhares de empresas em uma única requisição usando o endpoint /batch/search. Cada empresa retornada consome 1 crédito. Os créditos podem ser inclusos no seu plano mensal ou comprados em pacotes avulsos que nunca expiram.'
+    },
+    {
+      question: 'Os dados são realmente da Receita Federal?',
+      answer: 'Sim! Todos os dados são 100% oficiais e sincronizados mensalmente com a base pública da Receita Federal do Brasil. Isso inclui CNPJ completo, razão social, nome fantasia, endereço, situação cadastral, CNAE, porte, natureza jurídica, QSA (sócios e administradores) e muito mais. Garantimos conformidade total com a LGPD.'
+    },
+    {
+      question: 'Quais filtros avançados posso usar nas buscas?',
+      answer: 'Você tem acesso a mais de 45 filtros avançados! Pode filtrar por: estado (UF), município, CNAE (atividade econômica), situação cadastral, porte da empresa, data de abertura, razão social, nome fantasia, CEP, bairro, logradouro, opção pelo Simples Nacional, MEI, natureza jurídica e muito mais. Combine múltiplos filtros para encontrar exatamente o que precisa.'
+    },
+    {
+      question: 'Como funciona o plano gratuito?',
+      answer: 'O plano gratuito oferece 200 consultas por mês sem custo algum! Você pode consultar dados completos de qualquer CNPJ, incluindo informações da empresa, estabelecimentos e QSA. É perfeito para testar a plataforma. Não precisa cartão de crédito para começar e pode fazer upgrade a qualquer momento.'
+    },
+    {
+      question: 'Posso exportar os dados para análise?',
+      answer: 'Sim! Todas as consultas retornam dados em formato JSON estruturado, perfeito para integração com seu sistema. Além disso, você pode exportar resultados em CSV/Excel diretamente pelo dashboard para análises em planilhas. Os dados estão prontos para uso em ferramentas de BI, CRM ou qualquer sistema.'
     }
   ];
 
@@ -351,7 +377,7 @@ const LandingPage = () => {
             <a href="#features">Funcionalidades</a>
             <a href="#categories">Setores</a>
             <a href="#pricing">Planos</a>
-            <a href="#testimonials">Depoimentos</a>
+            <a href="#faq">FAQ</a>
             <a href="#contact">Contato</a>
           </div>
 
@@ -377,7 +403,7 @@ const LandingPage = () => {
             <a href="#features" onClick={() => setMenuOpen(false)}>Funcionalidades</a>
             <a href="#categories" onClick={() => setMenuOpen(false)}>Setores</a>
             <a href="#pricing" onClick={() => setMenuOpen(false)}>Planos</a>
-            <a href="#testimonials" onClick={() => setMenuOpen(false)}>Depoimentos</a>
+            <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
             <a href="#contact" onClick={() => setMenuOpen(false)}>Contato</a>
           </div>
 
@@ -397,31 +423,31 @@ const LandingPage = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={16} />
-            <span>Dados mais recentes do Brasil • Atualização diária</span>
+            <span>Mais de 500 empresas já confiam em nossa plataforma</span>
           </div>
 
           <h1 className="hero-title">
-            Acesso Completo aos Dados
+            Acesso Instantâneo a 64 Milhões de Empresas
             <br />
-            <span className="gradient-text">Públicos de CNPJ</span>
+            <span className="gradient-text">Dados 100% Oficiais e Atualizados</span>
           </h1>
 
           <p className="hero-description">
-            API profissional com dados oficiais e atualizados da Receita Federal. 
-            Consulte empresas, estabelecimentos, sócios e muito mais em milissegundos. 
-            Integração simples, filtros poderosos e dados 100% confiáveis para seu negócio.
+            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil. 
+            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e 
+            dados 100% confiáveis para seu negócio.
           </p>
 
           <div className="hero-cta">
             <a href="#pricing">
               <button className="btn-primary-large btn-hero-primary">
-                Começar Agora
+                Comece Agora Gratuitamente
                 <ChevronRight size={20} />
               </button>
             </a>
             <a href="#features">
               <button className="btn-secondary-large btn-hero-secondary">
-                Ver Demonstração
+                Ver Como Funciona
               </button>
             </a>
           </div>
@@ -1062,18 +1088,106 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section id="faq" className="benefits-section" style={{ background: '#f9fafb' }}>
+        <div className="section-header">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
+            <HelpCircle size={32} color="var(--primary)" />
+            <h2 style={{ margin: 0 }}>Perguntas Frequentes</h2>
+          </div>
+          <p>Tire suas dúvidas sobre nossa plataforma e funcionalidades</p>
+        </div>
+
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          {faqs.map((faq, index) => (
+            <div 
+              key={index} 
+              style={{
+                background: 'white',
+                borderRadius: '12px',
+                marginBottom: '16px',
+                overflow: 'hidden',
+                border: '1px solid #e5e7eb',
+                boxShadow: openFaqIndex === index ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <button
+                onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                style={{
+                  width: '100%',
+                  padding: '20px 24px',
+                  background: 'transparent',
+                  border: 'none',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'background 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ 
+                  fontSize: '18px', 
+                  fontWeight: '600', 
+                  color: '#111827',
+                  paddingRight: '20px'
+                }}>
+                  {faq.question}
+                </span>
+                <ChevronDown 
+                  size={24} 
+                  color="var(--primary)"
+                  style={{
+                    transform: openFaqIndex === index ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                    flexShrink: 0
+                  }}
+                />
+              </button>
+              
+              {openFaqIndex === index && (
+                <div style={{
+                  padding: '0 24px 24px 24px',
+                  fontSize: '16px',
+                  lineHeight: '1.6',
+                  color: '#4b5563',
+                  animation: 'fadeIn 0.3s ease'
+                }}>
+                  {faq.answer}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '20px' }}>
+            Ainda tem dúvidas? Nossa equipe está pronta para ajudar!
+          </p>
+          <a href="#contact">
+            <button className="btn-primary-large">
+              Fale com Nosso Time
+              <ChevronRight size={20} />
+            </button>
+          </a>
+        </div>
+      </section>
+
       {/* CTA Final Section */}
       <section className="cta-section">
         <div className="cta-content">
           <h2>Pronto Para Começar?</h2>
-          <p>Junte-se a centenas de empresas que já utilizam nossa plataforma</p>
+          <p>Entre no jogo com dados atualizados e de alta qualidade. Comece em minutos, sem compromisso.</p>
           <a href="#pricing">
             <button className="btn-primary-large btn-cta-primary">
-              Criar Conta Grátis
+              Comece Agora - Teste Grátis
               <ChevronRight size={20} />
             </button>
           </a>
-          <p className="cta-note">Sem cartão de crédito necessário • Cancele quando quiser • Dados 100% atualizados</p>
+          <p className="cta-note">✓ Sem cartão de crédito • ✓ 200 consultas gratuitas • ✓ Cancele quando quiser</p>
         </div>
       </section>
 

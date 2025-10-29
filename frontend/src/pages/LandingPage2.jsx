@@ -49,7 +49,7 @@ const LandingPage2 = () => {
       priceMonthly: '0',
       priceYearly: '0',
       queries: '200',
-      description: 'Teste grátis, sem cartão',
+      description: 'Comece sem compromisso',
       features: [
         '200 consultas/mês',
         '0 consultas em lote/mês',
@@ -70,7 +70,7 @@ const LandingPage2 = () => {
       priceMonthly: '79,90',
       priceYearly: '799,00',
       queries: '10.000',
-      description: 'Para começar pequeno',
+      description: 'Ideal para startups e PMEs',
       features: [
         '10.000 consultas/mês',
         '500 consultas em lote/mês',
@@ -119,7 +119,7 @@ const LandingPage2 = () => {
       priceMonthly: '799,90',
       priceYearly: '7.999,00',
       queries: '500.000',
-      description: 'Para alto volume',
+      description: 'Empresas em crescimento',
       features: [
         '500.000 consultas/mês',
         '10.000 consultas em lote/mês',
@@ -503,31 +503,31 @@ const LandingPage2 = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={16} />
-            <span>Dados mais recentes do Brasil • Atualização mensal</span>
+            <span>Mais de 500 empresas já confiam na nossa API</span>
           </div>
 
           <h1 className="hero-title">
-            Acesso Completo aos Dados
+            Acesso Instantâneo a 54 Milhões de Empresas
             <br />
-            <span className="gradient-text">Oficiais de CNPJ</span>
+            <span className="gradient-text">Dados 100% Oficiais e Atualizados</span>
           </h1>
 
           <p className="hero-description">
-            API profissional com dados oficiais da Receita Federal atualizados mensalmente. 
-            Consulte 54M+ empresas cadastradas, estabelecimentos e QSA completo. 
-            Integração simples via REST API, performance otimizada e dados 100% confiáveis.
+            Pare de perder horas pesquisando dados de empresas manualmente. 
+            Consulte CNPJ, QSA completo e estabelecimentos em segundos com nossa API REST. 
+            Integração em minutos, dados da Receita Federal e performance supersônica.
           </p>
 
           <div className="hero-cta">
             <a href="#pricing">
               <button className="btn-primary-large btn-hero-primary">
-                Teste gratuitamente
+                Comece Agora Gratuitamente
                 <ChevronRight size={20} />
               </button>
             </a>
             <a href="#features">
               <button className="btn-secondary-large btn-hero-secondary">
-                Ver Demonstração
+                Ver Como Funciona
               </button>
             </a>
           </div>
