@@ -1515,11 +1515,6 @@ const LandingPage = () => {
             <p style={{ marginTop: '16px', fontSize: '14px' }}>
               <strong>CNPJ:</strong> 47.394.596/0001-15
             </p>
-            <div className="social-links">
-              <a href="#" aria-label="LinkedIn"><Users size={20} /></a>
-              <a href="#" aria-label="Twitter"><Users size={20} /></a>
-              <a href="#" aria-label="Instagram"><Users size={20} /></a>
-            </div>
           </div>
 
           <div className="footer-section">
@@ -1527,44 +1522,43 @@ const LandingPage = () => {
             <ul>
               <li><a href="#features">Funcionalidades</a></li>
               <li><a href="#pricing">Planos e Preços</a></li>
-              <li><a href="#api">Documentação API</a></li>
-              <li><a href="#updates">Atualizações</a></li>
+              <li><a href="/servicos">Serviços</a></li>
+              <li><a href="/casos-de-uso">Casos de Uso</a></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Empresa</h4>
             <ul>
-              <li><a href="#about">Sobre Nós</a></li>
-              <li><a href="#blog">Blog</a></li>
-              <li><a href="#careers">Carreiras</a></li>
-              <li><a href="#contact">Contato</a></li>
+              <li><a href="/sobre">Sobre Nós</a></li>
+              <li><a href="/blog">Blog</a></li>
+              <li><a href="/contato">Contato</a></li>
+              <li><a href="/api">Documentação API</a></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Suporte</h4>
             <ul>
-              <li><a href="#help">Central de Ajuda</a></li>
               <li><a href="#faq">FAQ</a></li>
-              <li><a href="#status">Status do Sistema</a></li>
-              <li><a href="#terms">Termos de Uso</a></li>
+              <li><a href="#contact">Fale Conosco</a></li>
+              <li><a href="https://wa.me/5541987857413?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20DB%20Empresas" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+              <li><a href="tel:+5541987857413">(41) 98785-7413</a></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4>Legal</h4>
             <ul>
-              <li><a href="#privacy">Política de Privacidade</a></li>
-              <li><a href="#terms">Termos de Serviço</a></li>
-              <li><a href="#lgpd">LGPD</a></li>
-              <li><a href="#cookies">Cookies</a></li>
+              <li><a href="/privacidade">Política de Privacidade</a></li>
+              <li><a href="/termos">Termos de Uso</a></li>
+              <li><a href="mailto:contato@dbempresas.com.br">Contato Email</a></li>
             </ul>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2024 CNPJ API. Todos os direitos reservados.</p>
+          <p>&copy; 2024 DB Empresas - CNPJ: 47.394.596/0001-15. Todos os direitos reservados.</p>
           <p>Dados oficiais da Receita Federal do Brasil</p>
         </div>
       </footer>
