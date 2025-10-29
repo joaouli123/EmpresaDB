@@ -269,6 +269,134 @@ code {
   align-items: center;
 }
 
+.input-with-icon input {
+  flex: 1;
+  padding: 12px 12px 12px 44px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.input-with-icon svg:first-child {
+  position: absolute;
+  left: 14px;
+  color: var(--gray);
+  pointer-events: none;
+}
+
+.input-with-icon.input-valid input {
+  border-color: #10b981;
+  background: #10b98108;
+}
+
+.input-with-icon.input-invalid input {
+  border-color: #ef4444;
+  background: #ef444408;
+}
+
+.icon-success {
+  position: absolute;
+  right: 14px;
+  color: #10b981;
+  pointer-events: none;
+}
+
+.icon-error {
+  position: absolute;
+  right: 14px;
+  color: #ef4444;
+  pointer-events: none;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: var(--primary);
+}
+
+.text-success {
+  color: #10b981;
+  font-size: 13px;
+  margin-top: 4px;
+  display: block;
+}
+
+.text-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 4px;
+  display: block;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.success-message {
+  background: #10b98115;
+  color: #059669;
+  border: 1px solid #10b98130;
+}
+
+.error-message {
+  background: #ef444415;
+  color: #dc2626;
+  border: 1px solid #ef444430;
+}
+
+.plan-banner {
+  padding: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
 .input-with-icon svg {
   position: absolute;
   left: 16px;
