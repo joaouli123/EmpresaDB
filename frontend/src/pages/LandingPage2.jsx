@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Database, 
   Search, 
@@ -29,8 +29,10 @@ import {
   Sparkles,
   Brain,
   Menu,
-  X
+  X,
+  Package
 } from 'lucide-react';
+import { api } from '../services/api';
 import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
 
@@ -41,132 +43,74 @@ const LandingPage2 = () => {
   const [activeTab, setActiveTab] = useState('varejo');
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [batchPackages, setBatchPackages] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
-  const plans = [
-    {
-      id: 'free',
-      name: 'Free',
-      priceMonthly: '0',
-      priceYearly: '0',
-      queries: '200',
-      description: 'Comece sem compromisso',
-      features: [
-        '200 consultas/mês',
-        '0 consultas em lote/mês',
-        'Consulta completa por CNPJ',
-        'Dados completos da empresa',
-        'QSA e CNAEs secundários',
-        'Documentação da API',
-        'Suporte por email',
-        'Rate limit: 10 req/min'
-      ],
-      popular: false,
-      badge: null,
-      highlight: 'Ideal para testar'
-    },
-    {
-      id: 'start',
-      name: 'Start',
-      priceMonthly: '79,90',
-      priceYearly: '799,00',
-      queries: '10.000',
-      description: 'Ideal para startups e PMEs',
-      features: [
-        '10.000 consultas/mês',
-        '500 consultas em lote/mês',
-        '+45 filtros avançados',
-        'Créditos batch nunca expiram',
-        'Consulta completa por CNPJ',
-        'Dados completos da empresa',
-        'QSA e CNAEs secundários',
-        'Dashboard com estatísticas',
-        'Documentação da API',
-        'Suporte por email',
-        'Rate limit: 60 req/min'
-      ],
-      popular: false,
-      badge: null,
-      highlight: 'R$ 0,008 por consulta'
-    },
-    {
-      id: 'growth',
-      name: 'Growth',
-      priceMonthly: '249,90',
-      priceYearly: '2.499,00',
-      queries: '100.000',
-      description: 'Melhor custo-benefício',
-      features: [
-        '100.000 consultas/mês',
-        '2.000 consultas em lote/mês',
-        '+45 filtros avançados',
-        'Créditos batch nunca expiram',
-        'Consulta completa por CNPJ',
-        'Dados completos da empresa',
-        'QSA e CNAEs secundários',
-        'Cache Redis para performance',
-        'Dashboard completo com gráficos',
-        'Documentação da API',
-        'Suporte via WhatsApp',
-        'Rate limit: 300 req/min'
-      ],
-      popular: true,
-      badge: 'Mais Popular',
-      highlight: 'R$ 0,0025 por consulta'
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      priceMonthly: '799,90',
-      priceYearly: '7.999,00',
-      queries: '500.000',
-      description: 'Empresas em crescimento',
-      features: [
-        '500.000 consultas/mês',
-        '10.000 consultas em lote/mês',
-        '+45 filtros avançados',
-        'Créditos batch nunca expiram',
-        'Consulta completa por CNPJ',
-        'Dados completos da empresa',
-        'QSA e CNAEs secundários',
-        'Cache Redis dedicado',
-        'Dashboard completo e customizável',
-        'API com alta disponibilidade',
-        'Documentação da API',
-        'Suporte via WhatsApp',
-        'Rate limit: 1000 req/min'
-      ],
-      popular: false,
-      badge: 'Alto Volume',
-      highlight: 'R$ 0,0016 por consulta'
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      priceMonthly: 'Customizado',
-      priceYearly: 'Customizado',
-      queries: 'Ilimitado',
-      description: 'Solução corporativa completa',
-      features: [
-        'Consultas ilimitadas',
-        'Consultas em lote ilimitadas',
-        '+45 filtros avançados',
-        'Dados completos da empresa',
-        'QSA e CNAEs secundários',
-        'Cache Redis dedicado',
-        'Dashboard personalizado',
-        'Account manager dedicado',
-        'Consultoria técnica',
-        'Documentação da API',
-        'Suporte 24/7 prioritário',
-        'SLA 99.99% uptime',
-        'Rate limit customizado',
-        'Sua marca (white-label)'
-      ],
-      popular: false,
-      badge: 'Corporativo',
-      highlight: 'Fale com nosso time'
+  useEffect(() => {
+    loadPlans();
+    loadBatchPackages();
+  }, []);
+
+  const loadPlans = async () => {
+    try {
+      const response = await api.get('/api/v1/subscriptions/plans');
+      setPlans(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar planos:', error);
+      // Fallback: usar planos hardcoded se API falhar
+      setPlans([
+        {
+          id: 1,
+          name: 'free',
+          display_name: 'Free',
+          monthly_queries: 200,
+          monthly_batch_queries: 0,
+          price_brl: 0,
+          rate_limit: 10
+        },
+        {
+          id: 2,
+          name: 'start',
+          display_name: 'Start',
+          monthly_queries: 10000,
+          monthly_batch_queries: 500,
+          price_brl: 79.90,
+          rate_limit: 60
+        },
+        {
+          id: 3,
+          name: 'growth',
+          display_name: 'Growth',
+          monthly_queries: 100000,
+          monthly_batch_queries: 2000,
+          price_brl: 249.90,
+          rate_limit: 300
+        },
+        {
+          id: 4,
+          name: 'pro',
+          display_name: 'Pro',
+          monthly_queries: 500000,
+          monthly_batch_queries: 10000,
+          price_brl: 799.90,
+          rate_limit: 1000
+        }
+      ]);
+    } finally {
+      setLoadingPlans(false);
     }
-  ];
+  };
+
+  const loadBatchPackages = async () => {
+    try {
+      const response = await api.get('/api/v1/batch/packages');
+      setBatchPackages(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar pacotes de consulta em lote:', error);
+      setBatchPackages([]);
+    }
+  };
 
   const benefits = [
     {
@@ -762,95 +706,279 @@ const LandingPage2 = () => {
           </button>
         </div>
 
-        <div className="pricing-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-          {plans.map((plan) => (
-            <div 
-              key={plan.id} 
-              className={`pricing-card ${plan.popular ? 'popular' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
-            >
-              {plan.badge && (
-                <div className="popular-badge">
-                  {plan.id === 'enterprise' && <Building2 size={14} style={{ marginRight: '6px' }} />}
-                  {plan.badge}
-                </div>
-              )}
+        {loadingPlans ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+            <p style={{ color: 'var(--gray)' }}>Carregando planos...</p>
+          </div>
+        ) : (
+          <div className="pricing-grid">
+            {plans.map((plan) => {
+              const isPopular = plan.name === 'growth';
+              const priceMonthly = plan.price_brl;
+              const priceYearly = plan.price_brl * 12 * 0.83;
+              const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
 
-              <div className="plan-header">
-                <h3>{plan.name}</h3>
-                <p className="plan-description">{plan.description}</p>
-              </div>
+              return (
+                <div 
+                  key={plan.id} 
+                  className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
+                  onClick={() => setSelectedPlan(plan.name)}
+                >
+                  {isPopular && <div className="popular-badge">Mais Popular</div>}
 
-              <div className="plan-price">
-                {plan.id !== 'enterprise' ? (
-                  <>
+                  <div className="plan-header">
+                    <h3>{plan.display_name}</h3>
+                    <p className="plan-description">
+                      {plan.name === 'free' && 'Ideal para testar a plataforma'}
+                      {plan.name === 'start' && 'Perfeito para começar'}
+                      {plan.name === 'growth' && 'Para empresas em crescimento'}
+                    </p>
+                  </div>
+
+                  <div className="plan-price">
                     <span className="currency">R$</span>
                     <span className="amount">
-                      {billingPeriod === 'mensal' ? plan.priceMonthly : plan.priceYearly}
+                      {displayPrice.toFixed(2).replace('.', ',')}
                     </span>
                     <span className="period">
                       {billingPeriod === 'mensal' ? '/mês' : '/ano'}
                     </span>
-                  </>
-                ) : (
-                  <span className="amount" style={{ fontSize: '24px' }}>
-                    {plan.priceMonthly}
-                  </span>
-                )}
-              </div>
+                  </div>
 
-              {billingPeriod === 'anual' && plan.id !== 'enterprise' && plan.id !== 'free' && (
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: 'var(--primary)', 
-                  fontWeight: '600',
-                  marginBottom: '12px',
-                  textAlign: 'center'
-                }}>
-                  R$ {(parseFloat(plan.priceYearly.replace('.', '').replace(',', '.')) / 12).toFixed(2).replace('.', ',')} /mês
-                </div>
-              )}
-
-              <div className="plan-queries">
-                <strong>{plan.queries}</strong> consultas{plan.id === 'enterprise' ? '' : '/mês'}
-              </div>
-
-              <ul className="plan-features">
-                {plan.features.map((feature, index) => (
-                  <li key={index}>
-                    <Check size={18} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <a href={
-                plan.id === 'enterprise' ? '#contact' : 
-                plan.id === 'free' ? '/login?plan=free' : 
-                `/login?plan=${plan.id}`
-              }>
-                <button className={`btn-plan ${plan.popular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
-                  {plan.id === 'enterprise' ? (
-                    <>
-                      <Mail size={20} />
-                      Falar com Vendas
-                    </>
-                  ) : plan.id === 'free' ? (
-                    <>
-                      <Zap size={20} />
-                      Começar Grátis
-                    </>
-                  ) : (
-                    <>
-                      <Check size={20} />
-                      Assinar {plan.name}
-                    </>
+                  {billingPeriod === 'anual' && priceMonthly > 0 && (
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: 'var(--primary)', 
+                      fontWeight: '600',
+                      marginBottom: '12px',
+                      textAlign: 'center'
+                    }}>
+                      R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
+                    </div>
                   )}
-                </button>
-              </a>
+
+                  <div className="plan-queries">
+                    <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                  </div>
+
+                  {plan.monthly_batch_queries > 0 && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '10px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '14px',
+                      color: '#fff',
+                      fontWeight: '600',
+                      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      ⚡ {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                    </div>
+                  )}
+
+                  <ul className="plan-features">
+                    <li>
+                      <Check size={18} />
+                      {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
+                    </li>
+                    
+                    <li>
+                      <Check size={18} />
+                      {plan.name === 'free' && '50 consultas em lote/mês'}
+                      {plan.name === 'start' && '500 consultas em lote/mês'}
+                      {plan.name === 'growth' && '2.000 consultas em lote/mês'}
+                      {plan.name === 'pro' && '10.000 consultas em lote/mês'}
+                    </li>
+                    
+                    <li>
+                      <Check size={18} />
+                      +45 filtros avançados
+                    </li>
+                    
+                    {plan.name !== 'free' && (
+                      <li>
+                        <Check size={18} />
+                        <span style={{ color: '#10b981', fontWeight: '600' }}>
+                          ✨ Créditos batch nunca expiram
+                        </span>
+                      </li>
+                    )}
+                    
+                    <li>
+                      <Check size={18} />
+                      Consulta completa por CNPJ
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      Dados completos da empresa
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      QSA e CNAEs secundários
+                    </li>
+                    {plan.name !== 'free' && (
+                      <li>
+                        <Check size={18} />
+                        Dashboard com estatísticas
+                      </li>
+                    )}
+                    <li>
+                      <Check size={18} />
+                      Documentação da API
+                    </li>
+                    {plan.name === 'free' && (
+                      <li>
+                        <Check size={18} />
+                        Suporte por email
+                      </li>
+                    )}
+                    {plan.name === 'start' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Suporte por email
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Rate limit: 60 req/min
+                        </li>
+                      </>
+                    )}
+                    {plan.name === 'growth' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Cache Redis para performance
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Suporte via WhatsApp
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Rate limit: 300 req/min
+                        </li>
+                      </>
+                    )}
+                  </ul>
+
+                  <a href="/pricing">
+                    <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
+                      {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
+                    </button>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {batchPackages.length > 0 && (
+          <div className="addons-section">
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <Sparkles size={32} style={{ color: 'var(--primary)', marginBottom: '10px' }} />
+              <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
+              <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
+                Pesquise milhares de empresas de uma vez com +45 filtros avançados
+              </p>
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+                Cada resultado retornado = 1 crédito.
+              </p>
+              <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
+                ✨ Créditos comprados nunca expiram!
+              </p>
+              <div style={{
+                marginTop: '15px',
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                borderLeft: '4px solid #667eea',
+                borderRadius: '6px',
+                fontSize: '14px',
+                maxWidth: '900px',
+                margin: '16px auto 0'
+              }}>
+                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
+                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
+              </div>
             </div>
-          ))}
-        </div>
+            <div className="addons-grid">
+              {batchPackages.map((pkg) => {
+                const pricePerUnit = pkg.price_per_unit;
+                const savingsPercent = batchPackages[0] && pkg.id !== batchPackages[0].id 
+                  ? Math.round((1 - (pricePerUnit / batchPackages[0].price_per_unit)) * 100)
+                  : 0;
+
+                return (
+                  <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
+                    {savingsPercent > 0 && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '10px', 
+                        right: '10px', 
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        Economize {savingsPercent}%
+                      </div>
+                    )}
+                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                      <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                      <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
+                    </div>
+                    <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
+                      {pkg.credits.toLocaleString('pt-BR')}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
+                    <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
+                      R$ {pkg.price_brl.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
+                      R$ {(pricePerUnit * 100).toFixed(2)} centavos/crédito
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
+                      {pkg.description}
+                    </p>
+                    <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
+                      Comprar Agora
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ 
+              marginTop: '30px', 
+              padding: '20px', 
+              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+              borderRadius: '12px',
+              border: '2px solid #bae6fd'
+            }}>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
+                {batchPackages.length > 1 && (
+                  <li style={{ fontSize: '14px', color: '#374151' }}>
+                    ✅ Economize até {Math.max(...batchPackages.map(p => {
+                      const savings = batchPackages[0] && p.id !== batchPackages[0].id 
+                        ? Math.round((1 - (p.price_per_unit / batchPackages[0].price_per_unit)) * 100)
+                        : 0;
+                      return savings;
+                    }))}% comprando pacotes maiores
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Testimonials Section */}
