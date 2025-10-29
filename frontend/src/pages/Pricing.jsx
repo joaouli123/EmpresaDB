@@ -31,7 +31,69 @@ const Pricing = () => {
       setPlans(response.data);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
-      setPlans([]);
+      // Fallback: usar planos hardcoded se API falhar
+      setPlans([
+        {
+          id: 1,
+          name: 'free',
+          display_name: 'Free',
+          monthly_queries: 200,
+          price_brl: 0,
+          features: [
+            '200 consultas mensais',
+            'Acesso API básico',
+            'Dados atualizados',
+            'Suporte por email'
+          ]
+        },
+        {
+          id: 2,
+          name: 'start',
+          display_name: 'Start',
+          monthly_queries: 1000,
+          price_brl: 49.90,
+          features: [
+            '1.000 consultas mensais',
+            'Acesso API completo',
+            'Dados atualizados diariamente',
+            'Suporte prioritário',
+            'Dashboard básico'
+          ]
+        },
+        {
+          id: 3,
+          name: 'growth',
+          display_name: 'Growth',
+          monthly_queries: 5000,
+          price_brl: 149.90,
+          features: [
+            '5.000 consultas mensais',
+            'Acesso API completo',
+            'Dados em tempo real',
+            'Suporte prioritário',
+            'Dashboard avançado',
+            'Redis Cache (3x mais rápido)',
+            'Rate limit: 300 req/min'
+          ]
+        },
+        {
+          id: 4,
+          name: 'professional',
+          display_name: 'Professional',
+          monthly_queries: 20000,
+          price_brl: 399.90,
+          features: [
+            '20.000 consultas mensais',
+            'Acesso API ilimitado',
+            'Dados em tempo real',
+            'Suporte 24/7',
+            'Dashboard personalizado',
+            'Redis Cache Premium',
+            'Rate limit: 1000 req/min',
+            'Relatórios customizados'
+          ]
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -43,7 +105,42 @@ const Pricing = () => {
       setBatchPackages(response.data);
     } catch (error) {
       console.error('Erro ao carregar pacotes:', error);
-      setBatchPackages([]);
+      // Fallback: usar pacotes hardcoded se API falhar
+      setBatchPackages([
+        {
+          id: 1,
+          name: 'batch_starter',
+          display_name: 'Starter',
+          description: 'Ideal para testes e projetos pequenos',
+          credits: 1000,
+          price_brl: 49.90,
+          price_per_unit: 0.0499,
+          sort_order: 1,
+          is_active: true
+        },
+        {
+          id: 2,
+          name: 'batch_professional',
+          display_name: 'Professional',
+          description: 'Para empresas e consultas frequentes',
+          credits: 5000,
+          price_brl: 199.90,
+          price_per_unit: 0.03998,
+          sort_order: 2,
+          is_active: true
+        },
+        {
+          id: 3,
+          name: 'batch_enterprise',
+          display_name: 'Enterprise',
+          description: 'Melhor custo-benefício para grandes volumes',
+          credits: 20000,
+          price_brl: 599.90,
+          price_per_unit: 0.029995,
+          sort_order: 3,
+          is_active: true
+        }
+      ]);
     }
   };
 
