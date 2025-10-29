@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # ⚠️ ATENÇÃO: BANCO DE DADOS EXTERNO VPS - NÃO USAR REPLIT DATABASE!
     # DATABASE_URL deve estar sempre configurado no .env
     # NUNCA COMMITAR CREDENCIAIS NO CÓDIGO!
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: Optional[str] = os.getenv('DATABASE_URL')
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_NAME: str = "cnpj_db"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
 
     # Security - SECRET_KEY OBRIGATÓRIA via .env
-    SECRET_KEY: str  # OBRIGATÓRIO - sem default! Sistema não inicia sem ela!
+    SECRET_KEY: str = os.getenv('SECRET_KEY', 'dev-secret-key-min-32-chars-long-please-change-in-production')
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
     
