@@ -64,7 +64,7 @@ const LandingPage = () => {
           name: 'free',
           display_name: 'Free',
           monthly_queries: 200,
-          monthly_batch_queries: 50,
+          monthly_batch_queries: 0,
           price_brl: 0,
           rate_limit: 10
         },
@@ -73,7 +73,7 @@ const LandingPage = () => {
           name: 'start',
           display_name: 'Start',
           monthly_queries: 10000,
-          monthly_batch_queries: 0,
+          monthly_batch_queries: 500,
           price_brl: 79.90,
           rate_limit: 60
         },
@@ -82,7 +82,7 @@ const LandingPage = () => {
           name: 'growth',
           display_name: 'Growth',
           monthly_queries: 100000,
-          monthly_batch_queries: 0,
+          monthly_batch_queries: 2000,
           price_brl: 249.90,
           rate_limit: 300
         },
@@ -91,7 +91,7 @@ const LandingPage = () => {
           name: 'pro',
           display_name: 'Pro',
           monthly_queries: 500000,
-          monthly_batch_queries: 0,
+          monthly_batch_queries: 10000,
           price_brl: 799.90,
           rate_limit: 1000
         }
@@ -836,15 +836,22 @@ const LandingPage = () => {
                       <Check size={18} />
                       {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
                     </li>
-                    {plan.monthly_batch_queries > 0 && (
+                    <li>
+                      <Check size={18} />
+                      {plan.name === 'free' && '0 batch queries'}
+                      {plan.name === 'start' && '500 batch queries/mês'}
+                      {plan.name === 'growth' && '2.000 batch queries/mês'}
+                      {plan.name === 'pro' && '10.000 batch queries/mês'}
+                    </li>
+                    {plan.name !== 'free' && (
                       <li>
                         <Check size={18} />
-                        {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                        +40 tipos de dados para pesquisa avançada
                       </li>
                     )}
                     <li>
                       <Check size={18} />
-                      +45 filtros avançados
+                      Dados atualizados mensalmente
                     </li>
                     <li>
                       <Check size={18} />
