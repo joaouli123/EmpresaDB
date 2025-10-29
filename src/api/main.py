@@ -94,7 +94,7 @@ async def root():
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(auth_router)
 app.include_router(user_router)
-app.include_router(subscription_router)
+app.include_router(subscription_router, prefix="/api/v1")
 app.include_router(stripe_router)
 app.include_router(stripe_webhook_router)
 app.include_router(email_logs_router)

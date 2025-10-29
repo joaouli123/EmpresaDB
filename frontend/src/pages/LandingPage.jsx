@@ -52,10 +52,19 @@ const LandingPage = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [pricingCarouselIndex, setPricingCarouselIndex] = useState(0); // Carrossel de Preços
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
   useEffect(() => {
     loadPlans();
     loadBatchPackages();
+    
+    // Update window width on resize
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadPlans = async () => {
@@ -506,7 +515,7 @@ const LandingPage = () => {
   ];
 
   // Testimonial Carousel Logic
-  const testimonialItemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+  const testimonialItemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
   const totalTestimonialPages = Math.ceil(testimonials.length / testimonialItemsToShow);
 
   const nextTestimonial = () => {
@@ -518,15 +527,15 @@ const LandingPage = () => {
   };
 
   // Pricing Carousel Logic - Igual aos depoimentos
-  const pricingItemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+  const pricingItemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
 
   const nextPricingSlide = () => {
-    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+    const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
     setPricingCarouselIndex(prev => prev < plans.length - itemsToShow ? prev + 1 : 0);
   };
 
   const prevPricingSlide = () => {
-    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+    const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
     setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : plans.length - itemsToShow);
   };
 
@@ -1074,16 +1083,13 @@ const LandingPage = () => {
 
             {/* Indicadores */}
             <div className="carousel-indicators">
-              {(() => {
-                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-                return Array.from({ length: plans.length - itemsToShow + 1 }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setPricingCarouselIndex(index)}
-                    className={`carousel-indicator ${pricingCarouselIndex === index ? 'active' : ''}`}
-                  />
-                ));
-              })()}
+              {Array.from({ length: plans.length - pricingItemsToShow + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setPricingCarouselIndex(index)}
+                  className={`carousel-indicator ${pricingCarouselIndex === index ? 'active' : ''}`}
+                />
+              ))}
             </div>
           </div>
         )}
