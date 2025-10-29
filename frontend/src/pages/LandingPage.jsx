@@ -852,49 +852,61 @@ const LandingPage = () => {
                   return (
                     <div 
                       key={plan.id} 
-                      className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
+                      className={`pricing-card ${isPopular ? 'popular' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
                       onClick={() => setSelectedPlan(plan.name)}
+                      style={plan.name === 'enterprise' ? {
+                        background: 'linear-gradient(135deg, #1e293b 0%, #111827 100%)',
+                        border: '3px solid #fbbf24',
+                        color: 'white'
+                      } : {}}
                     >
                       {isPopular && <div className="popular-badge" style={{ top: '-16px' }}>Mais Popular</div>}
+                      {plan.name === 'enterprise' && (
+                        <div className="popular-badge" style={{ 
+                          top: '-16px',
+                          background: '#fbbf24',
+                          color: '#1f2937'
+                        }}>
+                          CUSTOMIZADO
+                        </div>
+                      )}
 
                       <div className="plan-header">
-                        <h3>{plan.display_name}</h3>
-                        <p className="plan-description">
+                        <h3 style={plan.name === 'enterprise' ? { color: 'white' } : {}}>{plan.display_name}</h3>
+                        <p className="plan-description" style={plan.name === 'enterprise' ? { color: 'rgba(255,255,255,0.7)' } : {}}>
                           {plan.name === 'free' && 'Para começar e testar'}
                           {plan.name === 'start' && 'Para pequenas empresas'}
                           {plan.name === 'growth' && 'Para empresas em crescimento'}
                           {plan.name === 'pro' && 'Para grandes volumes'}
-                          {plan.name === 'enterprise' && 'Solução personalizada'}
+                          {plan.name === 'enterprise' && 'Solução personalizada para grandes volumes'}
                         </p>
                       </div>
 
                       {plan.name === 'enterprise' ? (
                         <>
                           <div style={{ 
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            padding: '24px',
+                            background: 'rgba(59, 130, 246, 0.15)',
+                            border: '2px solid rgba(59, 130, 246, 0.3)',
                             borderRadius: '12px',
-                            marginBottom: '16px'
+                            marginBottom: '24px'
                           }}>
                             <div style={{ 
-                              fontSize: '32px', 
+                              fontSize: '36px', 
                               fontWeight: '800', 
-                              color: 'white',
-                              textAlign: 'center',
+                              color: '#60a5fa',
+                              textAlign: 'left',
                               marginBottom: '4px'
                             }}>
-                              Ilimitadas*
+                              ilimitadas*
                             </div>
                             <div style={{ 
-                              fontSize: '14px', 
-                              color: 'rgba(255,255,255,0.9)',
-                              textAlign: 'center'
+                              fontSize: '16px', 
+                              color: 'rgba(255,255,255,0.6)',
+                              textAlign: 'left'
                             }}>
-                              consultas mensais
+                              consultas
                             </div>
-                          </div>
-                          <div className="plan-queries" style={{ textAlign: 'center', color: 'var(--gray)' }}>
-                            Entre em contato para orçamento personalizado
                           </div>
                         </>
                       ) : (
@@ -927,11 +939,15 @@ const LandingPage = () => {
                         </>
                       )}
 
-                      <ul className="plan-features">
+                      <ul className="plan-features" style={plan.name === 'enterprise' ? { 
+                        borderTop: '1px solid rgba(255,255,255,0.1)',
+                        paddingTop: '20px',
+                        marginTop: '20px'
+                      } : {}}>
                         {plan.name === 'enterprise' ? (
                           plan.features.map((feature, idx) => (
-                            <li key={idx}>
-                              <Check size={18} />
+                            <li key={idx} style={{ color: 'rgba(255,255,255,0.85)' }}>
+                              <Check size={18} style={{ color: '#10b981' }} />
                               {feature}
                             </li>
                           ))
@@ -1015,9 +1031,10 @@ const LandingPage = () => {
                       {plan.name === 'enterprise' ? (
                         <a href="mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise">
                           <button className="btn-plan btn-secondary-large" style={{ 
-                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                            color: 'white',
-                            border: 'none'
+                            background: '#fbbf24',
+                            color: '#1f2937',
+                            border: 'none',
+                            fontWeight: '700'
                           }}>
                             Falar com Especialista
                           </button>
