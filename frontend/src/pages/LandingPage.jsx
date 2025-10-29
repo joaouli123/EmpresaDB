@@ -57,7 +57,45 @@ const LandingPage = () => {
       setPlans(response.data);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
-      setPlans([]);
+      // Fallback: usar planos hardcoded se API falhar
+      setPlans([
+        {
+          id: 1,
+          name: 'free',
+          display_name: 'Free',
+          monthly_queries: 200,
+          monthly_batch_queries: 50,
+          price_brl: 0,
+          rate_limit: 10
+        },
+        {
+          id: 2,
+          name: 'start',
+          display_name: 'Start',
+          monthly_queries: 10000,
+          monthly_batch_queries: 0,
+          price_brl: 79.90,
+          rate_limit: 60
+        },
+        {
+          id: 3,
+          name: 'growth',
+          display_name: 'Growth',
+          monthly_queries: 100000,
+          monthly_batch_queries: 0,
+          price_brl: 249.90,
+          rate_limit: 300
+        },
+        {
+          id: 4,
+          name: 'pro',
+          display_name: 'Pro',
+          monthly_queries: 500000,
+          monthly_batch_queries: 0,
+          price_brl: 799.90,
+          rate_limit: 1000
+        }
+      ]);
     } finally {
       setLoadingPlans(false);
     }
