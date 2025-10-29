@@ -1602,3 +1602,29 @@ section#faq.benefits-section {
   background: #f9fafb !important;
   padding: 100px 20px;
 }
+
+/* Pricing Carousel adjustments */
+.pricing-carousel-wrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 60px 0; /* Adjusted padding to accommodate badge */
+}
+
+.pricing-carousel-wrapper .pricing-card {
+  margin-top: 20px; /* Space for the badge */
+}
+
+.pricing-card .plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap; /* Allows /mês to wrap below price */
+}
+
+.pricing-card .plan-price .period {
+  font-size: 18px;
+  color: var(--gray);
+  margin-left: 4px; /* Ensure separation from the amount */
+}

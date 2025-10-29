@@ -830,10 +830,13 @@ const LandingPage = () => {
                       onClick={() => setSelectedPlan(plan.name)}
                       style={{
                         flex: `0 0 calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`,
-                        maxWidth: `calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`
+                        maxWidth: `calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`,
+                        overflow: 'visible',
+                        position: 'relative',
+                        marginTop: isPopular ? '20px' : '0'
                       }}
                     >
-                      {isPopular && <div className="popular-badge">Mais Popular</div>}
+                      {isPopular && <div className="popular-badge" style={{ top: '-16px' }}>Mais Popular</div>}
 
                       <div className="plan-header">
                         <h3>{plan.display_name}</h3>
@@ -845,10 +848,14 @@ const LandingPage = () => {
                         </p>
                       </div>
 
-                      <div className="plan-price">
-                        <span className="currency">R$</span>
-                        <span className="amount">{displayPrice.toFixed(2).replace('.', ',')}</span>
-                        <span className="period">/{billingPeriod === 'mensal' ? 'mês' : 'ano'}</span>
+                      <div className="plan-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                          <span className="currency">R$</span>
+                          <span className="amount">{displayPrice.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <span className="period" style={{ fontSize: '16px', color: 'var(--gray)', marginTop: '4px' }}>
+                          /{billingPeriod === 'mensal' ? 'mês' : 'ano'}
+                        </span>
                       </div>
 
                       {billingPeriod === 'anual' && priceMonthly > 0 && (
