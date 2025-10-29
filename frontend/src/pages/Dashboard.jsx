@@ -155,35 +155,83 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-header">
-            <Clock size={20} />
-            <h2>Status do Sistema</h2>
+        {subscription && subscription.plan_name && (
+          <div className="card">
+            <div className="card-header">
+              <Activity size={20} />
+              <h2>Uso de Consultas</h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', padding: '20px 0' }}>
+              {/* Círculo Consultas Usadas */}
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '12px' }}>Consultas Usadas</p>
+                <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
+                  <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
+                    <circle 
+                      cx="60" 
+                      cy="60" 
+                      r="50" 
+                      fill="none" 
+                      stroke={(subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6'}
+                      strokeWidth="10"
+                      strokeDasharray={`${((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 314} 314`}
+                      strokeLinecap="round"
+                    ></circle>
+                  </svg>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
+                      {subscription.queries_used || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Círculo Consultas Restantes */}
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '12px' }}>Consultas Restantes</p>
+                <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
+                  <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
+                    <circle 
+                      cx="60" 
+                      cy="60" 
+                      r="50" 
+                      fill="none" 
+                      stroke={(subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#10b981'}
+                      strokeWidth="10"
+                      strokeDasharray={`${(((subscription.total_limit || 0) - (subscription.queries_used || 0)) / (subscription.total_limit || 1)) * 314} 314`}
+                      strokeLinecap="round"
+                    ></circle>
+                  </svg>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#10b981' }}>
+                      {(subscription.total_limit || 0) - (subscription.queries_used || 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
+              <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px 0' }}>
+                {subscription.queries_used || 0} de {subscription.total_limit || 0} consultas usadas no plano {subscription.plan_name}
+              </p>
+              {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+                <a href="/home#pricing" style={{ 
+                  display: 'inline-block',
+                  fontSize: '12px',
+                  color: '#3b82f6',
+                  backgroundColor: '#eff6ff',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontWeight: '500'
+                }}>Fazer upgrade do plano →</a>
+              )}
+            </div>
           </div>
-          <div className="status-list">
-            <div className="status-item">
-              <CheckCircle2 size={20} className="status-icon success" />
-              <div className="status-content">
-                <h4>Banco de Dados</h4>
-                <p>Conectado e operacional</p>
-              </div>
-            </div>
-            <div className="status-item">
-              <CheckCircle2 size={20} className="status-icon success" />
-              <div className="status-content">
-                <h4>API REST</h4>
-                <p>Funcionando normalmente</p>
-              </div>
-            </div>
-            <div className="status-item">
-              <CheckCircle2 size={20} className="status-icon success" />
-              <div className="status-content">
-                <h4>Dados Atualizados</h4>
-                <p>Última atualização: Hoje</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {subscription && subscription.plan_name && (
