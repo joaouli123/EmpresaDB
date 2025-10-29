@@ -14,6 +14,11 @@ import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
 import Subscription from './pages/Subscription';
 import Pricing from './pages/Pricing';
+import About from './pages/About';
+import Services from './pages/Services';
+import Contact from './pages/Contact';
+import UseCases from './pages/UseCases';
+import BlogPage from './pages/BlogPage';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -52,6 +57,14 @@ function AppRoutes() {
           path="/pricing"
           element={<Pricing />}
         />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<LandingPage />} />
+        <Route path="/sobre" element={<About />} />
+        <Route path="/servicos" element={<Services />} />
+        <Route path="/contato" element={<Contact />} />
+        <Route path="/casos-de-uso" element={<UseCases />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/api" element={<Docs />} />
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
