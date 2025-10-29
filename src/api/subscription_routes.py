@@ -192,21 +192,26 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
             today_result = cursor.fetchone()
             queries_today = today_result[0] if today_result else 0
             
-            # Limite total - buscar da assinatura ou usar Free (200)
+            # Limite total - buscar da assinatura Stripe ativa ou usar Free (200)
             cursor.execute("""
-                SELECT total_limit, queries_remaining
-                FROM clientes.user_limits
-                WHERE user_id = %s
+                SELECT p.monthly_queries
+                FROM clientes.stripe_subscriptions ss
+                JOIN clientes.plans p ON ss.plan_id = p.id
+                WHERE ss.user_id = %s 
+                AND ss.status IN ('active', 'trialing')
+                ORDER BY ss.created_at DESC
+                LIMIT 1
             """, (current_user['id'],))
-            limit_result = cursor.fetchone()
+            subscription_result = cursor.fetchone()
             
-            if not limit_result:
+            if subscription_result:
+                # Usuário com assinatura paga
+                total_limit = subscription_result[0]
+                remaining = max(0, total_limit - queries_this_month)
+            else:
                 # Usuário Free - 200 consultas/mês
                 total_limit = 200
                 remaining = max(0, 200 - queries_this_month)
-            else:
-                total_limit = limit_result[0] or 0
-                remaining = limit_result[1] or 0
             
             cursor.close()
             
