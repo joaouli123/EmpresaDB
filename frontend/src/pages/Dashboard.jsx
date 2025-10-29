@@ -189,16 +189,17 @@ const Dashboard = () => {
               <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
                 {subscription ? (subscription.total_limit || 0) - (subscription.queries_used || 0) : 200} consultas restantes
               </p>
-              {subscription?.plan_name === 'Free' && (subscription?.queries_used || 0) >= (subscription?.total_limit || 0) && (
+              {subscription?.plan_name === 'Free' && (
                 <a href="/home#pricing" style={{ 
                   display: 'inline-block',
                   fontSize: '11px',
-                  color: '#3b82f6',
-                  backgroundColor: '#eff6ff',
+                  color: '#ffffff',
+                  backgroundColor: '#3b82f6',
                   padding: '6px 12px',
                   borderRadius: '6px',
                   textDecoration: 'none',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  transition: 'all 0.3s ease'
                 }}>Fazer upgrade →</a>
               )}
             </div>
@@ -231,17 +232,18 @@ const Dashboard = () => {
               <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
                 {batchCredits ? (batchCredits.available_credits || 0) : 0} créditos restantes
               </p>
-              {batchCredits && batchCredits.available_credits === 0 && (
+              {subscription?.plan_name === 'Free' && (
                 <a href="/home#pricing" style={{ 
                   display: 'inline-block',
                   fontSize: '11px',
-                  color: '#10b981',
-                  backgroundColor: '#f0fdf4',
+                  color: '#ffffff',
+                  backgroundColor: '#3b82f6',
                   padding: '6px 12px',
                   borderRadius: '6px',
                   textDecoration: 'none',
-                  fontWeight: '500'
-                }}>Comprar créditos →</a>
+                  fontWeight: '500',
+                  transition: 'all 0.3s ease'
+                }}>Fazer upgrade →</a>
               )}
             </div>
           </div>
