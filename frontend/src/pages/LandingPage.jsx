@@ -1144,10 +1144,10 @@ const LandingPage = () => {
                     onMouseEnter={(e) => e.currentTarget.style.background = '#eff6ff'}
                     onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#fafafa' : 'white'}
                     >
-                      <td data-label="Pacote" style={{ padding: '20px 24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <Package size={24} style={{ color: '#3b82f6', flexShrink: 0 }} />
-                          <div>
+                      <td data-label="Pacote" style={{ padding: '20px 24px', textAlign: 'left' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                          <Package size={24} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
+                          <div style={{ textAlign: 'left' }}>
                             <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name}</div>
                             <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description}</div>
                           </div>
