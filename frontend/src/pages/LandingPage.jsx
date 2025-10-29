@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Database, 
   Search, 
@@ -30,8 +30,10 @@ import {
   Sparkles,
   Brain,
   Menu,
-  X
+  X,
+  Package
 } from 'lucide-react';
+import { api } from '../services/api';
 import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
 
@@ -41,6 +43,7 @@ const LandingPage = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [batchPackages, setBatchPackages] = useState([]);
 
   const plans = [
     {
@@ -98,10 +101,19 @@ const LandingPage = () => {
     }
   ];
 
-  const addons = [
-    { queries: '+200', price: '49,90' },
-    { queries: '+400', price: '69,90' }
-  ];
+  useEffect(() => {
+    loadBatchPackages();
+  }, []);
+
+  const loadBatchPackages = async () => {
+    try {
+      const response = await api.get('/batch/packages');
+      setBatchPackages(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar pacotes de consulta em lote:', error);
+      setBatchPackages([]);
+    }
+  };
 
   const benefits = [
     {
@@ -807,19 +819,94 @@ const LandingPage = () => {
           ))}
         </div>
         
-        <div className="addons-section">
-          <h3>Precisa de mais consultas?</h3>
-          <p>Compre pacotes adicionais a qualquer momento</p>
-          <div className="addons-grid">
-            {addons.map((addon, index) => (
-              <div key={index} className="addon-card">
-                <div className="addon-queries">{addon.queries} consultas</div>
-                <div className="addon-price">R$ {addon.price}</div>
-                <button className="btn-addon">Adicionar ao Plano</button>
-              </div>
-            ))}
+        {batchPackages.length > 0 && (
+          <div className="addons-section">
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <Sparkles size={32} style={{ color: 'var(--primary)', marginBottom: '10px' }} />
+              <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
+              <p style={{ fontSize: '16px', color: '#666', marginBottom: '8px' }}>
+                Pesquise milhares de empresas de uma vez com filtros avançados
+              </p>
+              <p style={{ fontSize: '14px', color: '#888' }}>
+                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte e mais. 
+                Cada resultado = 1 crédito. Créditos não expiram!
+              </p>
+            </div>
+            <div className="addons-grid">
+              {batchPackages.map((pkg) => {
+                const pricePerUnit = pkg.price_per_unit;
+                const savingsPercent = batchPackages[0] && pkg.id !== batchPackages[0].id 
+                  ? Math.round((1 - (pricePerUnit / batchPackages[0].price_per_unit)) * 100)
+                  : 0;
+
+                return (
+                  <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
+                    {savingsPercent > 0 && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '10px', 
+                        right: '10px', 
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        Economize {savingsPercent}%
+                      </div>
+                    )}
+                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                      <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                      <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
+                    </div>
+                    <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
+                      {pkg.credits.toLocaleString('pt-BR')}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
+                    <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
+                      R$ {pkg.price_brl.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
+                      R$ {(pricePerUnit * 100).toFixed(2)} centavos/crédito
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
+                      {pkg.description}
+                    </p>
+                    <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
+                      Comprar Agora
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ 
+              marginTop: '30px', 
+              padding: '20px', 
+              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+              borderRadius: '12px',
+              border: '2px solid #bae6fd'
+            }}>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
+                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
+                {batchPackages.length > 1 && (
+                  <li style={{ fontSize: '14px', color: '#374151' }}>
+                    ✅ Economize até {Math.max(...batchPackages.map(p => {
+                      const savings = batchPackages[0] && p.id !== batchPackages[0].id 
+                        ? Math.round((1 - (p.price_per_unit / batchPackages[0].price_per_unit)) * 100)
+                        : 0;
+                      return savings;
+                    }))}% comprando pacotes maiores
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Testimonials Section */}
