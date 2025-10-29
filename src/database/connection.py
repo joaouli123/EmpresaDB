@@ -132,20 +132,6 @@ class DatabaseManager:
             logger.error(f"Erro ao executar schema: {e}")
             return False
 
-    def test_connection(self) -> bool:
-        try:
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT version();")
-                version = cursor.fetchone()
-                if version:
-                    logger.info(f"Conexão bem-sucedida! PostgreSQL: {version[0]}")
-                cursor.close()
-                return True
-        except Exception as e:
-            logger.error(f"Erro ao testar conexão: {e}")
-            return False
-
     def table_exists(self, table_name: str) -> bool:
         try:
             with self.get_connection() as conn:
@@ -249,7 +235,7 @@ class DatabaseManager:
             existing_user_email = await self.get_user_by_email(email)
             if existing_user_email:
                 raise ValueError("Email already in use.")
-            
+
             existing_user_phone = await self.get_user_by_phone(phone)
             if existing_user_phone:
                 raise ValueError("Phone number already in use.")
@@ -536,15 +522,21 @@ class DatabaseManager:
             logger.error(f"Erro ao buscar perfil: {e}")
             return None
 
-    async def update_user_profile(self, user_id: int, email: str, phone: str, cpf: str) -> bool:
+    async def update_user_profile(self, user_id: int, email: str, phone: str = None, cpf: str = None) -> bool:
+        """Atualiza perfil do usuário"""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
-                    UPDATE clientes.users
-                    SET email = %s, phone = %s, cpf = %s, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s
-                """, (email, phone, cpf, user_id))
+                if phone and cpf:
+                    cursor.execute(
+                        "UPDATE clientes.users SET email = %s, phone = %s, cpf = %s WHERE id = %s",
+                        (email, phone, cpf, user_id)
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE clientes.users SET email = %s WHERE id = %s",
+                        (email, user_id)
+                    )
                 cursor.close()
                 return True
         except Exception as e:

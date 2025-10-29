@@ -42,8 +42,9 @@ async def update_profile(
 ):
     try:
         # Remove formatação do telefone e CPF
-        phone = profile_data.phone.replace(/\D/g, '')
-        cpf = profile_data.cpf.replace(/\D/g, '')
+        import re
+        phone = re.sub(r'\D', '', profile_data.phone)
+        cpf = re.sub(r'\D', '', profile_data.cpf)
         
         success = await db_manager.update_user_profile(
             current_user['id'], 
