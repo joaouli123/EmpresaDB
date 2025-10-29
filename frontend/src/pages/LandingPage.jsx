@@ -1038,9 +1038,6 @@ const LandingPage = () => {
                     >
                       Falar com Especialista
                     </button>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '12px', textAlign: 'center' }}>
-                      * Sujeito a fair use policy
-                    </p>
                   </div>
                 </div>
               </div>
