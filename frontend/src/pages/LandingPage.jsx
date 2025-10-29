@@ -1011,6 +1011,10 @@ const LandingPage = () => {
                       </li>
                       <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                         <Check size={18} style={{ color: '#10b981' }} />
+                        White Label disponível
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
                         Onboarding personalizado
                       </li>
                       <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
