@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from 'react';
-import { 
-  Database, 
-  Search, 
-  Zap, 
-  Shield, 
-  TrendingUp, 
-  Check, 
+import {
+  Database,
+  Search,
+  Zap,
+  Shield,
+  TrendingUp,
+  Check,
   ChevronRight,
   BarChart3,
   Users,
@@ -57,12 +56,12 @@ const LandingPage = () => {
   useEffect(() => {
     loadPlans();
     loadBatchPackages();
-    
+
     // Update window width on resize
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -614,8 +613,8 @@ const LandingPage = () => {
           </h1>
 
           <p className="hero-description">
-            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil. 
-            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e 
+            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil.
+            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e
             dados 100% confiáveis para seu negócio.
           </p>
 
@@ -807,9 +806,9 @@ const LandingPage = () => {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <div style={{ 
-            background: 'white', 
-            padding: '32px', 
+          <div style={{
+            background: 'white',
+            padding: '32px',
             borderRadius: '12px',
             maxWidth: '700px',
             margin: '0 auto',
@@ -818,7 +817,7 @@ const LandingPage = () => {
             <Clock size={48} style={{ color: 'var(--primary)', margin: '0 auto 16px' }} />
             <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Dados Totalmente Atualizados</h3>
             <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
-              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha 
+              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha
               acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
             </p>
           </div>
@@ -833,13 +832,13 @@ const LandingPage = () => {
         </div>
 
         <div className="billing-toggle">
-          <button 
+          <button
             className={`billing-option ${billingPeriod === 'mensal' ? 'active' : ''}`}
             onClick={() => setBillingPeriod('mensal')}
           >
             Mensal
           </button>
-          <button 
+          <button
             className={`billing-option ${billingPeriod === 'anual' ? 'active' : ''}`}
             onClick={() => setBillingPeriod('anual')}
           >
@@ -864,8 +863,8 @@ const LandingPage = () => {
                   const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
 
                   return (
-                    <div 
-                      key={plan.id} 
+                    <div
+                      key={plan.id}
                       className={`pricing-card ${isPopular ? 'popular' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
                       onClick={() => setSelectedPlan(plan.name)}
                       style={plan.name === 'enterprise' ? {
@@ -876,7 +875,7 @@ const LandingPage = () => {
                     >
                       {isPopular && <div className="popular-badge" style={{ top: '-16px' }}>Mais Popular</div>}
                       {plan.name === 'enterprise' && (
-                        <div className="popular-badge" style={{ 
+                        <div className="popular-badge" style={{
                           top: '-16px',
                           background: '#fbbf24',
                           color: '#1f2937'
@@ -898,24 +897,24 @@ const LandingPage = () => {
 
                       {plan.name === 'enterprise' ? (
                         <>
-                          <div style={{ 
+                          <div style={{
                             padding: '24px',
                             background: 'rgba(59, 130, 246, 0.15)',
                             border: '2px solid rgba(59, 130, 246, 0.3)',
                             borderRadius: '12px',
                             marginBottom: '24px'
                           }}>
-                            <div style={{ 
-                              fontSize: '36px', 
-                              fontWeight: '800', 
+                            <div style={{
+                              fontSize: '36px',
+                              fontWeight: '800',
                               color: '#60a5fa',
                               textAlign: 'left',
                               marginBottom: '4px'
                             }}>
                               ilimitadas*
                             </div>
-                            <div style={{ 
-                              fontSize: '16px', 
+                            <div style={{
+                              fontSize: '16px',
                               color: 'rgba(255,255,255,0.6)',
                               textAlign: 'left'
                             }}>
@@ -936,9 +935,9 @@ const LandingPage = () => {
                           </div>
 
                           {billingPeriod === 'anual' && priceMonthly > 0 && (
-                            <div style={{ 
-                              fontSize: '14px', 
-                              color: 'var(--primary)', 
+                            <div style={{
+                              fontSize: '14px',
+                              color: 'var(--primary)',
                               fontWeight: '600',
                               marginBottom: '12px',
                               textAlign: 'center'
@@ -953,7 +952,7 @@ const LandingPage = () => {
                         </>
                       )}
 
-                      <ul className="plan-features" style={plan.name === 'enterprise' ? { 
+                      <ul className="plan-features" style={plan.name === 'enterprise' ? {
                         borderTop: '1px solid rgba(255,255,255,0.1)',
                         paddingTop: '20px',
                         marginTop: '20px'
@@ -1044,7 +1043,7 @@ const LandingPage = () => {
 
                       {plan.name === 'enterprise' ? (
                         <a href="mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise">
-                          <button className="btn-plan btn-secondary-large" style={{ 
+                          <button className="btn-plan btn-secondary-large" style={{
                             background: '#fbbf24',
                             color: '#1f2937',
                             border: 'none',
@@ -1127,14 +1126,14 @@ const LandingPage = () => {
                 <strong>🎯 34+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Tipo Logradouro, Número, Complemento, Porte, Situação Cadastral, Motivo Situação, Matriz/Filial, Data de Abertura, Data Situação Cadastral, Natureza Jurídica, Capital Social, Simples Nacional, MEI e muito mais!
               </div>
             </div>
-            <div style={{ 
-              background: 'white', 
-              borderRadius: '16px', 
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
               overflow: 'hidden',
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
-            <table style={{ 
-              width: '100%', 
+            <table style={{
+              width: '100%',
               borderCollapse: 'collapse',
               fontSize: '15px'
             }}>
@@ -1155,7 +1154,7 @@ const LandingPage = () => {
                   const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
 
                   return (
-                    <tr key={pkg.id || index} style={{ 
+                    <tr key={pkg.id || index} style={{
                       borderBottom: '1px solid #e5e7eb',
                       background: index % 2 === 0 ? '#fafafa' : 'white',
                       transition: 'all 0.2s'
@@ -1184,7 +1183,7 @@ const LandingPage = () => {
                         </div>
                       </td>
                       <td data-label="Preço/Crédito" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <div style={{ 
+                        <div style={{
                           background: 'linear-gradient(135deg, #10b98120, #05966920)',
                           padding: '6px 12px',
                           borderRadius: '8px',
@@ -1197,7 +1196,7 @@ const LandingPage = () => {
                       </td>
                       <td data-label="Economia" style={{ padding: '20px 24px', textAlign: 'center' }}>
                         {savingsPercent > 0 ? (
-                          <div style={{ 
+                          <div style={{
                             background: 'linear-gradient(135deg, #10b981, #059669)',
                             color: 'white',
                             padding: '6px 16px',
@@ -1246,9 +1245,9 @@ const LandingPage = () => {
               </table>
             </div>
 
-            <div style={{ 
-              marginTop: '40px', 
-              padding: '32px', 
+            <div style={{
+              marginTop: '40px',
+              padding: '32px',
               background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
               borderRadius: '12px',
               border: '2px solid #bae6fd'
@@ -1345,8 +1344,8 @@ const LandingPage = () => {
 
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           {faqs.map((faq, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               style={{
                 background: 'white',
                 borderRadius: '12px',
@@ -1374,16 +1373,16 @@ const LandingPage = () => {
                 onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
-                <span style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '600', 
+                <span style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
                   color: '#111827',
                   paddingRight: '20px'
                 }}>
                   {faq.question}
                 </span>
-                <ChevronDown 
-                  size={24} 
+                <ChevronDown
+                  size={24}
                   color="var(--primary)"
                   style={{
                     transform: openFaqIndex === index ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -1490,7 +1489,7 @@ const LandingPage = () => {
                 <option value="duvidas">Dúvidas sobre Planos</option>
                 <option value="tecnico">Suporte Técnico</option>
                 <option value="comercial">Proposta Comercial</option>
-                <option value="outro">Outro</option>tion>
+                <option value="outro">Outro</option>
               </select>
 
               <textarea rows="3" placeholder="Como podemos ajudar?" required></textarea>
@@ -1510,9 +1509,12 @@ const LandingPage = () => {
           <div className="footer-section">
             <div className="footer-logo">
               <Database size={32} />
-              <h3>CNPJ API</h3>
+              <h3>DB Empresas</h3>
             </div>
             <p>Acesso completo aos dados empresariais da Receita Federal. Consultas rápidas, precisas e atualizadas.</p>
+            <p style={{ marginTop: '16px', fontSize: '14px' }}>
+              <strong>CNPJ:</strong> 47.394.596/0001-15
+            </p>
             <div className="social-links">
               <a href="#" aria-label="LinkedIn"><Users size={20} /></a>
               <a href="#" aria-label="Twitter"><Users size={20} /></a>
@@ -1568,8 +1570,8 @@ const LandingPage = () => {
       </footer>
 
       {/* WhatsApp Floating Button */}
-      <a 
-        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ" 
+      <a
+        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ"
         className="whatsapp-float"
         target="_blank"
         rel="noopener noreferrer"
