@@ -41,15 +41,15 @@ const Subscription = () => {
     setError(null);
     try {
       const [subRes, transRes, cardsRes] = await Promise.all([
-        api.get('/subscriptions/my-subscription').catch(err => {
+        api.get('/api/v1/subscriptions/my-subscription').catch(err => {
           console.error('Erro ao buscar assinatura:', err);
           return { data: null };
         }),
-        api.get('/subscriptions/transactions').catch(err => {
+        api.get('/api/v1/subscriptions/transactions').catch(err => {
           console.error('Erro ao buscar transações:', err);
           return { data: [] };
         }),
-        api.get('/subscriptions/payment-methods').catch(err => {
+        api.get('/api/v1/subscriptions/payment-methods').catch(err => {
           console.error('Erro ao buscar métodos de pagamento:', err);
           return { data: [] };
         })

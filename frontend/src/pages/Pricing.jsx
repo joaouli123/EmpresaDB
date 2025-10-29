@@ -33,7 +33,7 @@ const Pricing = () => {
 
   const loadUserSubscription = async () => {
     try {
-      const response = await api.get('/subscriptions/my-subscription');
+      const response = await api.get('/api/v1/subscriptions/my-subscription');
       setUserSubscription(response.data);
     } catch (error) {
       console.error('Erro ao carregar assinatura do usuário:', error);

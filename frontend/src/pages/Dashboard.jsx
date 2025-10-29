@@ -37,7 +37,7 @@ const Dashboard = () => {
     try {
       const [usageRes, subRes, creditsRes] = await Promise.all([
         userAPI.getUsage(),
-        api.get('/subscriptions/my-subscription'),
+        api.get('/api/v1/subscriptions/my-subscription'),
         api.get('/api/v1/batch/credits').catch(() => ({ data: null }))
       ]);
       setUsage(usageRes.data);
