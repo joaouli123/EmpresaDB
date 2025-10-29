@@ -1099,51 +1099,121 @@ const LandingPage = () => {
               <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
             </div>
           </div>
-          <div className="addons-grid">
-            {batchPackages.map((pkg) => {
-              const pricePerUnit = pkg.price_brl / pkg.credits; // Calculate price per credit
-              const savingsPercent = batchPackages[0] ? Math.round((1 - (pricePerUnit / (batchPackages[0].price_brl / batchPackages[0].credits))) * 100) : 0;
+          <div style={{ 
+            background: 'white', 
+            borderRadius: '16px', 
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <table style={{ 
+              width: '100%', 
+              borderCollapse: 'collapse',
+              fontSize: '15px'
+            }}>
+              <thead>
+                <tr style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
+                  <th style={{ padding: '16px 24px', textAlign: 'left', color: 'white', fontWeight: '700' }}>Pacote</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Créditos</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço Total</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço/Crédito</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Economia</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {batchPackages.map((pkg, index) => {
+                  const pricePerUnit = pkg.price_brl / pkg.credits;
+                  const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                  const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
 
-              return (
-                <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
-                  {savingsPercent > 0 && (
-                    <div style={{ 
-                      position: 'absolute', 
-                      top: '10px', 
-                      right: '10px', 
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600'
-                    }}>
-                      Economize {savingsPercent}%
-                    </div>
-                  )}
-                  <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                    <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                    <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
-                  </div>
-                  <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
-                    {pkg.credits.toLocaleString('pt-BR')}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
-                  <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
-                    R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
-                    R$ {(pricePerUnit * 100).toFixed(2).replace('.', ',')} /crédito
-                  </div>
-                  <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
-                    {pkg.description}
-                  </p>
-                  <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
-                    Comprar Agora
-                  </button>
-                </div>
-              );
-            })}
+                  return (
+                    <tr key={pkg.id} style={{ 
+                      borderBottom: '1px solid #e5e7eb',
+                      background: index % 2 === 0 ? '#fafafa' : 'white',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#eff6ff'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#fafafa' : 'white'}
+                    >
+                      <td data-label="Pacote" style={{ padding: '20px 24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Package size={24} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name}</div>
+                            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td data-label="Créditos" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '20px' }}>
+                          {pkg.credits.toLocaleString('pt-BR')}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#6b7280' }}>consultas</div>
+                      </td>
+                      <td data-label="Preço Total" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '20px' }}>
+                          R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
+                        </div>
+                      </td>
+                      <td data-label="Preço/Crédito" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        <div style={{ 
+                          background: 'linear-gradient(135deg, #10b98120, #05966920)',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          display: 'inline-block'
+                        }}>
+                          <div style={{ fontWeight: '700', color: '#10b981', fontSize: '15px' }}>
+                            R$ {(pricePerUnit).toFixed(4).replace('.', ',')}
+                          </div>
+                        </div>
+                      </td>
+                      <td data-label="Economia" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        {savingsPercent > 0 ? (
+                          <div style={{ 
+                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                            color: 'white',
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            fontSize: '14px',
+                            fontWeight: '700',
+                            display: 'inline-block'
+                          }}>
+                            -{savingsPercent}%
+                          </div>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontSize: '13px' }}>—</span>
+                        )}
+                      </td>
+                      <td data-label="Ação" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        <button style={{
+                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '10px 24px',
+                          borderRadius: '8px',
+                          fontWeight: '600',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                        >
+                          Comprar
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
           <div style={{ 
             marginTop: '30px', 

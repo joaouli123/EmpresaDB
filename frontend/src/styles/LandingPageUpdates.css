@@ -108,6 +108,57 @@ html {
   }
 }
 
+/* Responsividade da tabela de pacotes */
+@media (max-width: 991px) {
+  .addons-section table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .addons-section thead {
+    display: none;
+  }
+  
+  .addons-section tbody {
+    display: block;
+  }
+  
+  .addons-section tr {
+    display: block;
+    margin-bottom: 20px;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+  }
+  
+  .addons-section td {
+    display: block !important;
+    text-align: left !important;
+    padding: 12px 20px !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+  }
+  
+  .addons-section td:last-child {
+    border-bottom: none !important;
+  }
+  
+  .addons-section td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .addons-section td button {
+    width: 100%;
+    padding: 12px 24px !important;
+  }
+}
+
 /* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   /* Navbar - Mobile */

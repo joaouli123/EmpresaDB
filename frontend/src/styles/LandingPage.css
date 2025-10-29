@@ -1109,52 +1109,6 @@
   margin-bottom: 32px;
 }
 
-.addons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.addon-card {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  border: 2px solid var(--border);
-}
-
-.addon-queries {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 8px;
-}
-
-.addon-price {
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--dark);
-  margin-bottom: 16px;
-}
-
-.btn-addon {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.2s;
-}
-
-.btn-addon:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
 /* Testimonials */
 .testimonials-section {
   padding: 100px 20px;
