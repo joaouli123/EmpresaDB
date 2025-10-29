@@ -72,7 +72,15 @@ const LandingPage = () => {
           monthly_queries: 200,
           monthly_batch_queries: 0,
           price_brl: 0,
-          rate_limit: 10
+          rate_limit: 10,
+          features: [
+            '200 consultas mensais',
+            '0 consultas em lote/mês',
+            '34+ filtros avançados',
+            'Acesso API básico',
+            'Dados atualizados',
+            'Suporte por email'
+          ]
         },
         {
           id: 2,
@@ -81,7 +89,17 @@ const LandingPage = () => {
           monthly_queries: 10000,
           monthly_batch_queries: 500,
           price_brl: 79.90,
-          rate_limit: 60
+          rate_limit: 60,
+          features: [
+            '10.000 consultas mensais',
+            '500 consultas em lote/mês',
+            '34+ filtros avançados',
+            'Acesso API completo',
+            'Dados atualizados diariamente',
+            'Suporte prioritário',
+            'Dashboard básico',
+            'Créditos batch comprados nunca expiram'
+          ]
         },
         {
           id: 3,
@@ -90,7 +108,19 @@ const LandingPage = () => {
           monthly_queries: 100000,
           monthly_batch_queries: 2000,
           price_brl: 249.90,
-          rate_limit: 300
+          rate_limit: 300,
+          features: [
+            '100.000 consultas mensais',
+            '2.000 consultas em lote/mês',
+            '34+ filtros avançados',
+            'Acesso API completo',
+            'Dados em tempo real',
+            'Suporte prioritário',
+            'Dashboard avançado',
+            'Redis Cache (3x mais rápido)',
+            'Rate limit: 300 req/min',
+            'Créditos batch comprados nunca expiram'
+          ]
         },
         {
           id: 4,
@@ -99,7 +129,20 @@ const LandingPage = () => {
           monthly_queries: 500000,
           monthly_batch_queries: 10000,
           price_brl: 799.90,
-          rate_limit: 1000
+          rate_limit: 1000,
+          features: [
+            '500.000 consultas mensais',
+            '10.000 consultas em lote/mês',
+            '34+ filtros avançados',
+            'Acesso API ilimitado',
+            'Dados em tempo real',
+            'Suporte 24/7',
+            'Dashboard personalizado',
+            'Redis Cache Premium',
+            'Rate limit: 1000 req/min',
+            'Relatórios customizados',
+            'Créditos batch comprados nunca expiram'
+          ]
         }
       ]);
     } finally {
@@ -321,8 +364,8 @@ const LandingPage = () => {
     },
     {
       icon: <Users size={24} />,
-      title: 'E mais 34+ Campos',
-      description: 'Capital social, porte, endereço completo, QSA, regime tributário e muito mais'
+      title: 'E muito mais!',
+      description: 'Capital social, porte, endereço completo, QSA, regime tributário, natureza jurídica, data de abertura e 28+ outros campos'
     }
   ];
 
@@ -882,15 +925,12 @@ const LandingPage = () => {
 
                         <li>
                           <Check size={18} />
-                          {plan.name === 'free' && '0 consultas em lote/mês'}
-                          {plan.name === 'start' && '500 consultas em lote/mês'}
-                          {plan.name === 'growth' && '2.000 consultas em lote/mês'}
-                          {plan.name === 'pro' && '10.000 consultas em lote/mês'}
+                          {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
                         </li>
 
                         <li>
                           <Check size={18} />
-                          16+ filtros avançados
+                          34+ filtros avançados
                         </li>
 
                         <li>
@@ -1081,9 +1121,9 @@ const LandingPage = () => {
         <section className="addons-section">
           <div className="section-header">
             <h2>⚡ Consultas em Lote</h2>
-            <p>Pesquise milhares de empresas de uma vez com 16+ filtros avançados</p>
+            <p>Pesquise milhares de empresas de uma vez com 34+ filtros avançados</p>
           </div>
-          
+
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
             <div style={{
               textAlign: 'center',
@@ -1105,7 +1145,7 @@ const LandingPage = () => {
                 maxWidth: '900px',
                 margin: '0 auto'
               }}>
-                <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
+                <strong>🎯 34+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Tipo Logradouro, Número, Complemento, Porte, Situação Cadastral, Motivo Situação, Matriz/Filial, Data de Abertura, Data Situação Cadastral, Natureza Jurídica, Capital Social, Simples Nacional, MEI e muito mais!
               </div>
             </div>
             <div style={{ 
@@ -1224,7 +1264,7 @@ const LandingPage = () => {
               </tbody>
               </table>
             </div>
-            
+
             <div style={{ 
               marginTop: '40px', 
               padding: '32px', 

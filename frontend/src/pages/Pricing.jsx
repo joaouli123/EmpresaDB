@@ -37,7 +37,7 @@ const Pricing = () => {
     
     // Adicionar info de filtros avançados
     if (!enrichedFeatures.some(f => f.includes('filtros avançados'))) {
-      enrichedFeatures.push('+45 filtros avançados');
+      enrichedFeatures.push('34+ filtros avançados');
     }
     
     // Adicionar info sobre créditos que não expiram (exceto plano free)
@@ -291,7 +291,7 @@ const Pricing = () => {
 
       {/* FILTROS DISPONÍVEIS */}
       <div className="filters-showcase">
-        <h2 className="filters-title">Filtros Avançados Disponíveis</h2>
+        <h2 className="filters-title">34+ Filtros Avançados Disponíveis</h2>
         <div className="filters-grid">
           <div className="filter-card">
             <div className="filter-icon">
@@ -353,8 +353,8 @@ const Pricing = () => {
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </div>
-            <h3>E mais 34+ Campos</h3>
-            <p>Capital social, porte, endereço completo, QSA, regime tributário e muito mais</p>
+            <h3>E muito mais!</h3>
+            <p>Capital social, porte, endereço completo, QSA, regime tributário, natureza jurídica, data de abertura e 28+ outros campos</p>
           </div>
         </div>
         <p className="filters-footer">
