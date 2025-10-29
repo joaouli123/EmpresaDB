@@ -16,7 +16,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/batch", tags=["Batch Queries"])
+router = APIRouter(prefix="/batch", tags=["Batch Queries"])
 
 # ============================================
 # MODELS

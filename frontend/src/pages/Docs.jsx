@@ -1,4 +1,4 @@
-import { Code, Book, Zap, Shield, Database } from 'lucide-react';
+import { Code, Book, Zap, Shield, Database, Package } from 'lucide-react';
 
 const Docs = () => {
   const API_URL = window.location.origin;
@@ -20,6 +20,7 @@ const Docs = () => {
             <li><a href="#intro">Introdução</a></li>
             <li><a href="#auth">Autenticação</a></li>
             <li><a href="#endpoints">Endpoints</a></li>
+            <li><a href="#batch">Consultas em Lote</a></li>
             <li><a href="#examples">Exemplos de Código</a></li>
             <li><a href="#codes">Códigos de Referência</a></li>
             <li><a href="#errors">Códigos de Erro HTTP</a></li>
@@ -700,6 +701,253 @@ X-API-Key: sua_chave_api`}</pre>
                   ⚠️ <strong>Nota:</strong> Por questões de performance, empresas com mais de 1.000 sócios terão seus resultados limitados.
                 </p>
               </div>
+            </div>
+          </section>
+
+          <section id="batch" className="doc-section">
+            <div className="section-icon">
+              <Package size={32} />
+            </div>
+            <h2>⚡ Consultas em Lote (Batch Queries)</h2>
+            
+            <div className="info-card" style={{ background: '#dbeafe', border: '2px solid #3b82f6', marginBottom: '24px' }}>
+              <h3 style={{ color: '#1e40af', marginBottom: '12px' }}>📦 O que são Consultas em Lote?</h3>
+              <p style={{ color: '#1e40af', fontSize: '14px', lineHeight: '1.6' }}>
+                Consultas em lote permitem que você pesquise <strong>milhares de empresas de uma vez</strong> usando filtros avançados
+                como CNAE, localização, porte empresarial, capital social, e muito mais. É a solução ideal para:
+              </p>
+              <ul style={{ color: '#1e40af', marginLeft: '20px', marginTop: '12px' }}>
+                <li>📊 Análises de mercado e inteligência competitiva</li>
+                <li>🎯 Prospecção de clientes em segmentos específicos</li>
+                <li>📈 Estudos de viabilidade e pesquisas de mercado</li>
+                <li>🔍 Mapeamento de concorrentes por região/setor</li>
+              </ul>
+            </div>
+
+            <h3>🎯 Como Funciona?</h3>
+            <div style={{ padding: '16px', background: '#f9fafb', borderRadius: '8px', marginBottom: '24px' }}>
+              <ol style={{ marginLeft: '20px', lineHeight: '1.8' }}>
+                <li><strong>Compre um pacote de créditos</strong> (pagamento único via Stripe)</li>
+                <li><strong>Use o endpoint /batch/search</strong> com seus filtros desejados</li>
+                <li><strong>Cada empresa retornada consome 1 crédito</strong></li>
+                <li><strong>Créditos não expiram</strong> - use quando precisar!</li>
+              </ol>
+            </div>
+
+            <h3>💰 Pacotes Disponíveis</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '8px', color: 'white' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Starter</h4>
+                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>1.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,10/crédito</p>
+              </div>
+              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '8px', color: 'white' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Business</h4>
+                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>5.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,08/crédito</p>
+              </div>
+              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '8px', color: 'white' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Enterprise</h4>
+                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>25.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,06/crédito</p>
+              </div>
+            </div>
+
+            <div className="info-card" style={{ background: '#fef3c7', border: '2px solid #f59e0b', marginBottom: '24px' }}>
+              <h4 style={{ color: '#92400e', marginBottom: '8px' }}>💡 Dica de Economia</h4>
+              <p style={{ color: '#92400e', fontSize: '14px' }}>
+                Quanto maior o pacote, menor o custo por crédito! Economize até <strong>40%</strong> comprando pacotes maiores.
+                Os créditos nunca expiram, então você pode comprar agora e usar quando quiser.
+              </p>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method post">POST</span>
+                <code>/api/v1/batch/search</code>
+              </div>
+              <p>Executa uma busca em lote com filtros avançados. Retorna empresas que correspondem aos critérios.</p>
+              
+              <div className="params-table">
+                <h4>📊 Filtros Disponíveis (Corpo da Requisição - JSON):</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parâmetro</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Exemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>razao_social</code></td>
+                      <td>string</td>
+                      <td>Busca parcial na razão social</td>
+                      <td>"TECH"</td>
+                    </tr>
+                    <tr>
+                      <td><code>cnae</code></td>
+                      <td>string</td>
+                      <td>Código CNAE (atividade econômica)</td>
+                      <td>"6201500"</td>
+                    </tr>
+                    <tr>
+                      <td><code>uf</code></td>
+                      <td>string</td>
+                      <td>Sigla do estado</td>
+                      <td>"SP"</td>
+                    </tr>
+                    <tr>
+                      <td><code>municipio</code></td>
+                      <td>string</td>
+                      <td>Código do município (IBGE)</td>
+                      <td>"3550308"</td>
+                    </tr>
+                    <tr>
+                      <td><code>porte</code></td>
+                      <td>string</td>
+                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande</td>
+                      <td>"4"</td>
+                    </tr>
+                    <tr>
+                      <td><code>situacao_cadastral</code></td>
+                      <td>string</td>
+                      <td>02=Ativa, 04=Inapta, 08=Baixada</td>
+                      <td>"02"</td>
+                    </tr>
+                    <tr>
+                      <td><code>capital_social_min</code></td>
+                      <td>number</td>
+                      <td>Capital social mínimo</td>
+                      <td>1000000</td>
+                    </tr>
+                    <tr>
+                      <td><code>capital_social_max</code></td>
+                      <td>number</td>
+                      <td>Capital social máximo</td>
+                      <td>10000000</td>
+                    </tr>
+                    <tr>
+                      <td><code>limit</code></td>
+                      <td>number</td>
+                      <td>Limite de resultados (máx: 10.000)</td>
+                      <td>100</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="endpoint-example">
+                <h4>💳 Consumo de Créditos:</h4>
+                <div style={{ padding: '12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', marginBottom: '16px' }}>
+                  <p style={{ margin: 0, color: '#991b1b', fontSize: '14px' }}>
+                    ⚠️ <strong>Importante:</strong> Cada empresa retornada na resposta consome <strong>1 crédito</strong>.
+                    Se sua busca retornar 500 empresas, você gastará 500 créditos. Use o parâmetro <code>limit</code> para
+                    controlar o consumo.
+                  </p>
+                </div>
+
+                <h4>Exemplo 1: Buscar empresas de tecnologia ativas em SP</h4>
+                <pre>{`POST ${API_URL}/api/v1/batch/search
+X-API-Key: sua_chave_api
+Content-Type: application/json
+
+{
+  "cnae": "6201500",
+  "uf": "SP",
+  "situacao_cadastral": "02",
+  "limit": 100
+}
+
+Resposta:
+{
+  "success": true,
+  "total_found": 1234,
+  "returned": 100,
+  "credits_used": 100,
+  "remaining_credits": 900,
+  "results": [
+    {
+      "cnpj": "12345678000190",
+      "razao_social": "TECH SOLUTIONS LTDA",
+      "nome_fantasia": "TECH SOLUTIONS",
+      "cnae": "6201500",
+      "uf": "SP",
+      "municipio": "SAO PAULO",
+      "porte": "2",
+      "capital_social": "50000.00",
+      "situacao_cadastral": "02"
+    },
+    ...
+  ]
+}`}</pre>
+
+                <h4>Exemplo 2: Grandes empresas com capital maior que R$ 1 milhão no RJ</h4>
+                <pre>{`POST ${API_URL}/api/v1/batch/search
+X-API-Key: sua_chave_api
+Content-Type: application/json
+
+{
+  "uf": "RJ",
+  "porte": "4",
+  "capital_social_min": 1000000,
+  "situacao_cadastral": "02",
+  "limit": 50
+}
+
+# Retorna até 50 empresas
+# Consome 50 créditos (ou menos se houver menos resultados)`}</pre>
+
+                <h4>Exemplo 3: Buscar por razão social parcial</h4>
+                <pre>{`POST ${API_URL}/api/v1/batch/search
+X-API-Key: sua_chave_api
+Content-Type: application/json
+
+{
+  "razao_social": "RESTAURANTE",
+  "uf": "SP",
+  "municipio": "3550308",
+  "limit": 200
+}
+
+# Busca todas as empresas com "RESTAURANTE" no nome
+# em São Paulo/SP, retorna até 200 resultados`}</pre>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/api/v1/batch/credits</code>
+              </div>
+              <p>Consulta o saldo atual de créditos de consultas em lote.</p>
+              <div className="endpoint-example">
+                <h4>Exemplo de Requisição:</h4>
+                <pre>{`GET ${API_URL}/api/v1/batch/credits
+X-API-Key: sua_chave_api
+
+Resposta:
+{
+  "total_credits": 1000,
+  "used_credits": 250,
+  "remaining_credits": 750
+}`}</pre>
+              </div>
+            </div>
+
+            <div className="info-card" style={{ background: '#d1fae5', border: '2px solid #10b981', marginTop: '24px' }}>
+              <h4 style={{ color: '#065f46', marginBottom: '8px' }}>✅ Boas Práticas</h4>
+              <ul style={{ color: '#065f46', marginLeft: '20px', fontSize: '14px' }}>
+                <li>Sempre use o parâmetro <code>limit</code> para controlar o consumo de créditos</li>
+                <li>Teste suas buscas com limites baixos primeiro (ex: limit=10)</li>
+                <li>Combine múltiplos filtros para resultados mais precisos</li>
+                <li>Verifique seu saldo de créditos antes de executar buscas grandes</li>
+                <li>Créditos não expiram - compre pacotes maiores para economizar!</li>
+              </ul>
             </div>
           </section>
 

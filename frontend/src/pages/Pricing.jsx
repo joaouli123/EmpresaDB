@@ -13,6 +13,13 @@ const Pricing = () => {
   const [purchasing, setPurchasing] = useState(null);
   const navigate = useNavigate();
 
+  const rateLimits = {
+    'free': 10,
+    'starter': 60,
+    'growth': 300,
+    'professional': 1000
+  };
+
   useEffect(() => {
     loadPlans();
     loadBatchPackages();
@@ -20,7 +27,7 @@ const Pricing = () => {
 
   const loadPlans = async () => {
     try {
-      const response = await api.get('/api/v1/subscriptions/plans');
+      const response = await api.get('/subscriptions/plans');
       setPlans(response.data);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
@@ -78,7 +85,7 @@ const Pricing = () => {
     setPurchasing(packageId);
     
     try {
-      const response = await api.post(`/batch/packages/${packageId}/purchase`);
+      const response = await api.post(`/api/v1/batch/packages/${packageId}/purchase`);
       
       if (response.data.success && response.data.session_url) {
         window.location.href = response.data.session_url;
@@ -145,7 +152,23 @@ const Pricing = () => {
             <div className="plan-limit">
               <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
             </div>
+            <div className="plan-rate-limit" style={{
+              marginTop: '12px',
+              padding: '10px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              borderRadius: '6px',
+              textAlign: 'center',
+              fontSize: '14px',
+              color: '#3b82f6',
+              fontWeight: '500'
+            }}>
+              ⚡ {rateLimits[plan.name] || 10} requisições/min
+            </div>
             <ul className="plan-features">
+              <li>
+                <Check size={18} />
+                {rateLimits[plan.name] || 10} req/min (Rate Limit)
+              </li>
               {plan.features.map((feature, index) => (
                 <li key={index}>
                   <Check size={18} />

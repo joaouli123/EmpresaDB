@@ -34,6 +34,17 @@ class Settings(BaseSettings):
     # CORS Settings - Configure trusted origins in .env
     ALLOWED_ORIGINS: str = "*"  # Default: all (MUST be configured in production!)
     
+    @model_validator(mode='before')
+    @classmethod
+    def parse_empty_strings(cls, data):
+        """Converte strings vazias em valores padrão para campos numéricos e booleanos"""
+        if isinstance(data, dict):
+            if data.get('EMAIL_PORT') == '':
+                data['EMAIL_PORT'] = 465
+            if data.get('EMAIL_USE_SSL') == '':
+                data['EMAIL_USE_SSL'] = True
+        return data
+    
     @model_validator(mode='after')
     def strip_email_fields(self):
         """Remove espaços em branco dos campos de email"""
@@ -79,11 +90,16 @@ class Settings(BaseSettings):
 
     # Email Configuration
     EMAIL_HOST: str = "smtp.hostinger.com"
-    EMAIL_PORT: Optional[int] = 465
+    EMAIL_PORT: int = 465
     EMAIL_USER: str = ""
     EMAIL_PASSWORD: str = ""
     EMAIL_FROM: str = ""
-    EMAIL_USE_SSL: Optional[bool] = True
+    EMAIL_USE_SSL: bool = True
+    
+    # Stripe Configuration
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
 
     model_config = SettingsConfigDict(
         env_file='.env',

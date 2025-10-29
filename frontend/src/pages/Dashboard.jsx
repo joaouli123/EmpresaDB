@@ -8,13 +8,15 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Package
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
   const [usage, setUsage] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const [batchCredits, setBatchCredits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,12 +35,14 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [usageRes, subRes] = await Promise.all([
+      const [usageRes, subRes, creditsRes] = await Promise.all([
         userAPI.getUsage(),
-        api.get('/subscriptions/my-subscription')
+        api.get('/subscriptions/my-subscription'),
+        api.get('/api/v1/batch/credits').catch(() => ({ data: null }))
       ]);
       setUsage(usageRes.data);
       setSubscription(subRes.data);
+      setBatchCredits(creditsRes.data);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setError('Falha ao carregar dados do dashboard.');
@@ -237,6 +241,78 @@ const Dashboard = () => {
                 }}
               >
                 Fazer Upgrade do Plano
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
+      {batchCredits && (
+        <div className="card">
+          <div className="card-header">
+            <Package size={20} />
+            <h2>Créditos de Consultas em Lote</h2>
+          </div>
+          <div className="db-stats">
+            <div className="db-stat-item">
+              <p className="db-stat-label">Créditos Totais</p>
+              <p className="db-stat-value">{(batchCredits.total_credits || 0).toLocaleString('pt-BR')}</p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Créditos Usados</p>
+              <p className="db-stat-value">{(batchCredits.used_credits || 0).toLocaleString('pt-BR')}</p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Créditos Restantes</p>
+              <p className="db-stat-value" style={{ color: '#10b981', fontWeight: 'bold' }}>
+                {(batchCredits.available_credits || 0).toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="db-stat-item">
+              <p className="db-stat-label">Status</p>
+              <p className="db-stat-value" style={{ fontSize: '14px' }}>
+                {batchCredits.available_credits > 0 ? '✅ Ativo' : '⚠️ Sem créditos'}
+              </p>
+            </div>
+          </div>
+          <div className="progress-bar" style={{ marginTop: '20px' }}>
+            <div
+              className="progress-fill"
+              style={{
+                width: `${batchCredits.total_credits > 0 ? ((batchCredits.used_credits / batchCredits.total_credits) * 100) : 0}%`,
+                backgroundColor: batchCredits.available_credits > 100 ? '#10b981' : batchCredits.available_credits > 0 ? '#f59e0b' : '#ef4444'
+              }}
+            />
+          </div>
+          <div style={{ 
+            marginTop: '16px', 
+            padding: '12px', 
+            background: 'rgba(16, 185, 129, 0.1)', 
+            borderRadius: '6px',
+            fontSize: '14px',
+            color: '#059669'
+          }}>
+            <p style={{ margin: 0 }}>
+              💡 <strong>Dica:</strong> Use o endpoint <code>/batch/search</code> para fazer consultas em lote. 
+              Cada resultado retornado consome 1 crédito. Créditos não expiram!
+            </p>
+          </div>
+          {batchCredits.available_credits === 0 && (
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+              <a
+                href="/home#pricing"
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Comprar Mais Créditos
               </a>
             </div>
           )}

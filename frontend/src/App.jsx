@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import APIKeys from './pages/APIKeys';
 import Docs from './pages/Docs';
 import Subscription from './pages/Subscription';
+import Pricing from './pages/Pricing';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -46,6 +47,10 @@ function AppRoutes() {
         <Route
           path="/home"
           element={<LandingPage />}
+        />
+        <Route
+          path="/pricing"
+          element={<Pricing />}
         />
         <Route
           path="/login"
