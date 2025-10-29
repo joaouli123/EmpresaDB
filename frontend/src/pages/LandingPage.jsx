@@ -838,15 +838,21 @@ const LandingPage = () => {
                     </li>
                     <li>
                       <Check size={18} />
-                      {plan.name === 'free' && '0 batch queries'}
-                      {plan.name === 'start' && '500 batch queries/mês'}
-                      {plan.name === 'growth' && '2.000 batch queries/mês'}
-                      {plan.name === 'pro' && '10.000 batch queries/mês'}
+                      {plan.name === 'free' && '0 consultas em lote (batch queries)'}
+                      {plan.name === 'start' && '500 consultas em lote (batch queries)/mês'}
+                      {plan.name === 'growth' && '2.000 consultas em lote (batch queries)/mês'}
+                      {plan.name === 'pro' && 'Consultas em lote ilimitadas'}
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      +45 filtros avançados
                     </li>
                     {plan.name !== 'free' && (
                       <li>
                         <Check size={18} />
-                        +40 tipos de dados para pesquisa avançada
+                        <span style={{ color: '#10b981', fontWeight: '600' }}>
+                          Consultas em lote (batch queries) não expiram
+                        </span>
                       </li>
                     )}
                     <li>
@@ -916,14 +922,6 @@ const LandingPage = () => {
                           Rate limit: 300 req/min
                         </li>
                       </>
-                    )}
-                    {plan.name !== 'free' && (
-                      <li>
-                        <Check size={18} />
-                        <span style={{ color: '#10b981', fontWeight: '600' }}>
-                          ✨ Créditos batch comprados nunca expiram
-                        </span>
-                      </li>
                     )}
                   </ul>
 
