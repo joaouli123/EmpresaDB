@@ -292,8 +292,8 @@ const LandingPage = () => {
     },
     {
       icon: <Users size={24} />,
-      title: 'Sócios e QSA',
-      description: 'Pesquise por CPF/CNPJ de sócios e administradores'
+      title: 'E mais 34+ Campos',
+      description: 'Capital social, porte, endereço completo, QSA, regime tributário e muito mais'
     }
   ];
 
@@ -585,7 +585,7 @@ const LandingPage = () => {
           ))}
         </div>
 
-        <div className="info-card" style={{ marginTop: '40px', background: '#1f2937', color: 'white' }}>
+        <div className="info-card" style={{ marginTop: '80px', marginBottom: '80px', background: '#1f2937', color: 'white' }}>
           <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta</h3>
           <pre style={{ background: '#111827', padding: '20px', borderRadius: '8px', overflow: 'auto' }}>
 {`GET /api/v1/empresas?cnpj=00000000000191

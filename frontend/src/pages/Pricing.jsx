@@ -70,7 +70,7 @@ const Pricing = () => {
           features: [
             '200 consultas mensais',
             '50 consultas em lote/mês',
-            '+45 filtros avançados',
+            '16+ filtros avançados',
             'Acesso API básico',
             'Dados atualizados',
             'Suporte por email'
@@ -85,7 +85,7 @@ const Pricing = () => {
           price_brl: 79.90,
           features: [
             '10.000 consultas mensais',
-            '+45 filtros avançados',
+            '16+ filtros avançados',
             'Acesso API completo',
             'Dados atualizados diariamente',
             'Suporte prioritário',
@@ -102,7 +102,7 @@ const Pricing = () => {
           price_brl: 249.90,
           features: [
             '100.000 consultas mensais',
-            '+45 filtros avançados',
+            '16+ filtros avançados',
             'Acesso API completo',
             'Dados em tempo real',
             'Suporte prioritário',
@@ -121,7 +121,7 @@ const Pricing = () => {
           price_brl: 799.90,
           features: [
             '500.000 consultas mensais',
-            '+45 filtros avançados',
+            '16+ filtros avançados',
             'Acesso API ilimitado',
             'Dados em tempo real',
             'Suporte 24/7',
@@ -289,6 +289,80 @@ const Pricing = () => {
         </div>
       </div>
 
+      {/* FILTROS DISPONÍVEIS */}
+      <div className="filters-showcase">
+        <h2 className="filters-title">Filtros Avançados Disponíveis</h2>
+        <div className="filters-grid">
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <h3>Localização</h3>
+            <p>Estado (UF) e município da empresa</p>
+          </div>
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+            </div>
+            <h3>CNAE</h3>
+            <p>Atividade econômica principal e secundárias</p>
+          </div>
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <h3>Data de Abertura</h3>
+            <p>Data de constituição da empresa</p>
+          </div>
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+              </svg>
+            </div>
+            <h3>Situação Cadastral</h3>
+            <p>Ativa, baixada, suspensa, nula ou inapta</p>
+          </div>
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </div>
+            <h3>Razão Social e Nome Fantasia</h3>
+            <p>Nome completo e nome de fantasia</p>
+          </div>
+          <div className="filter-card">
+            <div className="filter-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3>E mais 34+ Campos</h3>
+            <p>Capital social, porte, endereço completo, QSA, regime tributário e muito mais</p>
+          </div>
+        </div>
+        <p className="filters-footer">
+          Todos os dados que você precisa em uma única consulta
+        </p>
+        <a href="/docs" className="btn-docs">Ver Documentação Completa</a>
+      </div>
+
       {/* PLANOS MENSAIS */}
       <div className="section-title">
         <h2>🎯 Planos Mensais</h2>
@@ -385,7 +459,7 @@ const Pricing = () => {
               <Sparkles size={32} className="sparkle-icon" />
               <div>
                 <h2>⚡ Consultas em Lote</h2>
-                <p>Pesquise milhares de empresas de uma vez com +45 filtros avançados</p>
+                <p>Pesquise milhares de empresas de uma vez com 16+ filtros avançados</p>
               </div>
             </div>
             <div className="batch-description">
@@ -401,8 +475,7 @@ const Pricing = () => {
                 borderRadius: '6px',
                 fontSize: '14px'
               }}>
-                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
-                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
+                <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
               </div>
             </div>
           </div>
