@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   Database, 
@@ -308,7 +307,7 @@ const LandingPage = () => {
             <Database size={28} />
             <span>CNPJ API</span>
           </div>
-          
+
           {/* Links de navegação (visível no desktop) */}
           <div className="navbar-links">
             <a href="#features">Funcionalidades</a>
@@ -317,7 +316,7 @@ const LandingPage = () => {
             <a href="#testimonials">Depoimentos</a>
             <a href="#contact">Contato</a>
           </div>
-          
+
           {/* Ações (visível no desktop) */}
           <div className="navbar-actions">
             <a href="/login">
@@ -327,7 +326,7 @@ const LandingPage = () => {
               <button className="btn-navbar-primary">Começar Grátis</button>
             </a>
           </div>
-          
+
           {/* Botão hamburguer (visível no mobile) */}
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -343,7 +342,7 @@ const LandingPage = () => {
             <a href="#testimonials" onClick={() => setMenuOpen(false)}>Depoimentos</a>
             <a href="#contact" onClick={() => setMenuOpen(false)}>Contato</a>
           </div>
-          
+
           <div className="mobile-menu-actions">
             <a href="/login" onClick={() => setMenuOpen(false)}>
               <button className="btn-navbar-secondary">Entrar</button>
@@ -362,19 +361,19 @@ const LandingPage = () => {
             <Zap size={16} />
             <span>Dados mais recentes do Brasil • Atualização diária</span>
           </div>
-          
+
           <h1 className="hero-title">
             Acesso Completo aos Dados
             <br />
             <span className="gradient-text">Públicos de CNPJ</span>
           </h1>
-          
+
           <p className="hero-description">
             API profissional com dados oficiais e atualizados da Receita Federal. 
             Consulte empresas, estabelecimentos, sócios e muito mais em milissegundos. 
             Integração simples, filtros poderosos e dados 100% confiáveis para seu negócio.
           </p>
-          
+
           <div className="hero-cta">
             <a href="#pricing">
               <button className="btn-primary-large btn-hero-primary">
@@ -388,7 +387,7 @@ const LandingPage = () => {
               </button>
             </a>
           </div>
-          
+
           <div className="hero-stats">
             <div className="stat">
               <div className="stat-number">64M+</div>
@@ -416,7 +415,7 @@ const LandingPage = () => {
           <h2>Dados de Todos os Setores</h2>
           <p>Explore os principais CNAEs de cada categoria e consulte milhões de empresas</p>
         </div>
-        
+
         <div className="categories-tabs-container">
           <div className="tabs-header">
             {Object.values(businessCategories).map((category) => (
@@ -483,7 +482,7 @@ const LandingPage = () => {
           <h2>Filtros Poderosos Para Sua Busca</h2>
           <p>Encontre exatamente o que você precisa com nossos filtros avançados e combinações ilimitadas</p>
         </div>
-        
+
         <div className="benefits-grid">
           {advancedFilters.map((filter, index) => (
             <div key={index} className="benefit-card">
@@ -493,7 +492,7 @@ const LandingPage = () => {
             </div>
           ))}
         </div>
-        
+
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
           <p style={{ color: 'var(--gray)', fontSize: '18px', marginBottom: '24px' }}>
             <strong>Combine múltiplos filtros</strong> para encontrar seu público-alvo perfeito
@@ -511,7 +510,7 @@ const LandingPage = () => {
           <h2>Integração Rápida e Fácil</h2>
           <p>API REST otimizada e simples de usar. Comece a consultar dados em minutos, não em dias</p>
         </div>
-        
+
         <div className="benefits-grid">
           {integrationFeatures.map((feature, index) => (
             <div key={index} className="benefit-card">
@@ -551,7 +550,7 @@ const LandingPage = () => {
           <h2>Por Que Escolher Nossa Plataforma?</h2>
           <p>Tudo que você precisa para acessar dados empresariais de forma profissional</p>
         </div>
-        
+
         <div className="benefits-grid">
           {benefits.map((benefit, index) => (
             <div key={index} className="benefit-card">
@@ -705,7 +704,7 @@ const LandingPage = () => {
           <h2>Planos Que Cabem no Seu Bolso</h2>
           <p>Escolha o plano ideal para seu negócio. Sem taxas escondidas, cancele quando quiser</p>
         </div>
-        
+
         <div className="billing-toggle">
           <button 
             className={`billing-option ${billingPeriod === 'mensal' ? 'active' : ''}`}
@@ -721,7 +720,7 @@ const LandingPage = () => {
             <span className="discount-badge">Economize 17%</span>
           </button>
         </div>
-        
+
         {loadingPlans ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
@@ -734,7 +733,7 @@ const LandingPage = () => {
               const priceMonthly = plan.price_brl;
               const priceYearly = plan.price_brl * 12 * 0.83;
               const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
-              
+
               return (
                 <div 
                   key={plan.id} 
@@ -742,7 +741,7 @@ const LandingPage = () => {
                   onClick={() => setSelectedPlan(plan.name)}
                 >
                   {isPopular && <div className="popular-badge">Mais Popular</div>}
-                  
+
                   <div className="plan-header">
                     <h3>{plan.display_name}</h3>
                     <p className="plan-description">
@@ -751,7 +750,7 @@ const LandingPage = () => {
                       {plan.name === 'growth' && 'Para empresas em crescimento'}
                     </p>
                   </div>
-                  
+
                   <div className="plan-price">
                     <span className="currency">R$</span>
                     <span className="amount">
@@ -761,7 +760,7 @@ const LandingPage = () => {
                       {billingPeriod === 'mensal' ? '/mês' : '/ano'}
                     </span>
                   </div>
-                  
+
                   {billingPeriod === 'anual' && priceMonthly > 0 && (
                     <div style={{ 
                       fontSize: '14px', 
@@ -773,20 +772,28 @@ const LandingPage = () => {
                       R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
                     </div>
                   )}
-                  
+
                   <div className="plan-queries">
                     <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
                   </div>
-                  
+
                   <ul className="plan-features">
+                    <li>
+                      <Check size={18} />
+                      {plan.rate_limit || 10} req/min (Rate Limit)
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      Dados atualizados mensalmente
+                    </li>
                     {plan.features.map((feature, index) => (
                       <li key={index}>
                         <Check size={18} />
-                        <span>{feature}</span>
+                        {feature}
                       </li>
                     ))}
                   </ul>
-                  
+
                   <a href="/pricing">
                     <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
                       {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
@@ -797,7 +804,7 @@ const LandingPage = () => {
             })}
           </div>
         )}
-        
+
         {batchPackages.length > 0 && (
           <div className="addons-section">
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -894,7 +901,7 @@ const LandingPage = () => {
           <h2>O Que Nossos Clientes Dizem</h2>
           <p>Empresas de todos os tamanhos confiam em nossa plataforma</p>
         </div>
-        
+
         <div className="testimonials-grid">
           {testimonials.map((testimonial, index) => (
             <div key={index} className="testimonial-card">
@@ -971,12 +978,12 @@ const LandingPage = () => {
                 <input type="text" placeholder="Seu nome completo" required />
                 <input type="email" placeholder="seu@email.com" required />
               </div>
-              
+
               <div className="form-row">
                 <input type="tel" placeholder="(11) 99999-9999" />
                 <input type="text" placeholder="Nome da empresa" />
               </div>
-              
+
               <select required>
                 <option value="">Selecione um assunto</option>
                 <option value="duvidas">Dúvidas sobre Planos</option>
@@ -984,9 +991,9 @@ const LandingPage = () => {
                 <option value="comercial">Proposta Comercial</option>
                 <option value="outro">Outro</option>
               </select>
-              
+
               <textarea rows="3" placeholder="Como podemos ajudar?" required></textarea>
-              
+
               <button type="submit" className="btn-primary-large">
                 Enviar Mensagem
                 <ChevronRight size={20} />
