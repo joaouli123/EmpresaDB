@@ -219,6 +219,10 @@ class DatabaseManager:
     def generate_activation_token(self) -> str:
         """Gera um token único para ativação de conta"""
         return secrets.token_urlsafe(32)
+    
+    def generate_reset_token(self) -> str:
+        """Gera um token único para reset de senha"""
+        return secrets.token_urlsafe(32)
 
     async def create_user(
         self, 
@@ -371,6 +375,122 @@ class DatabaseManager:
                 cursor.close()
         except Exception as e:
             logger.error(f"Erro ao atualizar último login: {e}")
+    
+    async def create_password_reset_token(self, email: str) -> Optional[str]:
+        """
+        Cria um token de reset de senha para o usuário
+        
+        Returns:
+            Token gerado se sucesso, None se email não encontrado
+        """
+        try:
+            from datetime import datetime, timedelta
+            
+            # Verificar se usuário existe
+            user = await self.get_user_by_email(email)
+            if not user:
+                return None
+            
+            # Gerar token
+            token = self.generate_reset_token()
+            token_expires = datetime.now() + timedelta(hours=1)  # Token válido por 1 hora
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Verificar se colunas existem, senão criar
+                cursor.execute("""
+                    DO $$ BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns 
+                            WHERE table_schema = 'clientes' 
+                            AND table_name = 'users' 
+                            AND column_name = 'reset_password_token'
+                        ) THEN
+                            ALTER TABLE clientes.users 
+                            ADD COLUMN reset_password_token VARCHAR(255),
+                            ADD COLUMN reset_password_token_expires TIMESTAMP;
+                        END IF;
+                    END $$;
+                """)
+                
+                # Salvar token
+                cursor.execute("""
+                    UPDATE clientes.users
+                    SET reset_password_token = %s,
+                        reset_password_token_expires = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE email = %s
+                """, (token, token_expires, email))
+                cursor.close()
+                
+                return token
+        except Exception as e:
+            logger.error(f"Erro ao criar token de reset: {e}")
+            return None
+    
+    async def verify_password_reset_token(self, token: str) -> Optional[Dict]:
+        """
+        Verifica se o token de reset é válido
+        
+        Returns:
+            Dados do usuário se token válido, None caso contrário
+        """
+        try:
+            from datetime import datetime
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+                cursor.execute("""
+                    SELECT id, username, email, reset_password_token_expires
+                    FROM clientes.users
+                    WHERE reset_password_token = %s
+                """, (token,))
+                
+                user = cursor.fetchone()
+                cursor.close()
+                
+                if not user:
+                    return None
+                
+                # Verificar se token expirou
+                if user['reset_password_token_expires'] < datetime.now():
+                    return None
+                
+                return dict(user)
+        except Exception as e:
+            logger.error(f"Erro ao verificar token de reset: {e}")
+            return None
+    
+    async def reset_password_with_token(self, token: str, new_password_hash: str) -> bool:
+        """
+        Redefine a senha do usuário usando o token
+        
+        Returns:
+            True se sucesso, False caso contrário
+        """
+        try:
+            # Verificar token
+            user = await self.verify_password_reset_token(token)
+            if not user:
+                return False
+            
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE clientes.users
+                    SET password = %s,
+                        reset_password_token = NULL,
+                        reset_password_token_expires = NULL,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (new_password_hash, user['id']))
+                cursor.close()
+                
+                return True
+        except Exception as e:
+            logger.error(f"Erro ao redefinir senha: {e}")
+            return False
 
     async def get_user_profile(self, user_id: int) -> Optional[Dict]:
         try:
