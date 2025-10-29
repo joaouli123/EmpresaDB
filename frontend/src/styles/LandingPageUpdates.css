@@ -69,40 +69,40 @@ html {
     padding: 12px 20px;
     gap: 20px;
   }
-  
+
   .navbar-links {
     gap: 16px;
   }
-  
+
   .navbar-links a {
     font-size: 14px;
   }
-  
+
   /* Hero */
   .hero-section {
     padding: 120px 20px 60px;
     min-height: auto;
   }
-  
+
   .hero-title {
     font-size: 48px;
   }
-  
+
   .hero-description {
     font-size: 18px;
   }
-  
+
   /* Seções */
   .section-header h2 {
     font-size: 36px;
   }
-  
+
   /* Footer */
   .footer-content {
     grid-template-columns: repeat(2, 1fr);
     gap: 32px;
   }
-  
+
   .footer-section:first-child {
     grid-column: 1 / -1;
   }
@@ -118,53 +118,53 @@ html {
     margin: 16px 12px 20px;
     justify-content: space-between;
   }
-  
+
   .navbar-logo {
     flex: 1;
   }
-  
+
   .navbar-links {
     display: none !important;
   }
-  
+
   .navbar-actions {
     display: none !important;
   }
-  
+
   .menu-toggle {
     display: flex !important;
   }
-  
+
   .mobile-menu {
     left: 12px;
     right: 12px;
   }
-  
+
   /* Hero - Mobile */
   .hero-section {
     padding: 100px 16px 40px;
   }
-  
+
   .hero-title {
     font-size: 36px;
     margin-bottom: 16px;
   }
-  
+
   .hero-description {
     font-size: 16px;
     margin-bottom: 24px;
   }
-  
+
   .hero-cta {
     flex-direction: column;
     gap: 12px;
     margin-bottom: 40px;
   }
-  
+
   .hero-cta a {
     width: 100%;
   }
-  
+
   .btn-primary-large,
   .btn-secondary-large {
     width: 100%;
@@ -172,20 +172,20 @@ html {
     font-size: 16px;
     justify-content: center;
   }
-  
+
   .hero-stats {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
-  
+
   .stat-number {
     font-size: 28px;
   }
-  
+
   .stat-label {
     font-size: 12px;
   }
-  
+
   /* Seções - Mobile */
   .categories-section,
   .benefits-section,
@@ -193,203 +193,203 @@ html {
   .testimonials-section {
     padding: 60px 16px;
   }
-  
+
   .section-header {
     margin-bottom: 40px;
   }
-  
+
   .section-header h2 {
     font-size: 28px;
   }
-  
+
   .section-header p {
     font-size: 16px;
   }
-  
+
   /* Tabs - Mobile */
   .tabs-header {
     padding: 8px;
   }
-  
+
   .tab-button {
     min-width: 140px;
     padding: 16px 12px;
   }
-  
+
   .tab-icon {
     width: 40px;
     height: 40px;
   }
-  
+
   .tab-label {
     font-size: 12px;
   }
-  
+
   .tab-panel {
     padding: 32px 20px;
   }
-  
+
   .tab-panel-header {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .category-icon-large {
     width: 80px;
     height: 80px;
   }
-  
+
   .category-info h3 {
     font-size: 24px;
   }
-  
+
   /* CNAEs Grid - Mobile */
   .cnaes-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .cnae-card {
     padding: 16px;
   }
-  
+
   /* Benefits Grid - Mobile */
   .benefits-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .benefit-card {
     padding: 24px;
   }
-  
+
   /* Pricing - Mobile */
   .pricing-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .pricing-card {
     padding: 32px 24px;
   }
-  
+
   .pricing-card.popular {
     transform: scale(1);
   }
-  
+
   .billing-toggle {
     max-width: 100%;
     flex-direction: column;
   }
-  
+
   .billing-option {
     width: 100%;
   }
-  
+
   /* Testimonials - Mobile */
   .testimonials-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   /* CTA Section - Mobile */
   .cta-section {
     padding: 60px 16px;
   }
-  
+
   .cta-content h2 {
     font-size: 32px;
   }
-  
+
   .cta-content > p {
     font-size: 16px;
   }
-  
+
   /* Contact - Mobile */
   .contact-section {
     padding: 60px 16px;
   }
-  
+
   .contact-info-cards {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .contact-form-compact .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .contact-compact-grid {
     padding: 24px 20px;
   }
-  
+
   /* Footer - Mobile */
   .footer-content {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .footer-section:first-child {
     grid-column: 1;
   }
-  
+
   /* API Example Section - Mobile */
   .api-example-section {
     padding: 60px 16px !important;
   }
-  
+
   .api-example-grid {
     grid-template-columns: 1fr !important;
     gap: 24px !important;
   }
-  
+
   .api-example-box,
   .api-response-box {
     padding: 24px 16px !important;
   }
-  
+
   .api-example-box pre,
   .api-response-box pre {
     font-size: 12px !important;
     overflow-x: auto !important;
   }
-  
+
   /* Pricing Cards - Mobile melhorado */
   .plan-price .amount {
     font-size: 42px !important;
   }
-  
+
   .plan-price .currency {
     font-size: 20px !important;
   }
-  
+
   .plan-price .period {
     font-size: 16px !important;
   }
-  
+
   .pricing-card.popular {
     transform: scale(1) !important;
     margin: 0 !important;
   }
-  
+
   /* Stats no Hero - Melhorado */
   .hero-stats {
     grid-template-columns: 1fr 1fr !important;
     gap: 16px !important;
     padding: 0 16px;
   }
-  
+
   .stat {
     padding: 16px 12px;
   }
-  
+
   /* Integration Section - Mobile */
   .integration-section,
   .lookalike-section,
   .filters-section {
     padding: 60px 0 !important;
   }
-  
+
   .integration-grid,
   .feature-comparison-table {
     overflow-x: auto !important;
@@ -402,166 +402,166 @@ html {
     font-size: 28px !important;
     line-height: 1.2;
   }
-  
+
   .hero-description {
     font-size: 14px !important;
   }
-  
+
   .hero-badge {
     font-size: 12px !important;
     padding: 6px 16px !important;
   }
-  
+
   .section-header h2 {
     font-size: 24px !important;
     line-height: 1.3;
   }
-  
+
   .section-header p {
     font-size: 14px !important;
   }
-  
+
   .stat-number {
     font-size: 24px !important;
   }
-  
+
   .stat-label {
     font-size: 11px !important;
   }
-  
+
   .hero-stats {
     gap: 12px !important;
   }
-  
+
   .navbar-logo {
     font-size: 16px !important;
   }
-  
+
   .navbar-logo svg {
     width: 20px !important;
     height: 20px !important;
   }
-  
+
   /* Botões menores em telas pequenas */
   .btn-primary-large,
   .btn-secondary-large {
     padding: 12px 20px !important;
     font-size: 14px !important;
   }
-  
+
   /* Pricing mais compacto */
   .pricing-card {
     padding: 24px 16px !important;
   }
-  
+
   .plan-header h3 {
     font-size: 20px !important;
   }
-  
+
   .plan-price .amount {
     font-size: 36px !important;
   }
-  
+
   .plan-features li {
     font-size: 13px !important;
     padding: 8px 0 !important;
   }
-  
+
   /* Tabs mais compactos */
   .tab-button {
     min-width: 120px !important;
     padding: 14px 10px !important;
   }
-  
+
   .tab-icon {
     width: 36px !important;
     height: 36px !important;
   }
-  
+
   .tab-icon svg {
     width: 20px !important;
     height: 20px !important;
   }
-  
+
   .tab-label {
     font-size: 11px !important;
   }
-  
+
   /* CNAEs mais compactos */
   .cnae-card {
     padding: 12px !important;
     gap: 12px !important;
   }
-  
+
   .cnae-icon {
     width: 40px !important;
     height: 40px !important;
   }
-  
+
   .cnae-nome {
     font-size: 14px !important;
   }
-  
+
   .cnae-codigo {
     font-size: 12px !important;
   }
-  
+
   /* Category info menor */
   .category-icon-large {
     width: 70px !important;
     height: 70px !important;
   }
-  
+
   .category-info h3 {
     font-size: 24px !important;
   }
-  
+
   .category-info p {
     font-size: 14px !important;
   }
-  
+
   /* Benefits mais compactos */
   .benefit-card {
     padding: 20px !important;
   }
-  
+
   .benefit-icon {
     width: 56px !important;
     height: 56px !important;
   }
-  
+
   .benefit-card h3 {
     font-size: 18px !important;
   }
-  
+
   .benefit-card p {
     font-size: 14px !important;
   }
-  
+
   /* Testimonial cards */
   .testimonial-card {
     padding: 20px !important;
   }
-  
+
   .testimonial-text {
     font-size: 14px !important;
     line-height: 1.5 !important;
   }
-  
+
   .author-name {
     font-size: 14px !important;
   }
-  
+
   .author-role {
     font-size: 12px !important;
   }
-  
+
   /* CTA Section */
   .cta-content h2 {
     font-size: 26px !important;
     line-height: 1.3 !important;
   }
-  
+
   .cta-content p {
     font-size: 14px !important;
   }
@@ -639,9 +639,13 @@ html {
 }
 
 .carousel-nav-button:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  transform: translateY(-50%) scale(1.1);
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-nav-button:hover svg {
+  color: #3b82f6 !important;
 }
 
 .carousel-nav-button.prev {
@@ -694,12 +698,12 @@ html {
     gap: 6px;
     margin-top: 24px;
   }
-  
+
   .carousel-indicator {
     width: 10px;
     height: 10px;
   }
-  
+
   .carousel-indicator.active {
     width: 24px;
   }
@@ -721,7 +725,7 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   html {
     scroll-behavior: auto;
   }
