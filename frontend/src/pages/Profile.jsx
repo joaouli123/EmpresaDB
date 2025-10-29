@@ -128,7 +128,9 @@ const Profile = () => {
                 name="email"
                 value={profile?.email || ''}
                 onChange={handleChange}
+                disabled
               />
+              <small>O email não pode ser alterado</small>
             </div>
 
             <div className="form-group">
@@ -142,7 +144,9 @@ const Profile = () => {
                 value={profile?.phone || ''}
                 onChange={handleChange}
                 placeholder="(00) 00000-0000"
+                disabled
               />
+              <small>O telefone não pode ser alterado</small>
             </div>
 
             <div className="form-group">
@@ -156,7 +160,9 @@ const Profile = () => {
                 value={profile?.cpf || ''}
                 onChange={handleChange}
                 placeholder="000.000.000-00"
+                disabled
               />
+              <small>O CPF não pode ser alterado</small>
             </div>
 
             <div className="form-group">
