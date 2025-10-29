@@ -867,21 +867,6 @@ const LandingPage = () => {
                         <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
                       </div>
 
-                      {plan.monthly_batch_queries > 0 && (
-                        <div style={{
-                          marginTop: '12px',
-                          padding: '10px',
-                          background: '#f3f4f6',
-                          borderRadius: '6px',
-                          textAlign: 'center',
-                          fontSize: '14px',
-                          color: '#374151',
-                          fontWeight: '600'
-                        }}>
-                          {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
-                        </div>
-                      )}
-
                       <ul className="plan-features">
                         <li>
                           <Check size={18} />
@@ -1086,37 +1071,41 @@ const LandingPage = () => {
       {/* Addons Section */}
       {batchPackages.length > 0 && (
         <section className="addons-section">
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
-            <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
-              Pesquise milhares de empresas de uma vez com 16+ filtros avançados
-            </p>
-            <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-              <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
-              Cada resultado retornado = 1 crédito.
-            </p>
-            <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
-              ✨ Créditos comprados nunca expiram!
-            </p>
-            <div style={{
-              marginTop: '15px',
-              padding: '12px 16px',
-              background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-              borderLeft: '4px solid #667eea',
-              borderRadius: '6px',
-              fontSize: '14px',
-              maxWidth: '900px',
-              margin: '16px auto 0'
-            }}>
-              <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
-            </div>
+          <div className="section-header">
+            <h2>⚡ Consultas em Lote</h2>
+            <p>Pesquise milhares de empresas de uma vez com 16+ filtros avançados</p>
           </div>
-          <div style={{ 
-            background: 'white', 
-            borderRadius: '16px', 
-            overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
+          
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '40px'
+            }}>
+              <p style={{ fontSize: '16px', color: '#666', marginBottom: '12px' }}>
+                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+                Cada resultado retornado = 1 crédito.
+              </p>
+              <p style={{ fontSize: '16px', color: '#10b981', fontWeight: '700', marginBottom: '20px' }}>
+                ✨ Créditos comprados nunca expiram!
+              </p>
+              <div style={{
+                padding: '16px 20px',
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                borderLeft: '4px solid #667eea',
+                borderRadius: '8px',
+                fontSize: '15px',
+                maxWidth: '900px',
+                margin: '0 auto'
+              }}>
+                <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
+              </div>
+            </div>
+            <div style={{ 
+              background: 'white', 
+              borderRadius: '16px', 
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+            }}>
             <table style={{ 
               width: '100%', 
               borderCollapse: 'collapse',
@@ -1225,32 +1214,34 @@ const LandingPage = () => {
                   );
                 })}
               </tbody>
-            </table>
-          </div>
-          <div style={{ 
-            marginTop: '30px', 
-            padding: '20px', 
-            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-            borderRadius: '12px',
-            border: '2px solid #bae6fd'
-          }}>
-            <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
-              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
-              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
-              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
-              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
-              {batchPackages.length > 1 && (
-                <li style={{ fontSize: '14px', color: '#374151' }}>
-                  ✅ Economize até {Math.max(...batchPackages.map(p => {
-                    const pricePerUnit = p.price_brl / p.credits;
-                    const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
-                    const savings = basePricePerUnit > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
-                    return savings;
-                  }))}% comprando pacotes maiores
-                </li>
-              )}
-            </ul>
+              </table>
+            </div>
+            
+            <div style={{ 
+              marginTop: '40px', 
+              padding: '32px', 
+              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+              borderRadius: '12px',
+              border: '2px solid #bae6fd'
+            }}>
+              <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '10px' }}>
+                <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Compre um pacote de créditos (pagamento único)</li>
+                <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '3px 8px', borderRadius: '4px', fontSize: '14px' }}>/batch/search</code> com filtros avançados</li>
+                <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
+                <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Créditos não expiram - use quando quiser!</li>
+                {batchPackages.length > 1 && (
+                  <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
+                    ✅ Economize até {Math.max(...batchPackages.map(p => {
+                      const pricePerUnit = p.price_brl / p.credits;
+                      const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                      const savings = basePricePerUnit > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
+                      return savings;
+                    }))}% comprando pacotes maiores
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
         </section>
       )}
