@@ -148,7 +148,8 @@ const LandingPage2 = () => {
       description: 'Solução corporativa completa',
       features: [
         'Consultas ilimitadas',
-        'Consulta completa por CNPJ',
+        'Consultas em lote ilimitadas',
+        '+45 filtros avançados',
         'Dados completos da empresa',
         'QSA e CNAEs secundários',
         'Cache Redis dedicado',
