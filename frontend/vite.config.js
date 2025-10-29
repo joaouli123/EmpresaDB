@@ -29,6 +29,14 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/batch': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/stripe': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/cnpj': {
         target: 'http://localhost:8000',
         changeOrigin: true,

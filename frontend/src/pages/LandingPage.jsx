@@ -38,72 +38,31 @@ import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
 
 const LandingPage = () => {
-  const [selectedPlan, setSelectedPlan] = useState('profissional');
+  const [selectedPlan, setSelectedPlan] = useState('growth');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
   const [menuOpen, setMenuOpen] = useState(false);
   const [batchPackages, setBatchPackages] = useState([]);
-
-  const plans = [
-    {
-      id: 'basico',
-      name: 'Básico',
-      priceMonthly: '59,90',
-      priceYearly: '503,16', // 59.90 * 12 * 0.7 = 503.16
-      queries: '300',
-      description: 'Ideal para pequenos negócios',
-      features: [
-        '300 consultas mensais',
-        'Acesso API completo',
-        'Dados atualizados',
-        'Suporte por email',
-        'Dashboard básico'
-      ],
-      popular: false
-    },
-    {
-      id: 'profissional',
-      name: 'Profissional',
-      priceMonthly: '89,90',
-      priceYearly: '755,16', // 89.90 * 12 * 0.7 = 755.16
-      queries: '500',
-      description: 'Para empresas em crescimento',
-      features: [
-        '500 consultas mensais',
-        'Acesso API completo',
-        'Dados atualizados diariamente',
-        'Suporte prioritário',
-        'Dashboard avançado',
-        'Consulta de sócios (QSA)',
-        'Filtros personalizados'
-      ],
-      popular: true
-    },
-    {
-      id: 'empresarial',
-      name: 'Empresarial',
-      priceMonthly: '149,00',
-      priceYearly: '1.252,80', // 149.00 * 12 * 0.7 = 1252.80
-      queries: '1.000',
-      description: 'Solução corporativa completa',
-      features: [
-        '1.000 consultas mensais',
-        'Acesso API ilimitado',
-        'Dados em tempo real',
-        'Suporte 24/7',
-        'Dashboard personalizado',
-        'Todos os filtros avançados',
-        'Integração via API Key',
-        'Histórico completo de uso'
-      ],
-      popular: false
-    }
-  ];
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
+    loadPlans();
     loadBatchPackages();
   }, []);
+
+  const loadPlans = async () => {
+    try {
+      const response = await api.get('/subscriptions/plans');
+      setPlans(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar planos:', error);
+      setPlans([]);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
 
   const loadBatchPackages = async () => {
     try {
@@ -759,65 +718,85 @@ const LandingPage = () => {
             onClick={() => setBillingPeriod('anual')}
           >
             Anual
-            <span className="discount-badge">Economize 30%</span>
+            <span className="discount-badge">Economize 17%</span>
           </button>
         </div>
         
-        <div className="pricing-grid">
-          {plans.map((plan) => (
-            <div 
-              key={plan.id} 
-              className={`pricing-card ${plan.popular ? 'popular' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
-            >
-              {plan.popular && <div className="popular-badge">Mais Popular</div>}
+        {loadingPlans ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+            <p style={{ color: 'var(--gray)' }}>Carregando planos...</p>
+          </div>
+        ) : (
+          <div className="pricing-grid">
+            {plans.map((plan) => {
+              const isPopular = plan.name === 'growth';
+              const priceMonthly = plan.price_brl;
+              const priceYearly = plan.price_brl * 12 * 0.83;
+              const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
               
-              <div className="plan-header">
-                <h3>{plan.name}</h3>
-                <p className="plan-description">{plan.description}</p>
-              </div>
-              
-              <div className="plan-price">
-                <span className="currency">R$</span>
-                <span className="amount">
-                  {billingPeriod === 'mensal' ? plan.priceMonthly : plan.priceYearly}
-                </span>
-                <span className="period">
-                  {billingPeriod === 'mensal' ? '/mês' : '/ano'}
-                </span>
-              </div>
-              
-              {billingPeriod === 'anual' && (
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: 'var(--primary)', 
-                  fontWeight: '600',
-                  marginBottom: '12px',
-                  textAlign: 'center'
-                }}>
-                  R$ {(parseFloat(plan.priceYearly.replace('.', '').replace(',', '.')) / 12).toFixed(2).replace('.', ',')} /mês
+              return (
+                <div 
+                  key={plan.id} 
+                  className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
+                  onClick={() => setSelectedPlan(plan.name)}
+                >
+                  {isPopular && <div className="popular-badge">Mais Popular</div>}
+                  
+                  <div className="plan-header">
+                    <h3>{plan.display_name}</h3>
+                    <p className="plan-description">
+                      {plan.name === 'free' && 'Ideal para testar a plataforma'}
+                      {plan.name === 'start' && 'Perfeito para começar'}
+                      {plan.name === 'growth' && 'Para empresas em crescimento'}
+                    </p>
+                  </div>
+                  
+                  <div className="plan-price">
+                    <span className="currency">R$</span>
+                    <span className="amount">
+                      {displayPrice.toFixed(2).replace('.', ',')}
+                    </span>
+                    <span className="period">
+                      {billingPeriod === 'mensal' ? '/mês' : '/ano'}
+                    </span>
+                  </div>
+                  
+                  {billingPeriod === 'anual' && priceMonthly > 0 && (
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: 'var(--primary)', 
+                      fontWeight: '600',
+                      marginBottom: '12px',
+                      textAlign: 'center'
+                    }}>
+                      R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
+                    </div>
+                  )}
+                  
+                  <div className="plan-queries">
+                    <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                  </div>
+                  
+                  <ul className="plan-features">
+                    {plan.features.map((feature, index) => (
+                      <li key={index}>
+                        <Check size={18} />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <a href="/pricing">
+                    <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
+                      {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
+                    </button>
+                  </a>
                 </div>
-              )}
-              
-              <div className="plan-queries">
-                <strong>{plan.queries}</strong> consultas/mês
-              </div>
-              
-              <ul className="plan-features">
-                {plan.features.map((feature, index) => (
-                  <li key={index}>
-                    <Check size={18} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              
-              <button className={`btn-plan ${plan.popular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
-                Assinar {plan.name}
-              </button>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
         
         {batchPackages.length > 0 && (
           <div className="addons-section">
