@@ -269,22 +269,6 @@ code {
   align-items: center;
 }
 
-.input-with-icon input {
-  flex: 1;
-  padding: 12px 12px 12px 44px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.2s;
-}
-
-.input-with-icon svg:first-child {
-  position: absolute;
-  left: 14px;
-  color: var(--gray);
-  pointer-events: none;
-}
-
 .input-with-icon.input-valid input {
   border-color: #10b981;
   background: #10b98108;
@@ -397,20 +381,19 @@ code {
   margin-bottom: 8px;
 }
 
-.input-with-icon svg {
+.input-with-icon > svg:first-of-type {
   position: absolute;
-  left: 16px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray);
   pointer-events: none;
   z-index: 1;
-  flex-shrink: 0;
 }
 
-.input-with-icon input {
+.form-group .input-with-icon input {
   width: 100%;
-  padding: 14px 16px 14px 44px;
+  padding: 12px 16px 12px 52px !important;
   border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 15px;
