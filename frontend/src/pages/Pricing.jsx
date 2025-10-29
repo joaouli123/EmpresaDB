@@ -68,7 +68,7 @@ const Pricing = () => {
 
   const loadPlans = async () => {
     try {
-      const response = await api.get('/subscriptions/plans');
+      const response = await api.get('/api/v1/subscriptions/plans');
       const enrichedPlans = response.data.map(enrichPlanFeatures);
       setPlans(enrichedPlans);
     } catch (error) {
