@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { 
-  Database, 
-  Search, 
-  Zap, 
-  Shield, 
-  TrendingUp, 
-  Check, 
+import {
+  Database,
+  Search,
+  Zap,
+  Shield,
+  TrendingUp,
+  Check,
   ChevronRight,
   BarChart3,
   Users,
@@ -495,17 +495,35 @@ const LandingPage = () => {
     setCurrentTestimonial(prev => (prev - 1 + (testimonials.length - testimonialItemsToShow + 1)) % (testimonials.length - testimonialItemsToShow + 1));
   };
 
-  // Pricing Carousel Logic - Igual aos depoimentos
-  const pricingItemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+  // Pricing Carousel Logic
+  const getPricingItemsPerPage = () => {
+    if (window.innerWidth <= 640) return 1;
+    if (window.innerWidth <= 991) return 2;
+    return 3;
+  };
+
+  const [pricingItemsPerPage, setPricingItemsPerPage] = useState(getPricingItemsPerPage());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPricingItemsPerPage(getPricingItemsPerPage());
+      setPricingCarouselIndex(0); // Reset ao mudar tamanho
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Total de planos incluindo o Enterprise
+  const allPlans = [...plans, { id: 'enterprise', name: 'enterprise', display_name: 'Enterprise' }];
+  const maxPricingIndex = Math.max(0, allPlans.length - pricingItemsPerPage);
 
   const nextPricingSlide = () => {
-    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-    setPricingCarouselIndex(prev => prev < plans.length - itemsToShow ? prev + 1 : 0);
+    setPricingCarouselIndex(prev => Math.min(prev + 1, maxPricingIndex));
   };
 
   const prevPricingSlide = () => {
-    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-    setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : plans.length - itemsToShow);
+    setPricingCarouselIndex(prev => Math.max(prev - 1, 0));
   };
 
   return (
@@ -579,8 +597,8 @@ const LandingPage = () => {
           </h1>
 
           <p className="hero-description">
-            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil. 
-            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e 
+            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil.
+            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e
             dados 100% confiáveis para seu negócio.
           </p>
 
@@ -772,9 +790,9 @@ const LandingPage = () => {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <div style={{ 
-            background: 'white', 
-            padding: '32px', 
+          <div style={{
+            background: 'white',
+            padding: '32px',
             borderRadius: '12px',
             maxWidth: '700px',
             margin: '0 auto',
@@ -783,7 +801,7 @@ const LandingPage = () => {
             <Clock size={48} style={{ color: 'var(--primary)', margin: '0 auto 16px' }} />
             <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Dados Totalmente Atualizados</h3>
             <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
-              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha 
+              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha
               acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
             </p>
           </div>
@@ -798,13 +816,13 @@ const LandingPage = () => {
         </div>
 
         <div className="billing-toggle">
-          <button 
+          <button
             className={`billing-option ${billingPeriod === 'mensal' ? 'active' : ''}`}
             onClick={() => setBillingPeriod('mensal')}
           >
             Mensal
           </button>
-          <button 
+          <button
             className={`billing-option ${billingPeriod === 'anual' ? 'active' : ''}`}
             onClick={() => setBillingPeriod('anual')}
           >
@@ -820,20 +838,36 @@ const LandingPage = () => {
           </div>
         ) : (
           <div className="pricing-carousel-wrapper">
-            <div className="pricing-carousel">
-              <div className="pricing-carousel-grid">
-                {plans.slice(pricingCarouselIndex, pricingCarouselIndex + pricingItemsToShow).map((plan) => {
+            <button
+              className="carousel-nav-button prev"
+              onClick={prevPricingSlide}
+              disabled={pricingCarouselIndex === 0}
+              aria-label="Planos anteriores"
+              style={{ opacity: pricingCarouselIndex === 0 ? 0.3 : 1, cursor: pricingCarouselIndex === 0 ? 'not-allowed' : 'pointer' }}
+            >
+              <ChevronLeft size={24} color="#333" />
+            </button>
+
+            <div className="pricing-carousel-container">
+              <div
+                className="pricing-carousel-grid"
+                style={{
+                  transform: `translateX(calc(-${pricingCarouselIndex} * (100% / ${pricingItemsPerPage} + 32px)))`
+                }}
+              >
+                {plans.map((plan) => {
                   const isPopular = plan.name === 'growth';
                   const priceMonthly = plan.price_brl;
                   const priceYearly = plan.price_brl * 12 * 0.83;
                   const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
 
                   return (
-                    <div 
-                      key={plan.id} 
+                    <div
+                      key={plan.id}
                       className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
                       onClick={() => setSelectedPlan(plan.name)}
                     >
+
                       {isPopular && <div className="popular-badge" style={{ top: '-16px' }}>Mais Popular</div>}
 
                       <div className="plan-header">
@@ -857,9 +891,9 @@ const LandingPage = () => {
                       </div>
 
                       {billingPeriod === 'anual' && priceMonthly > 0 && (
-                        <div style={{ 
-                          fontSize: '14px', 
-                          color: 'var(--primary)', 
+                        <div style={{
+                          fontSize: '14px',
+                          color: 'var(--primary)',
                           fontWeight: '600',
                           marginBottom: '12px',
                           textAlign: 'center'
@@ -959,31 +993,25 @@ const LandingPage = () => {
 
             {/* Botões de Navegação */}
             <button
-              className="carousel-nav-button prev"
-              onClick={prevPricingSlide}
-            >
-              <ChevronLeft size={24} style={{ color: '#3b82f6' }} />
-            </button>
-
-            <button
               className="carousel-nav-button next"
               onClick={nextPricingSlide}
+              disabled={pricingCarouselIndex >= maxPricingIndex}
+              aria-label="Próximos planos"
+              style={{ opacity: pricingCarouselIndex >= maxPricingIndex ? 0.3 : 1, cursor: pricingCarouselIndex >= maxPricingIndex ? 'not-allowed' : 'pointer' }}
             >
-              <ChevronRight size={24} style={{ color: '#3b82f6' }} />
+              <ChevronRight size={24} color="#333" />
             </button>
 
             {/* Indicadores */}
             <div className="carousel-indicators">
-              {(() => {
-                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-                return Array.from({ length: plans.length - itemsToShow + 1 }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setPricingCarouselIndex(index)}
-                    className={`carousel-indicator ${pricingCarouselIndex === index ? 'active' : ''}`}
-                  />
-                ));
-              })()}
+              {Array.from({ length: maxPricingIndex + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  className={`carousel-indicator ${index === pricingCarouselIndex ? 'active' : ''}`}
+                  onClick={() => setPricingCarouselIndex(index)}
+                  aria-label={`Ir para slide ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -1021,126 +1049,126 @@ const LandingPage = () => {
                 <strong>🎯 34+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Tipo Logradouro, Número, Complemento, Porte, Situação Cadastral, Motivo Situação, Matriz/Filial, Data de Abertura, Data Situação Cadastral, Natureza Jurídica, Capital Social, Simples Nacional, MEI e muito mais!
               </div>
             </div>
-            <div style={{ 
-              background: 'white', 
-              borderRadius: '16px', 
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
               overflow: 'hidden',
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
-            <table style={{ 
-              width: '100%', 
-              borderCollapse: 'collapse',
-              fontSize: '15px'
-            }}>
-              <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
-                  <th style={{ padding: '16px 24px', textAlign: 'left', color: 'white', fontWeight: '700' }}>Pacote</th>
-                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Créditos</th>
-                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço Total</th>
-                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço/Crédito</th>
-                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Economia</th>
-                  <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {batchPackages.map((pkg, index) => {
-                  const pricePerUnit = pkg.price_brl / pkg.credits;
-                  const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
-                  const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '15px'
+              }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', color: 'white', fontWeight: '700' }}>Pacote</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Créditos</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço Total</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Preço/Crédito</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Economia</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {batchPackages.map((pkg, index) => {
+                    const pricePerUnit = pkg.price_brl / pkg.credits;
+                    const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                    const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
 
-                  return (
-                    <tr key={pkg.id} style={{ 
-                      borderBottom: '1px solid #e5e7eb',
-                      background: index % 2 === 0 ? '#fafafa' : 'white',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#eff6ff'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#fafafa' : 'white'}
-                    >
-                      <td data-label="Pacote" style={{ padding: '20px 24px', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                          <Package size={24} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
-                          <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name}</div>
-                            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description}</div>
+                    return (
+                      <tr key={pkg.id} style={{
+                        borderBottom: '1px solid #e5e7eb',
+                        background: index % 2 === 0 ? '#fafafa' : 'white',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#eff6ff'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#fafafa' : 'white'}
+                      >
+                        <td data-label="Pacote" style={{ padding: '20px 24px', textAlign: 'left' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                            <Package size={24} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
+                            <div style={{ textAlign: 'left' }}>
+                              <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name}</div>
+                              <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description}</div>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td data-label="Créditos" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '20px' }}>
-                          {pkg.credits.toLocaleString('pt-BR')}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#6b7280' }}>consultas</div>
-                      </td>
-                      <td data-label="Preço Total" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '20px' }}>
-                          R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
-                        </div>
-                      </td>
-                      <td data-label="Preço/Crédito" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <div style={{ 
-                          background: 'linear-gradient(135deg, #10b98120, #05966920)',
-                          padding: '6px 12px',
-                          borderRadius: '8px',
-                          display: 'inline-block'
-                        }}>
-                          <div style={{ fontWeight: '700', color: '#10b981', fontSize: '15px' }}>
-                            R$ {(pricePerUnit).toFixed(4).replace('.', ',')}
+                        </td>
+                        <td data-label="Créditos" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                          <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '20px' }}>
+                            {pkg.credits.toLocaleString('pt-BR')}
                           </div>
-                        </div>
-                      </td>
-                      <td data-label="Economia" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        {savingsPercent > 0 ? (
-                          <div style={{ 
-                            background: 'linear-gradient(135deg, #10b981, #059669)',
-                            color: 'white',
-                            padding: '6px 16px',
-                            borderRadius: '20px',
-                            fontSize: '14px',
-                            fontWeight: '700',
+                          <div style={{ fontSize: '12px', color: '#6b7280' }}>consultas</div>
+                        </td>
+                        <td data-label="Preço Total" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                          <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '20px' }}>
+                            R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
+                          </div>
+                        </td>
+                        <td data-label="Preço/Crédito" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                          <div style={{
+                            background: 'linear-gradient(135deg, #10b98120, #05966920)',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
                             display: 'inline-block'
                           }}>
-                            -{savingsPercent}%
+                            <div style={{ fontWeight: '700', color: '#10b981', fontSize: '15px' }}>
+                              R$ {(pricePerUnit).toFixed(4).replace('.', ',')}
+                            </div>
                           </div>
-                        ) : (
-                          <span style={{ color: '#9ca3af', fontSize: '13px' }}>—</span>
-                        )}
-                      </td>
-                      <td data-label="Ação" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <button style={{
-                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                          color: 'white',
-                          border: 'none',
-                          padding: '10px 24px',
-                          borderRadius: '8px',
-                          fontWeight: '600',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          whiteSpace: 'nowrap'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                        >
-                          Comprar
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+                        </td>
+                        <td data-label="Economia" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                          {savingsPercent > 0 ? (
+                            <div style={{
+                              background: 'linear-gradient(135deg, #10b981, #059669)',
+                              color: 'white',
+                              padding: '6px 16px',
+                              borderRadius: '20px',
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              display: 'inline-block'
+                            }}>
+                              -{savingsPercent}%
+                            </div>
+                          ) : (
+                            <span style={{ color: '#9ca3af', fontSize: '13px' }}>—</span>
+                          )}
+                        </td>
+                        <td data-label="Ação" style={{ padding: '20px 24px', textAlign: 'center' }}>
+                          <button style={{
+                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 24px',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                          >
+                            Comprar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
               </table>
             </div>
 
-            <div style={{ 
-              marginTop: '40px', 
-              padding: '32px', 
+            <div style={{
+              marginTop: '40px',
+              padding: '32px',
               background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
               borderRadius: '12px',
               border: '2px solid #bae6fd'
@@ -1237,8 +1265,8 @@ const LandingPage = () => {
 
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           {faqs.map((faq, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               style={{
                 background: 'white',
                 borderRadius: '12px',
@@ -1266,16 +1294,16 @@ const LandingPage = () => {
                 onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
-                <span style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '600', 
+                <span style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
                   color: '#111827',
                   paddingRight: '20px'
                 }}>
                   {faq.question}
                 </span>
-                <ChevronDown 
-                  size={24} 
+                <ChevronDown
+                  size={24}
                   color="var(--primary)"
                   style={{
                     transform: openFaqIndex === index ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -1457,8 +1485,8 @@ const LandingPage = () => {
       </footer>
 
       {/* WhatsApp Floating Button */}
-      <a 
-        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ" 
+      <a
+        href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20a%20API%20de%20CNPJ"
         className="whatsapp-float"
         target="_blank"
         rel="noopener noreferrer"

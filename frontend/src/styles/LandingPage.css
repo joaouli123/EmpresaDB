@@ -1606,48 +1606,88 @@ section#faq.benefits-section {
 /* Pricing Carousel - Igual aos depoimentos */
 .pricing-carousel-wrapper {
   position: relative;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 40px 80px;
 }
 
-.pricing-carousel {
-  overflow: visible;
+.pricing-carousel-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .pricing-carousel-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  display: flex;
   transition: transform 0.5s ease;
+  gap: 32px;
 }
 
-@media (max-width: 991px) {
-  .pricing-carousel-wrapper {
-    padding: 0 50px;
-  }
-
-  .pricing-carousel-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
+.pricing-carousel-grid .pricing-card {
+  flex: 0 0 calc((100% - 64px) / 3);
+  max-width: calc((100% - 64px) / 3);
+  margin-top: 20px;
 }
 
-@media (max-width: 640px) {
-  .pricing-carousel-wrapper {
-    padding: 0 40px;
-  }
-
-  .pricing-carousel-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+.carousel-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 480px) {
-  .pricing-carousel-wrapper {
-    padding: 0 16px;
-  }
+.carousel-nav-button:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.carousel-nav-button:hover svg {
+  color: white !important;
+}
+
+.carousel-nav-button.prev {
+  left: 0;
+}
+
+.carousel-nav-button.next {
+  right: 0;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.carousel-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d1d5db;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+}
+
+.carousel-indicator.active {
+  background: #3b82f6;
+  width: 32px;
+  border-radius: 5px;
 }
 
 .pricing-card .plan-price {
@@ -1655,11 +1695,44 @@ section#faq.benefits-section {
   align-items: baseline;
   gap: 4px;
   margin-bottom: 12px;
-  flex-wrap: wrap; /* Allows /mês to wrap below price */
+  flex-wrap: wrap;
 }
 
 .pricing-card .plan-price .period {
   font-size: 18px;
   color: var(--gray);
-  margin-left: 4px; /* Ensure separation from the amount */
+  margin-left: 4px;
+}
+
+/* Responsivo para tablets */
+@media (max-width: 991px) {
+  .pricing-carousel-wrapper {
+    padding: 40px 60px;
+  }
+
+  .pricing-carousel-grid .pricing-card {
+    flex: 0 0 calc((100% - 24px) / 2);
+    max-width: calc((100% - 24px) / 2);
+  }
+}
+
+/* Responsivo para mobile */
+@media (max-width: 640px) {
+  .pricing-carousel-wrapper {
+    padding: 40px 50px;
+  }
+
+  .pricing-carousel-grid {
+    gap: 20px;
+  }
+
+  .pricing-carousel-grid .pricing-card {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .carousel-nav-button {
+    width: 40px;
+    height: 40px;
+  }
 }
