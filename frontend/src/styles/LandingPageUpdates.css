@@ -80,7 +80,7 @@ html {
 
   /* Hero */
   .hero-section {
-    padding: 120px 20px 60px;
+    padding: 140px 20px 60px;
     min-height: auto;
   }
 
@@ -459,9 +459,10 @@ html {
   }
 
   .hero-badge {
-    font-size: 12px !important;
-    padding: 6px 16px !important;
-    margin-bottom: 24px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 12px;
+    padding: 6px 16px;
   }
 
   .section-header h2 {
