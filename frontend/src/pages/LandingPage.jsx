@@ -786,6 +786,19 @@ const LandingPage = () => {
                       <Check size={18} />
                       Dados atualizados mensalmente
                     </li>
+                    {plan.name !== 'free' && (
+                      <li>
+                        <Check size={18} />
+                        +40 tipos de dados para pesquisa avançada
+                      </li>
+                    )}
+                    <li>
+                      <Check size={18} />
+                      {plan.name === 'free' && '0 batch queries'}
+                      {plan.name === 'start' && '500 batch queries/mês'}
+                      {plan.name === 'growth' && '2.000 batch queries/mês'}
+                      {plan.name === 'pro' && '10.000 batch queries/mês'}
+                    </li>
                     {plan.features.map((feature, index) => (
                       <li key={index}>
                         <Check size={18} />
