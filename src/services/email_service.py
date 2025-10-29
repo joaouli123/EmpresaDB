@@ -215,6 +215,97 @@ class EmailService:
         )
         
         return self.send_email(to_email, subject, html_content)
+    
+    def send_limit_reached_email(
+        self,
+        to_email: str,
+        username: str,
+        plan_name: str,
+        limit: int
+    ) -> bool:
+        """Envia email quando limite mensal de consultas é atingido (100%)"""
+        from src.services.email_templates import get_limit_reached_template
+        
+        subject = "⚠️ Limite de Consultas Atingido - DB Empresas"
+        html_content = get_limit_reached_template(username, plan_name, limit)
+        
+        return self.send_email(to_email, subject, html_content)
+    
+    def send_batch_credits_purchased_email(
+        self,
+        to_email: str,
+        username: str,
+        package_name: str,
+        credits_amount: int,
+        price_paid: float,
+        total_credits_now: int
+    ) -> bool:
+        """Envia email quando créditos de lote são comprados"""
+        from src.services.email_templates import get_batch_credits_purchased_template
+        
+        subject = "✅ Créditos de Lote Adquiridos - DB Empresas"
+        html_content = get_batch_credits_purchased_template(
+            username, package_name, credits_amount, price_paid, total_credits_now
+        )
+        
+        return self.send_email(to_email, subject, html_content)
+    
+    def send_refund_processed_email(
+        self,
+        to_email: str,
+        username: str,
+        refund_amount: float,
+        refund_reason: str,
+        original_transaction: str,
+        processing_days: int = 7
+    ) -> bool:
+        """Envia email quando reembolso é processado"""
+        from src.services.email_templates import get_refund_processed_template
+        
+        subject = "Reembolso Processado - DB Empresas"
+        html_content = get_refund_processed_template(
+            username, refund_amount, refund_reason, original_transaction, processing_days
+        )
+        
+        return self.send_email(to_email, subject, html_content)
+    
+    def send_payment_failed_email(
+        self,
+        to_email: str,
+        username: str,
+        amount: float,
+        plan_name: str,
+        retry_date: str,
+        card_last4: str = None
+    ) -> bool:
+        """Envia email quando pagamento falha"""
+        from src.services.email_templates import get_payment_failed_template
+        
+        subject = "❌ Falha no Pagamento - DB Empresas"
+        html_content = get_payment_failed_template(
+            username, amount, plan_name, retry_date, card_last4
+        )
+        
+        return self.send_email(to_email, subject, html_content)
+    
+    def send_card_expiring_email(
+        self,
+        to_email: str,
+        username: str,
+        card_brand: str,
+        card_last4: str,
+        exp_month: int,
+        exp_year: int
+    ) -> bool:
+        """Envia email quando cartão está próximo de expirar"""
+        from src.services.email_templates import get_card_expiring_template
+        
+        subject = "⚠️ Cartão Expirando em Breve - DB Empresas"
+        html_content = get_card_expiring_template(
+            username, card_brand, card_last4, exp_month, exp_year
+        )
+        
+        return self.send_email(to_email, subject, html_content)
 
 
 email_service = EmailService()

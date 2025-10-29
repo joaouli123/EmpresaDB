@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import logging
 from typing import Optional, Dict, List
 from src.config import settings
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2Scheme
 import secrets
 
 logging.basicConfig(level=logging.INFO)
@@ -17,13 +17,13 @@ class DatabaseManager:
         # ⚠️ ATENÇÃO: ESTAMOS USANDO BANCO DE DADOS EXTERNO NA VPS!
         # NÃO USE O BANCO DO REPLIT - SEMPRE USE DATABASE_URL DO .env
         # NUNCA COMMITAR CREDENCIAIS NO CÓDIGO!
-        
+
         # Validação já é feita em settings.database_url (property com validação)
         self.connection_string = settings.database_url
         self.engine = None
         self.SessionLocal = None
-        self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-        
+        self.oauth2_scheme = OAuth2Scheme(tokenUrl="auth/login")
+
         # ✅ CONNECTION POOL: Reutiliza conexões (10x mais rápido!)
         # VPS: 4 CPUs, 16GB RAM → pool de 5-20 conexões
         self.connection_pool = None
@@ -32,12 +32,12 @@ class DatabaseManager:
     def _initialize_pool(self):
         """
         Inicializa pool de conexões para reutilização
-        
+
         Configuração para VPS (4 CPUs, 16GB RAM):
         - minconn=5: Mínimo de 5 conexões sempre prontas
         - maxconn=20: Máximo de 20 conexões simultâneas
         - 20 conexões × 8MB work_mem = 160MB RAM (OK para 16GB!)
-        
+
         BENEFÍCIOS:
         - 10x mais rápido (reutiliza conexões)
         - Latência: 500ms → 50ms
@@ -53,7 +53,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"❌ Erro ao criar connection pool: {e}")
             self.connection_pool = None
-    
+
     def get_engine(self):
         if not self.engine:
             # ⚠️ IMPORTANTE: Usando DATABASE_URL do .env (banco externo VPS)
@@ -79,12 +79,12 @@ class DatabaseManager:
     def get_connection(self):
         """
         OTIMIZADO: Usa connection pool para reutilizar conexões
-        
+
         ANTES (lento):
         - Abre conexão nova (100-500ms de latência)
         - Fecha após uso (desperdício!)
         - 10 req/s máximo
-        
+
         AGORA (rápido):
         - Pega conexão do pool (0-5ms)
         - Devolve para o pool (reutiliza!)
@@ -98,7 +98,7 @@ class DatabaseManager:
             else:
                 # ⚠️ Fallback se pool falhar (lento, mas funcional)
                 conn = psycopg2.connect(self.connection_string)
-            
+
             yield conn
             conn.commit()
         except Exception as e:
@@ -204,7 +204,7 @@ class DatabaseManager:
     def execute_query(self, query: str, params: Optional[tuple] = None):
         # Validar segurança da query
         self._validate_safe_query(query)
-        
+
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
@@ -219,26 +219,24 @@ class DatabaseManager:
     def generate_activation_token(self) -> str:
         """Gera um token único para ativação de conta"""
         return secrets.token_urlsafe(32)
-    
+
     def generate_reset_token(self) -> str:
         """Gera um token único para reset de senha"""
         return secrets.token_urlsafe(32)
 
     async def create_user(
-        self, 
-        username: str, 
-        email: str, 
-        hashed_password: str, 
-        role: str = 'user',
-        activation_token: Optional[str] = None,
+        self, username: str, email: str, phone: str, cpf: str,
+        hashed_password: str, activation_token: str = None, 
         is_active: bool = True
-    ) -> Optional[Dict]:
+    ) -> Optional[dict]:
         """
         Cria um novo usuário
-        
+
         Args:
             username: Nome de usuário
             email: Email do usuário
+            phone: Telefone do usuário
+            cpf: CPF do usuário
             hashed_password: Senha hash
             role: Papel do usuário (user ou admin)
             activation_token: Token de ativação (se fornecido, usuário é criado inativo)
@@ -246,28 +244,36 @@ class DatabaseManager:
         """
         try:
             from datetime import datetime, timedelta
+
+            # Verifica se o email ou celular já existem para evitar duplicidade
+            existing_user_email = await self.get_user_by_email(email)
+            if existing_user_email:
+                raise ValueError("Email already in use.")
             
+            existing_user_phone = await self.get_user_by_phone(phone)
+            if existing_user_phone:
+                raise ValueError("Phone number already in use.")
+
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-                
+
                 if activation_token:
                     # Se tem token, calcular data de expiração (24 horas)
-                    token_expires = datetime.now() + timedelta(hours=24)
+                    activation_expires = datetime.now() + timedelta(hours=24)
                     cursor.execute("""
-                        INSERT INTO clientes.users (
-                            username, email, password, role, is_active, 
-                            activation_token, activation_token_expires
-                        )
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                        RETURNING id, username, email, role, created_at, is_active
-                    """, (username, email, hashed_password, role, is_active, activation_token, token_expires))
+                        INSERT INTO clientes.users (username, email, phone, cpf, password, 
+                                                   activation_token, activation_token_expires, is_active)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id, username, email, phone, cpf, role, created_at
+                    """, (username, email, phone, cpf, hashed_password, activation_token, 
+                          activation_expires, is_active))
                 else:
                     cursor.execute("""
-                        INSERT INTO clientes.users (username, email, password, role, is_active)
-                        VALUES (%s, %s, %s, %s, %s)
-                        RETURNING id, username, email, role, created_at, is_active
-                    """, (username, email, hashed_password, role, is_active))
-                
+                        INSERT INTO clientes.users (username, email, phone, cpf, password, is_active)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        RETURNING id, username, email, phone, cpf, role, created_at
+                    """, (username, email, phone, cpf, hashed_password, is_active))
+
                 user = cursor.fetchone()
                 cursor.close()
                 return dict(user) if user else None
@@ -278,40 +284,40 @@ class DatabaseManager:
     async def activate_user_by_token(self, token: str) -> Optional[Dict]:
         """
         Ativa um usuário usando o token de ativação
-        
+
         Returns:
             Dict com dados do usuário se sucesso
             None se token inválido ou expirado
         """
         try:
             from datetime import datetime
-            
+
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
-                
+
                 # Buscar usuário com token válido e não expirado
                 cursor.execute("""
-                    SELECT id, username, email, role, is_active, activation_token_expires
+                    SELECT id, username, email, phone, cpf, role, is_active, activation_token_expires
                     FROM clientes.users
                     WHERE activation_token = %s
                 """, (token,))
-                
+
                 user = cursor.fetchone()
-                
+
                 if not user:
                     cursor.close()
                     return None
-                
+
                 # Verificar se já está ativo
                 if user['is_active']:
                     cursor.close()
                     return dict(user)
-                
+
                 # Verificar se token expirou
                 if user['activation_token_expires'] < datetime.now():
                     cursor.close()
                     return None
-                
+
                 # Ativar usuário e limpar token
                 cursor.execute("""
                     UPDATE clientes.users
@@ -320,13 +326,13 @@ class DatabaseManager:
                         activation_token_expires = NULL,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = %s
-                    RETURNING id, username, email, role, is_active
+                    RETURNING id, username, email, phone, cpf, role, is_active
                 """, (user['id'],))
-                
+
                 activated_user = cursor.fetchone()
                 cursor.close()
                 return dict(activated_user) if activated_user else None
-                
+
         except Exception as e:
             logger.error(f"Erro ao ativar usuário: {e}")
             return None
@@ -336,7 +342,7 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, password, role, created_at, last_login, is_active
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
                     FROM clientes.users
                     WHERE username = %s
                 """, (username,))
@@ -352,7 +358,7 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, password, role, created_at, last_login, is_active
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
                     FROM clientes.users
                     WHERE email = %s
                 """, (email,))
@@ -361,6 +367,22 @@ class DatabaseManager:
                 return dict(user) if user else None
         except Exception as e:
             logger.error(f"Erro ao buscar usuário por email: {e}")
+            return None
+
+    async def get_user_by_phone(self, phone: str) -> Optional[Dict]:
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+                cursor.execute("""
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
+                    FROM clientes.users
+                    WHERE phone = %s
+                """, (phone,))
+                user = cursor.fetchone()
+                cursor.close()
+                return dict(user) if user else None
+        except Exception as e:
+            logger.error(f"Erro ao buscar usuário por telefone: {e}")
             return None
 
     async def update_last_login(self, username: str):
@@ -375,29 +397,29 @@ class DatabaseManager:
                 cursor.close()
         except Exception as e:
             logger.error(f"Erro ao atualizar último login: {e}")
-    
+
     async def create_password_reset_token(self, email: str) -> Optional[str]:
         """
         Cria um token de reset de senha para o usuário
-        
+
         Returns:
             Token gerado se sucesso, None se email não encontrado
         """
         try:
             from datetime import datetime, timedelta
-            
+
             # Verificar se usuário existe
             user = await self.get_user_by_email(email)
             if not user:
                 return None
-            
+
             # Gerar token
             token = self.generate_reset_token()
             token_expires = datetime.now() + timedelta(hours=1)  # Token válido por 1 hora
-            
+
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                
+
                 # Verificar se colunas existem, senão criar
                 cursor.execute("""
                     DO $$ BEGIN
@@ -413,7 +435,7 @@ class DatabaseManager:
                         END IF;
                     END $$;
                 """)
-                
+
                 # Salvar token
                 cursor.execute("""
                     UPDATE clientes.users
@@ -423,49 +445,49 @@ class DatabaseManager:
                     WHERE email = %s
                 """, (token, token_expires, email))
                 cursor.close()
-                
+
                 return token
         except Exception as e:
             logger.error(f"Erro ao criar token de reset: {e}")
             return None
-    
+
     async def verify_password_reset_token(self, token: str) -> Optional[Dict]:
         """
         Verifica se o token de reset é válido
-        
+
         Returns:
             Dados do usuário se token válido, None caso contrário
         """
         try:
             from datetime import datetime
-            
+
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, reset_password_token_expires
+                    SELECT id, username, email, phone, cpf, reset_password_token_expires
                     FROM clientes.users
                     WHERE reset_password_token = %s
                 """, (token,))
-                
+
                 user = cursor.fetchone()
                 cursor.close()
-                
+
                 if not user:
                     return None
-                
+
                 # Verificar se token expirou
                 if user['reset_password_token_expires'] < datetime.now():
                     return None
-                
+
                 return dict(user)
         except Exception as e:
             logger.error(f"Erro ao verificar token de reset: {e}")
             return None
-    
+
     async def reset_password_with_token(self, token: str, new_password_hash: str) -> bool:
         """
         Redefine a senha do usuário usando o token
-        
+
         Returns:
             True se sucesso, False caso contrário
         """
@@ -474,7 +496,7 @@ class DatabaseManager:
             user = await self.verify_password_reset_token(token)
             if not user:
                 return False
-            
+
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
@@ -486,7 +508,7 @@ class DatabaseManager:
                     WHERE id = %s
                 """, (new_password_hash, user['id']))
                 cursor.close()
-                
+
                 return True
         except Exception as e:
             logger.error(f"Erro ao redefinir senha: {e}")
@@ -498,7 +520,7 @@ class DatabaseManager:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
                     SELECT 
-                        u.id, u.username, u.email, u.role, u.created_at, u.last_login,
+                        u.id, u.username, u.email, u.phone, u.cpf, u.role, u.created_at, u.last_login,
                         COUNT(DISTINCT ak.id) as active_api_keys,
                         COALESCE(SUM(uu.requests), 0) as total_requests
                     FROM clientes.users u
@@ -514,15 +536,15 @@ class DatabaseManager:
             logger.error(f"Erro ao buscar perfil: {e}")
             return None
 
-    async def update_user_profile(self, user_id: int, email: str) -> bool:
+    async def update_user_profile(self, user_id: int, email: str, phone: str, cpf: str) -> bool:
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
                     UPDATE clientes.users
-                    SET email = %s, updated_at = CURRENT_TIMESTAMP
+                    SET email = %s, phone = %s, cpf = %s, updated_at = CURRENT_TIMESTAMP
                     WHERE id = %s
-                """, (email, user_id))
+                """, (email, phone, cpf, user_id))
                 cursor.close()
                 return True
         except Exception as e:

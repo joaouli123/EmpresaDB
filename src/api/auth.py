@@ -30,6 +30,8 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
+    phone: str
+    cpf: str
     password: str
 
 class UserLogin(BaseModel):
@@ -322,24 +324,84 @@ async def activate_account(token: str):
 </html>
     """)
 
+def validate_cpf(cpf: str) -> bool:
+    """Valida CPF usando algoritmo oficial"""
+    numbers = ''.join(filter(str.isdigit, cpf))
+    if len(numbers) != 11:
+        return False
+    
+    # Verifica se todos os dígitos são iguais
+    if len(set(numbers)) == 1:
+        return False
+    
+    # Validação do primeiro dígito verificador
+    sum_val = sum(int(numbers[i]) * (10 - i) for i in range(9))
+    digit1 = 11 - (sum_val % 11)
+    if digit1 >= 10:
+        digit1 = 0
+    if digit1 != int(numbers[9]):
+        return False
+    
+    # Validação do segundo dígito verificador
+    sum_val = sum(int(numbers[i]) * (11 - i) for i in range(10))
+    digit2 = 11 - (sum_val % 11)
+    if digit2 >= 10:
+        digit2 = 0
+    if digit2 != int(numbers[10]):
+        return False
+    
+    return True
+
 @router.post("/register", response_model=dict)
 async def register(user: UserCreate):
+    # Validar CPF
+    if not validate_cpf(user.cpf):
+        raise HTTPException(status_code=400, detail="CPF inválido")
+    
+    # Validar telefone (apenas números, 10 ou 11 dígitos)
+    phone_numbers = ''.join(filter(str.isdigit, user.phone))
+    if len(phone_numbers) not in [10, 11]:
+        raise HTTPException(status_code=400, detail="Telefone inválido")
+    
+    # Verificar username duplicado
     existing_user = await db_manager.get_user_by_username(user.username)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Username já cadastrado")
 
+    # Verificar email duplicado
     existing_email = await db_manager.get_user_by_email(user.email)
     if existing_email:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email já cadastrado")
+    
+    # Verificar telefone duplicado
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM clientes.users WHERE phone = %s", (phone_numbers,))
+        if cursor.fetchone():
+            cursor.close()
+            raise HTTPException(status_code=400, detail="Telefone já cadastrado em outra conta")
+        
+        # Verificar CPF duplicado
+        cpf_numbers = ''.join(filter(str.isdigit, user.cpf))
+        cursor.execute("SELECT id FROM clientes.users WHERE cpf = %s", (cpf_numbers,))
+        if cursor.fetchone():
+            cursor.close()
+            raise HTTPException(status_code=400, detail="CPF já cadastrado em outra conta")
+        cursor.close()
 
     # Gerar token de ativação
     activation_token = db_manager.generate_activation_token()
 
     # Criar usuário INATIVO (is_active=False)
     hashed_password = get_password_hash(user.password)
+    phone_numbers = ''.join(filter(str.isdigit, user.phone))
+    cpf_numbers = ''.join(filter(str.isdigit, user.cpf))
+    
     new_user = await db_manager.create_user(
         username=user.username,
         email=user.email,
+        phone=phone_numbers,
+        cpf=cpf_numbers,
         hashed_password=hashed_password,
         activation_token=activation_token,
         is_active=False

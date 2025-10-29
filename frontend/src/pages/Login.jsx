@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Database, Mail, Lock, User as UserIcon, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Database, Mail, Lock, User as UserIcon, Eye, EyeOff, CheckCircle, AlertCircle, Phone, CreditCard } from 'lucide-react';
 import { api } from '../services/api';
 
 const Login = () => {
@@ -12,6 +12,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    phone: '',
+    cpf: '',
     password: '',
     confirmPassword: '',
   });
@@ -27,6 +29,8 @@ const Login = () => {
   const [validations, setValidations] = useState({
     username: { valid: null, message: '' },
     email: { valid: null, message: '' },
+    phone: { valid: null, message: '' },
+    cpf: { valid: null, message: '' },
     password: { valid: null, message: '' },
     confirmPassword: { valid: null, message: '' },
   });
@@ -46,12 +50,55 @@ const Login = () => {
     if (!isLogin) {
       validateField('username', formData.username);
       validateField('email', formData.email);
+      validateField('phone', formData.phone);
+      validateField('cpf', formData.cpf);
       validateField('password', formData.password);
       if (formData.confirmPassword) {
         validateField('confirmPassword', formData.confirmPassword);
       }
     }
   }, [formData, isLogin]);
+
+  const formatPhone = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    }
+    return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  };
+
+  const formatCPF = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  };
+
+  const validateCPF = (cpf) => {
+    const numbers = cpf.replace(/\D/g, '');
+    if (numbers.length !== 11) return false;
+    
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(numbers)) return false;
+    
+    // Validação do primeiro dígito verificador
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(numbers.charAt(i)) * (10 - i);
+    }
+    let digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(numbers.charAt(9))) return false;
+    
+    // Validação do segundo dígito verificador
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(numbers.charAt(i)) * (11 - i);
+    }
+    digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(numbers.charAt(10))) return false;
+    
+    return true;
+  };
 
   const validateField = (field, value) => {
     const newValidations = { ...validations };
@@ -76,6 +123,29 @@ const Login = () => {
           newValidations.email = { valid: false, message: 'Email inválido' };
         } else {
           newValidations.email = { valid: true, message: 'Email válido' };
+        }
+        break;
+
+      case 'phone':
+        const phoneNumbers = value.replace(/\D/g, '');
+        if (!value) {
+          newValidations.phone = { valid: null, message: '' };
+        } else if (phoneNumbers.length < 10) {
+          newValidations.phone = { valid: false, message: 'Telefone incompleto' };
+        } else if (phoneNumbers.length > 11) {
+          newValidations.phone = { valid: false, message: 'Telefone inválido' };
+        } else {
+          newValidations.phone = { valid: true, message: 'Telefone válido' };
+        }
+        break;
+
+      case 'cpf':
+        if (!value) {
+          newValidations.cpf = { valid: null, message: '' };
+        } else if (!validateCPF(value)) {
+          newValidations.cpf = { valid: false, message: 'CPF inválido' };
+        } else {
+          newValidations.cpf = { valid: true, message: 'CPF válido' };
         }
         break;
 
@@ -154,6 +224,7 @@ const Login = () => {
       } else {
         // REGISTRO - validar campos antes
         if (!validations.username.valid || !validations.email.valid || 
+            !validations.phone.valid || !validations.cpf.valid ||
             !validations.password.valid || !validations.confirmPassword.valid) {
           setError('Por favor, corrija os erros no formulário');
           setLoading(false);
@@ -164,6 +235,8 @@ const Login = () => {
           const response = await api.post('/auth/register', {
             username: formData.username,
             email: formData.email,
+            phone: formData.phone.replace(/\D/g, ''),
+            cpf: formData.cpf.replace(/\D/g, ''),
             password: formData.password
           });
           
@@ -173,12 +246,16 @@ const Login = () => {
             setFormData({
               username: '',
               email: '',
+              phone: '',
+              cpf: '',
               password: '',
               confirmPassword: '',
             });
             setValidations({
               username: { valid: null, message: '' },
               email: { valid: null, message: '' },
+              phone: { valid: null, message: '' },
+              cpf: { valid: null, message: '' },
               password: { valid: null, message: '' },
               confirmPassword: { valid: null, message: '' },
             });
@@ -199,7 +276,16 @@ const Login = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    
+    // Formatar telefone e CPF em tempo real
+    if (e.target.name === 'phone') {
+      value = formatPhone(value);
+    } else if (e.target.name === 'cpf') {
+      value = formatCPF(value);
+    }
+    
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleResetPassword = async (e) => {
@@ -318,164 +404,212 @@ const Login = () => {
             )}
 
             <div className="form-group">
-            <div className={`input-with-icon ${getInputClassName('username')}`}>
-              <UserIcon size={18} />
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                placeholder={isLogin ? "Usuário ou E-mail" : "Nome de Usuário"}
-                autoComplete="username"
-              />
-              {!isLogin && validations.username.valid === true && <CheckCircle size={18} className="icon-success" />}
-              {!isLogin && validations.username.valid === false && <AlertCircle size={18} className="icon-error" />}
-            </div>
-            {!isLogin && validations.username.message && (
-              <small className={validations.username.valid ? 'text-success' : 'text-error'}>
-                {validations.username.message}
-              </small>
-            )}
-          </div>
-
-          {!isLogin && (
-            <div className="form-group">
-              <div className={`input-with-icon ${getInputClassName('email')}`}>
-                <Mail size={18} />
+              <div className={`input-with-icon ${getInputClassName('username')}`}>
+                <UserIcon size={18} />
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="username"
+                  value={formData.username}
                   onChange={handleChange}
                   required
-                  placeholder="E-mail"
-                  autoComplete="email"
+                  placeholder={isLogin ? "Usuário ou E-mail" : "Nome de Usuário"}
+                  autoComplete="username"
                 />
-                {validations.email.valid === true && <CheckCircle size={18} className="icon-success" />}
-                {validations.email.valid === false && <AlertCircle size={18} className="icon-error" />}
+                {!isLogin && validations.username.valid === true && <CheckCircle size={18} className="icon-success" />}
+                {!isLogin && validations.username.valid === false && <AlertCircle size={18} className="icon-error" />}
               </div>
-              {validations.email.message && (
-                <small className={validations.email.valid ? 'text-success' : 'text-error'}>
-                  {validations.email.message}
+              {!isLogin && validations.username.message && (
+                <small className={validations.username.valid ? 'text-success' : 'text-error'}>
+                  {validations.username.message}
                 </small>
               )}
             </div>
-          )}
 
-          <div className="form-group">
-            <div className={`input-with-icon ${getInputClassName('password')}`}>
-              <Lock size={18} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder={isLogin ? "Senha" : "Senha (mínimo 6 caracteres)"}
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {!isLogin && validations.password.message && (
-              <small className={validations.password.valid ? 'text-success' : 'text-error'}>
-                {validations.password.message}
-              </small>
+            {!isLogin && (
+              <>
+                <div className="form-group">
+                  <div className={`input-with-icon ${getInputClassName('email')}`}>
+                    <Mail size={18} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      placeholder="E-mail"
+                      autoComplete="email"
+                    />
+                    {validations.email.valid === true && <CheckCircle size={18} className="icon-success" />}
+                    {validations.email.valid === false && <AlertCircle size={18} className="icon-error" />}
+                  </div>
+                  {validations.email.message && (
+                    <small className={validations.email.valid ? 'text-success' : 'text-error'}>
+                      {validations.email.message}
+                    </small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <div className={`input-with-icon ${getInputClassName('phone')}`}>
+                    <Phone size={18} />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      placeholder="Telefone (11) 98765-4321"
+                      autoComplete="tel"
+                      maxLength={15}
+                    />
+                    {validations.phone.valid === true && <CheckCircle size={18} className="icon-success" />}
+                    {validations.phone.valid === false && <AlertCircle size={18} className="icon-error" />}
+                  </div>
+                  {validations.phone.message && (
+                    <small className={validations.phone.valid ? 'text-success' : 'text-error'}>
+                      {validations.phone.message}
+                    </small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <div className={`input-with-icon ${getInputClassName('cpf')}`}>
+                    <CreditCard size={18} />
+                    <input
+                      type="text"
+                      name="cpf"
+                      value={formData.cpf}
+                      onChange={handleChange}
+                      required
+                      placeholder="CPF 000.000.000-00"
+                      autoComplete="off"
+                      maxLength={14}
+                    />
+                    {validations.cpf.valid === true && <CheckCircle size={18} className="icon-success" />}
+                    {validations.cpf.valid === false && <AlertCircle size={18} className="icon-error" />}
+                  </div>
+                  {validations.cpf.message && (
+                    <small className={validations.cpf.valid ? 'text-success' : 'text-error'}>
+                      {validations.cpf.message}
+                    </small>
+                  )}
+                </div>
+              </>
             )}
-          </div>
 
-          {!isLogin && (
             <div className="form-group">
-              <div className={`input-with-icon ${getInputClassName('confirmPassword')}`}>
+              <div className={`input-with-icon ${getInputClassName('password')}`}>
                 <Lock size={18} />
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
                   onChange={handleChange}
                   required
-                  placeholder="Confirmar Senha"
-                  autoComplete="new-password"
+                  placeholder={isLogin ? "Senha" : "Senha (mínimo 6 caracteres)"}
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                 />
                 <button
                   type="button"
                   className="toggle-password"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                {validations.confirmPassword.valid === true && <CheckCircle size={18} className="icon-success" />}
-                {validations.confirmPassword.valid === false && <AlertCircle size={18} className="icon-error" />}
               </div>
-              {validations.confirmPassword.message && (
-                <small className={validations.confirmPassword.valid ? 'text-success' : 'text-error'}>
-                  {validations.confirmPassword.message}
+              {!isLogin && validations.password.message && (
+                <small className={validations.password.valid ? 'text-success' : 'text-error'}>
+                  {validations.password.message}
                 </small>
               )}
             </div>
-          )}
 
-          {isLogin && !showResetPassword && (
-            <div className="forgot-password-link">
-              <a href="#" onClick={(e) => {
-                e.preventDefault();
-                setShowResetPassword(true);
-                setError('');
-                setSuccess('');
-                setResetMessage('');
-              }}>
-                Esqueceu sua senha?
-              </a>
+            {!isLogin && (
+              <div className="form-group">
+                <div className={`input-with-icon ${getInputClassName('confirmPassword')}`}>
+                  <Lock size={18} />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    placeholder="Confirmar Senha"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  {validations.confirmPassword.valid === true && <CheckCircle size={18} className="icon-success" />}
+                  {validations.confirmPassword.valid === false && <AlertCircle size={18} className="icon-error" />}
+                </div>
+                {validations.confirmPassword.message && (
+                  <small className={validations.confirmPassword.valid ? 'text-success' : 'text-error'}>
+                    {validations.confirmPassword.message}
+                  </small>
+                )}
+              </div>
+            )}
+
+            {isLogin && !showResetPassword && (
+              <div className="forgot-password-link">
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  setShowResetPassword(true);
+                  setError('');
+                  setSuccess('');
+                  setResetMessage('');
+                }}>
+                  Esqueceu sua senha?
+                </a>
+              </div>
+            )}
+
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner"></span>
+                  {isLogin ? 'Entrando...' : 'Criando conta...'}
+                </>
+              ) : (
+                isLogin ? 'Entrar' : 'Cadastrar'
+              )}
+            </button>
+
+            <div className="toggle-mode">
+              {isLogin ? (
+                <p>
+                  Não tem uma conta?{' '}
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    setIsLogin(false);
+                    setError('');
+                    setSuccess('');
+                  }}>
+                    Cadastre-se
+                  </a>
+                </p>
+              ) : (
+                <p>
+                  Já tem uma conta?{' '}
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    setIsLogin(true);
+                    setError('');
+                    setSuccess('');
+                  }}>
+                    Entrar
+                  </a>
+                </p>
+              )}
             </div>
-          )}
-
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                {isLogin ? 'Entrando...' : 'Criando conta...'}
-              </>
-            ) : (
-              isLogin ? 'Entrar' : 'Cadastrar'
-            )}
-          </button>
-
-          <div className="toggle-mode">
-            {isLogin ? (
-              <p>
-                Não tem uma conta?{' '}
-                <a href="#" onClick={(e) => {
-                  e.preventDefault();
-                  setIsLogin(false);
-                  setError('');
-                  setSuccess('');
-                }}>
-                  Cadastre-se
-                </a>
-              </p>
-            ) : (
-              <p>
-                Já tem uma conta?{' '}
-                <a href="#" onClick={(e) => {
-                  e.preventDefault();
-                  setIsLogin(true);
-                  setError('');
-                  setSuccess('');
-                }}>
-                  Entrar
-                </a>
-              </p>
-            )}
-          </div>
-        </form>
+          </form>
         )}
       </div>
     </div>
