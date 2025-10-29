@@ -20,7 +20,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showResetModal, setShowResetModal] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState('');
@@ -209,14 +209,10 @@ const Login = () => {
 
     try {
       await api.post('/auth/forgot-password', { email: resetEmail });
-      setResetMessage('Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
+      setResetMessage('✅ Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
       setResetEmail('');
-      setTimeout(() => {
-        setShowResetModal(false);
-        setResetMessage('');
-      }, 5000);
     } catch (err) {
-      setResetMessage('Erro ao solicitar redefinição de senha. Tente novamente.');
+      setResetMessage('❌ Erro ao solicitar redefinição de senha. Tente novamente.');
     } finally {
       setResetLoading(false);
     }
@@ -255,21 +251,73 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="message error-message">
-              <AlertCircle size={20} />
-              <span>{error}</span>
-            </div>
-          )}
-          {success && (
-            <div className="message success-message">
-              <CheckCircle size={20} />
-              <span>{success}</span>
-            </div>
-          )}
+        {showResetPassword ? (
+          <form onSubmit={handleResetPassword} className="login-form">
+            <p style={{color: 'var(--gray)', marginBottom: '20px', textAlign: 'center'}}>
+              Digite seu email para receber instruções de redefinição de senha.
+            </p>
 
-          <div className="form-group">
+            {resetMessage && (
+              <div className={`message ${resetMessage.includes('❌') ? 'error-message' : 'success-message'}`}>
+                <span>{resetMessage}</span>
+              </div>
+            )}
+
+            <div className="form-group">
+              <div className="input-with-icon">
+                <Mail size={18} />
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  placeholder="Seu e-mail cadastrado"
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={resetLoading}>
+              {resetLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  Enviando...
+                </>
+              ) : (
+                'Enviar Link de Redefinição'
+              )}
+            </button>
+
+            <div className="toggle-mode">
+              <p>
+                Lembrou da senha?{' '}
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  setShowResetPassword(false);
+                  setResetMessage('');
+                  setResetEmail('');
+                }}>
+                  Voltar para Login
+                </a>
+              </p>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="login-form">
+            {error && (
+              <div className="message error-message">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="message success-message">
+                <CheckCircle size={20} />
+                <span>{success}</span>
+              </div>
+            )}
+
+            <div className="form-group">
             <div className={`input-with-icon ${getInputClassName('username')}`}>
               <UserIcon size={18} />
               <input
@@ -375,11 +423,14 @@ const Login = () => {
             </div>
           )}
 
-          {isLogin && (
+          {isLogin && !showResetPassword && (
             <div className="forgot-password-link">
               <a href="#" onClick={(e) => {
                 e.preventDefault();
-                setShowResetModal(true);
+                setShowResetPassword(true);
+                setError('');
+                setSuccess('');
+                setResetMessage('');
               }}>
                 Esqueceu sua senha?
               </a>
@@ -425,64 +476,8 @@ const Login = () => {
             )}
           </div>
         </form>
+        )}
       </div>
-
-      {showResetModal && (
-        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Redefinir Senha</h2>
-            <p style={{color: 'var(--gray)', marginBottom: '20px'}}>
-              Digite seu email para receber instruções de redefinição de senha.
-            </p>
-
-            {resetMessage && (
-              <div className={`message ${resetMessage.includes('Erro') ? 'error-message' : 'success-message'}`}>
-                <span>{resetMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleResetPassword}>
-              <div className="form-group">
-                <div className="input-with-icon">
-                  <Mail size={18} />
-                  <input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    placeholder="Seu e-mail cadastrado"
-                    autoComplete="email"
-                  />
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => {
-                    setShowResetModal(false);
-                    setResetMessage('');
-                    setResetEmail('');
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="btn-primary" disabled={resetLoading}>
-                  {resetLoading ? (
-                    <>
-                      <span className="spinner"></span>
-                      Enviando...
-                    </>
-                  ) : (
-                    'Enviar'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
