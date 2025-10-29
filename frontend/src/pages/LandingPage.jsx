@@ -1045,7 +1045,7 @@ const LandingPage = () => {
                           </button>
                         </a>
                       ) : (
-                        <a href="/pricing">
+                        <a href={plan.name === 'free' ? '/login' : `/login?plan=${plan.name}`}>
                           <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
                             {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
                           </button>
@@ -1207,29 +1207,31 @@ const LandingPage = () => {
                         )}
                       </td>
                       <td data-label="Ação" style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <button style={{
-                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                          color: 'white',
-                          border: 'none',
-                          padding: '10px 24px',
-                          borderRadius: '8px',
-                          fontWeight: '600',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          whiteSpace: 'nowrap'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                        >
-                          Comprar
-                        </button>
+                        <a href="/login" style={{ textDecoration: 'none' }}>
+                          <button style={{
+                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 24px',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                          >
+                            Comprar
+                          </button>
+                        </a>
                       </td>
                     </tr>
                   );

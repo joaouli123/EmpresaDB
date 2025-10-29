@@ -7,7 +7,8 @@ import { api } from '../services/api';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(true);
+  const planParam = searchParams.get('plan');
+  const [isLogin, setIsLogin] = useState(planParam !== 'free');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -27,7 +28,6 @@ const Login = () => {
   });
   const { login } = useAuth();
   const navigate = useNavigate();
-  const planParam = searchParams.get('plan');
   const activatedParam = searchParams.get('activated');
 
   useEffect(() => {
