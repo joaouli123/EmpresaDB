@@ -777,34 +777,109 @@ const LandingPage = () => {
                     <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
                   </div>
 
+                  {plan.monthly_batch_queries > 0 && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '10px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '14px',
+                      color: '#fff',
+                      fontWeight: '600',
+                      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      ⚡ {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                    </div>
+                  )}
+
                   <ul className="plan-features">
                     <li>
                       <Check size={18} />
-                      {plan.rate_limit || 10} req/min (Rate Limit)
+                      {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
                     </li>
-                    <li>
-                      <Check size={18} />
-                      Dados atualizados mensalmente
-                    </li>
-                    {plan.name !== 'free' && (
+                    {plan.monthly_batch_queries > 0 && (
                       <li>
                         <Check size={18} />
-                        +40 tipos de dados para pesquisa avançada
+                        {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
                       </li>
                     )}
                     <li>
                       <Check size={18} />
-                      {plan.name === 'free' && '0 batch queries'}
-                      {plan.name === 'start' && '500 batch queries/mês'}
-                      {plan.name === 'growth' && '2.000 batch queries/mês'}
-                      {plan.name === 'pro' && '10.000 batch queries/mês'}
+                      +45 filtros avançados
                     </li>
-                    {plan.features.map((feature, index) => (
-                      <li key={index}>
+                    <li>
+                      <Check size={18} />
+                      Consulta completa por CNPJ
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      Dados completos da empresa
+                    </li>
+                    <li>
+                      <Check size={18} />
+                      QSA e CNAEs secundários
+                    </li>
+                    {plan.name !== 'free' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Dashboard com estatísticas
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Documentação da API
+                        </li>
+                      </>
+                    )}
+                    {plan.name === 'free' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Documentação da API
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Suporte por email
+                        </li>
+                      </>
+                    )}
+                    {plan.name === 'start' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Suporte por email
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Rate limit: 60 req/min
+                        </li>
+                      </>
+                    )}
+                    {plan.name === 'growth' && (
+                      <>
+                        <li>
+                          <Check size={18} />
+                          Cache Redis para performance
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Suporte via WhatsApp
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Rate limit: 300 req/min
+                        </li>
+                      </>
+                    )}
+                    {plan.name !== 'free' && (
+                      <li>
                         <Check size={18} />
-                        {feature}
+                        <span style={{ color: '#10b981', fontWeight: '600' }}>
+                          ✨ Créditos batch comprados nunca expiram
+                        </span>
                       </li>
-                    ))}
+                    )}
                   </ul>
 
                   <a href="/pricing">
@@ -823,13 +898,29 @@ const LandingPage = () => {
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <Sparkles size={32} style={{ color: 'var(--primary)', marginBottom: '10px' }} />
               <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '8px' }}>
-                Pesquise milhares de empresas de uma vez com filtros avançados
+              <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
+                Pesquise milhares de empresas de uma vez com +45 filtros avançados
               </p>
-              <p style={{ fontSize: '14px', color: '#888' }}>
-                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte e mais. 
-                Cada resultado = 1 crédito. Créditos não expiram!
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+                Cada resultado retornado = 1 crédito.
               </p>
+              <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
+                ✨ Créditos comprados nunca expiram!
+              </p>
+              <div style={{
+                marginTop: '15px',
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                borderLeft: '4px solid #667eea',
+                borderRadius: '6px',
+                fontSize: '14px',
+                maxWidth: '900px',
+                margin: '16px auto 0'
+              }}>
+                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
+                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
+              </div>
             </div>
             <div className="addons-grid">
               {batchPackages.map((pkg) => {

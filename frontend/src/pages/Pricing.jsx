@@ -25,10 +25,37 @@ const Pricing = () => {
     loadBatchPackages();
   }, []);
 
+  const enrichPlanFeatures = (plan) => {
+    // Adiciona features específicas de batch queries e filtros
+    const baseFeatures = plan.features || [];
+    const enrichedFeatures = [...baseFeatures];
+    
+    // Adicionar info de consultas em lote se houver
+    if (plan.monthly_batch_queries > 0) {
+      enrichedFeatures.unshift(`${plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês`);
+    }
+    
+    // Adicionar info de filtros avançados
+    if (!enrichedFeatures.some(f => f.includes('filtros avançados'))) {
+      enrichedFeatures.push('+45 filtros avançados');
+    }
+    
+    // Adicionar info sobre créditos que não expiram (exceto plano free)
+    if (plan.name !== 'free' && !enrichedFeatures.some(f => f.includes('nunca expiram'))) {
+      enrichedFeatures.push('Créditos batch comprados nunca expiram');
+    }
+    
+    return {
+      ...plan,
+      features: enrichedFeatures
+    };
+  };
+
   const loadPlans = async () => {
     try {
       const response = await api.get('/subscriptions/plans');
-      setPlans(response.data);
+      const enrichedPlans = response.data.map(enrichPlanFeatures);
+      setPlans(enrichedPlans);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
       // Fallback: usar planos hardcoded se API falhar
@@ -38,9 +65,12 @@ const Pricing = () => {
           name: 'free',
           display_name: 'Free',
           monthly_queries: 200,
+          monthly_batch_queries: 50,
           price_brl: 0,
           features: [
             '200 consultas mensais',
+            '50 consultas em lote/mês',
+            '+45 filtros avançados',
             'Acesso API básico',
             'Dados atualizados',
             'Suporte por email'
@@ -50,47 +80,56 @@ const Pricing = () => {
           id: 2,
           name: 'start',
           display_name: 'Start',
-          monthly_queries: 1000,
-          price_brl: 49.90,
+          monthly_queries: 10000,
+          monthly_batch_queries: 0,
+          price_brl: 79.90,
           features: [
-            '1.000 consultas mensais',
+            '10.000 consultas mensais',
+            '+45 filtros avançados',
             'Acesso API completo',
             'Dados atualizados diariamente',
             'Suporte prioritário',
-            'Dashboard básico'
+            'Dashboard básico',
+            'Créditos batch comprados nunca expiram'
           ]
         },
         {
           id: 3,
           name: 'growth',
           display_name: 'Growth',
-          monthly_queries: 5000,
-          price_brl: 149.90,
+          monthly_queries: 100000,
+          monthly_batch_queries: 0,
+          price_brl: 249.90,
           features: [
-            '5.000 consultas mensais',
+            '100.000 consultas mensais',
+            '+45 filtros avançados',
             'Acesso API completo',
             'Dados em tempo real',
             'Suporte prioritário',
             'Dashboard avançado',
             'Redis Cache (3x mais rápido)',
-            'Rate limit: 300 req/min'
+            'Rate limit: 300 req/min',
+            'Créditos batch comprados nunca expiram'
           ]
         },
         {
           id: 4,
           name: 'professional',
           display_name: 'Professional',
-          monthly_queries: 20000,
-          price_brl: 399.90,
+          monthly_queries: 500000,
+          monthly_batch_queries: 0,
+          price_brl: 799.90,
           features: [
-            '20.000 consultas mensais',
+            '500.000 consultas mensais',
+            '+45 filtros avançados',
             'Acesso API ilimitado',
             'Dados em tempo real',
             'Suporte 24/7',
             'Dashboard personalizado',
             'Redis Cache Premium',
             'Rate limit: 1000 req/min',
-            'Relatórios customizados'
+            'Relatórios customizados',
+            'Créditos batch comprados nunca expiram'
           ]
         }
       ]);
@@ -249,6 +288,21 @@ const Pricing = () => {
             <div className="plan-limit">
               <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
             </div>
+            {plan.monthly_batch_queries > 0 && (
+              <div className="batch-included-badge" style={{
+                marginTop: '12px',
+                padding: '10px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '6px',
+                textAlign: 'center',
+                fontSize: '14px',
+                color: '#fff',
+                fontWeight: '600',
+                boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+              }}>
+                ⚡ {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+              </div>
+            )}
             <div className="plan-rate-limit" style={{
               marginTop: '12px',
               padding: '10px',
@@ -292,14 +346,25 @@ const Pricing = () => {
               <Sparkles size={32} className="sparkle-icon" />
               <div>
                 <h2>⚡ Consultas em Lote</h2>
-                <p>Pesquise milhares de empresas de uma vez com filtros avançados</p>
+                <p>Pesquise milhares de empresas de uma vez com +45 filtros avançados</p>
               </div>
             </div>
             <div className="batch-description">
               <p>
-                <strong>Novo!</strong> Faça buscas avançadas por razão social, CNAE, localização, porte e mais.
-                Cada resultado retornado = 1 crédito. Créditos não expiram!
+                <strong>Novo!</strong> Faça buscas avançadas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+                Cada resultado retornado = 1 crédito. <strong style={{color: '#10b981'}}>✨ Créditos comprados nunca expiram!</strong>
               </p>
+              <div style={{
+                marginTop: '15px',
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+                borderLeft: '4px solid #667eea',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}>
+                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
+                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
+              </div>
             </div>
           </div>
 
