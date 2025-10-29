@@ -211,7 +211,66 @@ class BatchStripeService:
             
             logger.info(f"✅ Compra processada com sucesso: purchase_id={purchase_id}, {credits} créditos adicionados para user_id={user_id}")
             
-            # TODO: Enviar email de confirmação de compra
+            # Enviar email de confirmação de compra
+            try:
+                from src.services.email_service import email_service
+                from src.services.email_tracking import email_tracking_service
+                
+                # Buscar informações do usuário e pacote para o email
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    
+                    # Buscar usuário
+                    cursor.execute("""
+                        SELECT username, email FROM clientes.users WHERE id = %s
+                    """, (user_id,))
+                    user = cursor.fetchone()
+                    
+                    # Buscar pacote
+                    cursor.execute("""
+                        SELECT display_name FROM clientes.batch_query_packages WHERE id = %s
+                    """, (package_id,))
+                    package = cursor.fetchone()
+                    
+                    # Buscar total de créditos após compra
+                    cursor.execute("""
+                        SELECT total_credits FROM clientes.batch_credits WHERE user_id = %s
+                    """, (user_id,))
+                    credits_row = cursor.fetchone()
+                    
+                    cursor.close()
+                
+                if user and package and credits_row:
+                    username, email = user
+                    package_name = package[0]
+                    total_credits_now = credits_row[0]
+                    
+                    # Enviar email
+                    email_sent = email_service.send_batch_credits_purchased_email(
+                        to_email=email,
+                        username=username,
+                        package_name=package_name,
+                        credits_amount=credits,
+                        price_paid=amount_total,
+                        total_credits_now=total_credits_now
+                    )
+                    
+                    # Registrar envio no tracking
+                    email_tracking_service.log_email_sent(
+                        user_id=user_id,
+                        email_type='batch_credits_purchased',
+                        recipient_email=email,
+                        subject="Créditos de Lote Adquiridos - DB Empresas",
+                        status='sent' if email_sent else 'failed'
+                    )
+                    
+                    logger.info(f"Email de confirmação de compra enviado para {email}")
+                else:
+                    logger.warning(f"Não foi possível enviar email: dados incompletos")
+                    
+            except Exception as email_error:
+                logger.error(f"Erro ao enviar email de confirmação: {email_error}")
+                # Não falha a transação se o email falhar
             
             return True
             
