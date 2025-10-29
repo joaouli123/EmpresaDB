@@ -70,7 +70,7 @@ const ResetPassword = () => {
         <div className="login-card">
           <div className="login-header">
             <Database size={48} className="login-logo" />
-            <h1>Sistema CNPJ</h1>
+            <h1>DB Empresas</h1>
           </div>
 
           <div className="message error-message">

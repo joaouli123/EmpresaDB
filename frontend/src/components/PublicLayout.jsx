@@ -9,7 +9,7 @@ const PublicLayout = ({ children }) => {
         <div className="header-content">
           <Link to="/home" className="logo">
             <Database size={32} />
-            <span>Sistema CNPJ</span>
+            <span>DB Empresas</span>
           </Link>
           <nav className="public-nav">
             <Link to="/home" className="nav-link">
@@ -30,7 +30,7 @@ const PublicLayout = ({ children }) => {
         {children}
       </main>
       <footer className="public-footer">
-        <p>&copy; 2025 Sistema CNPJ. Todos os direitos reservados.</p>
+        <p>&copy; 2025 DB Empresas. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

@@ -10,7 +10,7 @@ const Docs = () => {
     <div className="docs-page">
       <div className="page-header">
         <h1>Documentação da API</h1>
-        <p>Guia completo para integração com o Sistema CNPJ</p>
+        <p>Guia completo para integração com a DB Empresas</p>
       </div>
 
       <div className="docs-container">

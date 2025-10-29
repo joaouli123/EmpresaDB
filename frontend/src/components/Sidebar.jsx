@@ -69,7 +69,7 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <div className="logo">
           <Database size={32} className="logo-icon" />
-          {!collapsed && <h1>CNPJ System</h1>}
+          {!collapsed && <h1>DB Empresas</h1>}
         </div>
         <div className="user-info">
           <div className="user-avatar">
@@ -78,23 +78,48 @@ const Sidebar = () => {
           {!collapsed && (
             <>
               <div className="user-details">
-                <p className="user-name">{user?.username}</p>
-                <span className={`user-role ${user?.role}`}>
-                  {user?.role === 'admin' ? 'Administrador' : 'Usuário'}
+                <p className="user-name">{user?.company_name || user?.username}</p>
+                <span className={`user-role ${subscription?.plan_name?.toLowerCase() || 'free'}`} style={{
+                  background: subscription?.plan_name === 'Free' ? '#6b7280' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase'
+                }}>
+                  {subscription?.plan_name || 'Plano Free'}
                 </span>
               </div>
               {subscription && (
                 <div className="user-subscription">
                   <div className="plan-info">
-                    <span className="plan-name">{subscription.plan_name}</span>
-                    <span className="plan-usage">
-                      {subscription.queries_used} / {subscription.total_limit} consultas
+                    <span className="plan-usage" style={{ 
+                      fontSize: '13px',
+                      color: '#9ca3af',
+                      display: 'block',
+                      marginTop: '8px'
+                    }}>
+                      {subscription.queries_used?.toLocaleString('pt-BR')} / {subscription.total_limit?.toLocaleString('pt-BR')} consultas
                     </span>
                   </div>
-                  <div className="usage-bar">
+                  <div className="usage-bar" style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    marginTop: '8px'
+                  }}>
                     <div 
                       className="usage-fill" 
-                      style={{ width: `${percentageUsed}%` }}
+                      style={{ 
+                        width: `${percentageUsed}%`,
+                        height: '100%',
+                        backgroundColor: '#3b82f6',
+                        borderRadius: '4px',
+                        transition: 'width 0.3s ease'
+                      }}
                     />
                   </div>
                 </div>

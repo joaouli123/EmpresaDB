@@ -376,7 +376,7 @@ const Login = () => {
       <div className="login-card">
         <div className="login-header">
           <Database size={48} className="login-logo" />
-          <h1>Sistema CNPJ</h1>
+          <h1>DB Empresas</h1>
           <p>Consulta e Gestão de Dados da Receita Federal</p>
         </div>
 
