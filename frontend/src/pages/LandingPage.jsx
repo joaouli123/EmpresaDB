@@ -492,7 +492,7 @@ const LandingPage = () => {
     },
     {
       question: 'Quais filtros avançados posso usar nas buscas?',
-      answer: 'Você tem acesso a mais de 45 filtros avançados! Pode filtrar por: estado (UF), município, CNAE (atividade econômica), situação cadastral, porte da empresa, data de abertura, razão social, nome fantasia, CEP, bairro, logradouro, opção pelo Simples Nacional, MEI, natureza jurídica e muito mais. Combine múltiplos filtros para encontrar exatamente o que precisa.'
+      answer: 'Você tem acesso a mais de 34 filtros avançados! Pode filtrar por: estado (UF), município, CNAE (atividade econômica), situação cadastral, porte da empresa, data de abertura, razão social, nome fantasia, CEP, bairro, logradouro, opção pelo Simples Nacional, MEI, natureza jurídica e muito mais. Combine múltiplos filtros para encontrar exatamente o que precisa.'
     },
     {
       question: 'Como funciona o plano gratuito?',
