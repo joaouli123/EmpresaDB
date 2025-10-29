@@ -1250,8 +1250,8 @@ const LandingPage = () => {
                 )}
               </ul>
             </div>
-          </section>
-        </>
+          </div>
+        </section>
       )}
 
       {/* Testimonials Section */}
