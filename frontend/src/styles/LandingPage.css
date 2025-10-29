@@ -1642,3 +1642,9 @@ body {
     margin-top: 60px;
   }
 }
+
+/* FAQ Section */
+section#faq.benefits-section {
+  background: #f9fafb !important;
+  padding: 100px 20px;
+}
