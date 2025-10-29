@@ -837,27 +837,24 @@ const LandingPage = () => {
                       {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
                     </li>
                     
-                    {/* BATCH QUERIES - NOVA LINHA */}
                     <li>
                       <Check size={18} />
-                      {plan.name === 'free' && '0 consultas em lote/mês'}
+                      {plan.name === 'free' && '50 consultas em lote/mês'}
                       {plan.name === 'start' && '500 consultas em lote/mês'}
                       {plan.name === 'growth' && '2.000 consultas em lote/mês'}
                       {plan.name === 'pro' && '10.000 consultas em lote/mês'}
                     </li>
                     
-                    {/* FILTROS AVANÇADOS - NOVA LINHA (TODOS OS PLANOS) */}
                     <li>
                       <Check size={18} />
                       +45 filtros avançados
                     </li>
                     
-                    {/* CRÉDITOS NÃO EXPIRAM - SOMENTE PLANOS PAGOS */}
                     {plan.name !== 'free' && (
                       <li>
                         <Check size={18} />
                         <span style={{ color: '#10b981', fontWeight: '600' }}>
-                          Créditos batch nunca expiram
+                          ✨ Créditos batch nunca expiram
                         </span>
                       </li>
                     )}
