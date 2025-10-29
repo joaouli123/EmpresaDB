@@ -841,7 +841,7 @@ const LandingPage = () => {
                       {plan.name === 'free' && '0 consultas em lote (batch queries)'}
                       {plan.name === 'start' && '500 consultas em lote (batch queries)/mês'}
                       {plan.name === 'growth' && '2.000 consultas em lote (batch queries)/mês'}
-                      {plan.name === 'pro' && 'Consultas em lote ilimitadas'}
+                      {plan.name === 'pro' && '10.000 consultas em lote (batch queries)/mês'}
                     </li>
                     <li>
                       <Check size={18} />
@@ -857,10 +857,6 @@ const LandingPage = () => {
                     )}
                     <li>
                       <Check size={18} />
-                      Dados atualizados mensalmente
-                    </li>
-                    <li>
-                      <Check size={18} />
                       Consulta completa por CNPJ
                     </li>
                     <li>
@@ -872,28 +868,20 @@ const LandingPage = () => {
                       QSA e CNAEs secundários
                     </li>
                     {plan.name !== 'free' && (
-                      <>
-                        <li>
-                          <Check size={18} />
-                          Dashboard com estatísticas
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Documentação da API
-                        </li>
-                      </>
+                      <li>
+                        <Check size={18} />
+                        Dashboard com estatísticas
+                      </li>
                     )}
+                    <li>
+                      <Check size={18} />
+                      Documentação da API
+                    </li>
                     {plan.name === 'free' && (
-                      <>
-                        <li>
-                          <Check size={18} />
-                          Documentação da API
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Suporte por email
-                        </li>
-                      </>
+                      <li>
+                        <Check size={18} />
+                        Suporte por email
+                      </li>
                     )}
                     {plan.name === 'start' && (
                       <>
