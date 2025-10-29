@@ -459,11 +459,19 @@ const LandingPage = () => {
     return 3;
   };
 
+  const getPricingGap = () => {
+    if (window.innerWidth <= 640) return 20;
+    if (window.innerWidth <= 991) return 24;
+    return 32;
+  };
+
   const [pricingItemsPerPage, setPricingItemsPerPage] = useState(getPricingItemsPerPage());
+  const [pricingGap, setPricingGap] = useState(getPricingGap());
 
   useEffect(() => {
     const handleResize = () => {
       setPricingItemsPerPage(getPricingItemsPerPage());
+      setPricingGap(getPricingGap());
     };
 
     window.addEventListener('resize', handleResize);
@@ -703,9 +711,9 @@ const LandingPage = () => {
           ))}
         </div>
 
-        <div className="info-card" style={{ marginTop: '80px', marginBottom: '80px', background: '#1f2937', color: 'white' }}>
-          <h3 style={{ color: 'white', marginBottom: '16px' }}>Exemplo de Consulta</h3>
-          <pre style={{ background: '#111827', padding: '20px', borderRadius: '8px', overflow: 'auto' }}>
+        <div className="info-card" style={{ marginTop: '80px', marginBottom: '80px', background: '#1f2937', color: 'white', paddingTop: '48px', paddingBottom: '48px', paddingLeft: '32px', paddingRight: '32px', borderRadius: '16px' }}>
+          <h3 style={{ color: 'white', marginBottom: '24px', marginTop: '0' }}>Exemplo de Consulta</h3>
+          <pre style={{ background: '#111827', padding: '24px', borderRadius: '8px', overflow: 'auto', marginBottom: '0' }}>
 {`GET /api/v1/empresas?cnpj=00000000000191
 
 {
@@ -720,7 +728,7 @@ const LandingPage = () => {
   ...
 }`}
           </pre>
-          <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.8)' }}>
+          <p style={{ marginTop: '24px', marginBottom: '0', color: 'rgba(255,255,255,0.8)', paddingTop: '16px', paddingBottom: '16px' }}>
             Documentação completa com exemplos em Python, JavaScript, PHP, Java e mais
           </p>
         </div>
@@ -800,13 +808,13 @@ const LandingPage = () => {
               <ChevronLeft size={24} color="#333" />
             </button>
 
-            <div className="pricing-carousel-container" style={{ overflow: 'hidden' }}>
+            <div className="pricing-carousel-container" style={{ overflow: 'visible' }}>
               <div 
                 className="pricing-carousel-grid"
                 style={{
-                  transform: `translateX(-${pricingCarouselIndex * (100 / pricingItemsPerPage)}%)`,
-                  gridTemplateColumns: `repeat(${pricingItemsPerPage}, 1fr)`,
-                  transition: 'transform 0.5s ease'
+                  transform: `translateX(-${pricingCarouselIndex * 100}%)`,
+                  transition: 'transform 0.5s ease',
+                  display: 'flex'
                 }}
               >
                 {plans.map((plan) => {
@@ -820,6 +828,10 @@ const LandingPage = () => {
                       key={plan.id} 
                       className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
                       onClick={() => setSelectedPlan(plan.name)}
+                      style={{
+                        flex: `0 0 calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`,
+                        maxWidth: `calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`
+                      }}
                     >
                       {isPopular && <div className="popular-badge">Mais Popular</div>}
 

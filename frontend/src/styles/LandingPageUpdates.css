@@ -626,46 +626,50 @@ html {
   position: relative;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 20px 70px;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .pricing-carousel-container {
-  overflow: hidden;
+  overflow: visible;
+  width: 100%;
 }
 
 .pricing-carousel-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 32px;
-  width: 300%;
+  transition: transform 0.5s ease;
+}
+
+.pricing-carousel-grid > .pricing-card {
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 @media (max-width: 991px) {
   .pricing-carousel-wrapper {
-    padding: 0 50px;
+    padding: 0 60px;
   }
 
   .pricing-carousel-grid {
-    grid-template-columns: repeat(2, 1fr);
-    width: 200%;
+    gap: 24px;
   }
 }
 
 @media (max-width: 640px) {
   .pricing-carousel-wrapper {
-    padding: 0 40px;
+    padding: 0 50px;
   }
 
   .pricing-carousel-grid {
-    grid-template-columns: 1fr;
-    width: 100%;
     gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .pricing-carousel-wrapper {
-    padding: 0 16px;
+    padding: 0 40px;
   }
 }
 
