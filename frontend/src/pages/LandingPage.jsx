@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { 
   Database, 
   Search, 
@@ -532,13 +531,6 @@ const LandingPage = () => {
   };
 
   return (
-    <>
-      <Helmet>
-        <title>API CNPJ Brasil - Consulta 64M+ Empresas Receita Federal | Teste Grátis</title>
-        <meta name="description" content="🚀 API profissional de CNPJ com dados oficiais da Receita Federal. 64M+ empresas, 47M+ estabelecimentos, QSA completo, 34+ filtros. Resposta em 45ms. 200 consultas grátis!" />
-        <link rel="alternate" hreflang="pt-br" href="https://cnpjapi.com.br" />
-        <link rel="alternate" hreflang="x-default" href="https://cnpjapi.com.br" />
-      </Helmet>
       <div className="landing-page">
       {/* Floating Navbar */}
       <nav className="floating-navbar">
@@ -1577,7 +1569,6 @@ const LandingPage = () => {
         </svg>
       </a>
     </div>
-    </>
   );
 };
 
