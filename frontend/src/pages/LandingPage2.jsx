@@ -972,6 +972,7 @@ const LandingPage2 = () => {
           </div>
         </div>
       </section>
+      </section>
 
       {/* Testimonials Section */}
       <section id="testimonials" className="testimonials-section">
