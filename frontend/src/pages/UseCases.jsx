@@ -11,6 +11,10 @@ const UseCases = () => {
         <meta name="description" content="Descubra como usar nossa API de CNPJ para prospecção B2B, marketing digital, análise de crédito, compliance, enriquecimento de CRM e inteligência de mercado." />
         <meta name="keywords" content="casos de uso CNPJ, prospecção B2B, marketing dados empresas, compliance CNPJ, análise crédito empresas, CRM enriquecimento" />
         <link rel="canonical" href="https://dbempresas.com.br/casos-de-uso" />
+        <meta property="og:title" content="Casos de Uso API CNPJ - DB Empresas" />
+        <meta property="og:description" content="Prospecção B2B, Marketing Digital, Compliance, Análise de Crédito e muito mais." />
+        <meta property="og:url" content="https://dbempresas.com.br/casos-de-uso" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">

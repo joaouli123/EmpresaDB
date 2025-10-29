@@ -13,6 +13,8 @@ const Services = () => {
         <link rel="canonical" href="https://dbempresas.com.br/servicos" />
         <meta property="og:title" content="Serviços de Consulta CNPJ - DB Empresas" />
         <meta property="og:description" content="API REST para consulta de CNPJ, busca avançada, validação e análise de dados empresariais." />
+        <meta property="og:url" content="https://dbempresas.com.br/servicos" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">

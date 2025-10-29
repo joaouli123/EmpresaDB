@@ -11,6 +11,10 @@ const Terms = () => {
         <meta name="description" content="Termos de Uso da plataforma DB Empresas. Conheça os direitos, deveres e condições de uso da nossa API de CNPJ." />
         <meta name="keywords" content="termos uso DB Empresas, condições uso API CNPJ, termos serviço dados empresas" />
         <link rel="canonical" href="https://dbempresas.com.br/termos" />
+        <meta property="og:title" content="Termos de Uso - DB Empresas" />
+        <meta property="og:description" content="Condições gerais de uso da plataforma DB Empresas." />
+        <meta property="og:url" content="https://dbempresas.com.br/termos" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">

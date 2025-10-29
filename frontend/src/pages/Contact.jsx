@@ -13,6 +13,8 @@ const Contact = () => {
         <link rel="canonical" href="https://dbempresas.com.br/contato" />
         <meta property="og:title" content="Contato - DB Empresas" />
         <meta property="og:description" content="Fale conosco via WhatsApp ou email. Atendimento especializado." />
+        <meta property="og:url" content="https://dbempresas.com.br/contato" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">
@@ -21,7 +23,7 @@ const Contact = () => {
       </div>
 
       <div className="content-section">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '60px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '60px' }}>
           <div className="feature-card">
             <Phone size={40} color="#3b82f6" style={{ marginBottom: '16px' }} />
             <h3>WhatsApp</h3>

@@ -11,6 +11,10 @@ const Privacy = () => {
         <meta name="description" content="Política de Privacidade da DB Empresas. Saiba como protegemos seus dados pessoais e garantimos conformidade com a LGPD." />
         <meta name="keywords" content="política privacidade DB Empresas, LGPD, proteção dados, privacidade CNPJ API" />
         <link rel="canonical" href="https://dbempresas.com.br/privacidade" />
+        <meta property="og:title" content="Política de Privacidade - DB Empresas" />
+        <meta property="og:description" content="Como protegemos seus dados e garantimos conformidade com a LGPD." />
+        <meta property="og:url" content="https://dbempresas.com.br/privacidade" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">

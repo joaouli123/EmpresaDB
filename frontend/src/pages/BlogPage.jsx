@@ -32,6 +32,10 @@ const BlogPage = () => {
         <meta name="description" content="Artigos, tutoriais e dicas sobre consulta de CNPJ, prospecção B2B, integração de API, compliance e análise de dados empresariais." />
         <meta name="keywords" content="blog CNPJ, artigos dados empresas, tutoriais API CNPJ, dicas prospecção B2B, compliance empresarial" />
         <link rel="canonical" href="https://dbempresas.com.br/blog" />
+        <meta property="og:title" content="Blog DB Empresas - Artigos sobre Dados Empresariais" />
+        <meta property="og:description" content="Artigos, tutoriais e dicas sobre consulta de CNPJ e dados empresariais." />
+        <meta property="og:url" content="https://dbempresas.com.br/blog" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="page-hero">
@@ -49,9 +53,9 @@ const BlogPage = () => {
               </div>
               <h3 style={{ marginBottom: '12px' }}>{post.title}</h3>
               <p style={{ margin: 0 }}>{post.excerpt}</p>
-              <a href="#" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: '600', marginTop: '12px', display: 'inline-block' }}>
-                Ler mais →
-              </a>
+              <span style={{ color: '#6b7280', fontSize: '14px', marginTop: '12px', display: 'inline-block' }}>
+                Em breve...
+              </span>
             </div>
           ))}
         </div>
