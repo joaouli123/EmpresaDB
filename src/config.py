@@ -4,26 +4,28 @@ from pydantic import model_validator
 from typing import Optional
 from urllib.parse import urlparse, unquote
 from fastapi.security import OAuth2PasswordBearer
-from dotenv import load_dotenv
 
-# ✅ Carrega .env mas NÃO sobrescreve Replit Secrets (override=False)
-# Prioridade: 1. Replit Secrets → 2. .env → 3. Defaults
-load_dotenv(override=False)
+# ✅ Pydantic BaseSettings lê automaticamente:
+# 1º Variáveis de ambiente (Replit Secrets)
+# 2º Arquivo .env (se existir)
+# 3º Valores default definidos na classe
 
 
 class Settings(BaseSettings):
     # ⚠️ ATENÇÃO: BANCO DE DADOS EXTERNO VPS - NÃO USAR REPLIT DATABASE!
-    # DATABASE_URL deve estar sempre configurado no .env
-    # NUNCA COMMITAR CREDENCIAIS NO CÓDIGO!
-    DATABASE_URL: Optional[str] = os.getenv('DATABASE_URL')
+    # Pydantic lê automaticamente de:
+    # 1º Replit Secrets (variáveis de ambiente)
+    # 2º Arquivo .env (se existir)
+    # 3º Valores default
+    DATABASE_URL: Optional[str] = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_NAME: str = "cnpj_db"
     DB_USER: str = "postgres"
     DB_PASSWORD: str = ""
 
-    # Security - SECRET_KEY OBRIGATÓRIA via .env
-    SECRET_KEY: str = os.getenv('SECRET_KEY', 'dev-secret-key-min-32-chars-long-please-change-in-production')
+    # Security - SECRET_KEY lida dos Replit Secrets ou .env
+    SECRET_KEY: str = 'dev-secret-key-min-32-chars-long-please-change-in-production'
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
     
@@ -102,13 +104,14 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str = ""
 
     model_config = SettingsConfigDict(
-        env_file='.env',
+        env_file='.env',  # Secundário - usa se .env existir
         env_file_encoding='utf-8',
-        extra='ignore',  # Ignorar campos extras ao invés de proibir
+        extra='ignore',
         env_prefix='',
         case_sensitive=True,
         env_nested_delimiter='__',
-        validate_default=True
+        validate_default=True,
+        # ✅ PRIORIDADE: 1º Replit Secrets (env vars), 2º .env, 3º defaults
     )
     
     @property
