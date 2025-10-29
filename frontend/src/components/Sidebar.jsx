@@ -80,45 +80,46 @@ const Sidebar = () => {
               <div className="user-details">
                 <p className="user-name">{user?.company_name || user?.username}</p>
                 <span className={`user-role ${subscription?.plan_name?.toLowerCase() || 'free'}`} style={{
-                  background: subscription?.plan_name === 'Free' ? '#6b7280' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: subscription?.plan_name === 'Free' ? '#3b82f6' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                   color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  textTransform: 'uppercase'
+                  padding: '2px 8px',
+                  borderRadius: '8px',
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  textTransform: 'capitalize'
                 }}>
-                  {subscription?.plan_name || 'Plano Free'}
+                  {subscription?.plan_name || 'Plano free'}
                 </span>
               </div>
               {subscription && (
                 <div className="user-subscription">
                   <div className="plan-info">
                     <span className="plan-usage" style={{ 
-                      fontSize: '13px',
+                      fontSize: '11px',
                       color: '#9ca3af',
                       display: 'block',
                       marginTop: '8px'
                     }}>
-                      {subscription.queries_used?.toLocaleString('pt-BR')} / {subscription.total_limit?.toLocaleString('pt-BR')} consultas
+                      {subscription.queries_used?.toLocaleString('pt-BR')} de {subscription.total_limit?.toLocaleString('pt-BR')} consultas
                     </span>
                   </div>
                   <div className="usage-bar" style={{
                     width: '100%',
-                    height: '8px',
-                    backgroundColor: '#e5e7eb',
+                    height: '6px',
+                    backgroundColor: '#3b82f6',
                     borderRadius: '4px',
                     overflow: 'hidden',
-                    marginTop: '8px'
+                    marginTop: '6px'
                   }}>
                     <div 
                       className="usage-fill" 
                       style={{ 
-                        width: `${percentageUsed}%`,
+                        width: `${100 - percentageUsed}%`,
                         height: '100%',
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#e0f2fe',
                         borderRadius: '4px',
-                        transition: 'width 0.3s ease'
+                        transition: 'width 0.3s ease',
+                        marginLeft: 'auto'
                       }}
                     />
                   </div>
