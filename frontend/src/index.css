@@ -460,6 +460,14 @@ code {
   justify-content: center;
   gap: 8px;
   font-size: 15px;
+  min-height: 48px;
+}
+
+.btn-primary .spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  margin-right: 0;
 }
 
 .btn-primary:disabled,
