@@ -125,6 +125,53 @@ def get_account_activation_template(username: str, activation_link: str) -> str:
     return get_email_base_template(content)
 
 
+def get_password_reset_template(reset_link: str) -> str:
+    """Template de email de redefinição de senha"""
+    content = f"""
+        <h2 style="margin: 0 0 20px 0; color: #1e3a8a; font-size: 24px; font-weight: 600;">
+            Redefinir Senha
+        </h2>
+        
+        <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
+            Olá,
+        </p>
+        
+        <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
+            Recebemos uma solicitação para redefinir a senha da sua conta no DB Empresas.
+        </p>
+        
+        <p style="margin: 0 0 16px 0; color: #334155; font-size: 16px;">
+            Para criar uma nova senha, clique no botão abaixo:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{reset_link}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 500; font-size: 16px;">
+                Redefinir Senha
+            </a>
+        </div>
+        
+        <p style="margin: 24px 0 16px 0; color: #64748b; font-size: 14px;">
+            Se o botão não funcionar, copie e cole o link abaixo no seu navegador:
+        </p>
+        
+        <p style="margin: 0; padding: 12px; background-color: #f1f5f9; border-radius: 4px; word-break: break-all; font-size: 13px; color: #475569;">
+            {reset_link}
+        </p>
+        
+        <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px;">
+            Este link expira em 1 hora.
+        </p>
+        
+        <div style="margin: 24px 0 0 0; padding: 16px; background-color: #fef2f2; border-left: 4px solid #ef4444; border-radius: 4px;">
+            <p style="margin: 0; color: #991b1b; font-size: 14px;">
+                <strong>⚠️ Não solicitou esta alteração?</strong><br>
+                Se você não solicitou a redefinição de senha, ignore este email. Sua senha permanecerá a mesma.
+            </p>
+        </div>
+    """
+    return get_email_base_template(content)
+
+
 def get_subscription_created_template(
     username: str, 
     plan_name: str, 

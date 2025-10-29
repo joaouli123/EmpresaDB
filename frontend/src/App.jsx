@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -54,6 +55,10 @@ function AppRoutes() {
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+        />
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
         />
         <Route path="/" element={
           <ProtectedRoute>

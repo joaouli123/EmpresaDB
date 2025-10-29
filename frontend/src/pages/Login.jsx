@@ -20,6 +20,10 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
   const [validations, setValidations] = useState({
     username: { valid: null, message: '' },
     email: { valid: null, message: '' },
@@ -198,6 +202,26 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetMessage('');
+
+    try {
+      await api.post('/auth/forgot-password', { email: resetEmail });
+      setResetMessage('Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
+      setResetEmail('');
+      setTimeout(() => {
+        setShowResetModal(false);
+        setResetMessage('');
+      }, 5000);
+    } catch (err) {
+      setResetMessage('Erro ao solicitar redefinição de senha. Tente novamente.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const planNames = {
     'free': 'Free',
     'start': 'Start',
@@ -355,7 +379,7 @@ const Login = () => {
             <div className="forgot-password-link">
               <a href="#" onClick={(e) => {
                 e.preventDefault();
-                alert('Funcionalidade de redefinir senha em desenvolvimento');
+                setShowResetModal(true);
               }}>
                 Esqueceu sua senha?
               </a>
@@ -402,6 +426,63 @@ const Login = () => {
           </div>
         </form>
       </div>
+
+      {showResetModal && (
+        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Redefinir Senha</h2>
+            <p style={{color: 'var(--gray)', marginBottom: '20px'}}>
+              Digite seu email para receber instruções de redefinição de senha.
+            </p>
+
+            {resetMessage && (
+              <div className={`message ${resetMessage.includes('Erro') ? 'error-message' : 'success-message'}`}>
+                <span>{resetMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleResetPassword}>
+              <div className="form-group">
+                <div className="input-with-icon">
+                  <Mail size={18} />
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    placeholder="Seu e-mail cadastrado"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setShowResetModal(false);
+                    setResetMessage('');
+                    setResetEmail('');
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary" disabled={resetLoading}>
+                  {resetLoading ? (
+                    <>
+                      <span className="spinner"></span>
+                      Enviando...
+                    </>
+                  ) : (
+                    'Enviar'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

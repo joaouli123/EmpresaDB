@@ -39,6 +39,13 @@ class UserLogin(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -424,3 +431,83 @@ async def login(form_data: UserLogin):
 async def read_users_me(current_user: dict = Depends(get_current_user)):
     user_data = {k: v for k, v in current_user.items() if k != 'password'}
     return user_data
+
+@router.post("/forgot-password")
+async def request_password_reset(data: PasswordResetRequest):
+    """
+    Solicita redefinição de senha enviando um email com token
+    """
+    # Criar token de reset
+    token = await db_manager.create_password_reset_token(data.email)
+    
+    if not token:
+        # Não revelar se o email existe ou não (segurança)
+        return {
+            "message": "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha."
+        }
+    
+    # Gerar link de reset
+    replit_domain = os.getenv('REPLIT_DOMAINS', '')
+    if replit_domain:
+        base_url = f"https://{replit_domain}"
+    else:
+        base_url = "http://localhost:5000"
+    
+    reset_link = f"{base_url}/reset-password?token={token}"
+    
+    # Enviar email de reset
+    try:
+        from src.services.email_service import email_service
+        from src.services.email_tracking import email_tracking_service
+        
+        # Obter usuário para o tracking
+        user = await db_manager.get_user_by_email(data.email)
+        
+        email_sent = email_service.send_password_reset_email(
+            to_email=data.email,
+            reset_link=reset_link
+        )
+        
+        if user:
+            email_tracking_service.log_email_sent(
+                user_id=user["id"],
+                email_type='password_reset',
+                recipient_email=data.email,
+                subject="Redefinir senha - DB Empresas",
+                status='sent' if email_sent else 'failed'
+            )
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de reset: {e}")
+        # Não falhar a requisição, apenas logar o erro
+    
+    return {
+        "message": "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha."
+    }
+
+@router.post("/reset-password")
+async def reset_password(data: PasswordReset):
+    """
+    Redefine a senha usando o token recebido por email
+    """
+    # Verificar se a senha é válida
+    if len(data.new_password) < 6:
+        raise HTTPException(
+            status_code=400,
+            detail="A senha deve ter no mínimo 6 caracteres"
+        )
+    
+    # Hash da nova senha
+    new_password_hash = get_password_hash(data.new_password)
+    
+    # Redefinir senha
+    success = await db_manager.reset_password_with_token(data.token, new_password_hash)
+    
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Token inválido ou expirado. Solicite um novo reset de senha."
+        )
+    
+    return {
+        "message": "Senha redefinida com sucesso! Você já pode fazer login com a nova senha."
+    }

@@ -109,6 +109,19 @@ class EmailService:
         
         return self.send_email(to_email, subject, html_content)
     
+    def send_password_reset_email(
+        self, 
+        to_email: str, 
+        reset_link: str
+    ) -> bool:
+        """Envia email de redefinição de senha"""
+        from src.services.email_templates import get_password_reset_template
+        
+        subject = "Redefinir senha - DB Empresas"
+        html_content = get_password_reset_template(reset_link)
+        
+        return self.send_email(to_email, subject, html_content)
+    
     def send_subscription_created_email(
         self, 
         to_email: str, 
