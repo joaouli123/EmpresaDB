@@ -72,6 +72,12 @@ export const emailLogsAPI = {
   getUsageNotifications: (params) => api.get('/admin/usage-notifications', { params }),
 };
 
+export const subscriptionAPI = {
+  getMySubscription: () => api.get('/api/v1/subscriptions/my-subscription'),
+  getPlans: () => api.get('/api/v1/subscriptions/plans'),
+  getUsage: () => api.get('/api/v1/subscriptions/usage'),
+};
+
 // Exportar api para uso em outros componentes
 export { api };
 export default api;
