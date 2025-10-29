@@ -160,7 +160,7 @@ const LandingPage = () => {
             'Gerente de conta dedicado',
             'Infraestrutura dedicada disponível',
             'Integração e onboarding personalizados',
-            'Relatórios e analytics customizados',
+            'Gestão e controle de usuários e pagamentos',
             'Desenvolvimento de features sob demanda',
             'Suporte prioritário 24/7'
           ]
