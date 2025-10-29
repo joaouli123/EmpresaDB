@@ -108,7 +108,33 @@ const LandingPage2 = () => {
       setBatchPackages(response.data);
     } catch (error) {
       console.error('Erro ao carregar pacotes de consulta em lote:', error);
-      setBatchPackages([]);
+      // Fallback: usar pacotes hardcoded se API falhar
+      setBatchPackages([
+        {
+          id: 1,
+          display_name: 'Pacote Starter',
+          credits: 1000,
+          price_brl: 49.90,
+          price_per_unit: 0.0499,
+          description: 'Ideal para começar'
+        },
+        {
+          id: 2,
+          display_name: 'Pacote Basic',
+          credits: 5000,
+          price_brl: 199.90,
+          price_per_unit: 0.03998,
+          description: 'Melhor custo-benefício'
+        },
+        {
+          id: 3,
+          display_name: 'Pacote Pro',
+          credits: 15000,
+          price_brl: 499.90,
+          price_per_unit: 0.03333,
+          description: 'Para alto volume'
+        }
+      ]);
     }
   };
 
