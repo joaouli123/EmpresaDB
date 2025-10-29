@@ -222,11 +222,63 @@ const Login = () => {
           setError(result.error);
         }
       } else {
-        // REGISTRO - validar campos antes
-        if (!validations.username.valid || !validations.email.valid || 
-            !validations.phone.valid || !validations.cpf.valid ||
-            !validations.password.valid || !validations.confirmPassword.valid) {
-          setError('Por favor, corrija os erros no formulário');
+        // REGISTRO - validar todos os campos forçadamente antes de enviar
+        const newValidations = { ...validations };
+        const errors = [];
+        
+        // Validar username
+        if (!formData.username) {
+          newValidations.username = { valid: false, message: 'Campo obrigatório' };
+          errors.push('Nome de usuário');
+        } else if (validations.username.valid === false) {
+          errors.push('Nome de usuário');
+        }
+        
+        // Validar email
+        if (!formData.email) {
+          newValidations.email = { valid: false, message: 'Campo obrigatório' };
+          errors.push('Email');
+        } else if (validations.email.valid === false) {
+          errors.push('Email');
+        }
+        
+        // Validar telefone
+        if (!formData.phone) {
+          newValidations.phone = { valid: false, message: 'Campo obrigatório' };
+          errors.push('Telefone');
+        } else if (validations.phone.valid === false) {
+          errors.push('Telefone');
+        }
+        
+        // Validar CPF
+        if (!formData.cpf) {
+          newValidations.cpf = { valid: false, message: 'Campo obrigatório' };
+          errors.push('CPF');
+        } else if (validations.cpf.valid === false) {
+          errors.push('CPF');
+        }
+        
+        // Validar senha
+        if (!formData.password) {
+          newValidations.password = { valid: false, message: 'Campo obrigatório' };
+          errors.push('Senha');
+        } else if (validations.password.valid === false) {
+          errors.push('Senha');
+        }
+        
+        // Validar confirmação de senha
+        if (!formData.confirmPassword) {
+          newValidations.confirmPassword = { valid: false, message: 'Campo obrigatório' };
+          errors.push('Confirmação de senha');
+        } else if (validations.confirmPassword.valid === false) {
+          errors.push('Confirmação de senha');
+        }
+        
+        // Atualizar validações para mostrar bordas vermelhas
+        setValidations(newValidations);
+        
+        if (errors.length > 0) {
+          setError(`Por favor, corrija os seguintes campos: ${errors.join(', ')}`);
           setLoading(false);
           return;
         }
