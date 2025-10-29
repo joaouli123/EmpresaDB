@@ -336,6 +336,55 @@ const LandingPage = () => {
       avatar: 'RA',
       rating: 5,
       text: 'Integrei a API em menos de 1 hora! A documentação é clara, os endpoints são intuitivos e o suporte respondeu minhas dúvidas super rápido. Recomendo demais!'
+    },
+    {
+      name: 'Fernanda Oliveira',
+      role: 'Head de Marketing, AgenciaMax',
+      avatar: 'FO',
+      rating: 5,
+      text: 'Revolucionou nossa prospecção! Criamos públicos lookalike no Meta Ads com listas segmentadas de CNPJs. Nosso CPL caiu 45% e a taxa de conversão dobrou!'
+    },
+    {
+      name: 'João Pedro Santos',
+      role: 'CTO, FinTech Solutions',
+      avatar: 'JP',
+      rating: 5,
+      text: 'API estável e performática! Processamos mais de 50 mil consultas por dia sem problemas. A resposta em menos de 50ms é impressionante. Excelente custo-benefício!'
+    },
+    {
+      name: 'Patrícia Mendes',
+      role: 'Analista de Crédito, Cooperativa Central',
+      avatar: 'PM',
+      rating: 5,
+      text: 'Dados 100% confiáveis da Receita Federal! Eliminamos erros de cadastro e aceleramos nossa análise de crédito. O suporte é sempre rápido e atencioso!'
+    },
+    {
+      name: 'Ricardo Fernandes',
+      role: 'Product Manager, SaaS Enterprise',
+      avatar: 'RF',
+      rating: 5,
+      text: 'Escalamos de 500 para 100 mil consultas/mês sem problemas! A API aguenta o tranco e os filtros avançados são perfeitos para nossa plataforma B2B!'
+    },
+    {
+      name: 'Juliana Rocha',
+      role: 'Diretora Comercial, ERP Nacional',
+      avatar: 'JR',
+      rating: 5,
+      text: 'Enriquecemos nosso CRM automaticamente! Agora temos dados completos de 100% dos nossos leads. O ROI foi de 300% no primeiro trimestre!'
+    },
+    {
+      name: 'André Martins',
+      role: 'Founder, StartupHub',
+      avatar: 'AM',
+      rating: 5,
+      text: 'A API mais completa de CNPJ do mercado! Testamos 4 concorrentes e esta aqui ganha em preço, performance e qualidade dos dados. Impecável!'
+    },
+    {
+      name: 'Camila Torres',
+      role: 'Business Analyst, Consultoria Estratégica',
+      avatar: 'CT',
+      rating: 5,
+      text: 'Dados atualizados diariamente! Conseguimos mapear mercados inteiros em minutos. As consultas em lote economizaram centenas de horas de pesquisa manual!'
     }
   ];
 
@@ -644,124 +693,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Lookalike/Meta Ads Section */}
-      <section id="marketing" className="lookalike-section">
-        <div className="section-header">
-          <h2>Potencialize Suas Campanhas com Públicos Lookalike</h2>
-          <p>Use nossos dados para criar audiências personalizadas no Meta Ads e treinar a inteligência artificial para encontrar clientes ideais</p>
-        </div>
-
-        <div className="benefits-grid" style={{ marginBottom: '48px' }}>
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Target size={32} />
-            </div>
-            <h3>Público-Alvo Preciso</h3>
-            <p>Obtenha listas segmentadas de CNPJs via API para criar audiências personalizadas (Custom Audiences) no Facebook e Instagram Ads</p>
-          </div>
-
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Brain size={32} />
-            </div>
-            <h3>Treinar a IA do Meta</h3>
-            <p>Alimente o algoritmo com dados precisos de empresas similares ao seu cliente ideal, melhorando drasticamente a performance das campanhas</p>
-          </div>
-
-          <div className="benefit-card" style={{ background: 'white' }}>
-            <div className="benefit-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              <Sparkles size={32} />
-            </div>
-            <h3>Lookalike Inteligente</h3>
-            <p>A partir da sua lista de CNPJs, o Meta cria públicos semelhantes (Lookalike Audiences) com milhões de prospects qualificados</p>
-          </div>
-        </div>
-
-        <div style={{ 
-          background: 'white', 
-          padding: '40px', 
-          borderRadius: '20px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.1)',
-          border: '2px solid #fbbf24'
-        }}>
-          <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--dark)', marginBottom: '16px', textAlign: 'center' }}>
-            Como Funciona na Prática
-          </h3>
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>1</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Filtre empresas do seu nicho</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Use nossa API para buscar CNPJs por CNAE, localização, porte e situação cadastral</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>2</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Colete via API e carregue no Meta Ads</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>Use os dados retornados pela API para criar uma Custom Audience com os CNPJs no Gerenciador de Anúncios</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-                color: 'white', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: '700',
-                flexShrink: 0
-              }}>3</div>
-              <div>
-                <strong style={{ color: 'var(--dark)' }}>Deixe a IA do Meta trabalhar</strong>
-                <p style={{ color: 'var(--gray)', margin: '4px 0 0 0', fontSize: '15px' }}>O algoritmo analisa padrões e encontra empresas similares, expandindo seu alcance com precisão</p>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ 
-            marginTop: '32px', 
-            padding: '20px', 
-            background: 'linear-gradient(135deg, #fef3c7, #fde68a)', 
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <p style={{ color: '#78350f', fontWeight: '600', margin: 0 }}>
-              💡 <strong>Resultado:</strong> Campanhas mais eficientes, menor CPA e melhor ROI nas suas estratégias de marketing digital
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="pricing" className="pricing-section">
         <div className="section-header">
@@ -872,7 +803,7 @@ const LandingPage = () => {
 
                     <li>
                       <Check size={18} />
-                      +45 filtros avançados
+                      16+ filtros avançados
                     </li>
 
                     <li>
@@ -941,10 +872,103 @@ const LandingPage = () => {
                 </div>
               );
             })}
+
+            {/* Card Enterprise dentro do grid */}
+            <div className="pricing-card enterprise-card" style={{
+              background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+              color: 'white',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '3px solid #fbbf24'
+            }}>
+              <div className="popular-badge" style={{ background: '#fbbf24', color: '#1f2937' }}>Customizado</div>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
+                opacity: 0.3
+              }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h3 className="plan-name" style={{ color: 'white' }}>Enterprise</h3>
+                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
+                  Solução personalizada para grandes volumes
+                </p>
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  border: '2px solid rgba(59, 130, 246, 0.4)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginBottom: '24px'
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#60a5fa', marginBottom: '4px' }}>
+                    ilimitadas*
+                  </div>
+                  <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>consultas</div>
+                </div>
+                <ul className="plan-features" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Consultas ilimitadas*
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Consultas em lote ilimitadas*
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    SLA garantido 99,9%
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Gerente de conta dedicado
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Infraestrutura dedicada
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Onboarding personalizado
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Relatórios customizados
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Features sob demanda
+                  </li>
+                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: 'none' }}>
+                    <Check size={18} style={{ color: '#10b981' }} />
+                    Suporte prioritário 24/7
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise'}
+                  className="btn-plan"
+                  style={{
+                    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                    color: '#1f2937',
+                    fontWeight: '700',
+                    marginTop: '20px'
+                  }}
+                >
+                  Falar com Especialista
+                </button>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '12px', textAlign: 'center' }}>
+                  * Sujeito a fair use policy
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="enterprise-card" style={{
+        {/* Card Enterprise antigo REMOVIDO - agora está no grid acima */}
+        {false && (
+        <div className="enterprise-card-old" style={{
           marginTop: '60px',
           background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
           borderRadius: '24px',
@@ -1040,13 +1064,14 @@ const LandingPage = () => {
             </p>
           </div>
         </div>
+        )}
 
         {batchPackages.length > 0 && (
           <div className="addons-section">
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
               <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
-                Pesquise milhares de empresas de uma vez com +45 filtros avançados
+                Pesquise milhares de empresas de uma vez com 16+ filtros avançados
               </p>
               <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
                 <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
@@ -1065,8 +1090,7 @@ const LandingPage = () => {
                 maxWidth: '900px',
                 margin: '16px auto 0'
               }}>
-                <strong>🎯 +45 filtros disponíveis:</strong> Razão Social, CNAE, UF, Cidade, Bairro, Porte, Situação Cadastral, 
-                Natureza Jurídica, Matriz/Filial, Faturamento Estimado, Data de Abertura e muitos outros!
+                <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
               </div>
             </div>
             <div className="addons-grid">
