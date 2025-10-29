@@ -1150,12 +1150,12 @@ const LandingPage = () => {
               </thead>
               <tbody>
                 {batchPackages.map((pkg, index) => {
-                  const pricePerUnit = pkg.price_brl / pkg.credits;
-                  const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                  const pricePerUnit = (pkg.price_brl || 0) / (pkg.credits || 1);
+                  const basePricePerUnit = batchPackages[0] ? (batchPackages[0].price_brl || 0) / (batchPackages[0].credits || 1) : pricePerUnit;
                   const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
 
                   return (
-                    <tr key={pkg.id} style={{ 
+                    <tr key={pkg.id || index} style={{ 
                       borderBottom: '1px solid #e5e7eb',
                       background: index % 2 === 0 ? '#fafafa' : 'white',
                       transition: 'all 0.2s'
@@ -1167,14 +1167,14 @@ const LandingPage = () => {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                           <Package size={24} style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }} />
                           <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name}</div>
-                            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description}</div>
+                            <div style={{ fontWeight: '700', color: '#1f2937', fontSize: '16px' }}>{pkg.display_name || 'Pacote'}</div>
+                            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{pkg.description || ''}</div>
                           </div>
                         </div>
                       </td>
                       <td data-label="Créditos" style={{ padding: '20px 24px', textAlign: 'center' }}>
                         <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '20px' }}>
-                          {pkg.credits.toLocaleString('pt-BR')}
+                          {(pkg.credits || 0).toLocaleString('pt-BR')}
                         </div>
                         <div style={{ fontSize: '12px', color: '#6b7280' }}>consultas</div>
                       </td>
@@ -1262,10 +1262,10 @@ const LandingPage = () => {
                 {batchPackages.length > 1 && (
                   <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
                     ✅ Economize até {Math.max(...batchPackages.map(p => {
-                      const pricePerUnit = p.price_brl / p.credits;
-                      const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                      const pricePerUnit = (p.price_brl || 0) / (p.credits || 1);
+                      const basePricePerUnit = batchPackages[0] ? ((batchPackages[0].price_brl || 0) / (batchPackages[0].credits || 1)) : pricePerUnit;
                       const savings = basePricePerUnit > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
-                      return savings;
+                      return Math.max(0, savings);
                     }))}% comprando pacotes maiores
                   </li>
                 )}
