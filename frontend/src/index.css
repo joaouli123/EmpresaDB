@@ -299,6 +299,7 @@ code {
   right: 14px;
   color: #10b981;
   pointer-events: none;
+  z-index: 2;
 }
 
 .icon-error {
@@ -306,6 +307,7 @@ code {
   right: 14px;
   color: #ef4444;
   pointer-events: none;
+  z-index: 2;
 }
 
 .toggle-password {
@@ -408,7 +410,7 @@ code {
 
 .form-group .input-with-icon input {
   width: 100%;
-  padding: 12px 16px 12px 52px !important;
+  padding: 12px 46px 12px 52px !important;
   border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 15px;
