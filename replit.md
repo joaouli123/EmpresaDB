@@ -4,6 +4,9 @@
 
 This project is an ETL system and REST API designed for querying public CNPJ data from the Brazilian Federal Revenue. Its primary goal is to provide an advanced search and filtering system for Brazilian companies, storing and organizing all Federal Revenue data (companies, establishments, CNPJs, partners) in a PostgreSQL database. The system offers a comprehensive REST API for integration, supporting business intelligence, compliance, and market analysis by efficiently handling large volumes of data. It operates on a subscription model with monthly plans and additional query packages.
 
+## Recent Changes (2025-10-29)
+- **Landing Page Pricing Section**: Added 20px spacing between "MAIS POPULAR" badge and Monthly/Annual toggle (margin-bottom: 70px). Restored Enterprise/White Label plan with custom card design showing "Ilimitadas*" instead of 0 values, specialized features list, and "Falar com Especialista" CTA button.
+
 ## User Preferences
 
 - **Database Configuration**: The PostgreSQL database on the VPS (72.61.217.143:5432/cnpj_db) is the only database to be used. The `DATABASE_URL` in the `.env` file must always point to this VPS. All data (CNPJ, users, API keys, logs) is centralized on the VPS.

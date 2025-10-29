@@ -95,6 +95,27 @@ const LandingPage2 = () => {
           monthly_batch_queries: 10000,
           price_brl: 799.90,
           rate_limit: 1000
+        },
+        {
+          id: 5,
+          name: 'enterprise',
+          display_name: 'Enterprise',
+          monthly_queries: 0,
+          monthly_batch_queries: 0,
+          price_brl: 0,
+          rate_limit: 0,
+          is_custom: true,
+          features: [
+            'Consultas ilimitadas*',
+            'Consultas em lote ilimitadas*',
+            'SLA garantido com uptime de 99,9%',
+            'Gerente de conta dedicado',
+            'Infraestrutura dedicada disponível',
+            'Integração e onboarding personalizados',
+            'Relatórios e analytics customizados',
+            'Desenvolvimento de features sob demanda',
+            'Suporte prioritário 24/7'
+          ]
         }
       ]);
     } finally {

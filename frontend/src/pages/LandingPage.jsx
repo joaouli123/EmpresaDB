@@ -143,6 +143,27 @@ const LandingPage = () => {
             'Relatórios customizados',
             'Créditos batch comprados nunca expiram'
           ]
+        },
+        {
+          id: 5,
+          name: 'enterprise',
+          display_name: 'Enterprise',
+          monthly_queries: 0,
+          monthly_batch_queries: 0,
+          price_brl: 0,
+          rate_limit: 0,
+          is_custom: true,
+          features: [
+            'Consultas ilimitadas*',
+            'Consultas em lote ilimitadas*',
+            'SLA garantido com uptime de 99,9%',
+            'Gerente de conta dedicado',
+            'Infraestrutura dedicada disponível',
+            'Integração e onboarding personalizados',
+            'Relatórios e analytics customizados',
+            'Desenvolvimento de features sob demanda',
+            'Suporte prioritário 24/7'
+          ]
         }
       ]);
     } finally {
@@ -843,114 +864,171 @@ const LandingPage = () => {
                           {plan.name === 'start' && 'Para pequenas empresas'}
                           {plan.name === 'growth' && 'Para empresas em crescimento'}
                           {plan.name === 'pro' && 'Para grandes volumes'}
+                          {plan.name === 'enterprise' && 'Solução personalizada'}
                         </p>
                       </div>
 
-                      <div className="plan-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0' }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                          <span className="currency">R$</span>
-                          <span className="amount">{displayPrice.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                        <span className="period" style={{ fontSize: '16px', color: 'var(--gray)', marginTop: '4px' }}>
-                          /{billingPeriod === 'mensal' ? 'mês' : 'ano'}
-                        </span>
-                      </div>
+                      {plan.name === 'enterprise' ? (
+                        <>
+                          <div style={{ 
+                            padding: '20px',
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            borderRadius: '12px',
+                            marginBottom: '16px'
+                          }}>
+                            <div style={{ 
+                              fontSize: '32px', 
+                              fontWeight: '800', 
+                              color: 'white',
+                              textAlign: 'center',
+                              marginBottom: '4px'
+                            }}>
+                              Ilimitadas*
+                            </div>
+                            <div style={{ 
+                              fontSize: '14px', 
+                              color: 'rgba(255,255,255,0.9)',
+                              textAlign: 'center'
+                            }}>
+                              consultas mensais
+                            </div>
+                          </div>
+                          <div className="plan-queries" style={{ textAlign: 'center', color: 'var(--gray)' }}>
+                            Entre em contato para orçamento personalizado
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="plan-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0' }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                              <span className="currency">R$</span>
+                              <span className="amount">{displayPrice.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            <span className="period" style={{ fontSize: '16px', color: 'var(--gray)', marginTop: '4px' }}>
+                              /{billingPeriod === 'mensal' ? 'mês' : 'ano'}
+                            </span>
+                          </div>
 
-                      {billingPeriod === 'anual' && priceMonthly > 0 && (
-                        <div style={{ 
-                          fontSize: '14px', 
-                          color: 'var(--primary)', 
-                          fontWeight: '600',
-                          marginBottom: '12px',
-                          textAlign: 'center'
-                        }}>
-                          R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
-                        </div>
+                          {billingPeriod === 'anual' && priceMonthly > 0 && (
+                            <div style={{ 
+                              fontSize: '14px', 
+                              color: 'var(--primary)', 
+                              fontWeight: '600',
+                              marginBottom: '12px',
+                              textAlign: 'center'
+                            }}>
+                              R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
+                            </div>
+                          )}
+
+                          <div className="plan-queries">
+                            <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                          </div>
+                        </>
                       )}
 
-                      <div className="plan-queries">
-                        <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
-                      </div>
-
                       <ul className="plan-features">
-                        <li>
-                          <Check size={18} />
-                          {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
-                        </li>
-
-                        <li>
-                          <Check size={18} />
-                          {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
-                        </li>
-
-                        <li>
-                          <Check size={18} />
-                          34+ filtros avançados
-                        </li>
-
-                        <li>
-                          <Check size={18} />
-                          Consulta completa por CNPJ
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Dados completos da empresa
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          QSA e CNAEs secundários
-                        </li>
-                        {plan.name !== 'free' && (
-                          <li>
-                            <Check size={18} />
-                            Dashboard com estatísticas
-                          </li>
-                        )}
-                        <li>
-                          <Check size={18} />
-                          Documentação da API
-                        </li>
-                        {plan.name === 'free' && (
-                          <li>
-                            <Check size={18} />
-                            Suporte por email
-                          </li>
-                        )}
-                        {plan.name === 'start' && (
+                        {plan.name === 'enterprise' ? (
+                          plan.features.map((feature, idx) => (
+                            <li key={idx}>
+                              <Check size={18} />
+                              {feature}
+                            </li>
+                          ))
+                        ) : (
                           <>
                             <li>
                               <Check size={18} />
-                              Suporte por email
+                              {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
+                            </li>
+
+                            <li>
+                              <Check size={18} />
+                              {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                            </li>
+
+                            <li>
+                              <Check size={18} />
+                              34+ filtros avançados
+                            </li>
+
+                            <li>
+                              <Check size={18} />
+                              Consulta completa por CNPJ
                             </li>
                             <li>
                               <Check size={18} />
-                              Rate limit: 60 req/min
-                            </li>
-                          </>
-                        )}
-                        {plan.name === 'growth' && (
-                          <>
-                            <li>
-                              <Check size={18} />
-                              Cache Redis para performance
+                              Dados completos da empresa
                             </li>
                             <li>
                               <Check size={18} />
-                              Suporte via WhatsApp
+                              QSA e CNAEs secundários
                             </li>
+                            {plan.name !== 'free' && (
+                              <li>
+                                <Check size={18} />
+                                Dashboard com estatísticas
+                              </li>
+                            )}
                             <li>
                               <Check size={18} />
-                              Rate limit: 300 req/min
+                              Documentação da API
                             </li>
+                            {plan.name === 'free' && (
+                              <li>
+                                <Check size={18} />
+                                Suporte por email
+                              </li>
+                            )}
+                            {plan.name === 'start' && (
+                              <>
+                                <li>
+                                  <Check size={18} />
+                                  Suporte por email
+                                </li>
+                                <li>
+                                  <Check size={18} />
+                                  Rate limit: 60 req/min
+                                </li>
+                              </>
+                            )}
+                            {plan.name === 'growth' && (
+                              <>
+                                <li>
+                                  <Check size={18} />
+                                  Cache Redis para performance
+                                </li>
+                                <li>
+                                  <Check size={18} />
+                                  Suporte via WhatsApp
+                                </li>
+                                <li>
+                                  <Check size={18} />
+                                  Rate limit: 300 req/min
+                                </li>
+                              </>
+                            )}
                           </>
                         )}
                       </ul>
 
-                      <a href="/pricing">
-                        <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
-                          {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
-                        </button>
-                      </a>
+                      {plan.name === 'enterprise' ? (
+                        <a href="mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise">
+                          <button className="btn-plan btn-secondary-large" style={{ 
+                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            color: 'white',
+                            border: 'none'
+                          }}>
+                            Falar com Especialista
+                          </button>
+                        </a>
+                      ) : (
+                        <a href="/pricing">
+                          <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
+                            {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
+                          </button>
+                        </a>
+                      )}
                     </div>
                   );
                 })}
