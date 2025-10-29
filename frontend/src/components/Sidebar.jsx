@@ -100,7 +100,7 @@ const Sidebar = () => {
                       display: 'block',
                       marginTop: '8px'
                     }}>
-                      {subscription.queries_used?.toLocaleString('pt-BR')} de {subscription.total_limit?.toLocaleString('pt-BR')} consultas
+                      {subscription.queries_used?.toLocaleString('pt-BR') || 0}/{subscription.total_limit?.toLocaleString('pt-BR') || 0} consultas
                     </span>
                   </div>
                   <div className="usage-bar" style={{
