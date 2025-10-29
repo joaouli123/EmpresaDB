@@ -85,93 +85,89 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
         
         print(f"[DEBUG] Buscando assinatura para user_id: {current_user['id']}")
         
-        # Verificar se a tabela user_limits existe
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Buscar uso mensal do usuário
             cursor.execute("""
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_schema = 'clientes' 
-                    AND table_name = 'user_limits'
-                );
-            """)
-            result = cursor.fetchone()
-            table_exists = result[0] if result else False
-            cursor.close()
-        
-        if not table_exists:
-            print("[DEBUG] Tabela user_limits não existe, retornando None")
-            return None
-        
-        with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
+                SELECT queries_used FROM clientes.monthly_usage
+                WHERE user_id = %s AND month_year = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
+            """, (current_user['id'],))
+            usage_result = cursor.fetchone()
+            queries_used = usage_result[0] if usage_result else 0
+            
+            # Buscar assinatura Stripe ativa
             cursor.execute("""
                 SELECT 
-                    plan_name,
-                    monthly_limit,
-                    extra_credits,
-                    total_limit,
-                    queries_used,
-                    queries_remaining,
-                    renewal_date,
-                    subscription_status
-                FROM clientes.user_limits
-                WHERE user_id = %s
+                    p.display_name,
+                    p.monthly_queries
+                FROM clientes.stripe_subscriptions ss
+                JOIN clientes.plans p ON ss.plan_id = p.id
+                WHERE ss.user_id = %s 
+                AND ss.status IN ('active', 'trialing')
+                ORDER BY ss.created_at DESC
+                LIMIT 1
             """, (current_user['id'],))
+            stripe_sub = cursor.fetchone()
             
-            result = cursor.fetchone()
+            cursor.close()
             
-            print(f"[DEBUG] Resultado da query: {result}")
-            
-            if not result or result[0] is None:
-                print("[DEBUG] Nenhuma assinatura paga encontrada, retornando plano Free")
-                # Retornar dados do plano Free (200 consultas gratuitas)
-                # Buscar uso mensal do usuário (cursor ainda está aberto)
-                cursor.execute("""
-                    SELECT queries_used FROM clientes.monthly_usage
-                    WHERE user_id = %s AND month_year = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
-                """, (current_user['id'],))
-                usage_result = cursor.fetchone()
-                queries_used = usage_result[0] if usage_result else 0
-                
-                cursor.close()
-                
-                free_limit = 200
-                queries_remaining = max(0, free_limit - queries_used)
+            # Se tem assinatura Stripe paga
+            if stripe_sub:
+                plan_name = stripe_sub[0]
+                monthly_limit = stripe_sub[1]
+                queries_remaining = max(0, monthly_limit - queries_used)
                 
                 next_month = datetime.now().replace(day=1) + timedelta(days=32)
                 renewal_date = next_month.replace(day=1).isoformat()
                 
                 return {
-                    "plan_name": "Free",
-                    "monthly_limit": free_limit,
+                    "plan_name": plan_name,
+                    "monthly_limit": monthly_limit,
                     "extra_credits": 0,
-                    "total_limit": free_limit,
+                    "total_limit": monthly_limit,
                     "queries_used": queries_used,
                     "queries_remaining": queries_remaining,
                     "renewal_date": renewal_date,
                     "status": "active"
                 }
             
-            next_month = datetime.now().replace(day=1) + timedelta(days=32)
-            default_renewal = next_month.replace(day=1).isoformat()
+            # Se não tem assinatura paga, retorna plano Free
+            print("[DEBUG] Nenhuma assinatura paga encontrada, retornando plano Free")
+            free_limit = 200
+            queries_remaining = max(0, free_limit - queries_used)
             
-            subscription_data = {
-                "plan_name": result[0],
-                "monthly_limit": result[1],
-                "extra_credits": result[2],
-                "total_limit": result[3],
-                "queries_used": result[4] or 0,
-                "queries_remaining": result[5] or result[3],
-                "renewal_date": result[6].isoformat() if result[6] else default_renewal,
-                "status": result[7]
+            next_month = datetime.now().replace(day=1) + timedelta(days=32)
+            renewal_date = next_month.replace(day=1).isoformat()
+            
+            return {
+                "plan_name": "Free",
+                "monthly_limit": free_limit,
+                "extra_credits": 0,
+                "total_limit": free_limit,
+                "queries_used": queries_used,
+                "queries_remaining": queries_remaining,
+                "renewal_date": renewal_date,
+                "status": "active"
             }
-            print(f"[DEBUG] Retornando dados: {subscription_data}")
-            return subscription_data
+            
     except Exception as e:
         print(f"[ERROR] Erro ao buscar assinatura: {str(e)}")
-        # Retorna None em vez de erro 500 se houver problema
-        return None
+        import traceback
+        traceback.print_exc()
+        # Em caso de erro, retorna plano Free padrão
+        next_month = datetime.now().replace(day=1) + timedelta(days=32)
+        renewal_date = next_month.replace(day=1).isoformat()
+        return {
+            "plan_name": "Free",
+            "monthly_limit": 200,
+            "extra_credits": 0,
+            "total_limit": 200,
+            "queries_used": 0,
+            "queries_remaining": 200,
+            "renewal_date": renewal_date,
+            "status": "active"
+        }
 
 @router.get("/usage", response_model=UsageStats)
 async def get_usage_stats(current_user: dict = Depends(get_current_user)):
