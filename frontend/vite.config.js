@@ -16,6 +16,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/auth': {
         target: 'http://localhost:8000',
@@ -31,11 +32,11 @@ export default defineConfig({
       },
       '/batch': {
         target: 'http://localhost:8000',
-        changeOrigin: true,
+        changeOrigin: true
       },
       '/stripe': {
         target: 'http://localhost:8000',
-        changeOrigin: true,
+        changeOrigin: true
       },
       '/cnpj': {
         target: 'http://localhost:8000',

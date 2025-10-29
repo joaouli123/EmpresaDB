@@ -20,7 +20,7 @@ const Pricing = () => {
 
   const loadPlans = async () => {
     try {
-      const response = await api.get('/subscriptions/plans');
+      const response = await api.get('/api/v1/subscriptions/plans');
       setPlans(response.data);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
@@ -32,7 +32,7 @@ const Pricing = () => {
 
   const loadBatchPackages = async () => {
     try {
-      const response = await api.get('/batch/packages');
+      const response = await api.get('/api/v1/batch/packages');
       setBatchPackages(response.data);
     } catch (error) {
       console.error('Erro ao carregar pacotes:', error);
