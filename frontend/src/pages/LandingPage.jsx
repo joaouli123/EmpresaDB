@@ -495,40 +495,17 @@ const LandingPage = () => {
     setCurrentTestimonial(prev => (prev - 1 + (testimonials.length - testimonialItemsToShow + 1)) % (testimonials.length - testimonialItemsToShow + 1));
   };
 
-  // Pricing Carousel Logic
-  const getPricingItemsPerPage = () => {
-    if (window.innerWidth <= 640) return 1;
-    if (window.innerWidth <= 991) return 2;
-    return 3;
-  };
-
-  const getPricingGap = () => {
-    if (window.innerWidth <= 640) return 20;
-    if (window.innerWidth <= 991) return 24;
-    return 32;
-  };
-
-  const [pricingItemsPerPage, setPricingItemsPerPage] = useState(getPricingItemsPerPage());
-  const [pricingGap, setPricingGap] = useState(getPricingGap());
-
-  useEffect(() => {
-    const handleResize = () => {
-      setPricingItemsPerPage(getPricingItemsPerPage());
-      setPricingGap(getPricingGap());
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const totalPricingPages = Math.ceil(plans.length / pricingItemsPerPage);
+  // Pricing Carousel Logic - Igual aos depoimentos
+  const pricingItemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
 
   const nextPricingSlide = () => {
-    setPricingCarouselIndex(prev => (prev + 1) % totalPricingPages);
+    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+    setPricingCarouselIndex(prev => prev < plans.length - itemsToShow ? prev + 1 : 0);
   };
 
   const prevPricingSlide = () => {
-    setPricingCarouselIndex(prev => (prev - 1 + totalPricingPages) % totalPricingPages);
+    const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+    setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : plans.length - itemsToShow);
   };
 
   return (
@@ -843,24 +820,9 @@ const LandingPage = () => {
           </div>
         ) : (
           <div className="pricing-carousel-wrapper">
-            <button 
-              className="carousel-nav-button prev" 
-              onClick={prevPricingSlide}
-              aria-label="Planos anteriores"
-            >
-              <ChevronLeft size={24} color="#333" />
-            </button>
-
-            <div className="pricing-carousel-container" style={{ overflow: 'visible' }}>
-              <div 
-                className="pricing-carousel-grid"
-                style={{
-                  transform: `translateX(-${pricingCarouselIndex * 100}%)`,
-                  transition: 'transform 0.5s ease',
-                  display: 'flex'
-                }}
-              >
-                {plans.map((plan) => {
+            <div className="pricing-carousel">
+              <div className="pricing-carousel-grid">
+                {plans.slice(pricingCarouselIndex, pricingCarouselIndex + pricingItemsToShow).map((plan) => {
                   const isPopular = plan.name === 'growth';
                   const priceMonthly = plan.price_brl;
                   const priceYearly = plan.price_brl * 12 * 0.83;
@@ -871,13 +833,6 @@ const LandingPage = () => {
                       key={plan.id} 
                       className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
                       onClick={() => setSelectedPlan(plan.name)}
-                      style={{
-                        flex: `0 0 calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`,
-                        maxWidth: `calc((100% - ${(pricingItemsPerPage - 1) * pricingGap}px) / ${pricingItemsPerPage})`,
-                        overflow: 'visible',
-                        position: 'relative',
-                        marginTop: isPopular ? '20px' : '0'
-                      }}
                     >
                       {isPopular && <div className="popular-badge" style={{ top: '-16px' }}>Mais Popular</div>}
 
@@ -999,118 +954,36 @@ const LandingPage = () => {
                     </div>
                   );
                 })}
-
-                {/* Card Enterprise dentro do grid */}
-                <div className="pricing-card enterprise-card" style={{
-                  background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
-                  color: 'white',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  border: '3px solid #fbbf24'
-                }}>
-                  <div className="popular-badge" style={{ background: '#fbbf24', color: '#1f2937' }}>Customizado</div>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
-                    opacity: 0.3
-                  }} />
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <h3 className="plan-name" style={{ color: 'white' }}>Enterprise</h3>
-                    <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
-                      Solução personalizada para grandes volumes
-                    </p>
-                    <div style={{
-                      background: 'rgba(59, 130, 246, 0.2)',
-                      border: '2px solid rgba(59, 130, 246, 0.4)',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      marginBottom: '24px'
-                    }}>
-                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#60a5fa', marginBottom: '4px' }}>
-                        ilimitadas*
-                      </div>
-                      <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>consultas</div>
-                    </div>
-                    <ul className="plan-features" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Consultas ilimitadas*
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Consultas em lote ilimitadas*
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        SLA garantido 99,9%
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Gerente de conta dedicado
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Infraestrutura dedicada
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        White Label disponível
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Onboarding personalizado
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Relatórios customizados
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Features sob demanda
-                      </li>
-                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: 'none' }}>
-                        <Check size={18} style={{ color: '#10b981' }} />
-                        Suporte prioritário 24/7
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise'}
-                      className="btn-plan"
-                      style={{
-                        background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                        color: '#1f2937',
-                        fontWeight: '700',
-                        marginTop: '20px'
-                      }}
-                    >
-                      Falar com Especialista
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <button 
-              className="carousel-nav-button next" 
-              onClick={nextPricingSlide}
-              aria-label="Próximos planos"
+            {/* Botões de Navegação */}
+            <button
+              className="carousel-nav-button prev"
+              onClick={prevPricingSlide}
             >
-              <ChevronRight size={24} color="#333" />
+              <ChevronLeft size={24} style={{ color: '#3b82f6' }} />
             </button>
 
+            <button
+              className="carousel-nav-button next"
+              onClick={nextPricingSlide}
+            >
+              <ChevronRight size={24} style={{ color: '#3b82f6' }} />
+            </button>
+
+            {/* Indicadores */}
             <div className="carousel-indicators">
-              {Array.from({ length: totalPricingPages }).map((_, index) => (
-                <button
-                  key={index}
-                  className={`carousel-indicator ${index === pricingCarouselIndex ? 'active' : ''}`}
-                  onClick={() => setPricingCarouselIndex(index)}
-                  aria-label={`Ir para página ${index + 1}`}
-                />
-              ))}
+              {(() => {
+                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+                return Array.from({ length: plans.length - itemsToShow + 1 }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setPricingCarouselIndex(index)}
+                    className={`carousel-indicator ${pricingCarouselIndex === index ? 'active' : ''}`}
+                  />
+                ));
+              })()}
             </div>
           </div>
         )}

@@ -1603,22 +1603,51 @@ section#faq.benefits-section {
   padding: 100px 20px;
 }
 
-/* Pricing Carousel adjustments */
+/* Pricing Carousel - Igual aos depoimentos */
 .pricing-carousel-wrapper {
   position: relative;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px 60px;
+  padding: 0 60px;
+}
+
+.pricing-carousel {
   overflow: visible;
 }
 
-.pricing-carousel-wrapper .pricing-card {
-  margin-top: 20px; /* Space for the badge */
+.pricing-carousel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  transition: transform 0.5s ease;
 }
 
-.pricing-carousel-container {
-  overflow: visible !important;
-  width: 100%;
+@media (max-width: 991px) {
+  .pricing-carousel-wrapper {
+    padding: 0 50px;
+  }
+
+  .pricing-carousel-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pricing-carousel-wrapper {
+    padding: 0 40px;
+  }
+
+  .pricing-carousel-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-carousel-wrapper {
+    padding: 0 16px;
+  }
 }
 
 .pricing-card .plan-price {

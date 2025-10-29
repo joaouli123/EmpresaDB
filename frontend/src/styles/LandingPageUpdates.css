@@ -618,59 +618,7 @@ html {
   }
 }
 
-/* ===============================================
-   CARROSSEL DE PREÇOS - RESPONSIVO
-   =============================================== */
 
-.pricing-carousel-wrapper {
-  position: relative;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px 70px;
-  overflow: visible !important;
-}
-
-.pricing-carousel-container {
-  overflow: visible !important;
-  width: 100%;
-}
-
-.pricing-carousel-grid {
-  display: flex;
-  gap: 32px;
-  transition: transform 0.5s ease;
-}
-
-.pricing-carousel-grid > .pricing-card {
-  flex: 0 0 auto;
-  min-width: 0;
-}
-
-@media (max-width: 991px) {
-  .pricing-carousel-wrapper {
-    padding: 0 60px;
-  }
-
-  .pricing-carousel-grid {
-    gap: 24px;
-  }
-}
-
-@media (max-width: 640px) {
-  .pricing-carousel-wrapper {
-    padding: 0 50px;
-  }
-
-  .pricing-carousel-grid {
-    gap: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .pricing-carousel-wrapper {
-    padding: 0 40px;
-  }
-}
 
 /* ===============================================
    CARROSSEL DE DEPOIMENTOS - RESPONSIVO
