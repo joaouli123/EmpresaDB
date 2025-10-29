@@ -101,7 +101,7 @@ const Subscription = () => {
     if (!confirm('Deseja remover este cartão?')) return;
     
     try {
-      await api.delete(`/subscriptions/payment-methods/${cardId}`);
+      await api.delete(`/api/v1/subscriptions/payment-methods/${cardId}`);
       loadData();
       alert('Cartão removido com sucesso!');
     } catch (error) {
