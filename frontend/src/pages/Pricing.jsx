@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { Check, Zap, Shield, TrendingUp, Package, Sparkles } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Check, Zap, Shield, TrendingUp, Package, Sparkles, Crown } from 'lucide-react';
 import './Pricing.css';
 
 const Pricing = () => {
@@ -11,7 +12,9 @@ const Pricing = () => {
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(null);
   const [purchasing, setPurchasing] = useState(null);
+  const [userSubscription, setUserSubscription] = useState(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const rateLimits = {
     'free': 10,
@@ -23,7 +26,19 @@ const Pricing = () => {
   useEffect(() => {
     loadPlans();
     loadBatchPackages();
-  }, []);
+    if (user) {
+      loadUserSubscription();
+    }
+  }, [user]);
+
+  const loadUserSubscription = async () => {
+    try {
+      const response = await api.get('/subscriptions/my-subscription');
+      setUserSubscription(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar assinatura do usuário:', error);
+    }
+  };
 
   const enrichPlanFeatures = (plan) => {
     // Adiciona features específicas de batch queries e filtros
@@ -264,8 +279,30 @@ const Pricing = () => {
     );
   }
 
+  const isFreePlan = userSubscription && (userSubscription.plan_name === 'Free' || userSubscription.plan_name === 'free');
+  const currentPlanName = userSubscription?.plan_name?.toLowerCase();
+
   return (
     <div className="pricing-page">
+      {user && isFreePlan && (
+        <div style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '32px 24px',
+          textAlign: 'center',
+          color: 'white',
+          marginBottom: '40px'
+        }}>
+          <Crown size={48} style={{ marginBottom: '16px', opacity: 0.9 }} />
+          <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '12px', color: 'white' }}>
+            Desbloqueie Todo o Potencial da API
+          </h2>
+          <p style={{ fontSize: '18px', opacity: 0.95, maxWidth: '800px', margin: '0 auto' }}>
+            Você está no plano Free com apenas {userSubscription.total_limit || 200} consultas/mês. 
+            Faça upgrade e tenha acesso a milhares de consultas, filtros avançados e suporte prioritário!
+          </p>
+        </div>
+      )}
+      
       <div className="pricing-header">
         <h1>Planos e Preços</h1>
         <p>Escolha o melhor plano para suas necessidades de consulta CNPJ</p>
@@ -370,9 +407,13 @@ const Pricing = () => {
       </div>
 
       <div className="plans-grid">
-        {plans.map((plan) => (
-          <div key={plan.id} className={`plan-card ${plan.name === 'professional' ? 'featured' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''}`}>
-            {plan.name === 'professional' && <div className="popular-badge">Mais Popular</div>}
+        {plans.map((plan) => {
+          const isCurrentPlan = currentPlanName && currentPlanName === plan.name.toLowerCase();
+          
+          return (
+          <div key={plan.id} className={`plan-card ${plan.name === 'professional' ? 'featured' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''} ${isCurrentPlan ? 'current-plan' : ''}`}>
+            {isCurrentPlan && <div className="current-badge" style={{ background: '#10b981' }}>Seu Plano Atual</div>}
+            {!isCurrentPlan && plan.name === 'professional' && <div className="popular-badge">Mais Popular</div>}
             {plan.name === 'enterprise' && <div className="custom-badge">Customizado</div>}
             
             <h3>{plan.display_name}</h3>
@@ -442,13 +483,21 @@ const Pricing = () => {
             
             <button
               className={`btn-plan ${plan.name === 'professional' ? 'btn-primary' : plan.name === 'enterprise' ? 'btn-enterprise' : 'btn-secondary'}`}
-              onClick={() => plan.name === 'enterprise' ? window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise' : handleSubscribe(plan.id)}
-              disabled={subscribing === plan.id}
+              onClick={() => plan.name === 'enterprise' ? window.location.href = 'mailto:contato@dbempresas.com.br?subject=Interesse no Plano Enterprise' : handleSubscribe(plan.id)}
+              disabled={subscribing === plan.id || isCurrentPlan}
             >
-              {plan.name === 'enterprise' ? 'Falar com Especialista' : subscribing === plan.id ? 'Processando...' : 'Assinar Agora'}
+              {isCurrentPlan 
+                ? '✓ Plano Atual' 
+                : plan.name === 'enterprise' 
+                  ? 'Falar com Especialista' 
+                  : subscribing === plan.id 
+                    ? 'Processando...' 
+                    : plan.name === 'free' 
+                      ? 'Plano Gratuito'
+                      : 'Assinar Agora'}
             </button>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* PACOTES DE CONSULTAS EM LOTE */}

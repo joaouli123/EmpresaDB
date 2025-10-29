@@ -164,6 +164,34 @@
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 
+.current-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.plan-card.current-plan {
+  border: 3px solid #10b981;
+  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+}
+
 .plan-card h3 {
   font-size: 1.75rem;
   font-weight: 700;
