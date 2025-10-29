@@ -627,12 +627,11 @@ html {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px 70px;
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: visible !important;
 }
 
 .pricing-carousel-container {
-  overflow: visible;
+  overflow: visible !important;
   width: 100%;
 }
 

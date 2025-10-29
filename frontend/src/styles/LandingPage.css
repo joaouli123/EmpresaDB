@@ -1608,11 +1608,17 @@ section#faq.benefits-section {
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 60px 0; /* Adjusted padding to accommodate badge */
+  padding: 20px 60px;
+  overflow: visible;
 }
 
 .pricing-carousel-wrapper .pricing-card {
   margin-top: 20px; /* Space for the badge */
+}
+
+.pricing-carousel-container {
+  overflow: visible !important;
+  width: 100%;
 }
 
 .pricing-card .plan-price {
