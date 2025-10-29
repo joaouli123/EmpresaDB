@@ -568,6 +568,57 @@ html {
 }
 
 /* ===============================================
+   CARROSSEL DE PREÇOS - RESPONSIVO
+   =============================================== */
+
+.pricing-carousel-wrapper {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.pricing-carousel-container {
+  overflow: hidden;
+}
+
+.pricing-carousel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  width: 300%;
+}
+
+@media (max-width: 991px) {
+  .pricing-carousel-wrapper {
+    padding: 0 50px;
+  }
+
+  .pricing-carousel-grid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 200%;
+  }
+}
+
+@media (max-width: 640px) {
+  .pricing-carousel-wrapper {
+    padding: 0 40px;
+  }
+
+  .pricing-carousel-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-carousel-wrapper {
+    padding: 0 16px;
+  }
+}
+
+/* ===============================================
    CARROSSEL DE DEPOIMENTOS - RESPONSIVO
    =============================================== */
 

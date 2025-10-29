@@ -32,7 +32,8 @@ import {
   X,
   Package,
   ChevronDown,
-  HelpCircle
+  HelpCircle,
+  ChevronLeft
 } from 'lucide-react';
 import { api } from '../services/api';
 import '../styles/LandingPage.css';
@@ -49,6 +50,7 @@ const LandingPage = () => {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [pricingCarouselIndex, setPricingCarouselIndex] = useState(0); // Carrossel de Preços
 
   useEffect(() => {
     loadPlans();
@@ -438,6 +440,46 @@ const LandingPage = () => {
     }
   ];
 
+  // Testimonial Carousel Logic
+  const testimonialItemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
+  const totalTestimonialPages = Math.ceil(testimonials.length / testimonialItemsToShow);
+
+  const nextTestimonial = () => {
+    setCurrentTestimonial(prev => (prev + 1) % (testimonials.length - testimonialItemsToShow + 1));
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial(prev => (prev - 1 + (testimonials.length - testimonialItemsToShow + 1)) % (testimonials.length - testimonialItemsToShow + 1));
+  };
+
+  // Pricing Carousel Logic
+  const getPricingItemsPerPage = () => {
+    if (window.innerWidth <= 640) return 1;
+    if (window.innerWidth <= 991) return 2;
+    return 3;
+  };
+
+  const [pricingItemsPerPage, setPricingItemsPerPage] = useState(getPricingItemsPerPage());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPricingItemsPerPage(getPricingItemsPerPage());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const totalPricingPages = Math.ceil(plans.length / pricingItemsPerPage);
+
+  const nextPricingSlide = () => {
+    setPricingCarouselIndex(prev => (prev + 1) % totalPricingPages);
+  };
+
+  const prevPricingSlide = () => {
+    setPricingCarouselIndex(prev => (prev - 1 + totalPricingPages) % totalPricingPages);
+  };
+
   return (
     <div className="landing-page">
       {/* Floating Navbar */}
@@ -749,453 +791,388 @@ const LandingPage = () => {
             <p style={{ color: 'var(--gray)' }}>Carregando planos...</p>
           </div>
         ) : (
-          <div className="pricing-grid">
-            {plans.map((plan) => {
-              const isPopular = plan.name === 'growth';
-              const priceMonthly = plan.price_brl;
-              const priceYearly = plan.price_brl * 12 * 0.83;
-              const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
-
-              return (
-                <div 
-                  key={plan.id} 
-                  className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
-                  onClick={() => setSelectedPlan(plan.name)}
-                >
-                  {isPopular && <div className="popular-badge">Mais Popular</div>}
-
-                  <div className="plan-header">
-                    <h3>{plan.display_name}</h3>
-                    <p className="plan-description">
-                      {plan.name === 'free' && 'Ideal para testar a plataforma'}
-                      {plan.name === 'start' && 'Perfeito para começar'}
-                      {plan.name === 'growth' && 'Para empresas em crescimento'}
-                    </p>
-                  </div>
-
-                  <div className="plan-price">
-                    <span className="currency">R$</span>
-                    <span className="amount">
-                      {displayPrice.toFixed(2).replace('.', ',')}
-                    </span>
-                    <span className="period">
-                      {billingPeriod === 'mensal' ? '/mês' : '/ano'}
-                    </span>
-                  </div>
-
-                  {billingPeriod === 'anual' && priceMonthly > 0 && (
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: 'var(--primary)', 
-                      fontWeight: '600',
-                      marginBottom: '12px',
-                      textAlign: 'center'
-                    }}>
-                      R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
-                    </div>
-                  )}
-
-                  <div className="plan-queries">
-                    <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
-                  </div>
-
-                  {plan.monthly_batch_queries > 0 && (
-                    <div style={{
-                      marginTop: '12px',
-                      padding: '10px',
-                      background: '#f3f4f6',
-                      borderRadius: '6px',
-                      textAlign: 'center',
-                      fontSize: '14px',
-                      color: '#374151',
-                      fontWeight: '600'
-                    }}>
-                      {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
-                    </div>
-                  )}
-
-                  <ul className="plan-features">
-                    <li>
-                      <Check size={18} />
-                      {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
-                    </li>
-
-                    <li>
-                      <Check size={18} />
-                      {plan.name === 'free' && '0 consultas em lote/mês'}
-                      {plan.name === 'start' && '500 consultas em lote/mês'}
-                      {plan.name === 'growth' && '2.000 consultas em lote/mês'}
-                      {plan.name === 'pro' && '10.000 consultas em lote/mês'}
-                    </li>
-
-                    <li>
-                      <Check size={18} />
-                      16+ filtros avançados
-                    </li>
-
-                    <li>
-                      <Check size={18} />
-                      Consulta completa por CNPJ
-                    </li>
-                    <li>
-                      <Check size={18} />
-                      Dados completos da empresa
-                    </li>
-                    <li>
-                      <Check size={18} />
-                      QSA e CNAEs secundários
-                    </li>
-                    {plan.name !== 'free' && (
-                      <li>
-                        <Check size={18} />
-                        Dashboard com estatísticas
-                      </li>
-                    )}
-                    <li>
-                      <Check size={18} />
-                      Documentação da API
-                    </li>
-                    {plan.name === 'free' && (
-                      <li>
-                        <Check size={18} />
-                        Suporte por email
-                      </li>
-                    )}
-                    {plan.name === 'start' && (
-                      <>
-                        <li>
-                          <Check size={18} />
-                          Suporte por email
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Rate limit: 60 req/min
-                        </li>
-                      </>
-                    )}
-                    {plan.name === 'growth' && (
-                      <>
-                        <li>
-                          <Check size={18} />
-                          Cache Redis para performance
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Suporte via WhatsApp
-                        </li>
-                        <li>
-                          <Check size={18} />
-                          Rate limit: 300 req/min
-                        </li>
-                      </>
-                    )}
-                  </ul>
-
-                  <a href="/pricing">
-                    <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
-                      {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
-                    </button>
-                  </a>
-                </div>
-              );
-            })}
-
-            {/* Card Enterprise dentro do grid */}
-            <div className="pricing-card enterprise-card" style={{
-              background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden',
-              border: '3px solid #fbbf24'
-            }}>
-              <div className="popular-badge" style={{ background: '#fbbf24', color: '#1f2937' }}>Customizado</div>
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
-                opacity: 0.3
-              }} />
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <h3 className="plan-name" style={{ color: 'white' }}>Enterprise</h3>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
-                  Solução personalizada para grandes volumes
-                </p>
-                <div style={{
-                  background: 'rgba(59, 130, 246, 0.2)',
-                  border: '2px solid rgba(59, 130, 246, 0.4)',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  marginBottom: '24px'
-                }}>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#60a5fa', marginBottom: '4px' }}>
-                    ilimitadas*
-                  </div>
-                  <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>consultas</div>
-                </div>
-                <ul className="plan-features" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Consultas ilimitadas*
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Consultas em lote ilimitadas*
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    SLA garantido 99,9%
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Gerente de conta dedicado
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Infraestrutura dedicada
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Onboarding personalizado
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Relatórios customizados
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Features sob demanda
-                  </li>
-                  <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: 'none' }}>
-                    <Check size={18} style={{ color: '#10b981' }} />
-                    Suporte prioritário 24/7
-                  </li>
-                </ul>
-                <button 
-                  onClick={() => window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise'}
-                  className="btn-plan"
-                  style={{
-                    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                    color: '#1f2937',
-                    fontWeight: '700',
-                    marginTop: '20px'
-                  }}
-                >
-                  Falar com Especialista
-                </button>
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '12px', textAlign: 'center' }}>
-                  * Sujeito a fair use policy
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Card Enterprise antigo REMOVIDO - agora está no grid acima */}
-        {false && (
-        <div className="enterprise-card-old" style={{
-          marginTop: '60px',
-          background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
-          borderRadius: '24px',
-          padding: '48px',
-          color: 'white',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
-            opacity: 0.3
-          }} />
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h3 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '16px', color: 'white' }}>
-              Enterprise
-            </h3>
-            <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
-              Solução personalizada para grandes volumes e necessidades específicas
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', maxWidth: '800px', margin: '0 auto 40px' }}>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Consultas</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Ilimitadas*</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Rate Limit</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Customizado</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Suporte</div>
-                <div style={{ fontSize: '24px', fontWeight: '700' }}>Prioritário</div>
-              </div>
-            </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 auto 40px', maxWidth: '600px', textAlign: 'left' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                SLA garantido com uptime de 99.9%
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Gerente de conta dedicado
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Infraestrutura dedicada disponível
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Integração e onboarding personalizados
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Relatórios e analytics customizados
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', color: 'rgba(255,255,255,0.9)' }}>
-                <Check size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                Desenvolvimento de features sob demanda
-              </li>
-            </ul>
+          <div className="pricing-carousel-wrapper">
             <button 
-              onClick={() => window.location.href = '#contact'}
-              style={{
-                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                color: '#1f2937',
-                border: 'none',
-                padding: '16px 48px',
-                fontSize: '18px',
-                fontWeight: '700',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                boxShadow: '0 8px 24px rgba(251, 191, 36, 0.3)',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 12px 32px rgba(251, 191, 36, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 8px 24px rgba(251, 191, 36, 0.3)';
-              }}
+              className="carousel-nav-button prev" 
+              onClick={prevPricingSlide}
+              aria-label="Planos anteriores"
             >
-              Falar com Especialista
+              <ChevronLeft size={24} color="#333" />
             </button>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '16px' }}>
-              * Sujeito a fair use policy
-            </p>
-          </div>
-        </div>
-        )}
 
-        {batchPackages.length > 0 && (
-          <div className="addons-section">
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
-              <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
-                Pesquise milhares de empresas de uma vez com 16+ filtros avançados
-              </p>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-                <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
-                Cada resultado retornado = 1 crédito.
-              </p>
-              <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
-                ✨ Créditos comprados nunca expiram!
-              </p>
-              <div style={{
-                marginTop: '15px',
-                padding: '12px 16px',
-                background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-                borderLeft: '4px solid #667eea',
-                borderRadius: '6px',
-                fontSize: '14px',
-                maxWidth: '900px',
-                margin: '16px auto 0'
-              }}>
-                <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
+            <div className="pricing-carousel-container" style={{ overflow: 'hidden' }}>
+              <div 
+                className="pricing-carousel-grid"
+                style={{
+                  transform: `translateX(-${pricingCarouselIndex * (100 / pricingItemsPerPage)}%)`,
+                  gridTemplateColumns: `repeat(${pricingItemsPerPage}, 1fr)`,
+                  transition: 'transform 0.5s ease'
+                }}
+              >
+                {plans.map((plan) => {
+                  const isPopular = plan.name === 'growth';
+                  const priceMonthly = plan.price_brl;
+                  const priceYearly = plan.price_brl * 12 * 0.83;
+                  const displayPrice = billingPeriod === 'mensal' ? priceMonthly : priceYearly;
+
+                  return (
+                    <div 
+                      key={plan.id} 
+                      className={`pricing-card ${isPopular ? 'popular' : ''} ${selectedPlan === plan.name ? 'selected' : ''}`}
+                      onClick={() => setSelectedPlan(plan.name)}
+                    >
+                      {isPopular && <div className="popular-badge">Mais Popular</div>}
+
+                      <div className="plan-header">
+                        <h3>{plan.display_name}</h3>
+                        <p className="plan-description">
+                          {plan.name === 'free' && 'Para começar e testar'}
+                          {plan.name === 'start' && 'Para pequenas empresas'}
+                          {plan.name === 'growth' && 'Para empresas em crescimento'}
+                          {plan.name === 'pro' && 'Para grandes volumes'}
+                        </p>
+                      </div>
+
+                      <div className="plan-price">
+                        <span className="currency">R$</span>
+                        <span className="amount">{displayPrice.toFixed(2).replace('.', ',')}</span>
+                        <span className="period">/{billingPeriod === 'mensal' ? 'mês' : 'ano'}</span>
+                      </div>
+
+                      {billingPeriod === 'anual' && priceMonthly > 0 && (
+                        <div style={{ 
+                          fontSize: '14px', 
+                          color: 'var(--primary)', 
+                          fontWeight: '600',
+                          marginBottom: '12px',
+                          textAlign: 'center'
+                        }}>
+                          R$ {(priceYearly / 12).toFixed(2).replace('.', ',')} /mês
+                        </div>
+                      )}
+
+                      <div className="plan-queries">
+                        <strong>{plan.monthly_queries.toLocaleString('pt-BR')}</strong> consultas/mês
+                      </div>
+
+                      {plan.monthly_batch_queries > 0 && (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '10px',
+                          background: '#f3f4f6',
+                          borderRadius: '6px',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          color: '#374151',
+                          fontWeight: '600'
+                        }}>
+                          {plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês
+                        </div>
+                      )}
+
+                      <ul className="plan-features">
+                        <li>
+                          <Check size={18} />
+                          {plan.monthly_queries.toLocaleString('pt-BR')} consultas/mês
+                        </li>
+
+                        <li>
+                          <Check size={18} />
+                          {plan.name === 'free' && '0 consultas em lote/mês'}
+                          {plan.name === 'start' && '500 consultas em lote/mês'}
+                          {plan.name === 'growth' && '2.000 consultas em lote/mês'}
+                          {plan.name === 'pro' && '10.000 consultas em lote/mês'}
+                        </li>
+
+                        <li>
+                          <Check size={18} />
+                          16+ filtros avançados
+                        </li>
+
+                        <li>
+                          <Check size={18} />
+                          Consulta completa por CNPJ
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          Dados completos da empresa
+                        </li>
+                        <li>
+                          <Check size={18} />
+                          QSA e CNAEs secundários
+                        </li>
+                        {plan.name !== 'free' && (
+                          <li>
+                            <Check size={18} />
+                            Dashboard com estatísticas
+                          </li>
+                        )}
+                        <li>
+                          <Check size={18} />
+                          Documentação da API
+                        </li>
+                        {plan.name === 'free' && (
+                          <li>
+                            <Check size={18} />
+                            Suporte por email
+                          </li>
+                        )}
+                        {plan.name === 'start' && (
+                          <>
+                            <li>
+                              <Check size={18} />
+                              Suporte por email
+                            </li>
+                            <li>
+                              <Check size={18} />
+                              Rate limit: 60 req/min
+                            </li>
+                          </>
+                        )}
+                        {plan.name === 'growth' && (
+                          <>
+                            <li>
+                              <Check size={18} />
+                              Cache Redis para performance
+                            </li>
+                            <li>
+                              <Check size={18} />
+                              Suporte via WhatsApp
+                            </li>
+                            <li>
+                              <Check size={18} />
+                              Rate limit: 300 req/min
+                            </li>
+                          </>
+                        )}
+                      </ul>
+
+                      <a href="/pricing">
+                        <button className={`btn-plan ${isPopular ? 'btn-primary-large' : 'btn-secondary-large'}`}>
+                          {plan.price_brl === 0 ? 'Começar Grátis' : `Assinar ${plan.display_name}`}
+                        </button>
+                      </a>
+                    </div>
+                  );
+                })}
+
+                {/* Card Enterprise dentro do grid */}
+                <div className="pricing-card enterprise-card" style={{
+                  background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+                  color: 'white',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  border: '3px solid #fbbf24'
+                }}>
+                  <div className="popular-badge" style={{ background: '#fbbf24', color: '#1f2937' }}>Customizado</div>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")',
+                    opacity: 0.3
+                  }} />
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <h3 className="plan-name" style={{ color: 'white' }}>Enterprise</h3>
+                    <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
+                      Solução personalizada para grandes volumes
+                    </p>
+                    <div style={{
+                      background: 'rgba(59, 130, 246, 0.2)',
+                      border: '2px solid rgba(59, 130, 246, 0.4)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      marginBottom: '24px'
+                    }}>
+                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#60a5fa', marginBottom: '4px' }}>
+                        ilimitadas*
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>consultas</div>
+                    </div>
+                    <ul className="plan-features" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Consultas ilimitadas*
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Consultas em lote ilimitadas*
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        SLA garantido 99,9%
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Gerente de conta dedicado
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Infraestrutura dedicada
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Onboarding personalizado
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Relatórios customizados
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Features sob demanda
+                      </li>
+                      <li style={{ color: 'rgba(255,255,255,0.9)', borderBottom: 'none' }}>
+                        <Check size={18} style={{ color: '#10b981' }} />
+                        Suporte prioritário 24/7
+                      </li>
+                    </ul>
+                    <button 
+                      onClick={() => window.location.href = 'mailto:contato@cnpjapi.com.br?subject=Interesse no Plano Enterprise'}
+                      className="btn-plan"
+                      style={{
+                        background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                        color: '#1f2937',
+                        fontWeight: '700',
+                        marginTop: '20px'
+                      }}
+                    >
+                      Falar com Especialista
+                    </button>
+                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '12px', textAlign: 'center' }}>
+                      * Sujeito a fair use policy
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="addons-grid">
-              {batchPackages.map((pkg) => {
-                const pricePerUnit = pkg.price_per_unit;
-                const savingsPercent = batchPackages[0] && pkg.id !== batchPackages[0].id 
-                  ? Math.round((1 - (pricePerUnit / batchPackages[0].price_per_unit)) * 100)
-                  : 0;
 
-                return (
-                  <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
-                    {savingsPercent > 0 && (
-                      <div style={{ 
-                        position: 'absolute', 
-                        top: '10px', 
-                        right: '10px', 
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        color: 'white',
-                        padding: '4px 12px',
-                        borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: '600'
-                      }}>
-                        Economize {savingsPercent}%
-                      </div>
-                    )}
-                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                      <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
-                      <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
-                    </div>
-                    <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
-                      {pkg.credits.toLocaleString('pt-BR')}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
-                    <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
-                      R$ {pkg.price_brl.toFixed(2)}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
-                      R$ {(pricePerUnit * 100).toFixed(2)} centavos/crédito
-                    </div>
-                    <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
-                      {pkg.description}
-                    </p>
-                    <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
-                      Comprar Agora
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ 
-              marginTop: '30px', 
-              padding: '20px', 
-              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-              borderRadius: '12px',
-              border: '2px solid #bae6fd'
-            }}>
-              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
-                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
-                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
-                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
-                <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
-                {batchPackages.length > 1 && (
-                  <li style={{ fontSize: '14px', color: '#374151' }}>
-                    ✅ Economize até {Math.max(...batchPackages.map(p => {
-                      const savings = batchPackages[0] && p.id !== batchPackages[0].id 
-                        ? Math.round((1 - (p.price_per_unit / batchPackages[0].price_per_unit)) * 100)
-                        : 0;
-                      return savings;
-                    }))}% comprando pacotes maiores
-                  </li>
-                )}
-              </ul>
+            <button 
+              className="carousel-nav-button next" 
+              onClick={nextPricingSlide}
+              aria-label="Próximos planos"
+            >
+              <ChevronRight size={24} color="#333" />
+            </button>
+
+            <div className="carousel-indicators">
+              {Array.from({ length: totalPricingPages }).map((_, index) => (
+                <button
+                  key={index}
+                  className={`carousel-indicator ${index === pricingCarouselIndex ? 'active' : ''}`}
+                  onClick={() => setPricingCarouselIndex(index)}
+                  aria-label={`Ir para página ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         )}
       </section>
+
+      {/* Addons Section */}
+      {batchPackages.length > 0 && (
+        <div className="addons-section">
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
+            <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
+              Pesquise milhares de empresas de uma vez com 16+ filtros avançados
+            </p>
+            <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+              <strong>Novo!</strong> Faça buscas por razão social, CNAE, localização, porte, faturamento, data de abertura e muito mais.
+              Cada resultado retornado = 1 crédito.
+            </p>
+            <p style={{ fontSize: '15px', color: '#10b981', fontWeight: '700', marginBottom: '16px' }}>
+              ✨ Créditos comprados nunca expiram!
+            </p>
+            <div style={{
+              marginTop: '15px',
+              padding: '12px 16px',
+              background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+              borderLeft: '4px solid #667eea',
+              borderRadius: '6px',
+              fontSize: '14px',
+              maxWidth: '900px',
+              margin: '16px auto 0'
+            }}>
+              <strong>🎯 16+ filtros disponíveis:</strong> Razão Social, Nome Fantasia, CNAE Principal e Secundário, UF, Município, CEP, Bairro, Logradouro, Porte, Situação Cadastral, Matriz/Filial, Data de Abertura, Simples Nacional, MEI e muito mais!
+            </div>
+          </div>
+          <div className="addons-grid">
+            {batchPackages.map((pkg) => {
+              const pricePerUnit = pkg.price_brl / pkg.credits; // Calculate price per credit
+              const savingsPercent = batchPackages[0] ? Math.round((1 - (pricePerUnit / (batchPackages[0].price_brl / batchPackages[0].credits))) * 100) : 0;
+
+              return (
+                <div key={pkg.id} className="addon-card" style={{ position: 'relative', padding: '24px', border: '2px solid var(--border)', borderRadius: '12px' }}>
+                  {savingsPercent > 0 && (
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '10px', 
+                      right: '10px', 
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: 'white',
+                      padding: '4px 12px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: '600'
+                    }}>
+                      Economize {savingsPercent}%
+                    </div>
+                  )}
+                  <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                    <Package size={40} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
+                    <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{pkg.display_name}</h4>
+                  </div>
+                  <div className="addon-queries" style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)', textAlign: 'center', marginBottom: '4px' }}>
+                    {pkg.credits.toLocaleString('pt-BR')}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '16px' }}>créditos</div>
+                  <div className="addon-price" style={{ fontSize: '28px', fontWeight: '700', textAlign: 'center', marginBottom: '4px' }}>
+                    R$ {pkg.price_brl.toFixed(2).replace('.', ',')}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginBottom: '16px' }}>
+                    R$ {(pricePerUnit * 100).toFixed(2).replace('.', ',')} /crédito
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '20px', minHeight: '40px' }}>
+                    {pkg.description}
+                  </p>
+                  <button className="btn-addon" style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
+                    Comprar Agora
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ 
+            marginTop: '30px', 
+            padding: '20px', 
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+            borderRadius: '12px',
+            border: '2px solid #bae6fd'
+          }}>
+            <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--primary)' }}>💡 Como funciona?</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Compre um pacote de créditos (pagamento único)</li>
+              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>/batch/search</code> com filtros avançados</li>
+              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
+              <li style={{ fontSize: '14px', color: '#374151' }}>✅ Créditos não expiram - use quando quiser!</li>
+              {batchPackages.length > 1 && (
+                <li style={{ fontSize: '14px', color: '#374151' }}>
+                  ✅ Economize até {Math.max(...batchPackages.map(p => {
+                    const pricePerUnit = p.price_brl / p.credits;
+                    const basePricePerUnit = batchPackages[0] ? batchPackages[0].price_brl / batchPackages[0].credits : pricePerUnit;
+                    const savings = basePricePerUnit > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
+                    return savings;
+                  }))}% comprando pacotes maiores
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+    </section>
 
       {/* Testimonials Section */}
       <section id="testimonials" className="testimonials-section">
@@ -1207,62 +1184,50 @@ const LandingPage = () => {
         <div className="testimonials-carousel-wrapper">
           <div className="testimonials-carousel">
             <div className="testimonials-carousel-grid">
-              {(() => {
-                const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-                return testimonials.slice(currentTestimonial, currentTestimonial + itemsToShow).map((testimonial, index) => (
-                  <div key={index} className="testimonial-card">
-                    <div className="stars">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
-                      ))}
-                    </div>
-                    <p className="testimonial-text">"{testimonial.text}"</p>
-                    <div className="testimonial-author">
-                      <div className="author-avatar">{testimonial.avatar}</div>
-                      <div className="author-info">
-                        <div className="author-name">{testimonial.name}</div>
-                        <div className="author-role">{testimonial.role}</div>
-                      </div>
+              {testimonials.slice(currentTestimonial, currentTestimonial + testimonialItemsToShow).map((testimonial, index) => (
+                <div key={index} className="testimonial-card">
+                  <div className="stars">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />
+                    ))}
+                  </div>
+                  <p className="testimonial-text">"{testimonial.text}"</p>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">{testimonial.avatar}</div>
+                    <div className="author-info">
+                      <div className="author-name">{testimonial.name}</div>
+                      <div className="author-role">{testimonial.role}</div>
                     </div>
                   </div>
-                ));
-              })()}
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Botões de Navegação */}
           <button
             className="carousel-nav-button prev"
-            onClick={() => {
-              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-              setCurrentTestimonial(prev => prev > 0 ? prev - 1 : testimonials.length - itemsToShow);
-            }}
+            onClick={prevTestimonial}
           >
             <ChevronRight size={24} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
           </button>
 
           <button
             className="carousel-nav-button next"
-            onClick={() => {
-              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-              setCurrentTestimonial(prev => prev < testimonials.length - itemsToShow ? prev + 1 : 0);
-            }}
+            onClick={nextTestimonial}
           >
             <ChevronRight size={24} style={{ color: '#3b82f6' }} />
           </button>
 
           {/* Indicadores */}
           <div className="carousel-indicators">
-            {(() => {
-              const itemsToShow = window.innerWidth <= 640 ? 1 : window.innerWidth <= 991 ? 2 : 3;
-              return Array.from({ length: testimonials.length - itemsToShow + 1 }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  className={`carousel-indicator ${currentTestimonial === index ? 'active' : ''}`}
-                />
-              ));
-            })()}
+            {Array.from({ length: testimonials.length - testimonialItemsToShow + 1 }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentTestimonial(index)}
+                className={`carousel-indicator ${currentTestimonial === index ? 'active' : ''}`}
+              />
+            ))}
           </div>
         </div>
       </section>
