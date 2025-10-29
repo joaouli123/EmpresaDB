@@ -1073,11 +1073,7 @@ const LandingPage = () => {
 
       {/* Addons Section */}
       {batchPackages.length > 0 && (
-        <div className="addons-section">
-
-      {/* Addons Section */}
-      {batchPackages.length > 0 && (
-        <div className="addons-section">
+        <section className="addons-section">
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>⚡ Consultas em Lote</h3>
             <p style={{ fontSize: '18px', color: '#333', marginBottom: '12px', fontWeight: '600' }}>
@@ -1244,10 +1240,8 @@ const LandingPage = () => {
               )}
             </ul>
           </div>
-        </div>
+        </section>
       )}
-      </div>
-    </section>
 
       {/* Testimonials Section */}
       <section id="testimonials" className="testimonials-section">
