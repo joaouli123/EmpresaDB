@@ -450,7 +450,7 @@ const Login = () => {
                 </div>
 
                 <div className="form-group">
-                  <div className={`input-with-icon ${getInputClassName('phone')}`}>
+                  <div className="input-with-icon">
                     <Phone size={18} />
                     <input
                       type="tel"
@@ -462,18 +462,11 @@ const Login = () => {
                       autoComplete="tel"
                       maxLength={15}
                     />
-                    {validations.phone.valid === true && <CheckCircle size={18} className="icon-success" />}
-                    {validations.phone.valid === false && <AlertCircle size={18} className="icon-error" />}
                   </div>
-                  {validations.phone.message && (
-                    <small className={validations.phone.valid ? 'text-success' : 'text-error'}>
-                      {validations.phone.message}
-                    </small>
-                  )}
                 </div>
 
                 <div className="form-group">
-                  <div className={`input-with-icon ${getInputClassName('cpf')}`}>
+                  <div className="input-with-icon">
                     <CreditCard size={18} />
                     <input
                       type="text"
@@ -485,14 +478,7 @@ const Login = () => {
                       autoComplete="off"
                       maxLength={14}
                     />
-                    {validations.cpf.valid === true && <CheckCircle size={18} className="icon-success" />}
-                    {validations.cpf.valid === false && <AlertCircle size={18} className="icon-error" />}
                   </div>
-                  {validations.cpf.message && (
-                    <small className={validations.cpf.valid ? 'text-success' : 'text-error'}>
-                      {validations.cpf.message}
-                    </small>
-                  )}
                 </div>
               </>
             )}
