@@ -155,156 +155,100 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {subscription && subscription.plan_name && (
-          <div className="card">
-            <div className="card-header">
-              <Activity size={20} />
-              <h2>Uso de Consultas</h2>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', padding: '20px 0' }}>
-              {/* Círculo Consultas Usadas */}
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '12px' }}>Consultas Usadas</p>
-                <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
-                  <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
-                    <circle 
-                      cx="60" 
-                      cy="60" 
-                      r="50" 
-                      fill="none" 
-                      stroke={(subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6'}
-                      strokeWidth="10"
-                      strokeDasharray={`${((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 314} 314`}
-                      strokeLinecap="round"
-                    ></circle>
-                  </svg>
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
-                      {subscription.queries_used || 0}
-                    </p>
-                  </div>
+        <div className="card">
+          <div className="card-header">
+            <Activity size={20} />
+            <h2>Uso de Consultas</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', padding: '20px 0' }}>
+            {/* Círculo Consultas Normais */}
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>Consultas Normais</p>
+              <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 16px' }}>
+                <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    fill="none" 
+                    stroke={subscription && (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6'}
+                    strokeWidth="10"
+                    strokeDasharray={`${subscription ? ((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 314 : 0} 314`}
+                    strokeLinecap="round"
+                  ></circle>
+                </svg>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usadas</p>
+                  <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
+                    {subscription?.queries_used || 0}
+                  </p>
+                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {subscription?.total_limit || 200}</p>
                 </div>
               </div>
-
-              {/* Círculo Consultas Restantes */}
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '12px' }}>Consultas Restantes</p>
-                <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
-                  <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
-                    <circle 
-                      cx="60" 
-                      cy="60" 
-                      r="50" 
-                      fill="none" 
-                      stroke={(subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#10b981'}
-                      strokeWidth="10"
-                      strokeDasharray={`${(((subscription.total_limit || 0) - (subscription.queries_used || 0)) / (subscription.total_limit || 1)) * 314} 314`}
-                      strokeLinecap="round"
-                    ></circle>
-                  </svg>
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#10b981' }}>
-                      {(subscription.total_limit || 0) - (subscription.queries_used || 0)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-              <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px 0' }}>
-                {subscription.queries_used || 0} de {subscription.total_limit || 0} consultas usadas no plano {subscription.plan_name}
+              <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
+                {subscription ? (subscription.total_limit || 0) - (subscription.queries_used || 0) : 200} consultas restantes
               </p>
-              {subscription.plan_name === 'Free' && (subscription.queries_used || 0) >= (subscription.total_limit || 0) && (
+              {subscription?.plan_name === 'Free' && (subscription?.queries_used || 0) >= (subscription?.total_limit || 0) && (
                 <a href="/home#pricing" style={{ 
                   display: 'inline-block',
-                  fontSize: '12px',
+                  fontSize: '11px',
                   color: '#3b82f6',
                   backgroundColor: '#eff6ff',
-                  padding: '8px 16px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
                   textDecoration: 'none',
                   fontWeight: '500'
-                }}>Fazer upgrade do plano →</a>
+                }}>Fazer upgrade →</a>
+              )}
+            </div>
+
+            {/* Círculo Consultas em Lote */}
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>Consultas em Lote</p>
+              <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 16px' }}>
+                <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    fill="none" 
+                    stroke={batchCredits && (batchCredits.used_credits || 0) >= (batchCredits.total_credits || 1) ? '#ef4444' : '#10b981'}
+                    strokeWidth="10"
+                    strokeDasharray={`${batchCredits ? ((batchCredits.used_credits || 0) / (batchCredits.total_credits || 1)) * 314 : 0} 314`}
+                    strokeLinecap="round"
+                  ></circle>
+                </svg>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usados</p>
+                  <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
+                    {batchCredits?.used_credits || 0}
+                  </p>
+                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {batchCredits?.total_credits || 0}</p>
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
+                {batchCredits ? (batchCredits.available_credits || 0) : 0} créditos restantes
+              </p>
+              {batchCredits && batchCredits.available_credits === 0 && (
+                <a href="/home#pricing" style={{ 
+                  display: 'inline-block',
+                  fontSize: '11px',
+                  color: '#10b981',
+                  backgroundColor: '#f0fdf4',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontWeight: '500'
+                }}>Comprar créditos →</a>
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
 
-      {batchCredits && (
-        <div className="card">
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Package size={18} />
-              <h2 style={{ fontSize: '16px', margin: 0 }}>Créditos de Consultas em Lote</h2>
-            </div>
-            {batchCredits.available_credits === 0 && (
-              <a
-                href="/home#pricing"
-                style={{
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '12px',
-                  fontWeight: '500'
-                }}
-              >
-                Comprar Mais Créditos
-              </a>
-            )}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', padding: '16px 0' }}>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Totais</p>
-              <p style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{(batchCredits.total_credits || 0).toLocaleString('pt-BR')}</p>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Usados</p>
-              <p style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{(batchCredits.used_credits || 0).toLocaleString('pt-BR')}</p>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Créditos Restantes</p>
-              <p style={{ fontSize: '20px', fontWeight: '600', color: '#10b981', margin: 0 }}>
-                {(batchCredits.available_credits || 0).toLocaleString('pt-BR')}
-              </p>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '0 0 4px 0' }}>Status</p>
-              <p style={{ fontSize: '16px', fontWeight: '600', color: batchCredits.available_credits > 0 ? '#10b981' : '#f59e0b', margin: 0 }}>
-                {batchCredits.available_credits > 0 ? 'Ativo' : 'Sem créditos'}
-              </p>
-            </div>
-          </div>
-          <div className="progress-bar" style={{ marginTop: '8px' }}>
-            <div
-              className="progress-fill"
-              style={{
-                width: `${batchCredits.total_credits > 0 ? ((batchCredits.used_credits / batchCredits.total_credits) * 100) : 0}%`,
-                backgroundColor: batchCredits.available_credits > 100 ? '#10b981' : batchCredits.available_credits > 0 ? '#f59e0b' : '#ef4444'
-              }}
-            />
-          </div>
-          <div style={{ 
-            marginTop: '12px', 
-            padding: '10px', 
-            background: 'rgba(16, 185, 129, 0.1)', 
-            borderRadius: '6px',
-            fontSize: '12px',
-            color: '#059669'
-          }}>
-            <p style={{ margin: 0 }}>
-              💡 <strong>Dica:</strong> Use o endpoint <code>/batch/search</code> para fazer consultas em lote. 
-              Cada resultado retornado consome 1 crédito. Créditos não expiram!
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
