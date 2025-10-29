@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-
-import { useState, useEffect } from 'react';
 import { 
   Database, 
   Search, 
