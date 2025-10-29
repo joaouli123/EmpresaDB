@@ -1471,14 +1471,17 @@ const LandingPage = () => {
               </div>
             </div>
 
-            <form className="contact-form-compact">
+            <form className="contact-form-compact" onSubmit={(e) => {
+              e.preventDefault();
+              window.open('https://wa.me/5541987857413?text=Olá!%20Gostaria%20de%20falar%20sobre%20os%20serviços%20da%20DB%20Empresas', '_blank');
+            }}>
               <div className="form-row">
                 <input type="text" placeholder="Seu nome completo" required />
                 <input type="email" placeholder="seu@email.com" required />
               </div>
 
               <div className="form-row">
-                <input type="tel" placeholder="(11) 99999-9999" />
+                <input type="tel" placeholder="(41) 98785-7413" />
                 <input type="text" placeholder="Nome da empresa" />
               </div>
 
@@ -1487,7 +1490,7 @@ const LandingPage = () => {
                 <option value="duvidas">Dúvidas sobre Planos</option>
                 <option value="tecnico">Suporte Técnico</option>
                 <option value="comercial">Proposta Comercial</option>
-                <option value="outro">Outro</option>
+                <option value="outro">Outro</option>tion>
               </select>
 
               <textarea rows="3" placeholder="Como podemos ajudar?" required></textarea>

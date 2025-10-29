@@ -27,9 +27,12 @@ const Contact = () => {
           <div className="feature-card">
             <Phone size={40} color="#3b82f6" style={{ marginBottom: '16px' }} />
             <h3>WhatsApp</h3>
-            <p style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', marginTop: '12px' }}>
+            <a 
+              href="tel:+5541987857413"
+              style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', marginTop: '12px', display: 'block', textDecoration: 'none' }}
+            >
               (41) 98785-7413
-            </p>
+            </a>
             <a 
               href="https://wa.me/5541987857413?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20DB%20Empresas" 
               target="_blank" 

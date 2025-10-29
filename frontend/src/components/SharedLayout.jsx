@@ -31,9 +31,9 @@ const SharedLayout = ({ children }) => {
             <Link to="/login">
               <button className="btn-navbar-secondary">Entrar</button>
             </Link>
-            <Link to="/#pricing">
+            <a href="/home#pricing">
               <button className="btn-navbar-primary">Começar Grátis</button>
-            </Link>
+            </a>
           </div>
 
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
@@ -56,9 +56,9 @@ const SharedLayout = ({ children }) => {
             <Link to="/login" onClick={() => setMenuOpen(false)}>
               <button className="btn-navbar-secondary">Entrar</button>
             </Link>
-            <Link to="/#pricing" onClick={() => setMenuOpen(false)}>
+            <a href="/home#pricing" onClick={() => setMenuOpen(false)}>
               <button className="btn-navbar-primary">Começar Grátis</button>
-            </Link>
+            </a>
           </div>
         </div>
       </nav>
@@ -86,7 +86,7 @@ const SharedLayout = ({ children }) => {
             <h4>Produto</h4>
             <ul>
               <li><Link to="/servicos">Serviços</Link></li>
-              <li><Link to="/#pricing">Planos e Preços</Link></li>
+              <li><a href="/home#pricing">Planos e Preços</a></li>
               <li><Link to="/api">Documentação API</Link></li>
               <li><Link to="/casos-de-uso">Casos de Uso</Link></li>
             </ul>
@@ -106,8 +106,8 @@ const SharedLayout = ({ children }) => {
             <h4>Suporte</h4>
             <ul>
               <li><Link to="/contato">Fale Conosco</Link></li>
-              <li><Link to="/#faq">FAQ</Link></li>
-              <li><a href="https://wa.me/5541987857413" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+              <li><a href="/home#faq">FAQ</a></li>
+              <li><a href="https://wa.me/5541987857413?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20DB%20Empresas" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
             </ul>
           </div>
 
