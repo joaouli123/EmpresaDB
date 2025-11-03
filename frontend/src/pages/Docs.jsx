@@ -1023,115 +1023,84 @@ buscarCNAEsSecundarios('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-const API_URL = '${API_URL}';
-const API_KEY = 'sua_chave_api_aqui';
+API_URL = '${API_URL}'
+API_KEY = 'sua_chave_api_aqui'
 
-const headers = {
+headers = {
     'X-API-Key': API_KEY
-};
+}
 
-// Consultar CNPJ específico
-const consultarCNPJ = async (cnpj) => {
-  try {
-    const response = await fetch(`${API_URL}/cnpj/${cnpj}`, { headers });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error('Erro ao consultar CNPJ:', error);
-    return null;
-  }
-};
+# Consultar CNPJ específico
+def consultar_cnpj(cnpj):
+    response = requests.get(f'{API_URL}/cnpj/{cnpj}', headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro: {response.status_code} - {response.text}')
+        return None
 
-const getEmpresaInfo = async () => {
-  const resultado = await consultarCNPJ('00000000000191');
-  if (resultado) {
-    console.log(`Razão Social: ${resultado['razao_social']}`);
-    console.log(`CNPJ: ${resultado['cnpj_completo']}`);
-  }
-};
-getEmpresaInfo();
+# Exemplo de uso
+resultado = consultar_cnpj('00000000000191')
+if resultado:
+    print(f"Razão Social: {resultado['razao_social']}")
+    print(f"CNPJ: {resultado['cnpj_completo']}")
 
 ${isAdmin ? `
-// 2. Buscar empresas com filtros (APENAS ADMIN)
-const buscarEmpresas = async (filtros) => {
-    const params = new URLSearchParams(filtros).toString();
-    try {
-        const response = await fetch(`${API_URL}/search?${params}`, { headers });
-        if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
-        return await response.json();
-    } catch (error) {
-        console.error('Erro ao buscar empresas:', error);
-        return null;
-    }
-};
+# 2. Buscar empresas com filtros (APENAS ADMIN)
+def buscar_empresas(filtros):
+    response = requests.get(f'{API_URL}/search', params=filtros, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro: {response.status_code} - {response.text}')
+        return None
 
-// Exemplo: Buscar empresas de grande porte em SP, ativas
-const filtros = {
+# Exemplo: Buscar empresas de grande porte em SP, ativas
+filtros = {
     "uf": "SP",
     "porte": "4",
     "situacao_cadastral": "02",
     "page": 1,
     "per_page": 50
-};
+}
 
-const getEmpresas = async () => {
-    const resultado = await buscarEmpresas(filtros);
-    if (resultado) {
-        console.log(\`Total de empresas encontradas: \${resultado['total']}\`);
-        console.log(\`Página \${resultado['page']} de \${resultado['total_pages']}\`);
+resultado = buscar_empresas(filtros)
+if resultado:
+    print(f"Total de empresas encontradas: {resultado['total']}")
+    print(f"Página {resultado['page']} de {resultado['total_pages']}")
+    
+    for empresa in resultado['items']:
+        print(f"{empresa['cnpj_completo']} - {empresa['razao_social']}")` : '# Endpoint /search disponível apenas para administrador'}
 
-        resultado['items'].forEach(empresa => {
-            console.log(\`\${empresa['cnpj_completo']} - \${empresa['razao_social']}\`);
-        });
-    }
-};
-getEmpresas();` : '// Endpoint /search disponível apenas para administrador'}
+# 3. Listar sócios
+def listar_socios(cnpj):
+    response = requests.get(f'{API_URL}/cnpj/{cnpj}/socios', headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro: {response.status_code}')
+        return None
 
-// Listar sócios
-const listarSocios = async (cnpj) => {
-  try {
-    const response = await fetch(`${API_URL}/cnpj/${cnpj}/socios`, { headers });
-    if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
-    return await response.json();
-  } catch (error) {
-    console.error('Erro ao listar sócios:', error);
-    return null;
-  }
-};
+socios = listar_socios('00000000000191')
+if socios:
+    print(f'Encontrados {len(socios)} sócios')
+    for socio in socios:
+        print(f"- {socio['nome_socio']}")
 
-const getSociosInfo = async () => {
-  const socios = await listarSocios('00000000000191');
-  if (socios) {
-    console.log(\`Encontrados \${socios.length} sócios\`);
-    socios.forEach(socio => {
-      console.log(`- \${socio['nome_socio']}`);
-    });
-  }
-};
-getSociosInfo();
+# 4. Buscar CNAEs secundários
+def buscar_cnaes_secundarios(cnpj):
+    response = requests.get(f'{API_URL}/cnpj/{cnpj}/cnaes-secundarios', headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro: {response.status_code}')
+        return None
 
-// Buscar CNAEs secundários
-const buscarCNAEsSecundarios = async (cnpj) => {
-  try {
-    const response = await fetch(`${API_URL}/cnpj/${cnpj}/cnaes-secundarios`, { headers });
-    if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
-    return await response.json();
-  } catch (error) {
-    console.error('Erro ao buscar CNAEs secundários:', error);
-    return null;
-  }
-};
-
-const getCNAEsInfo = async () => {
-  const cnaes = await buscarCNAEsSecundarios('00000000000191');
-  if (cnaes) {
-    console.log(\`Encontrados \${cnaes.length} CNAEs secundários:\`);
-    cnaes.forEach(cnae => {
-      console.log(`- [\${cnae['codigo']}] \${cnae['descricao']}`);
-    });
-  }
-};
-getCNAEsInfo();`}</pre>
+cnaes = buscar_cnaes_secundarios('00000000000191')
+if cnaes:
+    print(f'Encontrados {len(cnaes)} CNAEs secundários:')
+    for cnae in cnaes:
+        print(f"- [{cnae['codigo']}] {cnae['descricao']}")`}</pre>
             </div>
 
             <h3>PHP</h3>
