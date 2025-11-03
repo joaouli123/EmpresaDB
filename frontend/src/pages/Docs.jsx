@@ -736,23 +736,23 @@ X-API-Key: sua_chave_api`}</pre>
 
             <h3>💰 Pacotes Disponíveis</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '8px', color: 'white' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Starter</h4>
-                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>1.000</p>
-                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,10/crédito</p>
+              <div style={{ padding: '20px', background: '#ffffff', borderRadius: '12px', border: '2px solid #3b82f6', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1f2937', fontWeight: '600' }}>Starter</h4>
+                <p style={{ margin: '0', fontSize: '32px', fontWeight: 'bold', color: '#3b82f6' }}>1.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' }}>créditos</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '14px', color: '#374151', fontWeight: '500' }}>~R$ 0,10/crédito</p>
               </div>
-              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '8px', color: 'white' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Business</h4>
-                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>5.000</p>
-                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,08/crédito</p>
+              <div style={{ padding: '20px', background: '#ffffff', borderRadius: '12px', border: '2px solid #8b5cf6', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1f2937', fontWeight: '600' }}>Business</h4>
+                <p style={{ margin: '0', fontSize: '32px', fontWeight: 'bold', color: '#8b5cf6' }}>5.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' }}>créditos</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '14px', color: '#374151', fontWeight: '500' }}>~R$ 0,08/crédito</p>
               </div>
-              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '8px', color: 'white' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Enterprise</h4>
-                <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold' }}>25.000</p>
-                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: '0.9' }}>créditos</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>~R$ 0,06/crédito</p>
+              <div style={{ padding: '20px', background: '#ffffff', borderRadius: '12px', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1f2937', fontWeight: '600' }}>Enterprise</h4>
+                <p style={{ margin: '0', fontSize: '32px', fontWeight: 'bold', color: '#10b981' }}>25.000</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' }}>créditos</p>
+                <p style={{ margin: '12px 0 0 0', fontSize: '14px', color: '#374151', fontWeight: '500' }}>~R$ 0,06/crédito</p>
               </div>
             </div>
 
