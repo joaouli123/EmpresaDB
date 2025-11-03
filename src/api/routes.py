@@ -498,13 +498,30 @@ async def search_companies(
     data_inicio_atividade_max: str = Query(None, description="Data início atividade máxima (YYYY-MM-DD)"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    current_user: dict = Depends(get_current_admin_user)
+    current_user: dict = Depends(verify_api_key)
 ):
     """
     Pesquisa empresas por múltiplos critérios
     ⚠️ ENDPOINT EXCLUSIVO PARA ADMINISTRADOR
-    Acesso ilimitado apenas para: jl.uli1996@gmail.com
+    Acesso ilimitado com API Key de admin
     """
+    # Verificar se usuário é admin
+    if current_user.get('role') != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "admin_only",
+                "message": "Este endpoint é exclusivo para administradores.",
+                "endpoint": "/search",
+                "current_user": current_user.get('email'),
+                "required_role": "admin",
+                "help": "O endpoint /search é restrito apenas ao administrador do sistema. Use o endpoint /cnpj/{cnpj} para consultas individuais.",
+                "suggestions": [
+                    "Use GET /cnpj/{cnpj} para consultar empresas específicas",
+                    "Entre em contato com o suporte se precisar de acesso especial"
+                ]
+            }
+        )
     try:
         # Log de auditoria (admin tem acesso ilimitado)
         await log_query(
