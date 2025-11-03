@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || '';
+// Em produção (deployment), usa a mesma origem
+// Em desenvolvimento, usa proxy do Vite
+const baseURL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || '');
 
 const api = axios.create({
   baseURL: baseURL,

@@ -12,6 +12,7 @@ from src.api.email_logs import router as email_logs_router
 from src.api.batch_routes import router as batch_router
 from src.config import settings
 import logging
+import os
 from pathlib import Path
 from sqlalchemy import text
 
@@ -154,9 +155,10 @@ app.include_router(batch_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.getenv("PORT", 5000))  # Usa porta 5000 em produção
     uvicorn.run(
         "src.api.main:app",
         host=settings.API_HOST,
-        port=8000,
+        port=port,
         reload=True
     )
