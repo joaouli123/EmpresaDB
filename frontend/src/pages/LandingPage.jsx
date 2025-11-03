@@ -66,6 +66,10 @@ const LandingPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Garantir que sempre sejam arrays
+  const safePlans = Array.isArray(plans) ? plans : [];
+  const safeBatchPackages = Array.isArray(batchPackages) ? batchPackages : [];
+
   const loadPlans = async () => {
     try {
       const response = await api.get('/api/v1/subscriptions/plans');
@@ -530,12 +534,12 @@ const LandingPage = () => {
 
   const nextPricingSlide = () => {
     const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
-    setPricingCarouselIndex(prev => prev < plans.length - itemsToShow ? prev + 1 : 0);
+    setPricingCarouselIndex(prev => prev < safePlans.length - itemsToShow ? prev + 1 : 0);
   };
 
   const prevPricingSlide = () => {
     const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
-    setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : plans.length - itemsToShow);
+    setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : safePlans.length - itemsToShow);
   };
 
   return (
@@ -856,7 +860,7 @@ const LandingPage = () => {
           <div className="pricing-carousel-wrapper">
             <div className="pricing-carousel">
               <div className="pricing-carousel-grid">
-                {plans.slice(pricingCarouselIndex, pricingCarouselIndex + pricingItemsToShow).map((plan) => {
+                {safePlans.slice(pricingCarouselIndex, pricingCarouselIndex + pricingItemsToShow).map((plan) => {
                   const isPopular = plan.name === 'growth';
                   const priceMonthly = plan.price_brl;
                   const priceYearly = plan.price_brl * 12 * 0.83;
@@ -1082,7 +1086,7 @@ const LandingPage = () => {
 
             {/* Indicadores */}
             <div className="carousel-indicators">
-              {Array.from({ length: plans.length - pricingItemsToShow + 1 }).map((_, index) => (
+              {Array.from({ length: safePlans.length - pricingItemsToShow + 1 }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setPricingCarouselIndex(index)}
@@ -1095,7 +1099,7 @@ const LandingPage = () => {
       </section>
 
       {/* Addons Section */}
-      {batchPackages.length > 0 && (
+      {safeBatchPackages.length > 0 && (
         <section className="addons-section">
           <div className="section-header">
             <h2>⚡ Consultas em Lote</h2>
@@ -1148,9 +1152,9 @@ const LandingPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {batchPackages.map((pkg, index) => {
+                {safeBatchPackages.map((pkg, index) => {
                   const pricePerUnit = (pkg.price_brl || 0) / (pkg.credits || 1);
-                  const basePricePerUnit = batchPackages[0] ? (batchPackages[0].price_brl || 0) / (batchPackages[0].credits || 1) : pricePerUnit;
+                  const basePricePerUnit = safeBatchPackages[0] ? (safeBatchPackages[0].price_brl || 0) / (safeBatchPackages[0].credits || 1) : pricePerUnit;
                   const savingsPercent = index > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
 
                   return (
@@ -1258,11 +1262,11 @@ const LandingPage = () => {
                 <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Use o endpoint <code style={{ background: '#e5e7eb', padding: '3px 8px', borderRadius: '4px', fontSize: '14px' }}>/batch/search</code> com filtros avançados</li>
                 <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Cada empresa retornada = 1 crédito consumido</li>
                 <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>✅ Créditos não expiram - use quando quiser!</li>
-                {batchPackages.length > 1 && (
+                {safeBatchPackages.length > 1 && (
                   <li style={{ fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
-                    ✅ Economize até {Math.max(...batchPackages.map(p => {
+                    ✅ Economize até {Math.max(...safeBatchPackages.map(p => {
                       const pricePerUnit = (p.price_brl || 0) / (p.credits || 1);
-                      const basePricePerUnit = batchPackages[0] ? ((batchPackages[0].price_brl || 0) / (batchPackages[0].credits || 1)) : pricePerUnit;
+                      const basePricePerUnit = safeBatchPackages[0] ? ((safeBatchPackages[0].price_brl || 0) / (safeBatchPackages[0].credits || 1)) : pricePerUnit;
                       const savings = basePricePerUnit > 0 ? Math.round((1 - (pricePerUnit / basePricePerUnit)) * 100) : 0;
                       return Math.max(0, savings);
                     }))}% comprando pacotes maiores
