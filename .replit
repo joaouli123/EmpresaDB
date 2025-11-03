@@ -102,3 +102,8 @@ externalPort = 4200
 [[ports]]
 localPort = 45989
 externalPort = 6800
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd frontend && npm run build && cd .. && uvicorn src.api.main:app --host 0.0.0.0 --port 5000"]
+build = ["npm", "install", "--prefix", "frontend"]

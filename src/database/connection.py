@@ -597,10 +597,20 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    UPDATE clientes.api_keys
-                    SET last_used = CURRENT_TIMESTAMP, total_requests = total_requests + 1
-                    WHERE key = %s AND is_active = TRUE
-                    RETURNING user_id AS id
+                    WITH updated_key AS (
+                        UPDATE clientes.api_keys
+                        SET last_used = CURRENT_TIMESTAMP, total_requests = total_requests + 1
+                        WHERE key = %s AND is_active = TRUE
+                        RETURNING user_id
+                    )
+                    SELECT 
+                        u.id,
+                        u.username,
+                        u.email,
+                        u.role,
+                        u.is_active
+                    FROM updated_key uk
+                    JOIN clientes.users u ON u.id = uk.user_id
                 """, (key,))
                 result = cursor.fetchone()
                 cursor.close()

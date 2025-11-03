@@ -37,8 +37,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "*"  # Default: all (MUST be configured in production!)
     
     @model_validator(mode='before')
-    @classmethod
-    def parse_empty_strings(cls, data: dict) -> dict:
+    def parse_empty_strings(cls, data):
         """Converte strings vazias em valores padrão para campos numéricos e booleanos"""
         if isinstance(data, dict):
             if data.get('EMAIL_PORT') == '':

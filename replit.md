@@ -6,15 +6,21 @@ This project is an ETL system and REST API designed for querying public CNPJ dat
 
 ## User Preferences
 
-- **Database Configuration**: The PostgreSQL database on the VPS (72.61.217.143:5432/cnpj_db) is the only database to be used. The `DATABASE_URL` in the `.env` file must always point to this VPS. All data (CNPJ, users, API keys, logs) is centralized on the VPS.
-- **Replit Configuration (CRITICAL)**: The `frontend/.env` file MUST have `VITE_API_URL=` (empty string). NEVER set a URL in this variable on Replit. The Vite proxy (configured in `vite.config.js`) automatically routes all API requests to the backend on port 8000. Accessing port 8000 directly via external URL will fail on Replit.
+- **Database Configuration**: The PostgreSQL database on the VPS (72.61.217.143:5432/cnpj_db) is the only database to be used. The `DATABASE_URL` must be configured in Replit Secrets for production security. All data (CNPJ, users, API keys, logs) is centralized on the VPS.
+- **Replit Configuration (CRITICAL)**: 
+  - Backend runs locally on port 8000 but connects to VPS database
+  - Frontend runs on port 5000 with Vite proxy routing to localhost:8000
+  - NO frontend/.env file needed - proxy handles all routing automatically
+  - Deploy config uses Autoscale with build + run commands for production
+- **API Admin Access**: The `verify_api_key` function now returns complete user info (id, username, email, role, is_active). Admin-only endpoints like `/search` verify `role='admin'`. Use `scripts/set_admin_user.sql` to grant admin permissions. See `API_ADMIN_GUIDE.md` for integration details.
 - **Frontend Interaction**: Third-party companies should use the frontend normally (registration -> login -> generate API key). The admin can use either the frontend or a Python script to create users.
 - **ETL Configuration**: `chunk_size` and `max_workers` for ETL processing should be dynamically adjustable via the admin interface.
-- **Security**: Hardcoded credentials must be removed from the codebase and managed via `.env` files. `SECRET_KEY` must be mandatory, at least 32 characters long, and validated at startup. CORS origins must be configurable.
+- **Security**: All credentials managed via Replit Secrets (DATABASE_URL, SECRET_KEY, STRIPE keys, etc). `SECRET_KEY` must be minimum 32 characters. CORS origins must be configured for production.
 - **Performance**: Dashboard loading times and API query performance are critical. Optimizations for database queries (indexing, materialized views) and efficient counting strategies are highly valued.
 - **Data Integrity**: ETL processes should be idempotent, support automatic recovery, and include integrity validation (CSV vs. DB record counts).
 - **Stripe Payments**: System now uses ONLY `stripe_subscriptions` table. Old `subscriptions` table deprecated and renamed to `subscriptions_legacy`. All subscription logic centralized in Stripe webhooks. Monthly usage automatically tracked and enforced. Webhook secret mandatory in production.
 - **Email Worker**: Email worker must be deployed using Replit's Scheduled Deployments. Use `python3 run_email_worker.py` scheduled to run "Every hour".
+- **Deployment**: Configured for Replit Autoscale deployment. Build step installs frontend dependencies, run step builds frontend and starts uvicorn on port 5000.
 
 ## System Architecture
 
