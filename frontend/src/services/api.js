@@ -3,7 +3,10 @@ import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL || '';
 const isProduction = import.meta.env.PROD;
 console.log('[API] Ambiente:', isProduction ? 'PRODUÇÃO' : 'DESENVOLVIMENTO');
-console.log('[API] Base URL configurada:', baseURL || '(usando proxy)');urada!');
+console.log('[API] Base URL configurada:', baseURL || '(usando proxy)');
+
+if (isProduction && !baseURL) {
+  console.warn('⚠️ ATENÇÃO: Em produção mas VITE_API_URL não configurada!');
 }
 
 const api = axios.create({
