@@ -501,6 +501,12 @@ class DatabaseManager:
             return False
 
     async def get_user_profile(self, user_id: int) -> Optional[Dict]:
+        """Busca perfil completo do usuário"""
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"🔍 Buscando perfil do user_id: {user_id}")
+
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
@@ -517,7 +523,13 @@ class DatabaseManager:
                 """, (user_id,))
                 profile = cursor.fetchone()
                 cursor.close()
-                return dict(profile) if profile else None
+                
+                if profile:
+                    logger.info(f"✅ Perfil encontrado: {profile['username']} (role: {profile['role']})")
+                    return dict(profile)
+                
+                logger.error(f"❌ Nenhum perfil encontrado para user_id: {user_id}")
+                return None
         except Exception as e:
             logger.error(f"Erro ao buscar perfil: {e}")
             return None

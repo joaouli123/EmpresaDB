@@ -18,10 +18,21 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
+      console.log('[AUTH] Verificando autenticação...');
       const response = await authAPI.getMe();
+      console.log('[AUTH] Resposta /auth/me:', response.data);
+      
+      if (!response.data || !response.data.id) {
+        console.error('[AUTH] Resposta inválida do /auth/me:', response.data);
+        logout();
+        return;
+      }
+      
       setUser(response.data);
+      console.log('[AUTH] ✅ Usuário autenticado:', response.data.username, '(role:', response.data.role + ')');
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('[AUTH] ❌ Erro ao verificar autenticação:', error);
+      console.error('[AUTH] Erro detalhado:', error.response?.data);
       logout();
     } finally {
       setLoading(false);

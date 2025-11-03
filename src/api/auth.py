@@ -491,7 +491,21 @@ async def login(form_data: UserLogin):
 
 @router.get("/me", response_model=dict)
 async def read_users_me(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna dados completos do usuário autenticado
+    """
+    # Remover senha e garantir todos os campos necessários
     user_data = {k: v for k, v in current_user.items() if k != 'password'}
+    
+    # Garantir que campos essenciais existem
+    if 'role' not in user_data:
+        user_data['role'] = 'user'
+    if 'is_active' not in user_data:
+        user_data['is_active'] = True
+    
+    # Log para debug
+    logger.info(f"✅ /auth/me retornando dados do usuário: {user_data.get('username')} (role: {user_data.get('role')})")
+    
     return user_data
 
 @router.post("/forgot-password")

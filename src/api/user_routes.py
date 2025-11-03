@@ -21,19 +21,36 @@ class APIKeyCreate(BaseModel):
 
 @router.get("/profile")
 async def get_profile(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna perfil completo do usuário autenticado
+    """
     try:
+        logger.info(f"📊 Buscando perfil do usuário: {current_user.get('username')} (ID: {current_user.get('id')})")
+        
         profile = await db_manager.get_user_profile(current_user['id'])
+        
         if not profile:
+            logger.error(f"❌ Perfil não encontrado para user_id: {current_user['id']}")
             raise HTTPException(status_code=404, detail="Profile not found")
         
+        # Remover senha e adicionar campos extras
         profile_data = {k: v for k, v in profile.items() if k != 'password'}
         profile_data['last_activity'] = 'Hoje'
+        
+        # Garantir que role existe
+        if 'role' not in profile_data:
+            profile_data['role'] = current_user.get('role', 'user')
+        
+        logger.info(f"✅ Perfil retornado: {profile_data.get('username')} (role: {profile_data.get('role')})")
+        
         return profile_data
+        
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting profile: {e}")
-        raise HTTPException(status_code=500, detail="Error getting profile")
+        logger.error(f"❌ Erro ao buscar perfil: {e}")
+        logger.exception(e)  # Log completo do erro
+        raise HTTPException(status_code=500, detail=f"Error getting profile: {str(e)}")
 
 @router.put("/profile")
 async def update_profile(
