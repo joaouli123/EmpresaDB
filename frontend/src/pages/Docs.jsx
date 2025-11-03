@@ -34,48 +34,29 @@ const Docs = () => {
             </div>
             <h2>Introdução</h2>
             <p>
-              Nossa API permite consultar dados de empresas brasileiras através de diversos filtros.
+              Bem-vindo à documentação da API de Consulta de CNPJs! Esta API oferece acesso programático
+              aos dados públicos de empresas registradas na Receita Federal do Brasil.
             </p>
-            <div style={{
-              padding: '1rem',
-              background: '#fff3cd',
-              border: '1px solid #ffc107',
-              borderRadius: '4px',
-              marginBottom: '1rem'
-            }}>
-              <strong>⚠️ Tempo de Resposta:</strong> A API externa da Receita Federal pode demorar entre 5 a 30 segundos para responder.
-              Isso é normal e está fora do nosso controle. Aguarde o carregamento completo.
-            </div>
+            <p>
+              Com nossa API, você pode consultar informações detalhadas sobre empresas, sócios, endereços,
+              CNAEs e muito mais. Perfeita para integração em sistemas de CRM, ERPs, validação de dados
+              e análises de mercado.
+            </p>
 
-            <div className="info-card" style={{ marginTop: '20px', background: '#1f2937', color: 'white' }}>
-              <h3 style={{ color: 'white', marginBottom: '12px' }}>🔗 URL Base da API</h3>
-              <pre style={{ background: '#111827', padding: '15px', borderRadius: '8px', overflow: 'auto' }}>
-                {window.location.protocol}//{window.location.host}
-              </pre>
-              <p style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-                Use esta URL em todas as suas requisições para a API
+            <div className="info-card" style={{ marginTop: '30px', background: '#fee2e2', border: '3px solid #ef4444', padding: '24px' }}>
+              <h3 style={{ color: '#991b1b', marginBottom: '16px', fontSize: '20px' }}>
+                ⚠️ ATENÇÃO: Autenticação Obrigatória
+              </h3>
+              <p style={{ color: '#991b1b', fontSize: '16px', marginBottom: '12px', fontWeight: 'bold' }}>
+                TODAS as requisições à API precisam do header:
               </p>
-              <p style={{ marginTop: '12px', color: '#fbbf24', fontSize: '14px' }}>
-                ⚠️ <strong>IMPORTANTE:</strong> Todas as requisições precisam do header <code>X-API-Key</code> com sua chave de API
+              <div className="code-block" style={{ marginTop: '12px' }}>
+                <code style={{ fontSize: '16px' }}>X-API-Key: sua_chave_api_aqui</code>
+              </div>
+              <p style={{ color: '#991b1b', fontSize: '14px', marginTop: '16px' }}>
+                <strong>Sem este header, você receberá erro 401 Unauthorized.</strong><br/>
+                Obtenha sua chave em: <strong>Dashboard → Chaves de API → Nova Chave</strong>
               </p>
-            </div>
-
-            <div className="features-grid">
-              <div className="feature">
-                <Zap size={24} />
-                <h4>Rápido e Eficiente</h4>
-                <p>Respostas em menos de 50ms</p>
-              </div>
-              <div className="feature">
-                <Shield size={24} />
-                <h4>Seguro</h4>
-                <p>Autenticação via API Key</p>
-              </div>
-              <div className="feature">
-                <Database size={24} />
-                <h4>Completo</h4>
-                <p>Mais de 60 milhões de registros</p>
-              </div>
             </div>
           </section>
 
@@ -709,7 +690,7 @@ X-API-Key: sua_chave_api`}</pre>
               <Package size={32} />
             </div>
             <h2>⚡ Consultas em Lote (Batch Queries)</h2>
-            
+
             <div className="info-card" style={{ background: '#dbeafe', border: '2px solid #3b82f6', marginBottom: '24px' }}>
               <h3 style={{ color: '#1e40af', marginBottom: '12px' }}>📦 O que são Consultas em Lote?</h3>
               <p style={{ color: '#1e40af', fontSize: '14px', lineHeight: '1.6' }}>
@@ -770,7 +751,7 @@ X-API-Key: sua_chave_api`}</pre>
                 <code>/api/v1/batch/search</code>
               </div>
               <p>Executa uma busca em lote com filtros avançados. Retorna empresas que correspondem aos critérios.</p>
-              
+
               <div className="params-table">
                 <h4>📊 Filtros Disponíveis (Corpo da Requisição - JSON):</h4>
                 <table>
@@ -1042,96 +1023,115 @@ buscarCNAEsSecundarios('00000000000191');`}</pre>
             <div className="code-block">
               <pre>{`import requests
 
-API_BASE_URL = '${API_URL}'
-API_KEY = 'sua_chave_api_aqui'
+const API_URL = '${API_URL}';
+const API_KEY = 'sua_chave_api_aqui';
 
-headers = {
+const headers = {
     'X-API-Key': API_KEY
-}
+};
 
-# Consultar CNPJ específico
-def consultar_cnpj(cnpj):
-    response = requests.get(
-        f'{API_BASE_URL}/cnpj/{cnpj}',
-        headers=headers
-    )
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Erro {response.status_code}: {response.text}")
-        return None
+// Consultar CNPJ específico
+const consultarCNPJ = async (cnpj) => {
+  try {
+    const response = await fetch(`${API_URL}/cnpj/${cnpj}`, { headers });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao consultar CNPJ:', error);
+    return null;
+  }
+};
 
-resultado = consultar_cnpj('00000000000191')
-if resultado:
-    print(f"Razão Social: {resultado['razao_social']}")
-    print(f"CNPJ: {resultado['cnpj_completo']}")
+const getEmpresaInfo = async () => {
+  const resultado = await consultarCNPJ('00000000000191');
+  if (resultado) {
+    console.log(`Razão Social: ${resultado['razao_social']}`);
+    console.log(`CNPJ: ${resultado['cnpj_completo']}`);
+  }
+};
+getEmpresaInfo();
 
 ${isAdmin ? `
-# 2. Buscar empresas com filtros (APENAS ADMIN)
-def buscar_empresas(filtros):
-    response = requests.get(
-        f'{API_BASE_URL}/search',
-        headers=headers,
-        params=filtros
-    )
+// 2. Buscar empresas com filtros (APENAS ADMIN)
+const buscarEmpresas = async (filtros) => {
+    const params = new URLSearchParams(filtros).toString();
+    try {
+        const response = await fetch(`${API_URL}/search?${params}`, { headers });
+        if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao buscar empresas:', error);
+        return null;
+    }
+};
 
-    if response.status_code == 200:
-        return response.json()
-
-    return None
-
-# Exemplo: Buscar empresas de grande porte em SP, ativas
-filtros = {
+// Exemplo: Buscar empresas de grande porte em SP, ativas
+const filtros = {
     "uf": "SP",
     "porte": "4",
     "situacao_cadastral": "02",
     "page": 1,
     "per_page": 50
-}
+};
 
-resultado = buscar_empresas(filtros)
-if resultado:
-    print(f"Total de empresas encontradas: {resultado['total']}")
-    print(f"Página {resultado['page']} de {resultado['total_pages']}")
+const getEmpresas = async () => {
+    const resultado = await buscarEmpresas(filtros);
+    if (resultado) {
+        console.log(\`Total de empresas encontradas: \${resultado['total']}\`);
+        console.log(\`Página \${resultado['page']} de \${resultado['total_pages']}\`);
 
-    for empresa in resultado['items']:
-        print(f"{empresa['cnpj_completo']} - {empresa['razao_social']}")` : '# Endpoint /search disponível apenas para administrador'}
+        resultado['items'].forEach(empresa => {
+            console.log(\`\${empresa['cnpj_completo']} - \${empresa['razao_social']}\`);
+        });
+    }
+};
+getEmpresas();` : '// Endpoint /search disponível apenas para administrador'}
 
-# Listar sócios
-def listar_socios(cnpj):
-    response = requests.get(
-        f'{API_BASE_URL}/cnpj/{cnpj}/socios',
-        headers=headers
-    )
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Erro {response.status_code}: {response.text}")
-        return None
+// Listar sócios
+const listarSocios = async (cnpj) => {
+  try {
+    const response = await fetch(`${API_URL}/cnpj/${cnpj}/socios`, { headers });
+    if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao listar sócios:', error);
+    return null;
+  }
+};
 
-socios = listar_socios('00000000000191')
-if socios:
-    print(f"Encontrados {len(socios)} sócios")
-    for socio in socios:
-        print(f"- {socio['nome_socio']}")
+const getSociosInfo = async () => {
+  const socios = await listarSocios('00000000000191');
+  if (socios) {
+    console.log(\`Encontrados \${socios.length} sócios\`);
+    socios.forEach(socio => {
+      console.log(`- \${socio['nome_socio']}`);
+    });
+  }
+};
+getSociosInfo();
 
-# Buscar CNAEs secundários
-def buscar_cnaes_secundarios(cnpj):
-    response = requests.get(
-        f'{API_BASE_URL}/cnpj/{cnpj}/cnaes-secundarios',
-        headers=headers
-    )
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Erro {response.status_code}: {response.text}")
-        return None
+// Buscar CNAEs secundários
+const buscarCNAEsSecundarios = async (cnpj) => {
+  try {
+    const response = await fetch(`${API_URL}/cnpj/${cnpj}/cnaes-secundarios`, { headers });
+    if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao buscar CNAEs secundários:', error);
+    return null;
+  }
+};
 
-cnaes = buscar_cnaes_secundarios('00000000000191')
-if cnaes:
-    print(f"Encontrados {len(cnaes)} CNAEs secundários:")
-    for cnae in cnaes:
-        print(f"- [{cnae['codigo']}] {cnae['descricao']}")`}</pre>
+const getCNAEsInfo = async () => {
+  const cnaes = await buscarCNAEsSecundarios('00000000000191');
+  if (cnaes) {
+    console.log(\`Encontrados \${cnaes.length} CNAEs secundários:\`);
+    cnaes.forEach(cnae => {
+      console.log(`- [\${cnae['codigo']}] \${cnae['descricao']}`);
+    });
+  }
+};
+getCNAEsInfo();`}</pre>
             </div>
 
             <h3>PHP</h3>
