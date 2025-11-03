@@ -8,7 +8,9 @@ import psycopg2
 from datetime import datetime, timedelta
 from src.database.connection import db_manager
 from src.api.auth import get_current_user
-from src.config import logger # Assuming logger is configured in src.config
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 

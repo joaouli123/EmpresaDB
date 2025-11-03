@@ -1,9 +1,17 @@
 import os
+import logging
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import model_validator
 from typing import Optional
 from urllib.parse import urlparse, unquote
 from fastapi.security import OAuth2PasswordBearer
+
+# Configurar logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # ✅ Pydantic BaseSettings lê automaticamente:
 # 1º Variáveis de ambiente (Replit Secrets)
