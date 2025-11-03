@@ -13,6 +13,7 @@ from src.api.batch_routes import router as batch_router
 from src.config import settings
 import logging
 from pathlib import Path
+from sqlalchemy import text
 
 logging.basicConfig(
     level=logging.INFO,
