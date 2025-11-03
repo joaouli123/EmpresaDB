@@ -83,13 +83,41 @@ static_path = Path(__file__).parent.parent.parent / "static"
 if static_path.exists():
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
-@app.get("/")
-async def root():
+# Servir frontend buildado em produção
+frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+
+@app.get("/api")
+async def api_root():
     return {
         "message": "API de Consulta CNPJ",
         "version": settings.API_VERSION,
         "docs": "/api-docs"
     }
+
+# Servir index.html para todas as rotas não-API (SPA routing)
+if frontend_dist.exists():
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Se é uma rota de API, não serve o frontend
+        if full_path.startswith(("api/", "auth/", "user/", "subscriptions/", "batch/", "stripe/", "cnpj/", "search", "stats", "etl/", "ws/", "docs", "redoc", "openapi.json")):
+            return {"error": "Not found"}
+        
+        # Serve o index.html para todas as outras rotas (React Router)
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not built"}
+else:
+    @app.get("/")
+    async def root():
+        return {
+            "message": "API de Consulta CNPJ",
+            "version": settings.API_VERSION,
+            "docs": "/api-docs",
+            "warning": "Frontend not built. Run 'cd frontend && npm run build'"
+        }
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(auth_router)
