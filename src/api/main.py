@@ -104,7 +104,7 @@ if frontend_dist.exists():
         # Se é uma rota de API, não serve o frontend
         if full_path.startswith(("api/", "auth/", "user/", "subscriptions/", "batch/", "stripe/", "cnpj/", "search", "stats", "etl/", "ws/", "docs", "redoc", "openapi.json")):
             return {"error": "Not found"}
-        
+
         # Serve o index.html para todas as outras rotas (React Router)
         index_file = frontend_dist / "index.html"
         if index_file.exists():
@@ -124,13 +124,13 @@ else:
 async def health_check():
     """Health check para monitoramento do deployment"""
     from src.database.connection import engine_manager
-    
+
     try:
         # Verifica conexão com banco
         engine = engine_manager.get_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        
+
         return {
             "status": "healthy",
             "database": "connected",

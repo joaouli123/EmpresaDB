@@ -55,13 +55,16 @@ const Subscription = () => {
         })
       ]);
       
-      console.log('Subscription data:', subRes.data);
-      console.log('Transactions data:', transRes.data);
-      console.log('Cards data:', cardsRes.data);
+      // Verificar se retornou erro 404
+      if (subRes.data && subRes.data.error) {
+        setError('Não foi possível carregar informações da assinatura. Tente novamente.');
+        setSubscription(null);
+      } else {
+        setSubscription(subRes.data);
+      }
       
-      setSubscription(subRes.data);
-      setTransactions(transRes.data || []);
-      setCards(cardsRes.data || []);
+      setTransactions(Array.isArray(transRes.data) ? transRes.data : []);
+      setCards(Array.isArray(cardsRes.data) ? cardsRes.data : []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       setError('Erro ao carregar informações da assinatura');
