@@ -43,19 +43,19 @@ const Docs = () => {
               e análises de mercado.
             </p>
 
-            <div className="info-card" style={{ marginTop: '30px', background: '#fee2e2', border: '3px solid #ef4444', padding: '24px' }}>
-              <h3 style={{ color: '#991b1b', marginBottom: '16px', fontSize: '20px' }}>
-                ⚠️ ATENÇÃO: Autenticação Obrigatória
+            <div className="info-card" style={{ marginTop: '30px', background: '#fef2f2', border: '1px solid #fca5a5', padding: '20px' }}>
+              <h3 style={{ color: '#991b1b', marginBottom: '12px', fontSize: '16px' }}>
+                ⚠️ Autenticação Obrigatória
               </h3>
-              <p style={{ color: '#991b1b', fontSize: '16px', marginBottom: '12px', fontWeight: 'bold' }}>
-                TODAS as requisições à API precisam do header:
+              <p style={{ color: '#7f1d1d', fontSize: '14px', marginBottom: '10px' }}>
+                Todas as requisições à API precisam do header:
               </p>
-              <div className="code-block" style={{ marginTop: '12px' }}>
-                <code style={{ fontSize: '16px' }}>X-API-Key: sua_chave_api_aqui</code>
+              <div className="code-block" style={{ marginTop: '10px' }}>
+                <code style={{ fontSize: '14px' }}>X-API-Key: sua_chave_api_aqui</code>
               </div>
-              <p style={{ color: '#991b1b', fontSize: '14px', marginTop: '16px' }}>
-                <strong>Sem este header, você receberá erro 401 Unauthorized.</strong><br/>
-                Obtenha sua chave em: <strong>Dashboard → Chaves de API → Nova Chave</strong>
+              <p style={{ color: '#7f1d1d', fontSize: '13px', marginTop: '12px' }}>
+                Sem este header, você receberá erro 401 Unauthorized.<br/>
+                Obtenha sua chave em: Dashboard → Chaves de API → Nova Chave
               </p>
             </div>
           </section>
