@@ -34,7 +34,8 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     
     # CORS Settings - Configure trusted origins in .env
-    ALLOWED_ORIGINS: str = "*"  # Default: all (MUST be configured in production!)
+    # Em produção, configure: ALLOWED_ORIGINS=https://dbempresas.com.br,https://www.dbempresas.com.br
+    ALLOWED_ORIGINS: str = "*"  # Default: all (DEVE ser configurado em produção!)
     
     @model_validator(mode='before')
     def parse_empty_strings(cls, data):

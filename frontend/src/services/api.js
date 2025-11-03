@@ -1,7 +1,13 @@
 import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_API_URL || '';
-console.log('[API] Base URL configurada:', baseURL || '(usando proxy)');
+const isProduction = import.meta.env.PROD;
+console.log('[API] Ambiente:', isProduction ? 'PRODUÇÃO' : 'DESENVOLVIMENTO');
+console.log('[API] Base URL configurada:', baseURL || '(usando proxy Vite)');
+
+if (isProduction && !baseURL) {
+  console.error('⚠️ ATENÇÃO: Em produção mas VITE_API_URL não configurada!');
+}
 
 const api = axios.create({
   baseURL: baseURL,

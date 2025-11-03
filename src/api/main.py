@@ -117,6 +117,31 @@ else:
             "version": settings.API_VERSION,
             "docs": "/api-docs",
             "warning": "Frontend not built. Run 'cd frontend && npm run build'"
+
+
+@app.get("/health")
+async def health_check():
+    """Health check para monitoramento do deployment"""
+    from src.database.connection import engine_manager
+    
+    try:
+        # Verifica conexão com banco
+        engine = engine_manager.get_engine()
+        with engine.connect() as conn:
+            conn.execute("SELECT 1")
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "version": settings.API_VERSION
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
+
         }
 
 app.include_router(api_router, prefix="/api/v1")
