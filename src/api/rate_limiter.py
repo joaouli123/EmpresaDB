@@ -37,7 +37,7 @@ class RateLimiter:
         self.requests = defaultdict(list)
         self.cleanup_task = None
     
-    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', max_requests: int | None = None, window_seconds: int | None = None):
+    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', user_role: str = 'user', max_requests: int | None = None, window_seconds: int | None = None):
         """
         Verifica se usuário excedeu limite de requisições
         Suporta limites por plano e limites customizados
@@ -45,9 +45,15 @@ class RateLimiter:
         Args:
             user_id: ID do usuário
             user_plan: Plano do usuário (free, start, growth, pro, enterprise, admin)
+            user_role: Role do usuário (user, admin) - admin tem acesso ilimitado
             max_requests: Limite customizado (sobrescreve plano)
             window_seconds: Janela de tempo customizada (sobrescreve plano)
         """
+        # 🔓 ADMIN TEM ACESSO ILIMITADO - sem rate limiting!
+        if user_role == 'admin':
+            logger.info(f"✅ Admin user {user_id} - unlimited access (no rate limiting)")
+            return
+        
         now = datetime.now()
         
         # Usar limites do plano ou customizados

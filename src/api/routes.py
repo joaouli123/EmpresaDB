@@ -189,64 +189,71 @@ async def verify_api_key(x_api_key: str = Header(None)):
                         logger.info(f"Usuário {user['id']} tem assinatura marcada para cancelar no final do período")
 
                 # VERIFICAÇÃO DE LIMITE MENSAL DE CONSULTAS
-                month_year = datetime.now().strftime('%Y-%m')
-                cursor.execute("""
-                    SELECT queries_used 
-                    FROM clientes.monthly_usage
-                    WHERE user_id = %s AND month_year = %s
-                """, (user['id'], month_year))
-                usage = cursor.fetchone()
+                # 🔓 ADMIN TEM CONSULTAS ILIMITADAS - pular verificação de limite
+                if user.get('role') != 'admin':
+                    month_year = datetime.now().strftime('%Y-%m')
+                    cursor.execute("""
+                        SELECT queries_used 
+                        FROM clientes.monthly_usage
+                        WHERE user_id = %s AND month_year = %s
+                    """, (user['id'], month_year))
+                    usage = cursor.fetchone()
 
-                queries_used = usage[0] if usage else 0
-                monthly_limit = user.get('monthly_queries', 200) # Default para 200 se não encontrado
+                    queries_used = usage[0] if usage else 0
+                    monthly_limit = user.get('monthly_queries', 200) # Default para 200 se não encontrado
 
-                # Verificar se excedeu o limite
-                if queries_used >= monthly_limit:
-                    # Calcular data de renovação
-                    period_end = subscription[1] if subscription else None # Pega do subscription se existir
-                    renewal_date = "N/A"
-                    if period_end:
-                        if period_end.tzinfo is None:
-                            period_end = period_end.replace(tzinfo=timezone.utc)
-                        renewal_date = period_end.strftime('%d/%m/%Y')
-                    elif user.get('plan') == 'free':
-                        # Para plano Free, renova no início do próximo mês
-                        now = datetime.now(timezone.utc)
-                        next_month = now.replace(day=1, month=now.month % 12 + 1, year=now.year if now.month < 12 else now.year + 1)
-                        renewal_date = next_month.strftime('%d/%m/%Y')
+                    # Verificar se excedeu o limite
+                    if queries_used >= monthly_limit:
+                        # Calcular data de renovação
+                        period_end = subscription[1] if subscription else None # Pega do subscription se existir
+                        renewal_date = "N/A"
+                        if period_end:
+                            if period_end.tzinfo is None:
+                                period_end = period_end.replace(tzinfo=timezone.utc)
+                            renewal_date = period_end.strftime('%d/%m/%Y')
+                        elif user.get('plan') == 'free':
+                            # Para plano Free, renova no início do próximo mês
+                            now = datetime.now(timezone.utc)
+                            next_month = now.replace(day=1, month=now.month % 12 + 1, year=now.year if now.month < 12 else now.year + 1)
+                            renewal_date = next_month.strftime('%d/%m/%Y')
 
-                    raise HTTPException(
-                        status_code=429,
-                        detail={
-                            "error": "monthly_limit_exceeded",
-                            "message": f"Você atingiu o limite mensal de {monthly_limit:,} consultas do plano {user.get('plan', 'free')}.",
-                            "queries_used": queries_used,
-                            "monthly_limit": monthly_limit,
-                            "current_plan": user.get('plan', 'free'),
-                            "renewal_date": renewal_date,
-                            "action_url": "/home#pricing",
-                            "help": f"Seu plano será renovado em {renewal_date}. Para continuar usando a API agora, faça upgrade para um plano superior com mais consultas mensais.",
-                            "suggestions": [
-                                "Aguarde a renovação do plano",
-                                "Faça upgrade para um plano com mais consultas",
-                                "Entre em contato com o suporte para opções personalizadas"
-                            ]
-                        }
-                    )
+                        raise HTTPException(
+                            status_code=429,
+                            detail={
+                                "error": "monthly_limit_exceeded",
+                                "message": f"Você atingiu o limite mensal de {monthly_limit:,} consultas do plano {user.get('plan', 'free')}.",
+                                "queries_used": queries_used,
+                                "monthly_limit": monthly_limit,
+                                "current_plan": user.get('plan', 'free'),
+                                "renewal_date": renewal_date,
+                                "action_url": "/home#pricing",
+                                "help": f"Seu plano será renovado em {renewal_date}. Para continuar usando a API agora, faça upgrade para um plano superior com mais consultas mensais.",
+                                "suggestions": [
+                                    "Aguarde a renovação do plano",
+                                    "Faça upgrade para um plano com mais consultas",
+                                    "Entre em contato com o suporte para opções personalizadas"
+                                ]
+                            }
+                        )
 
-                # Incrementar contador de uso mensal
-                cursor.execute("""
-                    INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
-                    VALUES (%s, %s, 1, NOW())
-                    ON CONFLICT (user_id, month_year) 
-                    DO UPDATE SET 
-                        queries_used = clientes.monthly_usage.queries_used + 1,
-                        last_query_at = NOW()
-                """, (user['id'], month_year))
+                    # Incrementar contador de uso mensal
+                    cursor.execute("""
+                        INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
+                        VALUES (%s, %s, 1, NOW())
+                        ON CONFLICT (user_id, month_year) 
+                        DO UPDATE SET 
+                            queries_used = clientes.monthly_usage.queries_used + 1,
+                            last_query_at = NOW()
+                    """, (user['id'], month_year))
 
-                # Armazenar informações de uso para logging
-                user['queries_used'] = queries_used + 1  # Incluir esta consulta
-                user['queries_remaining'] = monthly_limit - (queries_used + 1)
+                    # Armazenar informações de uso para logging
+                    user['queries_used'] = queries_used + 1  # Incluir esta consulta
+                    user['queries_remaining'] = monthly_limit - (queries_used + 1)
+                else:
+                    # Admin tem acesso ilimitado - configurar valores especiais
+                    logger.info(f"✅ Admin user {user['id']} - unlimited queries (no monthly limit)")
+                    user['queries_used'] = 0
+                    user['queries_remaining'] = 999999999  # Ilimitado
 
             finally:
                 # Garantir que cursor sempre seja fechado
@@ -261,9 +268,11 @@ async def verify_api_key(x_api_key: str = Header(None)):
             detail="Erro ao verificar assinatura. Por favor, tente novamente."
         )
 
-    # Aplicar rate limiting baseado no plano do usuário
+    # Aplicar rate limiting baseado no plano e role do usuário
+    # 🔓 Admin tem acesso ilimitado (sem rate limiting)
     user_plan = user.get('plan', 'free')
-    await rate_limiter.check_rate_limit(user['id'], user_plan)
+    user_role = user.get('role', 'user')
+    await rate_limiter.check_rate_limit(user['id'], user_plan, user_role)
 
     # O método verify_api_key já incrementa automaticamente os contadores
     return user
