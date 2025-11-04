@@ -21,19 +21,73 @@ export const AuthProvider = ({ children }) => {
       console.log('[AUTH] Verificando autenticação...');
       const response = await authAPI.getMe();
       console.log('[AUTH] Resposta /auth/me:', response.data);
-      
-      if (!response.data || !response.data.id) {
-        console.error('[AUTH] Resposta inválida do /auth/me:', response.data);
+
+      // Verificar se a resposta contém um erro
+      if (response.data && response.data.error) {
+        console.error('[AUTH] Backend retornou erro:', response.data.error);
+        // Tentar usar dados do localStorage
+        const cachedUser = localStorage.getItem('user');
+        if (cachedUser) {
+          try {
+            const parsedUser = JSON.parse(cachedUser);
+            setUser(parsedUser);
+            console.log('[AUTH] ✅ Usando dados do cache:', parsedUser.username);
+            return;
+          } catch (e) {
+            console.error('[AUTH] Erro ao parsear user do cache:', e);
+          }
+        }
         logout();
         return;
       }
-      
+
+      if (!response.data || !response.data.id) {
+        console.error('[AUTH] Resposta inválida do /auth/me:', response.data);
+        // Tentar usar dados do localStorage
+        const cachedUser = localStorage.getItem('user');
+        if (cachedUser) {
+          try {
+            const parsedUser = JSON.parse(cachedUser);
+            setUser(parsedUser);
+            console.log('[AUTH] ✅ Usando dados do cache:', parsedUser.username);
+            return;
+          } catch (e) {
+            console.error('[AUTH] Erro ao parsear user do cache:', e);
+          }
+        }
+        logout();
+        return;
+      }
+
+      // Salvar no cache para uso futuro
+      localStorage.setItem('user', JSON.stringify(response.data));
       setUser(response.data);
       console.log('[AUTH] ✅ Usuário autenticado:', response.data.username, '(role:', response.data.role + ')');
     } catch (error) {
       console.error('[AUTH] ❌ Erro ao verificar autenticação:', error);
       console.error('[AUTH] Erro detalhado:', error.response?.data);
-      logout();
+
+      // Tentar usar dados do localStorage antes de fazer logout
+      const cachedUser = localStorage.getItem('user');
+      if (cachedUser && error.response?.status !== 401) {
+        try {
+          const parsedUser = JSON.parse(cachedUser);
+          setUser(parsedUser);
+          console.log('[AUTH] ✅ Usando dados do cache após erro:', parsedUser.username);
+          return;
+        } catch (e) {
+          console.error('[AUTH] Erro ao parsear user do cache:', e);
+        }
+      }
+
+      // Fazer logout apenas em caso de 401 ou se não houver cache
+      if (error.response?.status === 401) {
+        console.warn('[AUTH] Token inválido. Fazendo logout...');
+        logout();
+      } else if (!cachedUser) {
+        console.warn('[AUTH] Sem cache disponível. Fazendo logout...');
+        logout();
+      }
     } finally {
       setLoading(false);
     }
