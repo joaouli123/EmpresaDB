@@ -98,29 +98,6 @@ async def api_root():
         "docs": "/api-docs"
     }
 
-# Servir index.html para todas as rotas não-API (SPA routing)
-if frontend_dist.exists():
-    @app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
-        # Se é uma rota de API, não serve o frontend
-        if full_path.startswith(("api/", "auth/", "user/", "subscriptions/", "batch/", "stripe/", "cnpj/", "search", "stats", "etl/", "ws/", "docs", "redoc", "openapi.json")):
-            return {"error": "Not found"}
-
-        # Serve o index.html para todas as outras rotas (React Router)
-        index_file = frontend_dist / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
-        return {"error": "Frontend not built"}
-else:
-    @app.get("/")
-    async def root():
-        return {
-            "message": "API de Consulta CNPJ",
-            "version": settings.API_VERSION,
-            "docs": "/api-docs",
-            "warning": "Frontend not built. Run 'cd frontend && npm run build'"
-        }
-
 @app.get("/health")
 async def health_check():
     """Health check para monitoramento do deployment"""
@@ -152,6 +129,24 @@ app.include_router(stripe_router)
 app.include_router(stripe_webhook_router)
 app.include_router(email_logs_router)
 app.include_router(batch_router, prefix="/api/v1")
+
+# ⚠️ IMPORTANTE: Catch-all route DEVE vir DEPOIS de todos os routers
+# para não interceptar as rotas de API
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """Serve o frontend React para todas as rotas não-API (SPA routing)"""
+    if frontend_dist.exists():
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not built"}
+    
+    return {
+        "message": "API de Consulta CNPJ",
+        "version": settings.API_VERSION,
+        "docs": "/api-docs",
+        "warning": "Frontend not built. Run 'cd frontend && npm run build'"
+    }
 
 if __name__ == "__main__":
     import uvicorn
