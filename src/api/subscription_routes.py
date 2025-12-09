@@ -29,9 +29,10 @@ class SubscriptionInfo(BaseModel):
     total_limit: int
     queries_used: int
     queries_remaining: int
-    renewal_date: str
+    renewal_date: Optional[str] = None
     status: str
-    cancel_at_period_end: bool # Added this field based on the changes
+    cancel_at_period_end: bool
+    plan_id: Optional[int] = None
 
 class UsageStats(BaseModel):
     queries_used_today: int
