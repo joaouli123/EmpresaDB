@@ -7,7 +7,7 @@ const Privacy = () => {
   return (
     <SharedLayout>
       <Helmet>
-        <title>Política de Privacidade - DB Empresas | CNPJ 47.394.596/0001-15</title>
+        <title>Política de Privacidade - DB Empresas</title>
         <meta name="description" content="Política de Privacidade da DB Empresas. Saiba como protegemos seus dados pessoais e garantimos conformidade com a LGPD." />
         <meta name="keywords" content="política privacidade DB Empresas, LGPD, proteção dados, privacidade CNPJ API" />
         <link rel="canonical" href="https://dbempresas.com.br/privacidade" />
@@ -26,7 +26,7 @@ const Privacy = () => {
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '40px' }}>
             <strong>Última atualização:</strong> Janeiro de 2024<br />
-            <strong>DB Empresas</strong> - CNPJ: 47.394.596/0001-15
+            <strong>DB Empresas</strong>
           </p>
 
           <section style={{ marginBottom: '48px' }}>

@@ -7,7 +7,7 @@ const About = () => {
   return (
     <SharedLayout>
       <Helmet>
-        <title>Sobre a DB Empresas - Líder em Dados Empresariais do Brasil | CNPJ 47.394.596/0001-15</title>
+        <title>Sobre a DB Empresas - Líder em Dados Empresariais do Brasil</title>
         <meta name="description" content="Conheça a DB Empresas, empresa especializada em consulta de CNPJ e dados empresariais. Acesso a 64M+ empresas da Receita Federal com tecnologia de ponta." />
         <meta name="keywords" content="DB Empresas, sobre DB Empresas, empresa dados CNPJ, consulta empresas Brasil, API CNPJ profissional" />
         <link rel="canonical" href="https://dbempresas.com.br/sobre" />
@@ -25,7 +25,7 @@ const About = () => {
         <h2>Quem Somos</h2>
         <p>
           A DB Empresas é uma empresa brasileira especializada em fornecer acesso rápido e confiável aos dados 
-          empresariais da Receita Federal. Com CNPJ 47.394.596/0001-15, oferecemos soluções tecnológicas para 
+          empresariais da Receita Federal. Oferecemos soluções tecnológicas para 
           empresas que precisam consultar, validar e analisar informações de CNPJs.
         </p>
         <p>

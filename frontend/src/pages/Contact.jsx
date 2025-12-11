@@ -80,11 +80,8 @@ const Contact = () => {
 
           <div className="feature-card">
             <MapPin size={40} color="#3b82f6" style={{ marginBottom: '16px' }} />
-            <h3>CNPJ</h3>
+            <h3>Localização</h3>
             <p style={{ fontSize: '18px', color: '#1f2937', marginTop: '12px' }}>
-              47.394.596/0001-15
-            </p>
-            <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
               Curitiba/PR - Brasil
             </p>
           </div>

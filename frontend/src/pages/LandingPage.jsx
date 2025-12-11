@@ -1516,9 +1516,6 @@ const LandingPage = () => {
               <h3>DB Empresas</h3>
             </div>
             <p>Acesso completo aos dados empresariais da Receita Federal. Consultas rápidas, precisas e atualizadas.</p>
-            <p style={{ marginTop: '16px', fontSize: '14px' }}>
-              <strong>CNPJ:</strong> 47.394.596/0001-15
-            </p>
           </div>
 
           <div className="footer-section">
@@ -1562,7 +1559,7 @@ const LandingPage = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2024 DB Empresas - CNPJ: 47.394.596/0001-15. Todos os direitos reservados.</p>
+          <p>&copy; 2024 DB Empresas. Todos os direitos reservados.</p>
           <p>Dados oficiais da Receita Federal do Brasil</p>
         </div>
       </footer>

@@ -7,7 +7,7 @@ const Terms = () => {
   return (
     <SharedLayout>
       <Helmet>
-        <title>Termos de Uso - DB Empresas | CNPJ 47.394.596/0001-15</title>
+        <title>Termos de Uso - DB Empresas</title>
         <meta name="description" content="Termos de Uso da plataforma DB Empresas. Conheça os direitos, deveres e condições de uso da nossa API de CNPJ." />
         <meta name="keywords" content="termos uso DB Empresas, condições uso API CNPJ, termos serviço dados empresas" />
         <link rel="canonical" href="https://dbempresas.com.br/termos" />
@@ -26,7 +26,7 @@ const Terms = () => {
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '40px' }}>
             <strong>Última atualização:</strong> Janeiro de 2024<br />
-            <strong>DB Empresas</strong> - CNPJ: 47.394.596/0001-15
+            <strong>DB Empresas</strong>
           </p>
 
           <section style={{ marginBottom: '48px' }}>

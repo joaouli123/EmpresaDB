@@ -53,7 +53,7 @@ const SEO = ({
       
       <meta name="author" content="DB Empresas" />
       <meta name="publisher" content="DB Empresas" />
-      <meta name="copyright" content="© 2024 DB Empresas - CNPJ: 47.394.596/0001-15" />
+      <meta name="copyright" content="© 2024 DB Empresas" />
 
       <meta httpEquiv="content-language" content="pt-BR" />
       <meta name="rating" content="general" />
