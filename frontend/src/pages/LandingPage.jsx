@@ -36,11 +36,12 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { api } from '../services/api';
-import ContactModal from '../components/ContactModal';
+import { useContactModal } from '../contexts/ContactModalContext';
 import '../styles/LandingPage.css';
 import '../styles/LandingPageUpdates.css';
 
 const LandingPage = () => {
+  const { setIsOpen: setContactModalOpen } = useContactModal();
   const [selectedPlan, setSelectedPlan] = useState('professional');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -53,7 +54,6 @@ const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [pricingCarouselIndex, setPricingCarouselIndex] = useState(0); // Carrossel de Preços
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   useEffect(() => {
     loadPlans();
@@ -1419,7 +1419,7 @@ const LandingPage = () => {
           </p>
           <button 
             className="btn-primary-large"
-            onClick={() => setIsContactModalOpen(true)}
+            onClick={() => setContactModalOpen(true)}
           >
             Fale com Nosso Time
             <ChevronRight size={20} />
@@ -1500,10 +1500,6 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      <ContactModal 
-        isOpen={isContactModalOpen} 
-        onClose={() => setIsContactModalOpen(false)} 
-      />
     </div>
   );
 };

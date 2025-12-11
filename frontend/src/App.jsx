@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ContactModalProvider } from './contexts/ContactModalContext';
 import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
+import ContactModal from './components/ContactModal';
+import { useContactModal } from './contexts/ContactModalContext';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import LandingPage from './pages/LandingPage';
@@ -113,12 +116,28 @@ function AppRoutes() {
   );
 }
 
+function AppWithModals() {
+  const { isOpen, setIsOpen } = useContactModal();
+
+  return (
+    <AppRoutes />
+  );
+}
+
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ContactModalProvider>
+      <AuthProvider>
+        <AppWithModals />
+        <ContactModalContent />
+      </AuthProvider>
+    </ContactModalProvider>
   );
+}
+
+function ContactModalContent() {
+  const { isOpen, setIsOpen } = useContactModal();
+  return <ContactModal isOpen={isOpen} onClose={() => setIsOpen(false)} />;
 }
 
 export default App;

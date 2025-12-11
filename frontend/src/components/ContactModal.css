@@ -15,9 +15,10 @@
 .contact-modal {
   background: white;
   border-radius: 16px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
+  width: calc(100% - 40px);
+  min-width: 280px;
+  max-width: 450px;
+  max-height: 85vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -55,42 +56,44 @@
 }
 
 .modal-content {
-  padding: 40px;
+  padding: 32px;
 }
 
 .modal-content h2 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 8px;
+  padding-right: 32px;
 }
 
 .modal-content > p {
   color: #6b7280;
-  margin-bottom: 32px;
-  font-size: 15px;
+  margin-bottom: 24px;
+  font-size: 14px;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 6px;
+  font-size: 13px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 11px 14px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   transition: border-color 0.2s;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .form-group input:focus {
@@ -101,15 +104,16 @@
 
 .btn-submit {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: #3b82f6;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s;
+  margin-top: 8px;
 }
 
 .btn-submit:hover {
