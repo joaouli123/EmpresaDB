@@ -146,6 +146,9 @@ CREATE INDEX IF NOT EXISTS idx_simples_mei ON simples_nacional(opcao_mei);
 -- Views úteis para consultas
 
 -- View de estabelecimentos com dados da empresa
+DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos CASCADE;
+DROP VIEW IF EXISTS vw_estabelecimentos_completos CASCADE;
+
 CREATE OR REPLACE VIEW vw_estabelecimentos_completos AS
 SELECT 
     e.cnpj_completo,

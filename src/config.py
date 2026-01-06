@@ -84,6 +84,7 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
 
     # ETL
+    RFB_BASE_URL: str = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/"
     DOWNLOAD_DIR: str = "./downloads"
     BATCH_SIZE: int = 10000
     CHUNK_SIZE: int = 50000  # Tamanho do chunk para processamento
