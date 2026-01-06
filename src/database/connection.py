@@ -115,6 +115,18 @@ class DatabaseManager:
                     # Fallback: fecha conexão (lento)
                     conn.close()
 
+    def test_connection(self) -> bool:
+        """Testa se a conexão com o banco de dados está funcionando"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.close()
+                return True
+        except Exception as e:
+            logger.error(f"❌ Falha no teste de conexão: {e}")
+            return False
+
     def execute_schema(self, schema_file: str):
         logger.info(f"Executando schema do arquivo: {schema_file}")
         try:
