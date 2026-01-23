@@ -16,3 +16,4 @@ tarsafe
 passlib
 redis
 stripe
+resend

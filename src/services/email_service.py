@@ -1,42 +1,32 @@
-import smtplib
 import logging
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, Any
 from datetime import datetime
 from src.config import settings
+
+try:
+    import resend
+    RESEND_AVAILABLE = True
+except ImportError:
+    RESEND_AVAILABLE = False
+    logging.warning("Biblioteca 'resend' não instalada. Instale com: pip install resend")
 
 logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Serviço para envio de emails via SMTP"""
+    """Serviço para envio de emails via Resend API"""
     
     def __init__(self):
-        self.host = settings.EMAIL_HOST
-        self.port = settings.EMAIL_PORT
-        self.user = settings.EMAIL_USER
-        self.password = settings.EMAIL_PASSWORD
+        self.api_key = settings.RESEND_API_KEY
         self.from_email = settings.EMAIL_FROM
-        self.use_ssl = settings.EMAIL_USE_SSL
         
-        if not all([self.host, self.user, self.password, self.from_email]):
-            logger.warning("Configurações de email incompletas. Envio de emails desabilitado.")
-    
-    def _get_smtp_connection(self):
-        """Cria conexão SMTP"""
-        try:
-            if self.use_ssl:
-                server = smtplib.SMTP_SSL(self.host, self.port, timeout=10)
-            else:
-                server = smtplib.SMTP(self.host, self.port, timeout=10)
-                server.starttls()
-            
-            server.login(self.user, self.password)
-            return server
-        except Exception as e:
-            logger.error(f"Erro ao conectar ao servidor SMTP: {e}")
-            raise
+        if not self.api_key:
+            logger.warning("RESEND_API_KEY não configurada. Envio de emails desabilitado.")
+        elif RESEND_AVAILABLE:
+            resend.api_key = self.api_key
+            logger.info("✅ Resend API inicializada com sucesso")
+        else:
+            logger.error("❌ Biblioteca 'resend' não disponível")
     
     def send_email(
         self, 
@@ -46,44 +36,40 @@ class EmailService:
         plain_content: Optional[str] = None
     ) -> bool:
         """
-        Envia um email
+        Envia um email via Resend API
         
         Args:
             to_email: Email do destinatário
             subject: Assunto do email
             html_content: Conteúdo HTML do email
-            plain_content: Conteúdo em texto puro (opcional)
+            plain_content: Conteúdo em texto puro (opcional, ignorado pela Resend)
         
         Returns:
             True se enviado com sucesso, False caso contrário
         """
-        if not all([self.host, self.user, self.password, self.from_email]):
-            logger.error("Configurações de email incompletas")
+        if not self.api_key:
+            logger.error("RESEND_API_KEY não configurada")
+            return False
+        
+        if not RESEND_AVAILABLE:
+            logger.error("Biblioteca 'resend' não disponível")
             return False
         
         try:
-            msg = MIMEMultipart('alternative')
-            # Usar nome personalizado ao invés de só o email
-            msg['From'] = f"DB Empresas <{self.from_email}>"
-            msg['To'] = to_email
-            msg['Subject'] = subject
-            msg['Date'] = datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
+            params = {
+                "from": f"DB Empresas <{self.from_email}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content
+            }
             
-            if plain_content:
-                part1 = MIMEText(plain_content, 'plain', 'utf-8')
-                msg.attach(part1)
+            response = resend.Emails.send(params)
             
-            part2 = MIMEText(html_content, 'html', 'utf-8')
-            msg.attach(part2)
-            
-            with self._get_smtp_connection() as server:
-                server.send_message(msg)
-            
-            logger.info(f"Email enviado com sucesso para {to_email}: {subject}")
+            logger.info(f"✅ Email enviado via Resend para {to_email}: {subject} (ID: {response.get('id')})")
             return True
             
         except Exception as e:
-            logger.error(f"Erro ao enviar email para {to_email}: {e}")
+            logger.error(f"❌ Erro ao enviar email via Resend para {to_email}: {e}")
             return False
     
     def send_account_creation_email(self, to_email: str, username: str) -> bool:

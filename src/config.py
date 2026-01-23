@@ -99,12 +99,15 @@ class Settings(BaseSettings):
     CNPJ_API_URL: Optional[str] = None
     CNPJ_API_TOKEN: Optional[str] = None
 
-    # Email Configuration
+    # Email Configuration - Resend API (substituiu SMTP)
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "noreply@dbempresas.com.br"
+    
+    # SMTP (Legacy - não usar mais)
     EMAIL_HOST: str = "smtp.hostinger.com"
     EMAIL_PORT: int = 465
     EMAIL_USER: str = ""
     EMAIL_PASSWORD: str = ""
-    EMAIL_FROM: str = ""
     EMAIL_USE_SSL: bool = True
     
     # Stripe Configuration
