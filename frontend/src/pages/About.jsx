@@ -1,21 +1,51 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { Building2, Users, TrendingUp, Shield } from 'lucide-react';
 
 const About = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Sobre a DB Empresas - Líder em Dados Empresariais do Brasil';
+    setMeta('description', 'Conheça a DB Empresas, empresa especializada em consulta de CNPJ e dados empresariais. Acesso a 64M+ empresas da Receita Federal com tecnologia de ponta.');
+    setMeta('keywords', 'DB Empresas, sobre DB Empresas, empresa dados CNPJ, consulta empresas Brasil, API CNPJ profissional');
+    setCanonical('https://dbempresas.com.br/sobre');
+    setMetaProperty('og:title', 'Sobre a DB Empresas - Líder em Dados Empresariais');
+    setMetaProperty('og:description', 'Empresa especializada em dados empresariais da Receita Federal. Tecnologia, segurança e confiabilidade.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/sobre');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Sobre a DB Empresas - Líder em Dados Empresariais do Brasil</title>
-        <meta name="description" content="Conheça a DB Empresas, empresa especializada em consulta de CNPJ e dados empresariais. Acesso a 64M+ empresas da Receita Federal com tecnologia de ponta." />
-        <meta name="keywords" content="DB Empresas, sobre DB Empresas, empresa dados CNPJ, consulta empresas Brasil, API CNPJ profissional" />
-        <link rel="canonical" href="https://dbempresas.com.br/sobre" />
-        <meta property="og:title" content="Sobre a DB Empresas - Líder em Dados Empresariais" />
-        <meta property="og:description" content="Empresa especializada em dados empresariais da Receita Federal. Tecnologia, segurança e confiabilidade." />
-        <meta property="og:url" content="https://dbempresas.com.br/sobre" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Sobre a DB Empresas</h1>
         <p>Conectando você aos dados empresariais do Brasil com tecnologia e segurança</p>
