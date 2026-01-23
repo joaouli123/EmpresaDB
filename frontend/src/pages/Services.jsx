@@ -1,22 +1,52 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { Database, Search, Zap, Filter, BarChart3, Shield } from 'lucide-react';
 
 const Services = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Serviços de Consulta CNPJ e Dados Empresariais | DB Empresas';
+    setMeta('description', 'Conheça nossos serviços de consulta CNPJ: API REST, busca avançada, validação de empresas, QSA completo e análise de dados empresariais da Receita Federal.');
+    setMeta('keywords', 'serviços consulta CNPJ, API dados empresas, validação CNPJ, busca empresas Brasil, QSA empresas, análise dados Receita Federal');
+    setCanonical('https://dbempresas.com.br/servicos');
+    setMetaProperty('og:title', 'Serviços de Consulta CNPJ - DB Empresas');
+    setMetaProperty('og:description', 'API REST para consulta de CNPJ, busca avançada, validação e análise de dados empresariais.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/servicos');
+    setMetaProperty('og:type', 'website');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Serviços de Consulta CNPJ e Dados Empresariais | DB Empresas</title>
-        <meta name="description" content="Conheça nossos serviços de consulta CNPJ: API REST, busca avançada, validação de empresas, QSA completo e análise de dados empresariais da Receita Federal." />
-        <meta name="keywords" content="serviços consulta CNPJ, API dados empresas, validação CNPJ, busca empresas Brasil, QSA empresas, análise dados Receita Federal" />
-        <link rel="canonical" href="https://dbempresas.com.br/servicos" />
-        <meta property="og:title" content="Serviços de Consulta CNPJ - DB Empresas" />
-        <meta property="og:description" content="API REST para consulta de CNPJ, busca avançada, validação e análise de dados empresariais." />
-        <meta property="og:url" content="https://dbempresas.com.br/servicos" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Nossos Serviços</h1>
         <p>Soluções completas para consulta e análise de dados empresariais</p>
