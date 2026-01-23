@@ -101,11 +101,11 @@ async def api_root():
 @app.get("/health")
 async def health_check():
     """Health check para monitoramento do deployment"""
-    from src.database.connection import engine_manager
+    from src.database.connection import db_manager
 
     try:
         # Verifica conexão com banco
-        engine = engine_manager.get_engine()
+        engine = db_manager.get_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
 

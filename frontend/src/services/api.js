@@ -53,20 +53,22 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
 };
 
+const API_V1 = '/api/v1';
+
 export const cnpjAPI = {
-  search: (params) => api.get('/search', { params }),
-  getByCNPJ: (cnpj) => api.get(`/cnpj/${cnpj}`),
-  getStats: () => api.get('/stats'),
-  getSocios: (cnpj) => api.get(`/cnpj/${cnpj}/socios`),
-  getCNAEs: (search) => api.get('/cnaes', { params: { search } }),
-  getMunicipios: (uf) => api.get(`/municipios/${uf}`),
+  search: (params) => api.get(`${API_V1}/search`, { params }),
+  getByCNPJ: (cnpj) => api.get(`${API_V1}/cnpj/${cnpj}`),
+  getStats: () => api.get(`${API_V1}/stats`),
+  getSocios: (cnpj) => api.get(`${API_V1}/cnpj/${cnpj}/socios`),
+  getCNAEs: (search) => api.get(`${API_V1}/cnaes`, { params: { search } }),
+  getMunicipios: (uf) => api.get(`${API_V1}/municipios/${uf}`),
 };
 
 export const etlAPI = {
-  startETL: () => api.post('/etl/start'),
-  stopETL: () => api.post('/etl/stop'),
-  getStatus: () => api.get('/etl/status'),
-  checkUpdates: () => api.get('/etl/check-updates'),
+  startETL: () => api.post(`${API_V1}/etl/start`),
+  stopETL: () => api.post(`${API_V1}/etl/stop`),
+  getStatus: () => api.get(`${API_V1}/etl/status`),
+  checkUpdates: () => api.get(`${API_V1}/etl/check-updates`),
 };
 
 export const userAPI = {

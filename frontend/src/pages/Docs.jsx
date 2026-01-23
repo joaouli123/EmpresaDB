@@ -1,10 +1,10 @@
 import { Code, Book, Zap, Shield, Database, Package } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Docs = () => {
-  const API_URL = window.location.origin;
-  // Assume isAdmin is true for admin users and false for regular users.
-  // This would typically come from authentication context or user role.
-  const isAdmin = true; 
+  const { isAdmin } = useAuth();
+  const API_URL = `${window.location.origin}/api/v1`;
+  const showAdmin = isAdmin();
 
   return (
     <div className="docs-page">
@@ -128,7 +128,7 @@ X-API-Key: sua_chave_api`}</pre>
               </div>
             </div>
 
-            {isAdmin && (
+            {showAdmin && (
               <div className="endpoint">
                 <div className="endpoint-header">
                   <span className="method get">GET</span>
@@ -970,7 +970,7 @@ const consultarCNPJ = async (cnpj) => {
 
 consultarCNPJ('00000000000191');
 
-${isAdmin ? `
+${showAdmin ? `
 // Buscar empresas com filtros (APENAS ADMIN)
 const buscarEmpresas = async () => {
   try {
@@ -1045,7 +1045,7 @@ if resultado:
     print(f"Razão Social: {resultado['razao_social']}")
     print(f"CNPJ: {resultado['cnpj_completo']}")
 
-${isAdmin ? `
+${showAdmin ? `
 # 2. Buscar empresas com filtros (APENAS ADMIN)
 def buscar_empresas(filtros):
     response = requests.get(f'{API_URL}/search', params=filtros, headers=headers)
@@ -1136,7 +1136,7 @@ if ($empresa) {
     echo "Razão Social: " . $empresa['razao_social'] . "\\n";
 }
 
-${isAdmin ? `
+${showAdmin ? `
 // Buscar empresas com filtros (APENAS ADMIN)
 $params = http_build_query([
     'uf' => 'SP',
@@ -1170,7 +1170,7 @@ if ($cnaes) {
 curl -X GET "${API_URL}/cnpj/00000000000191" \\
   -H "X-API-Key: sua_chave_api"
 
-${isAdmin ? `# 2. Buscar empresas ativas em SP (APENAS ADMIN)
+${showAdmin ? `# 2. Buscar empresas ativas em SP (APENAS ADMIN)
 curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1&per_page=20" \\
   -H "X-API-Key: sua_chave_api"
 
