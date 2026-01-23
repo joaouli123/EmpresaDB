@@ -1,9 +1,42 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { FileText, TrendingUp, Target } from 'lucide-react';
 
 const BlogPage = () => {
+  useEffect(() => {
+    const setMeta = (name, content, isProperty = false) => {
+      const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+      let tag = document.head.querySelector(selector);
+      if (!tag) {
+        tag = document.createElement('meta');
+        if (isProperty) {
+          tag.setAttribute('property', name);
+        } else {
+          tag.setAttribute('name', name);
+        }
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    document.title = 'Blog DB Empresas - Artigos sobre CNPJ, Prospecção e Dados Empresariais';
+    setMeta('description', 'Artigos, tutoriais e dicas sobre consulta de CNPJ, prospecção B2B, integração de API, compliance e análise de dados empresariais.');
+    setMeta('keywords', 'blog CNPJ, artigos dados empresas, tutoriais API CNPJ, dicas prospecção B2B, compliance empresarial');
+    setMeta('og:title', 'Blog DB Empresas - Artigos sobre Dados Empresariais', true);
+    setMeta('og:description', 'Artigos, tutoriais e dicas sobre consulta de CNPJ e dados empresariais.', true);
+    setMeta('og:url', 'https://dbempresas.com.br/blog', true);
+    setMeta('og:type', 'website', true);
+
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', 'https://dbempresas.com.br/blog');
+  }, []);
+
   const posts = [
     {
       title: "Como Usar Dados de CNPJ para Prospecção B2B Eficiente",
@@ -27,17 +60,6 @@ const BlogPage = () => {
 
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Blog DB Empresas - Artigos sobre CNPJ, Prospecção e Dados Empresariais</title>
-        <meta name="description" content="Artigos, tutoriais e dicas sobre consulta de CNPJ, prospecção B2B, integração de API, compliance e análise de dados empresariais." />
-        <meta name="keywords" content="blog CNPJ, artigos dados empresas, tutoriais API CNPJ, dicas prospecção B2B, compliance empresarial" />
-        <link rel="canonical" href="https://dbempresas.com.br/blog" />
-        <meta property="og:title" content="Blog DB Empresas - Artigos sobre Dados Empresariais" />
-        <meta property="og:description" content="Artigos, tutoriais e dicas sobre consulta de CNPJ e dados empresariais." />
-        <meta property="og:url" content="https://dbempresas.com.br/blog" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Blog</h1>
         <p>Artigos, tutoriais e novidades sobre dados empresariais</p>
