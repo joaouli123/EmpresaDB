@@ -1,0 +1,14 @@
+[phases.setup]
+# Python + Node para build do frontend
+nixPkgs = ["python311", "nodejs_20", "npm"]
+
+[phases.install]
+cmds = [
+  "python -m venv /app/.venv",
+  ". /app/.venv/bin/activate && pip install -r requirements.txt",
+  "cd frontend && npm install",
+  "cd frontend && npm run build"
+]
+
+[phases.start]
+cmd = "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"
