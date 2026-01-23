@@ -1,22 +1,52 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { Shield, Lock, Eye, FileText } from 'lucide-react';
 
 const Privacy = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Política de Privacidade - DB Empresas';
+    setMeta('description', 'Política de Privacidade da DB Empresas. Saiba como protegemos seus dados pessoais e garantimos conformidade com a LGPD.');
+    setMeta('keywords', 'política privacidade DB Empresas, LGPD, proteção dados, privacidade CNPJ API');
+    setCanonical('https://dbempresas.com.br/privacidade');
+    setMetaProperty('og:title', 'Política de Privacidade - DB Empresas');
+    setMetaProperty('og:description', 'Como protegemos seus dados e garantimos conformidade com a LGPD.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/privacidade');
+    setMetaProperty('og:type', 'website');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Política de Privacidade - DB Empresas</title>
-        <meta name="description" content="Política de Privacidade da DB Empresas. Saiba como protegemos seus dados pessoais e garantimos conformidade com a LGPD." />
-        <meta name="keywords" content="política privacidade DB Empresas, LGPD, proteção dados, privacidade CNPJ API" />
-        <link rel="canonical" href="https://dbempresas.com.br/privacidade" />
-        <meta property="og:title" content="Política de Privacidade - DB Empresas" />
-        <meta property="og:description" content="Como protegemos seus dados e garantimos conformidade com a LGPD." />
-        <meta property="og:url" content="https://dbempresas.com.br/privacidade" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Política de Privacidade</h1>
         <p>Como coletamos, usamos e protegemos suas informações</p>

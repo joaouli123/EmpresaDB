@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const SEO = ({
@@ -11,58 +11,82 @@ const SEO = ({
   noindex = false,
   children
 }) => {
-  const siteName = 'DB Empresas - Consulta CNPJ';
-  const defaultDescription = 'Acesso completo aos dados empresariais da Receita Federal. Consultas rápidas, precisas e atualizadas de CNPJ, empresas e sócios.';
-  const defaultKeywords = 'CNPJ, consulta CNPJ, dados empresariais, Receita Federal, empresas Brasil, API CNPJ, busca CNPJ';
-  const defaultImage = `${window.location.origin}/og-image.jpg`;
-  const baseUrl = window.location.origin;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-  const fullTitle = title ? `${title} | ${siteName}` : siteName;
-  const finalDescription = description || defaultDescription;
-  const finalKeywords = keywords || defaultKeywords;
-  const finalImage = ogImage || defaultImage;
-  const finalCanonicalUrl = canonicalUrl || window.location.href;
+    const setMetaByAttr = (attr, key, content) => {
+      let tag = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
 
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-      <meta name="description" content={finalDescription} />
-      <meta name="keywords" content={finalKeywords} />
-      
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
-      {!noindex && <meta name="robots" content="index, follow" />}
-      
-      <link rel="canonical" href={finalCanonicalUrl} />
+    const setLink = (rel, href) => {
+      let link = document.querySelector(`link[rel="${rel}"]`);
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', rel);
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
 
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={finalDescription} />
-      <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={finalCanonicalUrl} />
-      <meta property="og:image" content={finalImage} />
-      <meta property="og:site_name" content={siteName} />
-      <meta property="og:locale" content="pt_BR" />
+    const siteName = 'DB Empresas - Consulta CNPJ';
+    const defaultDescription = 'Acesso completo aos dados empresariais da Receita Federal. Consultas rápidas, precisas e atualizadas de CNPJ, empresas e sócios.';
+    const defaultKeywords = 'CNPJ, consulta CNPJ, dados empresariais, Receita Federal, empresas Brasil, API CNPJ, busca CNPJ';
+    const defaultImage = `${window.location.origin}/og-image.jpg`;
 
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={finalDescription} />
-      <meta name="twitter:image" content={finalImage} />
+    const fullTitle = title ? `${title} | ${siteName}` : siteName;
+    const finalDescription = description || defaultDescription;
+    const finalKeywords = keywords || defaultKeywords;
+    const finalImage = ogImage || defaultImage;
+    const finalCanonicalUrl = canonicalUrl || window.location.href;
 
-      <meta name="language" content="Portuguese" />
-      <meta name="geo.region" content="BR" />
-      <meta name="geo.placename" content="Brasil" />
-      
-      <meta name="author" content="DB Empresas" />
-      <meta name="publisher" content="DB Empresas" />
-      <meta name="copyright" content="© 2024 DB Empresas" />
+    document.title = fullTitle;
 
-      <meta httpEquiv="content-language" content="pt-BR" />
-      <meta name="rating" content="general" />
-      
-      <meta name="theme-color" content="#3b82f6" />
-      
-      {children}
-    </Helmet>
-  );
+    setMetaByAttr('name', 'description', finalDescription);
+    setMetaByAttr('name', 'keywords', finalKeywords);
+    setMetaByAttr('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    setLink('canonical', finalCanonicalUrl);
+
+    setMetaByAttr('property', 'og:title', fullTitle);
+    setMetaByAttr('property', 'og:description', finalDescription);
+    setMetaByAttr('property', 'og:type', ogType);
+    setMetaByAttr('property', 'og:url', finalCanonicalUrl);
+    setMetaByAttr('property', 'og:image', finalImage);
+    setMetaByAttr('property', 'og:site_name', siteName);
+    setMetaByAttr('property', 'og:locale', 'pt_BR');
+
+    setMetaByAttr('name', 'twitter:card', 'summary_large_image');
+    setMetaByAttr('name', 'twitter:title', fullTitle);
+    setMetaByAttr('name', 'twitter:description', finalDescription);
+    setMetaByAttr('name', 'twitter:image', finalImage);
+
+    setMetaByAttr('name', 'language', 'Portuguese');
+    setMetaByAttr('name', 'geo.region', 'BR');
+    setMetaByAttr('name', 'geo.placename', 'Brasil');
+
+    setMetaByAttr('name', 'author', 'DB Empresas');
+    setMetaByAttr('name', 'publisher', 'DB Empresas');
+    setMetaByAttr('name', 'copyright', '© 2024 DB Empresas');
+
+    setMetaByAttr('http-equiv', 'content-language', 'pt-BR');
+    setMetaByAttr('name', 'rating', 'general');
+    setMetaByAttr('name', 'theme-color', '#3b82f6');
+  }, [
+    title,
+    description,
+    keywords,
+    canonicalUrl,
+    ogImage,
+    ogType,
+    noindex
+  ]);
+
+  return children || null;
 };
 
 SEO.propTypes = {

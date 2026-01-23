@@ -1,22 +1,52 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { FileText, AlertCircle } from 'lucide-react';
 
 const Terms = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Termos de Uso - DB Empresas';
+    setMeta('description', 'Termos de Uso da plataforma DB Empresas. Conheça os direitos, deveres e condições de uso da nossa API de CNPJ.');
+    setMeta('keywords', 'termos uso DB Empresas, condições uso API CNPJ, termos serviço dados empresas');
+    setCanonical('https://dbempresas.com.br/termos');
+    setMetaProperty('og:title', 'Termos de Uso - DB Empresas');
+    setMetaProperty('og:description', 'Condições gerais de uso da plataforma DB Empresas.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/termos');
+    setMetaProperty('og:type', 'website');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Termos de Uso - DB Empresas</title>
-        <meta name="description" content="Termos de Uso da plataforma DB Empresas. Conheça os direitos, deveres e condições de uso da nossa API de CNPJ." />
-        <meta name="keywords" content="termos uso DB Empresas, condições uso API CNPJ, termos serviço dados empresas" />
-        <link rel="canonical" href="https://dbempresas.com.br/termos" />
-        <meta property="og:title" content="Termos de Uso - DB Empresas" />
-        <meta property="og:description" content="Condições gerais de uso da plataforma DB Empresas." />
-        <meta property="og:url" content="https://dbempresas.com.br/termos" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Termos de Uso</h1>
         <p>Condições gerais de uso da plataforma DB Empresas</p>

@@ -1,22 +1,52 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 const Contact = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Contato - DB Empresas | Fale Conosco via WhatsApp ou Email';
+    setMeta('description', 'Entre em contato com a DB Empresas. WhatsApp: (41) 98785-7413 | Email: contato@dbempresas.com.br. Atendimento especializado em dados empresariais.');
+    setMeta('keywords', 'contato DB Empresas, suporte CNPJ API, whatsapp DB Empresas, email contato empresas, atendimento consulta CNPJ');
+    setCanonical('https://dbempresas.com.br/contato');
+    setMetaProperty('og:title', 'Contato - DB Empresas');
+    setMetaProperty('og:description', 'Fale conosco via WhatsApp ou email. Atendimento especializado.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/contato');
+    setMetaProperty('og:type', 'website');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Contato - DB Empresas | Fale Conosco via WhatsApp ou Email</title>
-        <meta name="description" content="Entre em contato com a DB Empresas. WhatsApp: (41) 98785-7413 | Email: contato@dbempresas.com.br. Atendimento especializado em dados empresariais." />
-        <meta name="keywords" content="contato DB Empresas, suporte CNPJ API, whatsapp DB Empresas, email contato empresas, atendimento consulta CNPJ" />
-        <link rel="canonical" href="https://dbempresas.com.br/contato" />
-        <meta property="og:title" content="Contato - DB Empresas" />
-        <meta property="og:description" content="Fale conosco via WhatsApp ou email. Atendimento especializado." />
-        <meta property="og:url" content="https://dbempresas.com.br/contato" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Entre em Contato</h1>
         <p>Estamos prontos para ajudar você. Fale conosco agora!</p>

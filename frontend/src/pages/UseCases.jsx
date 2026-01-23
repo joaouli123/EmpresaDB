@@ -1,22 +1,52 @@
 
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import SharedLayout from '../components/SharedLayout';
 import { TrendingUp, Users, ShoppingCart, Building2, BarChart3, Target } from 'lucide-react';
 
 const UseCases = () => {
+  useEffect(() => {
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setMetaProperty = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (href) => {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    document.title = 'Casos de Uso API CNPJ - Prospecção, Marketing, Compliance | DB Empresas';
+    setMeta('description', 'Descubra como usar nossa API de CNPJ para prospecção B2B, marketing digital, análise de crédito, compliance, enriquecimento de CRM e inteligência de mercado.');
+    setMeta('keywords', 'casos de uso CNPJ, prospecção B2B, marketing dados empresas, compliance CNPJ, análise crédito empresas, CRM enriquecimento');
+    setCanonical('https://dbempresas.com.br/casos-de-uso');
+    setMetaProperty('og:title', 'Casos de Uso API CNPJ - DB Empresas');
+    setMetaProperty('og:description', 'Prospecção B2B, Marketing Digital, Compliance, Análise de Crédito e muito mais.');
+    setMetaProperty('og:url', 'https://dbempresas.com.br/casos-de-uso');
+    setMetaProperty('og:type', 'website');
+  }, []);
+
   return (
     <SharedLayout>
-      <Helmet>
-        <title>Casos de Uso API CNPJ - Prospecção, Marketing, Compliance | DB Empresas</title>
-        <meta name="description" content="Descubra como usar nossa API de CNPJ para prospecção B2B, marketing digital, análise de crédito, compliance, enriquecimento de CRM e inteligência de mercado." />
-        <meta name="keywords" content="casos de uso CNPJ, prospecção B2B, marketing dados empresas, compliance CNPJ, análise crédito empresas, CRM enriquecimento" />
-        <link rel="canonical" href="https://dbempresas.com.br/casos-de-uso" />
-        <meta property="og:title" content="Casos de Uso API CNPJ - DB Empresas" />
-        <meta property="og:description" content="Prospecção B2B, Marketing Digital, Compliance, Análise de Crédito e muito mais." />
-        <meta property="og:url" content="https://dbempresas.com.br/casos-de-uso" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-
       <div className="page-hero">
         <h1>Casos de Uso</h1>
         <p>Descubra como empresas usam nossa plataforma para impulsionar seus resultados</p>
