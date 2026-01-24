@@ -47,18 +47,32 @@ const AdminDashboard = () => {
 
   const connectWebSocket = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/etl`);
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/api/v1/ws/etl`;
+    
+    console.log('[ETL] Conectando WebSocket:', wsUrl);
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('[ETL] ✅ WebSocket conectado!');
+    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log('[ETL] Mensagem WebSocket:', data);
       setLogs(prev => [...prev, data].slice(-100));
-      if (data.type === 'status') {
-        setEtlStatus(data.data);
+      if (data.type === 'status' || data.type === 'stats_update') {
+        setEtlStatus(data.data || data.stats);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error('[ETL] ❌ WebSocket error:', error);
+    };
+
+    ws.onclose = () => {
+      console.warn('[ETL] WebSocket fechado. Reconectando em 5s...');
+      setTimeout(connectWebSocket, 5000);
     };
 
     setWsConnection(ws);

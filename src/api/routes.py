@@ -1108,4 +1108,38 @@ async def get_database_stats(current_user: dict = Depends(get_current_admin_user
         return stats
     except Exception as e:
         logger.error(f"Erro ao obter estatísticas do banco: {e}")
+
+@router.get("/etl/check-updates")
+async def check_updates(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Verifica se há novas atualizações disponíveis na Receita Federal
+    Requer autenticação JWT com role de admin
+    """
+    try:
+        from src.etl.downloader import RFBDownloader
+        downloader = RFBDownloader()
+        
+        # Lista arquivos disponíveis
+        available_files = downloader.list_available_files()
+        
+        if not available_files:
+            return {
+                "status": "no_updates",
+                "message": "Não foi possível verificar atualizações.",
+                "files": []
+            }
+        
+        # Detecta pasta mais recente
+        latest_folder = downloader.get_latest_folder()
+        
+        return {
+            "status": "success",
+            "message": f"Encontrados {len(available_files)} arquivos disponíveis em {latest_folder}/",
+            "latest_folder": latest_folder,
+            "total_files": len(available_files),
+            "files": available_files[:10]  # Primeiros 10 para evitar overhead
+        }
+    except Exception as e:
+        logger.error(f"Erro ao verificar atualizações: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
         raise HTTPException(status_code=500, detail=str(e))
