@@ -1041,8 +1041,20 @@ async def start_etl(current_user: dict = Depends(get_current_admin_user)):
     Requer autenticação JWT com role de admin
     """
     try:
-        asyncio.create_task(etl_controller.run_etl())
-        logger.info(f"ETL iniciado pelo admin: {current_user.get('username')}")
+        # Criar task com callback para capturar exceções
+        task = asyncio.create_task(etl_controller.run_etl())
+        
+        def task_done_callback(t):
+            try:
+                exc = t.exception()
+                if exc:
+                    logger.error(f"❌ ETL task falhou com exceção: {exc}", exc_info=exc)
+            except asyncio.CancelledError:
+                logger.warning("⚠️ ETL task foi cancelada")
+                
+        task.add_done_callback(task_done_callback)
+        
+        logger.info(f"🚀 ETL iniciado pelo admin: {current_user.get('username')}")
         return {
             "status": "started",
             "message": "Processo ETL iniciado. Acompanhe o progresso via WebSocket."
@@ -1079,6 +1091,14 @@ async def get_etl_status(current_user: dict = Depends(get_current_admin_user)):
         "stats": etl_controller.stats,
         "config": etl_controller.config
     }
+
+@router.get("/etl/detailed-status")
+async def get_etl_detailed_status(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Obtém status detalhado do ETL em andamento com informações do banco
+    Requer autenticação JWT com role de admin
+    """
+    return await etl_controller.get_detailed_status()
 
 @router.post("/etl/config")
 async def update_etl_config(config: Dict[str, Any], current_user: dict = Depends(get_current_admin_user)):
@@ -1142,4 +1162,19 @@ async def check_updates(current_user: dict = Depends(get_current_admin_user)):
     except Exception as e:
         logger.error(f"Erro ao verificar atualizações: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/etl/import-statistics")
+async def get_import_statistics(current_user: dict = Depends(get_current_admin_user)):
+    """
+    Retorna estatísticas do último processamento ETL (novos/atualizados/inalterados)
+    Requer autenticação JWT com role de admin
+    """
+    try:
+        stats = await etl_controller.get_import_statistics()
+        return {
+            "status": "success",
+            "statistics": stats
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar estatísticas de importação: {e}")
         raise HTTPException(status_code=500, detail=str(e))

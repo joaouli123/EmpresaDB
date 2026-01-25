@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # API Server Settings
     API_HOST: str = "0.0.0.0"  # Bind to all interfaces
     API_PORT: int = 8000
+
+    # Ambiente
+    ENVIRONMENT: str = "development"  # development | production
     
     # CORS Settings - Configure trusted origins in .env
     # Em produção, configure: ALLOWED_ORIGINS=https://dbempresas.com.br,https://www.dbempresas.com.br
@@ -70,12 +73,17 @@ class Settings(BaseSettings):
     
     def validate_config(self) -> None:
         """Valida configurações críticas para produção"""
-        if not self.SECRET_KEY or self.SECRET_KEY == "your-secret-key-here-change-in-production":
+        if not self.SECRET_KEY or self.SECRET_KEY in [
+            "your-secret-key-here-change-in-production",
+            "dev-secret-key-min-32-chars-long-please-change-in-production"
+        ]:
             raise ValueError("SECRET_KEY não configurada ou insegura! Configure no .env")
         if len(self.SECRET_KEY) < 32:
             raise ValueError("SECRET_KEY muito curta! Use no mínimo 32 caracteres")
         if not self.DATABASE_URL:
             raise ValueError("DATABASE_URL não configurada! Configure no .env")
+        if self.ENVIRONMENT.lower() == "production" and self.ALLOWED_ORIGINS == "*":
+            raise ValueError("ALLOWED_ORIGINS não pode ser '*' em produção. Configure no .env")
             
     def get_cors_origins(self) -> list:
         """Retorna lista de origens permitidas para CORS"""

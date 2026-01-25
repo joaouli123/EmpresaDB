@@ -21,6 +21,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+# Silencia logs HTTP de requisições bem-sucedidas (200 OK)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+
 # ⚠️ VALIDAÇÃO DE CONFIGURAÇÃO CRÍTICA NO STARTUP
 # Garante que SECRET_KEY, DATABASE_URL estão configurados
 try:
@@ -75,10 +78,11 @@ app = FastAPI(
 cors_origins = settings.get_cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=cors_origins != ["*"],  # Só permite credentials se não for wildcard
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=cors_origins if cors_origins != ["*"] else ["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 static_path = Path(__file__).parent.parent.parent / "static"

@@ -49,6 +49,77 @@ class ETLController:
         """Atualiza configurações do ETL"""
         self.config.update(new_config)
         
+    async def get_detailed_status(self) -> Dict[str, Any]:
+        """Retorna status detalhado do ETL em andamento"""
+        if not self.is_running:
+            return {
+                "is_running": False,
+                "message": "Nenhum ETL em execução"
+            }
+        
+        # Busca informações da execução atual no banco
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            # Busca última execução ativa
+            cursor.execute("""
+                SELECT execution_id, start_time, status
+                FROM etl_control.executions
+                WHERE status = 'running'
+                ORDER BY start_time DESC
+                LIMIT 1
+            """)
+            execution = cursor.fetchone()
+            
+            if not execution:
+                cursor.close()
+                return {
+                    "is_running": self.is_running,
+                    "message": "ETL rodando mas sem registro no banco"
+                }
+            
+            execution_id = execution[0]
+            
+            # Busca arquivos processados
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total_files,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_files,
+                    SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing_files,
+                    SUM(COALESCE(records_imported, 0)) as total_records_imported
+                FROM etl_control.file_processing
+                WHERE execution_id = %s
+            """, (execution_id,))
+            file_stats = cursor.fetchone()
+            
+            # Busca arquivo atualmente sendo processado
+            cursor.execute("""
+                SELECT file_path, status, records_imported, start_time
+                FROM etl_control.file_processing
+                WHERE execution_id = %s AND status = 'processing'
+                ORDER BY start_time DESC
+                LIMIT 1
+            """, (execution_id,))
+            current_file = cursor.fetchone()
+            cursor.close()
+            
+            return {
+                "is_running": True,
+                "execution_id": execution_id,
+                "start_time": execution[1].isoformat(),
+                "total_files": file_stats[0] or 0,
+                "completed_files": file_stats[1] or 0,
+                "processing_files": file_stats[2] or 0,
+                "total_records_imported": file_stats[3] or 0,
+                "current_file": {
+                    "path": current_file[0],
+                    "status": current_file[1],
+                    "records_imported": current_file[2] or 0,
+                    "start_time": current_file[3].isoformat()
+                } if current_file else None,
+                **self.stats
+            }
+
+        
         # Atualiza settings globais
         if "chunk_size" in new_config:
             settings.CHUNK_SIZE = new_config["chunk_size"]
@@ -137,6 +208,11 @@ class ETLController:
         }
         
         try:
+            # Anexa loggers ao WebSocket para capturar logs em tempo real
+            ws_manager.attach_logger('src.etl.importer')
+            ws_manager.attach_logger('src.etl.downloader')
+            ws_manager.attach_logger('src.etl.etl_tracker')
+            
             await self.update_stats({"status": "running"})
             await self.log_message("info", "🚀 Iniciando processo ETL")
             
@@ -186,9 +262,15 @@ class ETLController:
             table_stats = await self.get_database_stats()
             total_records = sum(table_stats.values())
             
+            # Busca estatísticas de novos/atualizados do tracker
+            import_stats = await self.get_import_statistics()
+            
             await self.update_stats({
                 "tables": table_stats,
                 "total_records": total_records,
+                "new_records": import_stats.get("new_records", 0),
+                "updated_records": import_stats.get("updated_records", 0),
+                "unchanged_records": import_stats.get("unchanged_records", 0),
                 "progress": 100,
                 "status": "completed",
                 "current_step": "Concluído",
@@ -196,20 +278,68 @@ class ETLController:
             })
             
             await self.log_message("info", f"✅ ETL concluído com sucesso! Total: {total_records:,} registros")
+            await self.log_message("info", f"📊 Novos: {import_stats.get('new_records', 0):,} | Atualizados: {import_stats.get('updated_records', 0):,} | Sem mudança: {import_stats.get('unchanged_records', 0):,}")
             
             self.is_running = False
             return True
             
         except Exception as e:
-            self.stats["errors"].append(str(e))
+            error_msg = f"Erro no ETL: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            await self.log_message("error", error_msg)
             await self.update_stats({
                 "status": "error",
-                "current_step": f"Erro: {str(e)}",
+                "current_step": "Erro",
                 "end_time": datetime.now().isoformat()
             })
-            await self.log_message("error", f"❌ Erro no ETL: {str(e)}")
+            self.stats["errors"].append(error_msg)
             self.is_running = False
             return False
+            
+        finally:
+            # Remove handlers de logging do WebSocket
+            ws_manager.detach_logger('src.etl.importer')
+            ws_manager.detach_logger('src.etl.downloader')
+            ws_manager.detach_logger('src.etl.etl_tracker')
+    
+    async def get_import_statistics(self) -> Dict[str, int]:
+        """Busca estatísticas de importação (novos vs atualizados)"""
+        try:
+            with db_manager.get_connection() as conn:
+                with conn.cursor() as cursor:
+                    # Verifica se a tabela existe (evita erro quando ainda não foi criada)
+                    cursor.execute("SELECT to_regclass('etl_control.import_stats')")
+                    table_exists = cursor.fetchone()[0]
+                    if not table_exists:
+                        logger.warning("Tabela etl_control.import_stats não existe. Estatísticas zeradas.")
+                        return {"new_records": 0, "updated_records": 0, "unchanged_records": 0}
+
+                    # Busca estatísticas da última execução
+                    cursor.execute("""
+                        SELECT 
+                            COALESCE(SUM(CASE WHEN action_type = 'insert' THEN 1 ELSE 0 END), 0) as new_records,
+                            COALESCE(SUM(CASE WHEN action_type = 'update' THEN 1 ELSE 0 END), 0) as updated_records,
+                            COALESCE(SUM(CASE WHEN action_type = 'skip' THEN 1 ELSE 0 END), 0) as unchanged_records
+                        FROM etl_control.import_stats
+                        WHERE execution_id = (
+                            SELECT execution_id 
+                            FROM etl_control.executions 
+                            ORDER BY start_time DESC 
+                            LIMIT 1
+                        )
+                    """)
+                    result = cursor.fetchone()
+                    
+                    if result:
+                        return {
+                            "new_records": result[0],
+                            "updated_records": result[1],
+                            "unchanged_records": result[2]
+                        }
+                    return {"new_records": 0, "updated_records": 0, "unchanged_records": 0}
+        except Exception as e:
+            logger.error(f"Erro ao buscar estatísticas de importação: {e}")
+            return {"new_records": 0, "updated_records": 0, "unchanged_records": 0}
             
     async def stop_etl(self):
         """Para o processo ETL"""

@@ -98,32 +98,50 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
 
             cursor.execute("""
                 SELECT 
-                    s.status,
-                    s.renewal_date,
-                    s.cancel_at_period_end,
+                    ss.status,
+                    ss.current_period_end,
+                    ss.cancel_at_period_end,
                     p.name as plan_name,
                     p.monthly_queries,
                     p.id as plan_id,
-                    mu.queries_used,
-                    s.extra_credits
-                FROM clientes.subscriptions s
-                JOIN clientes.subscription_plans p ON s.plan_id = p.id
-                LEFT JOIN clientes.monthly_usage mu ON mu.user_id = s.user_id 
+                    mu.queries_used
+                FROM clientes.stripe_subscriptions ss
+                JOIN clientes.plans p ON ss.plan_id = p.id
+                LEFT JOIN clientes.monthly_usage mu ON mu.user_id = ss.user_id 
                     AND mu.month_year = %s
-                WHERE s.user_id = %s AND s.status IN ('active', 'canceled')
-                ORDER BY s.created_at DESC
+                WHERE ss.user_id = %s 
+                    AND ss.current_period_end > NOW()
+                    AND ss.status IN ('active', 'trialing', 'canceled')
+                ORDER BY ss.created_at DESC
                 LIMIT 1
             """, (datetime.now().strftime('%Y-%m'), current_user['id']))
 
             subscription = cursor.fetchone()
 
             if not subscription:
-                raise HTTPException(status_code=404, detail="No active subscription found")
+                # Plano Free (200 consultas/mês)
+                now = datetime.now()
+                next_month = now.replace(day=1, month=now.month % 12 + 1, year=now.year if now.month < 12 else now.year + 1)
+                monthly_limit = 200
+                queries_used = 0
+                total_limit = monthly_limit
+                return {
+                    "status": "active",
+                    "renewal_date": next_month.isoformat(),
+                    "cancel_at_period_end": False,
+                    "plan_name": "Free",
+                    "monthly_limit": monthly_limit,
+                    "queries_used": queries_used,
+                    "queries_remaining": total_limit,
+                    "total_limit": total_limit,
+                    "extra_credits": 0,
+                    "plan_id": None
+                }
 
             queries_used = subscription[6] or 0
             monthly_limit = subscription[4]
-            extra_credits = subscription[7] or 0
-            total_limit = monthly_limit + extra_credits
+            extra_credits = 0
+            total_limit = monthly_limit
 
             return {
                 "status": subscription[0],
@@ -174,7 +192,7 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
                 remaining = 999999999
             else:
                 cursor.execute("""
-                    SELECT p.monthly_queries, ss.extra_credits
+                    SELECT p.monthly_queries
                     FROM clientes.stripe_subscriptions ss
                     JOIN clientes.plans p ON ss.plan_id = p.id
                     WHERE ss.user_id = %s 
@@ -187,8 +205,7 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
                 if subscription_result:
                     # Usuário com assinatura paga
                     monthly_limit = subscription_result[0]
-                    extra_credits = subscription_result[1] or 0
-                    total_limit = monthly_limit + extra_credits
+                    total_limit = monthly_limit
                     remaining = max(0, total_limit - queries_this_month)
                 else:
                     # Usuário Free - 200 consultas/mês
@@ -256,8 +273,8 @@ async def subscribe_to_plan(plan_id: int, current_user: dict = Depends(get_curre
                 # This part might need refinement based on how Stripe webhooks and API calls are handled.
                 # If a new subscription entry is always created for a new plan selection, even if Stripe handles the update:
                  cursor.execute("""
-                    INSERT INTO clientes.stripe_subscriptions (user_id, plan_id, status, created_at, updated_at, renewal_date, extra_credits)
-                    VALUES (%s, %s, 'active', NOW(), NOW(), %s, 0) 
+                    INSERT INTO clientes.stripe_subscriptions (user_id, plan_id, status, created_at, updated_at, renewal_date)
+                    VALUES (%s, %s, 'active', NOW(), NOW(), %s) 
                     RETURNING id
                 """, (current_user['id'], plan_id, renewal_date))
                  new_sub_id = cursor.fetchone()[0]
@@ -267,8 +284,8 @@ async def subscribe_to_plan(plan_id: int, current_user: dict = Depends(get_curre
             else:
                 # Create a new subscription entry if no active one exists
                 cursor.execute("""
-                    INSERT INTO clientes.stripe_subscriptions (user_id, plan_id, status, created_at, updated_at, renewal_date, extra_credits)
-                    VALUES (%s, %s, 'active', NOW(), NOW(), %s, 0) 
+                    INSERT INTO clientes.stripe_subscriptions (user_id, plan_id, status, created_at, updated_at, renewal_date)
+                    VALUES (%s, %s, 'active', NOW(), NOW(), %s) 
                     RETURNING id
                 """, (current_user['id'], plan_id, renewal_date))
                 new_sub_id = cursor.fetchone()[0]

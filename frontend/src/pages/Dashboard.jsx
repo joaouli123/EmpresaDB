@@ -35,14 +35,23 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [usageRes, subRes, creditsRes] = await Promise.all([
+      const [usageRes, subRes, creditsRes] = await Promise.allSettled([
         userAPI.getUsage(),
         api.get('/api/v1/subscriptions/my-subscription'),
-        api.get('/api/v1/batch/credits').catch(() => ({ data: null }))
+        api.get('/api/v1/batch/credits')
       ]);
-      setUsage(usageRes.data);
-      setSubscription(subRes.data);
-      setBatchCredits(creditsRes.data);
+
+      const usageData = usageRes.status === 'fulfilled' ? usageRes.value.data : null;
+      const subscriptionData = subRes.status === 'fulfilled' ? subRes.value.data : null;
+      const creditsData = creditsRes.status === 'fulfilled' ? creditsRes.value.data : null;
+
+      setUsage(usageData);
+      setSubscription(subscriptionData);
+      setBatchCredits(creditsData);
+
+      if (!usageData && !subscriptionData && !creditsData) {
+        throw new Error('Dashboard data unavailable');
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setError('Falha ao carregar dados do dashboard.');

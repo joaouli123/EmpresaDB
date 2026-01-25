@@ -42,7 +42,7 @@ import '../styles/LandingPageUpdates.css';
 
 const LandingPage = () => {
   const { setIsOpen: setContactModalOpen } = useContactModal();
-  const [selectedPlan, setSelectedPlan] = useState('professional');
+  const [selectedPlan, setSelectedPlan] = useState('pro');
   const [billingPeriod, setBillingPeriod] = useState('mensal'); // 'mensal' ou 'anual'
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('varejo');
@@ -54,6 +54,8 @@ const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [pricingCarouselIndex, setPricingCarouselIndex] = useState(0); // Carrossel de Preços
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const safePlans = Array.isArray(plans) ? plans : [];
+  const safeBatchPackages = Array.isArray(batchPackages) ? batchPackages : [];
 
   useEffect(() => {
     loadPlans();
@@ -67,10 +69,6 @@ const LandingPage = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Garantir que sempre sejam arrays
-  const safePlans = Array.isArray(plans) ? plans : [];
-  const safeBatchPackages = Array.isArray(batchPackages) ? batchPackages : [];
 
   const loadPlans = async () => {
     try {
@@ -533,14 +531,21 @@ const LandingPage = () => {
 
   // Pricing Carousel Logic - Igual aos depoimentos
   const pricingItemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
+  const pricingSlides = Math.max(1, safePlans.length - pricingItemsToShow + 1);
 
   const nextPricingSlide = () => {
     const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
+    if (safePlans.length <= itemsToShow) {
+      return;
+    }
     setPricingCarouselIndex(prev => prev < safePlans.length - itemsToShow ? prev + 1 : 0);
   };
 
   const prevPricingSlide = () => {
     const itemsToShow = windowWidth <= 640 ? 1 : windowWidth <= 991 ? 2 : 3;
+    if (safePlans.length <= itemsToShow) {
+      return;
+    }
     setPricingCarouselIndex(prev => prev > 0 ? prev - 1 : safePlans.length - itemsToShow);
   };
 
@@ -1088,7 +1093,7 @@ const LandingPage = () => {
 
             {/* Indicadores */}
             <div className="carousel-indicators">
-              {Array.from({ length: safePlans.length - pricingItemsToShow + 1 }).map((_, index) => (
+              {Array.from({ length: pricingSlides }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setPricingCarouselIndex(index)}

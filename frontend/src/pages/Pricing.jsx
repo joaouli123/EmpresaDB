@@ -18,9 +18,9 @@ const Pricing = () => {
 
   const rateLimits = {
     'free': 10,
-    'starter': 60,
+    'start': 60,
     'growth': 300,
-    'professional': 1000
+    'pro': 1000
   };
 
   useEffect(() => {
@@ -129,8 +129,8 @@ const Pricing = () => {
         },
         {
           id: 4,
-          name: 'professional',
-          display_name: 'Professional',
+          name: 'pro',
+          display_name: 'Pro',
           monthly_queries: 500000,
           monthly_batch_queries: 0,
           price_brl: 799.90,
@@ -411,9 +411,9 @@ const Pricing = () => {
           const isCurrentPlan = currentPlanName && currentPlanName === plan.name.toLowerCase();
           
           return (
-          <div key={plan.id} className={`plan-card ${plan.name === 'professional' ? 'featured' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''} ${isCurrentPlan ? 'current-plan' : ''}`}>
+          <div key={plan.id} className={`plan-card ${plan.name === 'pro' ? 'featured' : ''} ${plan.name === 'enterprise' ? 'enterprise' : ''} ${isCurrentPlan ? 'current-plan' : ''}`}>
             {isCurrentPlan && <div className="current-badge" style={{ background: '#10b981' }}>Seu Plano Atual</div>}
-            {!isCurrentPlan && plan.name === 'professional' && <div className="popular-badge">Mais Popular</div>}
+            {!isCurrentPlan && plan.name === 'pro' && <div className="popular-badge">Mais Popular</div>}
             {plan.name === 'enterprise' && <div className="custom-badge">Customizado</div>}
             
             <h3>{plan.display_name}</h3>
@@ -482,7 +482,7 @@ const Pricing = () => {
             </ul>
             
             <button
-              className={`btn-plan ${plan.name === 'professional' ? 'btn-primary' : plan.name === 'enterprise' ? 'btn-enterprise' : 'btn-secondary'}`}
+              className={`btn-plan ${plan.name === 'pro' ? 'btn-primary' : plan.name === 'enterprise' ? 'btn-enterprise' : 'btn-secondary'}`}
               onClick={() => plan.name === 'enterprise' ? window.location.href = 'mailto:contato@dbempresas.com.br?subject=Interesse no Plano Enterprise' : handleSubscribe(plan.id)}
               disabled={subscribing === plan.id || isCurrentPlan}
             >

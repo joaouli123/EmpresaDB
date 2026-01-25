@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class CNPJImporter:
     def __init__(self):
         self.download_dir = Path(settings.DOWNLOAD_DIR)
-        self.data_dir = Path(settings.DATA_DIR)
+        self.data_dir = self.download_dir  # Usar o mesmo diretório de download
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.chunk_size = settings.CHUNK_SIZE
 
@@ -347,7 +347,7 @@ class CNPJImporter:
 
                 # Criar tabela temporária para importação
                 cursor.execute(f"""
-                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING ALL)
+                    CREATE TEMP TABLE temp_{table_name} (LIKE {table_name} INCLUDING DEFAULTS)
                 """)
 
                 with open(csv_path, 'r', encoding='latin1') as f:
@@ -390,11 +390,17 @@ class CNPJImporter:
                         copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                # Inserir apenas os que não existem (ON CONFLICT DO NOTHING)
+                # Inserir/atualizar registros (UPSERT)
                 cursor.execute(f"""
                     INSERT INTO {table_name} 
                     SELECT * FROM temp_{table_name}
-                    ON CONFLICT (cnpj_basico) DO NOTHING
+                    ON CONFLICT (cnpj_basico) DO UPDATE SET
+                        razao_social = EXCLUDED.razao_social,
+                        natureza_juridica = EXCLUDED.natureza_juridica,
+                        qualificacao_responsavel = EXCLUDED.qualificacao_responsavel,
+                        capital_social = EXCLUDED.capital_social,
+                        porte_empresa = EXCLUDED.porte_empresa,
+                        ente_federativo_responsavel = EXCLUDED.ente_federativo_responsavel
                 """)
 
                 total_imported = cursor.rowcount
@@ -418,7 +424,7 @@ class CNPJImporter:
         except Exception as e:
             logger.error(f"Erro ao importar empresas: {e}")
             if file_id:
-                self.tracker.finish_file_processing(file_id, 'failed', table_name)
+                self.tracker.finish_file_processing(file_id, 'failed', table_name, str(e))
 
     def import_estabelecimentos(self, csv_path: Path):
         logger.info(f"Importando estabelecimentos de: {csv_path.name}")
@@ -530,11 +536,38 @@ class CNPJImporter:
                             avg_time = elapsed / chunk_count
                             logger.info(f"📊 Chunk {chunk_count}: {chunk_time:.2f}s | Média: {avg_time:.2f}s/chunk | Total: {elapsed/60:.1f}min")
 
-                # Inserir apenas os que não existem (sem cnpj_completo que é GENERATED)
+                # Inserir/atualizar registros (UPSERT)
                 cursor.execute(f"""
                     INSERT INTO {table_name} ({','.join(db_columns)})
                     SELECT {','.join(db_columns)} FROM temp_{table_name}
-                    ON CONFLICT (cnpj_basico, cnpj_ordem, cnpj_dv) DO NOTHING
+                    ON CONFLICT (cnpj_basico, cnpj_ordem, cnpj_dv) DO UPDATE SET
+                        identificador_matriz_filial = EXCLUDED.identificador_matriz_filial,
+                        nome_fantasia = EXCLUDED.nome_fantasia,
+                        situacao_cadastral = EXCLUDED.situacao_cadastral,
+                        data_situacao_cadastral = EXCLUDED.data_situacao_cadastral,
+                        motivo_situacao_cadastral = EXCLUDED.motivo_situacao_cadastral,
+                        nome_cidade_exterior = EXCLUDED.nome_cidade_exterior,
+                        pais = EXCLUDED.pais,
+                        data_inicio_atividade = EXCLUDED.data_inicio_atividade,
+                        cnae_fiscal_principal = EXCLUDED.cnae_fiscal_principal,
+                        cnae_fiscal_secundaria = EXCLUDED.cnae_fiscal_secundaria,
+                        tipo_logradouro = EXCLUDED.tipo_logradouro,
+                        logradouro = EXCLUDED.logradouro,
+                        numero = EXCLUDED.numero,
+                        complemento = EXCLUDED.complemento,
+                        bairro = EXCLUDED.bairro,
+                        cep = EXCLUDED.cep,
+                        uf = EXCLUDED.uf,
+                        municipio = EXCLUDED.municipio,
+                        ddd_1 = EXCLUDED.ddd_1,
+                        telefone_1 = EXCLUDED.telefone_1,
+                        ddd_2 = EXCLUDED.ddd_2,
+                        telefone_2 = EXCLUDED.telefone_2,
+                        ddd_fax = EXCLUDED.ddd_fax,
+                        fax = EXCLUDED.fax,
+                        correio_eletronico = EXCLUDED.correio_eletronico,
+                        situacao_especial = EXCLUDED.situacao_especial,
+                        data_situacao_especial = EXCLUDED.data_situacao_especial
                 """)
 
                 total_imported = cursor.rowcount
@@ -557,7 +590,7 @@ class CNPJImporter:
         except Exception as e:
             logger.error(f"Erro ao importar estabelecimentos: {e}")
             if file_id:
-                self.tracker.finish_file_processing(file_id, 'failed', table_name)
+                self.tracker.finish_file_processing(file_id, 'failed', table_name, str(e))
 
     def import_socios(self, csv_path: Path):
         logger.info(f"Importando sócios de: {csv_path.name}")
@@ -636,11 +669,19 @@ class CNPJImporter:
                         copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                # Inserir apenas os que não existem
+                # Inserir/atualizar registros (UPSERT)
                 cursor.execute(f"""
                     INSERT INTO {table_name} 
                     SELECT * FROM temp_{table_name}
-                    ON CONFLICT (cnpj_basico, identificador_socio, cnpj_cpf_socio) DO NOTHING
+                    ON CONFLICT (cnpj_basico, identificador_socio, cnpj_cpf_socio) DO UPDATE SET
+                        nome_socio = EXCLUDED.nome_socio,
+                        qualificacao_socio = EXCLUDED.qualificacao_socio,
+                        data_entrada_sociedade = EXCLUDED.data_entrada_sociedade,
+                        pais = EXCLUDED.pais,
+                        representante_legal = EXCLUDED.representante_legal,
+                        nome_representante = EXCLUDED.nome_representante,
+                        qualificacao_representante = EXCLUDED.qualificacao_representante,
+                        faixa_etaria = EXCLUDED.faixa_etaria
                 """)
 
                 total_imported = cursor.rowcount
@@ -663,7 +704,7 @@ class CNPJImporter:
         except Exception as e:
             logger.error(f"Erro ao importar sócios: {e}")
             if file_id:
-                self.tracker.finish_file_processing(file_id, 'failed', table_name)
+                self.tracker.finish_file_processing(file_id, 'failed', table_name, str(e))
 
     def import_simples(self, csv_path: Path):
         logger.info(f"Importando Simples Nacional de: {csv_path.name}")
@@ -731,11 +772,20 @@ class CNPJImporter:
                         copy_sql = f"COPY temp_{table_name} ({','.join(columns)}) FROM STDIN WITH CSV DELIMITER ';'"
                         cursor.copy_expert(copy_sql, output)
 
-                # Inserir apenas os que não existem
+                # Inserir/atualizar registros (UPSERT)
+                # Filtra apenas CNPJ básicos já presentes em empresas para evitar FK
                 cursor.execute(f"""
                     INSERT INTO {table_name} 
-                    SELECT * FROM temp_{table_name}
-                    ON CONFLICT (cnpj_basico) DO NOTHING
+                    SELECT t.*
+                    FROM temp_{table_name} t
+                    JOIN empresas e ON e.cnpj_basico = t.cnpj_basico
+                    ON CONFLICT (cnpj_basico) DO UPDATE SET
+                        opcao_simples = EXCLUDED.opcao_simples,
+                        data_opcao_simples = EXCLUDED.data_opcao_simples,
+                        data_exclusao_simples = EXCLUDED.data_exclusao_simples,
+                        opcao_mei = EXCLUDED.opcao_mei,
+                        data_opcao_mei = EXCLUDED.data_opcao_mei,
+                        data_exclusao_mei = EXCLUDED.data_exclusao_mei
                 """)
 
                 total_imported = cursor.rowcount
@@ -758,7 +808,7 @@ class CNPJImporter:
         except Exception as e:
             logger.error(f"Erro ao importar Simples Nacional: {e}")
             if file_id:
-                self.tracker.finish_file_processing(file_id, 'failed', table_name)
+                self.tracker.finish_file_processing(file_id, 'failed', table_name, str(e))
 
     def process_all(self, downloaded_files: dict, skip_types: list = None):
         """

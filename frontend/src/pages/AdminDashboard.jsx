@@ -18,6 +18,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [wsConnection, setWsConnection] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [importStats, setImportStats] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -30,14 +31,33 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Poll de status detalhado quando ETL está rodando
+  useEffect(() => {
+    if (!etlStatus || !etlStatus.is_running) return;
+    
+    // Removido polling de detailed-status por enquanto
+    // O ETL continua funcionando normalmente
+    
+  }, [etlStatus?.is_running]);
+
   const loadData = async () => {
     try {
       const [statusRes, statsRes] = await Promise.all([
         etlAPI.getStatus(),
         cnpjAPI.getStats()
       ]);
+      
+      console.log('[AdminDashboard] ETL Status recebido:', statusRes.data);
       setEtlStatus(statusRes.data);
       setStats(statsRes.data);
+      
+      // Carregar estatísticas de importação
+      try {
+        const importStatsRes = await etlAPI.getImportStatistics();
+        setImportStats(importStatsRes.data.statistics);
+      } catch (err) {
+        console.log('[AdminDashboard] Estatísticas de importação não disponíveis ainda');
+      }
     } catch (error) {
       console.error('Error loading admin data:', error);
     } finally {
@@ -46,9 +66,11 @@ const AdminDashboard = () => {
   };
 
   const connectWebSocket = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/api/v1/ws/etl`;
+    // Em desenvolvimento, usar localhost:8000 diretamente para WebSocket (proxy não funciona com WS)
+    const isDev = import.meta.env.DEV;
+    const wsUrl = isDev 
+      ? 'ws://localhost:8000/api/v1/ws'
+      : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/v1/ws`;
     
     console.log('[ETL] Conectando WebSocket:', wsUrl);
     const ws = new WebSocket(wsUrl);
@@ -60,7 +82,18 @@ const AdminDashboard = () => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log('[ETL] Mensagem WebSocket:', data);
-      setLogs(prev => [...prev, data].slice(-100));
+      
+      // Se for log, adicionar ao array de logs
+      if (data.type === 'log') {
+        const logEntry = {
+          timestamp: data.data?.timestamp || new Date().toLocaleTimeString(),
+          level: data.data?.level || 'info',
+          message: data.data?.message || JSON.stringify(data.data)
+        };
+        setLogs(prev => [...prev, logEntry].slice(-100));
+      }
+      
+      // Atualizar status do ETL
       if (data.type === 'status' || data.type === 'stats_update') {
         setEtlStatus(data.data || data.stats);
       }
@@ -114,7 +147,25 @@ const AdminDashboard = () => {
     );
   }
 
-  const isRunning = etlStatus?.status === 'running';
+  const isRunning = etlStatus?.is_running || false;
+  const stats_data = etlStatus?.stats || {};
+  const statusText = isRunning ? 'Em Execução' : (stats_data.status === 'completed' ? 'Concluído' : 'Parado');
+  const progress = stats_data.progress || 0;
+  const processedRecords = stats_data.total_records || stats_data.imported_records || 0;
+  
+  // Calcula tempo decorrido se estiver rodando
+  let timeElapsed = '0min';
+  if (isRunning && stats_data.start_time) {
+    try {
+      const startTime = new Date(stats_data.start_time);
+      const now = new Date();
+      const diffMs = now - startTime;
+      const diffMins = Math.floor(diffMs / 60000);
+      timeElapsed = diffMins > 0 ? `${diffMins}min` : '< 1min';
+    } catch (e) {
+      console.error('Erro ao calcular tempo:', e);
+    }
+  }
 
   return (
     <div className="admin-dashboard">
@@ -153,9 +204,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Status do ETL</p>
-            <h3 className="stat-value">
-              {isRunning ? 'Em Execução' : 'Parado'}
-            </h3>
+            <h3 className="stat-value">{statusText}</h3>
           </div>
         </div>
 
@@ -165,9 +214,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Progresso</p>
-            <h3 className="stat-value">
-              {etlStatus?.progress || 0}%
-            </h3>
+            <h3 className="stat-value">{progress}%</h3>
           </div>
         </div>
 
@@ -177,9 +224,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-content">
             <p className="stat-label">Tempo Decorrido</p>
-            <h3 className="stat-value">
-              {etlStatus?.elapsed_time || '0min'}
-            </h3>
+            <h3 className="stat-value">{timeElapsed}</h3>
           </div>
         </div>
 
@@ -190,11 +235,54 @@ const AdminDashboard = () => {
           <div className="stat-content">
             <p className="stat-label">Registros Processados</p>
             <h3 className="stat-value">
-              {(etlStatus?.processed_records || 0).toLocaleString('pt-BR')}
+              {processedRecords.toLocaleString('pt-BR')}
             </h3>
           </div>
         </div>
       </div>
+
+      {importStats && (
+        <div className="stats-section">
+          <h2>📊 Estatísticas do Último Processamento</h2>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon green">
+                <CheckCircle2 size={24} />
+              </div>
+              <div className="stat-content">
+                <p className="stat-label">Registros Novos</p>
+                <h3 className="stat-value">
+                  {importStats.new_records?.toLocaleString('pt-BR') || '0'}
+                </h3>
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-icon blue">
+                <RefreshCw size={24} />
+              </div>
+              <div className="stat-content">
+                <p className="stat-label">Registros Atualizados</p>
+                <h3 className="stat-value">
+                  {importStats.updated_records?.toLocaleString('pt-BR') || '0'}
+                </h3>
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-icon gray">
+                <AlertCircle size={24} />
+              </div>
+              <div className="stat-content">
+                <p className="stat-label">Sem Mudanças</p>
+                <h3 className="stat-value">
+                  {importStats.unchanged_records?.toLocaleString('pt-BR') || '0'}
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="dashboard-grid">
         <div className="card">

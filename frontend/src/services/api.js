@@ -68,7 +68,9 @@ export const etlAPI = {
   startETL: () => api.post(`${API_V1}/etl/start`),
   stopETL: () => api.post(`${API_V1}/etl/stop`),
   getStatus: () => api.get(`${API_V1}/etl/status`),
+  getDetailedStatus: () => api.get(`${API_V1}/etl/detailed-status`),
   checkUpdates: () => api.get(`${API_V1}/etl/check-updates`),
+  getImportStatistics: () => api.get(`${API_V1}/etl/import-statistics`),
 };
 
 export const userAPI = {

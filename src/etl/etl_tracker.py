@@ -186,7 +186,7 @@ class ETLTracker:
                 cursor = conn.cursor()
 
                 cursor.execute("""
-                    SELECT id, status, total_csv_lines, total_imported_records
+                    SELECT id, status, total_csv_lines, total_imported_records, table_name
                     FROM etl_tracking_files
                     WHERE file_name = %s AND file_hash = %s
                     ORDER BY created_at DESC
@@ -199,7 +199,24 @@ class ETLTracker:
                 if not result:
                     return None
 
-                file_id, status, csv_lines, db_records = result
+                file_id, status, csv_lines, db_records, table_name = result
+
+                # Se for simples_nacional, recalcula o total real para evitar estatística desatualizada
+                if table_name == 'simples_nacional':
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT COUNT(*) FROM simples_nacional")
+                    real_count = cursor.fetchone()[0] or 0
+                    cursor.close()
+                    if real_count != db_records:
+                        cursor = conn.cursor()
+                        cursor.execute("""
+                            UPDATE etl_tracking_files
+                            SET total_imported_records = %s, updated_at = CURRENT_TIMESTAMP
+                            WHERE id = %s
+                        """, (real_count, file_id))
+                        conn.commit()
+                        cursor.close()
+                        db_records = real_count
 
                 # Se completado, sempre pula (mesmo com discrepância)
                 if status == 'completed':
@@ -214,6 +231,12 @@ class ETLTracker:
                     logger.info(f"⏸️  Arquivo {file_path.name} parcialmente processado, retomando...")
                     self.current_file_id = file_id
                     return 'partial'
+
+                # Se falhou, permitir reprocessar
+                if status == 'failed':
+                    logger.warning(f"🔁 Arquivo {file_path.name} falhou anteriormente, reprocessando...")
+                    self.current_file_id = file_id
+                    return 'failed'
 
                 return None
 
@@ -238,6 +261,33 @@ class ETLTracker:
         if status == 'partial' and self.current_file_id:
             logger.info(f"⏸️  {file_path.name} parcialmente processado, retomando...")
             return self.current_file_id  # Retoma processamento
+
+        if status == 'failed' and self.current_file_id:
+            try:
+                with db_manager.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE etl_tracking_files SET
+                            status = 'running',
+                            started_at = CURRENT_TIMESTAMP,
+                            finished_at = NULL,
+                            total_imported_records = 0,
+                            chunks_total = 0,
+                            chunks_completed = 0,
+                            has_discrepancy = FALSE,
+                            discrepancy_details = NULL,
+                            error_message = NULL,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                        RETURNING id
+                    """, (self.current_file_id,))
+                    result = cursor.fetchone()
+                    cursor.close()
+                    if result:
+                        return result[0]
+            except Exception as e:
+                logger.error(f"Erro ao reiniciar arquivo {file_path.name}: {e}")
+                return None
 
         # Só chega aqui se for arquivo NOVO
         file_size = file_path.stat().st_size if file_path.exists() else 0
@@ -330,7 +380,7 @@ class ETLTracker:
         except Exception as e:
             logger.error(f"Erro ao finalizar chunk: {e}")
 
-    def finish_file_processing(self, file_id: int, status: str = 'completed', table_name: str = None):
+    def finish_file_processing(self, file_id: int, status: str = 'completed', table_name: str = None, error_message: str = None):
         """Finaliza processamento de arquivo e valida integridade (CSV vs DB REAL)"""
         try:
             with db_manager.get_connection() as conn:
@@ -351,7 +401,12 @@ class ETLTracker:
                 final_table = table_name or table_name_db
 
                 # **VALIDAÇÃO REAL: Conta registros direto no banco de dados**
-                db_count_real = db_manager.get_table_count(final_table) or 0
+                # Para tabelas grandes como simples_nacional, usar COUNT(*) para evitar estatística desatualizada
+                if final_table == 'simples_nacional':
+                    cursor.execute(f"SELECT COUNT(*) FROM {final_table}")
+                    db_count_real = cursor.fetchone()[0] or 0
+                else:
+                    db_count_real = db_manager.get_table_count(final_table) or 0
 
                 # Calcula chunks completados
                 cursor.execute("""
@@ -391,10 +446,11 @@ class ETLTracker:
                         chunks_total = %s,
                         chunks_completed = %s,
                         has_discrepancy = %s,
-                        discrepancy_details = %s
+                        discrepancy_details = %s,
+                        error_message = %s
                     WHERE id = %s
                 """, (status, db_count_real, chunks_total, chunks_completed, 
-                      has_discrepancy, discrepancy_details, file_id))
+                      has_discrepancy, discrepancy_details, error_message, file_id))
 
                 conn.commit()
                 cursor.close()
