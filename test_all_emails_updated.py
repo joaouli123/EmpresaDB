@@ -42,7 +42,7 @@ def test_all_emails():
     print(f"📧 1/{total} - Enviando: Email de Ativação de Conta (NOVO)...")
     try:
         # Gerar token de exemplo para o link
-        activation_link = "http://localhost:8000/auth/activate/exemplo_token_ativacao_12345"
+        activation_link = "https://www.dbempresas.com.br/auth/activate/exemplo_token_ativacao_12345"
         success = email_service.send_account_activation_email(
             to_email=test_email,
             username=test_username,

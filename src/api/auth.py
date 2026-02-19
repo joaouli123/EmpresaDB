@@ -415,12 +415,19 @@ async def register(user: UserCreate):
 
     # Construir link de ativação (aponta para o backend endpoint)
     # O endpoint retorna HTML que redireciona para o frontend
-    replit_domain = os.getenv('REPLIT_DOMAINS', '')
-    if replit_domain:
-        base_url = f"https://{replit_domain}"
-    else:
-        # Fallback para desenvolvimento local
-        base_url = "http://localhost:8000"
+    base_url = os.getenv('BASE_URL', '')
+    if not base_url:
+        # Tentar REPLIT_DOMAINS para compatibilidade
+        replit_domain = os.getenv('REPLIT_DOMAINS', '')
+        if replit_domain:
+            base_url = f"https://{replit_domain}"
+        else:
+            # Usar domínio de produção como padrão
+            environment = os.getenv('ENVIRONMENT', 'production').lower()
+            if environment == 'development':
+                base_url = "http://localhost:8000"
+            else:
+                base_url = "https://www.dbempresas.com.br"
 
     activation_link = f"{base_url}/auth/activate/{activation_token}"
 
@@ -523,11 +530,19 @@ async def request_password_reset(data: PasswordResetRequest):
         }
     
     # Gerar link de reset
-    replit_domain = os.getenv('REPLIT_DOMAINS', '')
-    if replit_domain:
-        base_url = f"https://{replit_domain}"
-    else:
-        base_url = "http://localhost:5000"
+    base_url = os.getenv('BASE_URL', '')
+    if not base_url:
+        # Tentar REPLIT_DOMAINS para compatibilidade
+        replit_domain = os.getenv('REPLIT_DOMAINS', '')
+        if replit_domain:
+            base_url = f"https://{replit_domain}"
+        else:
+            # Usar domínio de produção como padrão
+            environment = os.getenv('ENVIRONMENT', 'production').lower()
+            if environment == 'development':
+                base_url = "http://localhost:5000"  # Frontend para desenvolvimento
+            else:
+                base_url = "https://www.dbempresas.com.br"
     
     reset_link = f"{base_url}/reset-password?token={token}"
     

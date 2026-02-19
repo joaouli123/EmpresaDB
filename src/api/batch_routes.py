@@ -616,9 +616,21 @@ async def purchase_batch_package(
         
         # Criar sessão de checkout do Stripe
         import os
-        origin = os.getenv('REPLIT_DEV_DOMAIN', 'http://localhost:5000')
-        if origin and not origin.startswith('http'):
-            origin = f'https://{origin}'
+        
+        # Determinar URL de origem para redirecionamentos
+        origin = os.getenv('BASE_URL', '')
+        if not origin:
+            # Tentar REPLIT_DEV_DOMAIN para compatibilidade
+            origin = os.getenv('REPLIT_DEV_DOMAIN', '')
+            if origin and not origin.startswith('http'):
+                origin = f'https://{origin}'
+            else:
+                # Usar domínio de produção como padrão
+                environment = os.getenv('ENVIRONMENT', 'production').lower()
+                if environment == 'development':
+                    origin = 'http://localhost:5000'
+                else:
+                    origin = 'https://www.dbempresas.com.br'
         
         checkout_session = await batch_stripe_service.create_package_checkout_session(
             user_id=current_user['id'],

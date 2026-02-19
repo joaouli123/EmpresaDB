@@ -31,10 +31,22 @@ async def create_checkout_session(
     Cria uma sessão de checkout do Stripe para assinar um plano
     """
     try:
-        # URLs padrão se não fornecidas
-        base_url = os.getenv('REPLIT_DOMAINS', 'http://localhost:5000').split(',')[0]
-        if not base_url.startswith('http'):
-            base_url = f'https://{base_url}'
+        # Determinar URL base para redirecionamentos
+        base_url = os.getenv('BASE_URL', '')
+        if not base_url:
+            # Tentar REPLIT_DOMAINS para compatibilidade
+            replit_domains = os.getenv('REPLIT_DOMAINS', '')
+            if replit_domains:
+                base_url = replit_domains.split(',')[0]
+                if not base_url.startswith('http'):
+                    base_url = f'https://{base_url}'
+            else:
+                # Usar domínio de produção como padrão
+                environment = os.getenv('ENVIRONMENT', 'production').lower()
+                if environment == 'development':
+                    base_url = 'http://localhost:5000'
+                else:
+                    base_url = 'https://www.dbempresas.com.br'
         
         success_url = data.success_url or f'{base_url}/subscription?success=true'
         cancel_url = data.cancel_url or f'{base_url}/pricing?canceled=true'
@@ -102,9 +114,22 @@ async def create_customer_portal(
     (onde o usuário pode gerenciar seu método de pagamento, ver faturas, etc)
     """
     try:
-        base_url = os.getenv('REPLIT_DOMAINS', 'http://localhost:5000').split(',')[0]
-        if not base_url.startswith('http'):
-            base_url = f'https://{base_url}'
+        # Determinar URL base para redirecionamentos
+        base_url = os.getenv('BASE_URL', '')
+        if not base_url:
+            # Tentar REPLIT_DOMAINS para compatibilidade
+            replit_domains = os.getenv('REPLIT_DOMAINS', '')
+            if replit_domains:
+                base_url = replit_domains.split(',')[0]
+                if not base_url.startswith('http'):
+                    base_url = f'https://{base_url}'
+            else:
+                # Usar domínio de produção como padrão
+                environment = os.getenv('ENVIRONMENT', 'production').lower()
+                if environment == 'development':
+                    base_url = 'http://localhost:5000'
+                else:
+                    base_url = 'https://www.dbempresas.com.br'
         
         return_url = data.return_url or f'{base_url}/subscription'
         
