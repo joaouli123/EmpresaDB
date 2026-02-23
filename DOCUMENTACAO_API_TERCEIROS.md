@@ -1,10 +1,18 @@
 # 📚 API de Consulta CNPJ - Documentação Completa para Terceiros
 
+> ✅ **Atualização de integração (fev/2026)**
+>
+> Para parceiros/terceiros, o endpoint recomendado de busca avançada é:
+> - `POST /api/v1/batch/search` (com `X-API-Key`)
+> - Paginação com `limit` e `offset`
+>
+> O endpoint `GET /api/v1/search` é de uso administrativo e não deve ser usado em integrações de parceiros.
+
 ## 🎯 Visão Geral
 
 Esta API fornece acesso completo aos dados públicos de CNPJ da Receita Federal do Brasil, permitindo consultas avançadas sobre empresas, estabelecimentos e sócios com mais de **60 milhões de registros**.
 
-**Base URL**: `https://sua-api.com.br/api/v1`
+**Base URL**: `https://www.dbempresas.com.br/api/v1`
 
 ## 🔑 Autenticação
 
@@ -12,7 +20,7 @@ Todas as requisições exigem autenticação via **API Key** no header `X-API-Ke
 
 ### Como Obter sua API Key
 
-1. Acesse o painel de clientes: `https://sua-api.com.br`
+1. Acesse o painel de clientes: `https://www.dbempresas.com.br`
 2. Crie sua conta ou faça login
 3. Vá até a seção **"Chaves de API"** no dashboard
 4. Clique em **"Nova Chave"**
@@ -26,7 +34,7 @@ Todas as requisições exigem autenticação via **API Key** no header `X-API-Ke
 ### Exemplo de Autenticação
 
 ```bash
-curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191" \
   -H "X-API-Key: sua_chave_api_aqui"
 ```
 
@@ -203,17 +211,16 @@ Busca empresas com filtros avançados e paginação.
 
 | Parâmetro | Tipo | Padrão | Descrição |
 |-----------|------|--------|-----------|
-| `page` | integer | 1 | Número da página (mín: 1) |
-| `per_page` | integer | 20 | Itens por página (mín: 1, máx: 100) |
+| `limit` | integer | 100 | Itens por requisição (mín: 1, máx: 1000) |
+| `offset` | integer | 0 | Deslocamento inicial (mín: 0) |
 
 #### Resposta de Sucesso (200)
 
 ```json
 {
   "total": 1234,
-  "page": 1,
-  "per_page": 20,
-  "total_pages": 62,
+  "limit": 100,
+  "offset": 0,
   "items": [
     {
       "cnpj_completo": "33000167000101",
@@ -262,15 +269,15 @@ Busca empresas com filtros avançados e paginação.
 
 ```bash
 # Buscar empresas ativas em SP que sejam MEI
-curl -X POST "https://sua-api.com.br/api/v1/batch/search?uf=SP&mei=S&situacao_cadastral=02&limit=100" \
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?uf=SP&mei=S&situacao_cadastral=02&limit=100&offset=0" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # Buscar empresas por CNAE em determinada cidade
-curl -X POST "https://sua-api.com.br/api/v1/batch/search?cnae=4712100&municipio=3550308&limit=50" \
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?cnae=4712100&municipio=3550308&limit=50&offset=0" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # Buscar empresas grandes (porte 4) abertas em 2024
-curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_atividade_min=2024-01-01&limit=200" \
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?porte=4&data_inicio_atividade_min=2024-01-01&limit=200&offset=0" \
   -H "X-API-Key: sua_chave_api_aqui"
 ```
 
@@ -279,9 +286,8 @@ curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_ati
 ```json
 {
   "total": 1234,
-  "page": 1,
-  "per_page": 100,
-  "total_pages": 13,
+  "limit": 100,
+  "offset": 0,
   "items": [
     {
       "cnpj_completo": "12345678000195",
@@ -335,7 +341,7 @@ curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_ati
 
 **Endpoint**: `GET /batch/credits`
 
-**Autenticação**: Requer token JWT (login no painel)
+**Autenticação**: Requer login de usuário no painel (token Bearer)
 
 **Resposta**:
 
@@ -390,7 +396,7 @@ curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_ati
 
 **Endpoint**: `POST /batch/packages/{package_id}/purchase`
 
-**Autenticação**: Requer token JWT (login no painel)
+**Autenticação**: Requer login de usuário no painel (token Bearer)
 
 **Resposta**:
 
@@ -407,7 +413,7 @@ curl -X POST "https://sua-api.com.br/api/v1/batch/search?porte=4&data_inicio_ati
 
 **Endpoint**: `GET /batch/usage?limit=100`
 
-**Autenticação**: Requer token JWT (login no painel)
+**Autenticação**: Requer login de usuário no painel (token Bearer)
 
 **Resposta**:
 
@@ -477,19 +483,19 @@ Busca sócios com filtros avançados. Ideal para encontrar empresas através de 
 
 ```bash
 # Buscar pessoas físicas que são administradores
-GET /socios/search?identificador_socio=2&qualificacao_socio=05&limit=100
+GET /api/v1/socios/search?identificador_socio=2&qualificacao_socio=05&limit=100
 
 # Buscar sócios com CPF específico
-GET /socios/search?cpf_cnpj=12345678900
+GET /api/v1/socios/search?cpf_cnpj=12345678900
 
 # Buscar sócios por nome
-GET /socios/search?nome_socio=SILVA&limit=50
+GET /api/v1/socios/search?nome_socio=SILVA&limit=50
 
 # Buscar sócios de faixa etária específica
-GET /socios/search?faixa_etaria=4&identificador_socio=2
+GET /api/v1/socios/search?faixa_etaria=4&identificador_socio=2
 
 # Buscar empresas sócias (PJ)
-GET /socios/search?identificador_socio=1&limit=200
+GET /api/v1/socios/search?identificador_socio=1&limit=200
 ```
 
 **Resposta de Sucesso (200)**:
@@ -619,7 +625,7 @@ Verifica se a API está funcionando.
 ```python
 import requests
 
-API_BASE_URL = "https://sua-api.com.br/api/v1"
+API_BASE_URL = "https://www.dbempresas.com.br/api/v1"
 API_KEY = "sua_chave_api_aqui"
 
 headers = {
@@ -649,10 +655,10 @@ if empresa:
     print(f"Capital Social: R$ {empresa['capital_social']:,.2f}")
 
 
-# 2. Buscar empresas com filtros
+# 2. Buscar empresas com filtros (parceiros)
 def buscar_empresas(filtros):
-    response = requests.get(
-        f"{API_BASE_URL}/search",
+  response = requests.post(
+    f"{API_BASE_URL}/batch/search",
         headers=headers,
         params=filtros
     )
@@ -667,14 +673,13 @@ filtros = {
     "uf": "SP",
     "porte": "4",
     "situacao_cadastral": "02",
-    "page": 1,
-    "per_page": 50
+  "limit": 50,
+  "offset": 0
 }
 
 resultado = buscar_empresas(filtros)
 if resultado:
     print(f"Total de empresas encontradas: {resultado['total']}")
-    print(f"Página {resultado['page']} de {resultado['total_pages']}")
 
     for empresa in resultado['items']:
         print(f"{empresa['cnpj_completo']} - {empresa['razao_social']}")
@@ -721,11 +726,12 @@ import csv
 
 def exportar_empresas_para_csv(filtros, arquivo_saida):
     todas_empresas = []
-    page = 1
+  offset = 0
+  limit = 100
 
     while True:
-        filtros['page'] = page
-        filtros['per_page'] = 100  # Máximo por requisição
+    filtros['limit'] = limit
+    filtros['offset'] = offset
 
         resultado = buscar_empresas(filtros)
         if not resultado or not resultado['items']:
@@ -733,12 +739,12 @@ def exportar_empresas_para_csv(filtros, arquivo_saida):
 
         todas_empresas.extend(resultado['items'])
 
-        print(f"Baixando página {page} de {resultado['total_pages']}...")
+        print(f"Baixando lote a partir do offset {offset}...")
 
-        if page >= resultado['total_pages']:
+        if len(resultado['items']) < limit:
             break
 
-        page += 1
+        offset += limit
 
     # Salvar em CSV
     if todas_empresas:
@@ -769,7 +775,7 @@ exportar_empresas_para_csv(filtros_exportacao, "meis_rio.csv")
 ```javascript
 const axios = require('axios');
 
-const API_BASE_URL = 'https://sua-api.com.br/api/v1';
+const API_BASE_URL = 'https://www.dbempresas.com.br/api/v1';
 const API_KEY = 'sua_chave_api_aqui';
 
 const api = axios.create({
@@ -807,7 +813,7 @@ async function consultarCNPJ(cnpj) {
 // 2. Buscar empresas com filtros
 async function buscarEmpresas(filtros) {
   try {
-    const response = await api.get('/search', { params: filtros });
+    const response = await api.post('/batch/search', null, { params: filtros });
     return response.data;
   } catch (error) {
     console.error('Erro:', error.message);
@@ -818,12 +824,12 @@ async function buscarEmpresas(filtros) {
 // Exemplo: Empresas abertas em 2023
 (async () => {
   const filtros = {
-    data_inicio_atividade_de: '2023-01-01',
-    data_inicio_atividade_ate: '2023-12-31',
+    data_inicio_atividade_min: '2023-01-01',
+    data_inicio_atividade_max: '2023-12-31',
     situacao_cadastral: '02',
     uf: 'SP',
-    page: 1,
-    per_page: 20
+    limit: 20,
+    offset: 0
   };
 
   const resultado = await buscarEmpresas(filtros);
@@ -840,18 +846,19 @@ async function buscarEmpresas(filtros) {
 // 3. Buscar todas as páginas
 async function buscarTodasPaginas(filtros) {
   const todasEmpresas = [];
-  let page = 1;
+  let offset = 0;
+  const limit = 100;
 
   while (true) {
-    const resultado = await buscarEmpresas({ ...filtros, page, per_page: 100 });
+    const resultado = await buscarEmpresas({ ...filtros, limit, offset });
 
     if (!resultado || resultado.items.length === 0) break;
 
     todasEmpresas.push(...resultado.items);
-    console.log(`Baixando página ${page} de ${resultado.total_pages}...`);
+    console.log(`Baixando lote a partir do offset ${offset}...`);
 
-    if (page >= resultado.total_pages) break;
-    page++;
+    if (resultado.items.length < limit) break;
+    offset += limit;
   }
 
   return todasEmpresas;
@@ -909,23 +916,30 @@ async function buscarCnaesSecundarios(cnpj) {
 <?php
 
 class CNPJApi {
-    private $baseUrl = 'https://sua-api.com.br/api/v1';
+  private $baseUrl = 'https://www.dbempresas.com.br/api/v1';
     private $apiKey;
 
     public function __construct($apiKey) {
         $this->apiKey = $apiKey;
     }
 
-    private function request($endpoint, $params = []) {
+    private function request($endpoint, $params = [], $method = 'GET') {
         $url = $this->baseUrl . $endpoint;
 
-        if (!empty($params)) {
+      if ($method === 'GET' && !empty($params)) {
             $url .= '?' . http_build_query($params);
         }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+
+        if ($method === 'POST' && !empty($params)) {
+          $url .= '?' . http_build_query($params);
+          curl_setopt($ch, CURLOPT_URL, $url);
+        }
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-API-Key: ' . $this->apiKey
         ]);
@@ -946,7 +960,7 @@ class CNPJApi {
     }
 
     public function buscarEmpresas($filtros) {
-        return $this->request('/search', $filtros);
+      return $this->request('/batch/search', $filtros, 'POST');
     }
 
     public function buscarSocios($cnpj) {
@@ -981,8 +995,8 @@ $resultado = $api->buscarEmpresas([
     'uf' => 'SP',
     'porte' => '4',
     'situacao_cadastral' => '02',
-    'page' => 1,
-    'per_page' => 20
+  'limit' => 20,
+  'offset' => 0
 ]);
 
 if ($resultado) {
@@ -1014,35 +1028,35 @@ foreach ($cnaes_secundarios as $cnae) {
 
 ```bash
 # 1. Consultar CNPJ específico
-curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191" \
   -H "X-API-Key: sua_chave_api_aqui"
 
-# 2. Buscar empresas ativas em SP
-curl -X GET "https://sua-api.com.br/api/v1/search?uf=SP&situacao_cadastral=02&page=1&per_page=20" \
+# 2. Buscar empresas ativas em SP (parceiros)
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?uf=SP&situacao_cadastral=02&limit=20&offset=0" \
   -H "X-API-Key: sua_chave_api_aqui"
 
-# 3. Buscar empresas com múltiplos filtros
-curl -X GET "https://sua-api.com.br/api/v1/search?uf=RJ&porte=4&capital_social_min=1000000&simples=N&identificador_matriz_filial=1" \
+# 3. Buscar empresas com múltiplos filtros (parceiros)
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?uf=RJ&porte=4&capital_social_min=1000000&simples=N&identificador_matriz_filial=1&limit=100&offset=0" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # 4. Buscar sócios
-curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191/socios" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191/socios" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # 5. Buscar CNAEs secundários
-curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191/cnaes-secundarios" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191/cnaes-secundarios" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # 6. Listar CNAEs
-curl -X GET "https://sua-api.com.br/api/v1/cnaes?search=comercio&limit=50" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnaes?search=comercio&limit=50" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # 7. Listar municípios de SP
-curl -X GET "https://sua-api.com.br/api/v1/municipios/SP" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/municipios/SP" \
   -H "X-API-Key: sua_chave_api_aqui"
 
 # 8. Estatísticas
-curl -X GET "https://sua-api.com.br/api/v1/stats" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/stats" \
   -H "X-API-Key: sua_chave_api_aqui"
 ```
 
@@ -1059,8 +1073,8 @@ filtros = {
     "uf": "SP",
     "municipio": "3550308",  # São Paulo
     "situacao_cadastral": "02",  # Ativas
-    "page": 1,
-    "per_page": 100
+  "limit": 100,
+  "offset": 0
 }
 
 resultado = buscar_empresas(filtros)
@@ -1086,8 +1100,8 @@ for socio in socios:
     cnpj_completo = cnpj_basico + "00010001"  # CNPJ básico + ordem + DV aproximado
 
     # Ou buscar todos os estabelecimentos desse CNPJ básico
-    empresas = requests.get(
-        f"{API_BASE_URL}/search",
+    empresas = requests.post(
+      f"{API_BASE_URL}/batch/search",
         headers=headers,
         params={"cnpj": cnpj_basico}
     ).json()
@@ -1120,8 +1134,8 @@ cnpjs_basicos = list(set([s['cnpj_basico'] for s in socios_jovens_admin]))
 # 3. Buscar dados completos das empresas
 empresas_detalhadas = []
 for cnpj_basico in cnpjs_basicos[:50]:  # Limitar para exemplo
-    empresas = requests.get(
-        f"{API_BASE_URL}/search",
+    empresas = requests.post(
+      f"{API_BASE_URL}/batch/search",
         headers=headers,
         params={"cnpj": cnpj_basico, "situacao_cadastral": "02"}
     ).json()
@@ -1141,11 +1155,11 @@ from datetime import datetime, timedelta
 data_limite = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
 
 filtros = {
-    "data_inicio_atividade_de": data_limite,
+  "data_inicio_atividade_min": data_limite,
     "uf": "RJ",
     "situacao_cadastral": "02",
-    "page": 1,
-    "per_page": 100
+  "limit": 100,
+  "offset": 0
 }
 ```
 
@@ -1176,15 +1190,16 @@ import pandas as pd
 # Buscar todos os MEIs ativos de Campinas
 def exportar_meis_campinas():
     empresas = []
-    page = 1
+  offset = 0
+  limit = 100
 
     while True:
         filtros = {
             "mei": "S",
             "municipio": "3509502",  # Campinas
             "situacao_cadastral": "02",
-            "page": page,
-            "per_page": 100
+          "limit": limit,
+          "offset": offset
         }
 
         resultado = buscar_empresas(filtros)
@@ -1193,10 +1208,10 @@ def exportar_meis_campinas():
 
         empresas.extend(resultado['items'])
 
-        if page >= resultado['total_pages']:
+        if len(resultado['items']) < limit:
             break
 
-        page += 1
+        offset += limit
 
     # Converter para DataFrame
     df = pd.DataFrame(empresas)
@@ -1216,8 +1231,8 @@ def monitorar_empresas_tech():
         "uf": "SP",
         "situacao_cadastral": "02",
         "porte": "4",  # Grandes empresas
-        "page": 1,
-        "per_page": 100
+    "limit": 100,
+    "offset": 0
     }
 
     resultado = buscar_empresas(filtros)
@@ -1340,13 +1355,19 @@ def monitorar_empresas_tech():
 Sempre use paginação para grandes volumes:
 
 ```python
-# ✅ BOM: Paginar resultados
-for page in range(1, total_pages + 1):
-    resultado = buscar_empresas({...filtros, "page": page, "per_page": 100})
+# ✅ BOM: Paginar resultados com limit/offset
+offset = 0
+limit = 100
+while True:
+  resultado = buscar_empresas({...filtros, "limit": limit, "offset": offset})
     processar(resultado['items'])
 
+  if len(resultado['items']) < limit:
+    break
+  offset += limit
+
 # ❌ RUIM: Tentar baixar tudo de uma vez
-resultado = buscar_empresas({...filtros, "per_page": 100000})  # Não funciona!
+resultado = buscar_empresas({...filtros, "limit": 100000})  # Não funciona!
 ```
 
 ### 2. **Cache Local**
@@ -1497,9 +1518,9 @@ Acompanhe seu consumo no painel de clientes para evitar surpresas.
 
 **Dúvidas ou problemas?**
 
-- 📧 E-mail: suporte@sua-api.com.br
+- 📧 E-mail: contato@dbempresas.com.br
 - 💬 Chat: Acesse o painel de clientes
-- 📖 Documentação: https://sua-api.com.br/docs
+- 📖 Documentação: https://www.dbempresas.com.br/docs
 
 ---
 
@@ -1528,8 +1549,8 @@ Antes de colocar em produção, verifique:
 
 ## 📚 Recursos Adicionais
 
-- **Swagger UI**: `https://sua-api.com.br/docs` (documentação interativa)
-- **ReDoc**: `https://sua-api.com.br/redoc` (documentação alternativa)
+- **Swagger UI**: `https://www.dbempresas.com.br/docs` (documentação interativa)
+- **ReDoc**: `https://www.dbempresas.com.br/redoc` (documentação alternativa)
 - **Postman Collection**: Disponível no painel de clientes
 
 ---

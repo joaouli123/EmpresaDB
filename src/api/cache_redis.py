@@ -59,6 +59,9 @@ class RedisCache:
         """
         key_data = f"{prefix}:{str(args)}:{str(sorted(kwargs.items()))}"
         return f"cnpj_api:{hashlib.md5(key_data.encode()).hexdigest()}"
+
+    def generate_key(self, prefix: str, *args, **kwargs) -> str:
+        return self._generate_key(prefix, *args, **kwargs)
     
     def _compress(self, data: Any) -> bytes:
         """

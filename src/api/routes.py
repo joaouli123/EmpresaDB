@@ -21,6 +21,7 @@ from functools import lru_cache
 from datetime import datetime, timedelta, timezone
 from src.utils.cnpj_utils import clean_cnpj
 from src.api.security_logger import log_query
+from src.api.cache_redis import cache as shared_cache
 
 # ℹ️ Todos os dados estão no banco da VPS (72.61.217.143:5432/cnpj_db)
 # DATABASE_URL configurado no .env aponta para a VPS
@@ -35,17 +36,31 @@ _cache_timeout = {}
 
 def get_from_cache(key: str):
     """Retorna do cache se ainda válido"""
+    try:
+        cached = shared_cache.get(key)
+        if cached is not None:
+            return cached
+    except Exception:
+        pass
+
     if key in _cache:
         if datetime.now() < _cache_timeout.get(key, datetime.min):
             return _cache[key]
         else:
-            # Expirou, remove
             _cache.pop(key, None)
             _cache_timeout.pop(key, None)
     return None
 
 def set_cache(key: str, value, minutes: int = 60):
     """Salva no cache com tempo de expiração"""
+    ttl_seconds = max(1, int(minutes * 60))
+    try:
+        saved = shared_cache.set(key, value, ttl_seconds=ttl_seconds)
+        if saved:
+            return
+    except Exception:
+        pass
+
     _cache[key] = value
     _cache_timeout[key] = datetime.now() + timedelta(minutes=minutes)
 

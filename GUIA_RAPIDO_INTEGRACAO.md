@@ -4,16 +4,25 @@
 
 ### 1️⃣ Obtenha sua API Key
 
-Acesse: `https://sua-api.com.br` → Login → Chaves de API → Nova Chave
+Acesse: `https://www.dbempresas.com.br` → Login → Chaves de API → Nova Chave
+
+> Header obrigatório em todas as requisições: `X-API-Key: SUA_CHAVE_AQUI`
 
 ### 2️⃣ Teste sua primeira consulta
 
 ```bash
-curl -X GET "https://sua-api.com.br/api/v1/cnpj/00000000000191" \
+curl -X GET "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191" \
   -H "X-API-Key: SUA_CHAVE_AQUI"
 ```
 
-### 3️⃣ Integre no seu código
+### 3️⃣ Teste consulta em lote (parceiros)
+
+```bash
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?uf=SP&situacao_cadastral=02&limit=100&offset=0" \
+  -H "X-API-Key: SUA_CHAVE_AQUI"
+```
+
+### 4️⃣ Integre no seu código
 
 **Python**:
 ```python
@@ -21,7 +30,7 @@ import requests
 
 headers = {"X-API-Key": "SUA_CHAVE_AQUI"}
 response = requests.get(
-    "https://sua-api.com.br/api/v1/cnpj/00000000000191",
+    "https://www.dbempresas.com.br/api/v1/cnpj/00000000000191",
     headers=headers
 )
 empresa = response.json()
@@ -30,7 +39,7 @@ print(empresa['razao_social'])
 
 **JavaScript**:
 ```javascript
-fetch('https://sua-api.com.br/api/v1/cnpj/00000000000191', {
+fetch('https://www.dbempresas.com.br/api/v1/cnpj/00000000000191', {
   headers: { 'X-API-Key': 'SUA_CHAVE_AQUI' }
 })
 .then(res => res.json())
@@ -39,7 +48,7 @@ fetch('https://sua-api.com.br/api/v1/cnpj/00000000000191', {
 
 **PHP**:
 ```php
-$ch = curl_init('https://sua-api.com.br/api/v1/cnpj/00000000000191');
+$ch = curl_init('https://www.dbempresas.com.br/api/v1/cnpj/00000000000191');
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-API-Key: SUA_CHAVE_AQUI']);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $empresa = json_decode(curl_exec($ch), true);
@@ -52,18 +61,36 @@ echo $empresa['razao_social'];
 
 ### Consultar CNPJ
 ```
-GET /cnpj/{cnpj}
+GET /api/v1/cnpj/{cnpj}
 ```
 
-### Buscar Empresas
+### Buscar Empresas em Lote (parceiros)
 ```
-GET /search?uf=SP&situacao_cadastral=02&page=1&per_page=20
+POST /api/v1/batch/search?uf=SP&situacao_cadastral=02&limit=100&offset=0
 ```
 
 ### Buscar Sócios
 ```
-GET /cnpj/{cnpj}/socios
+GET /api/v1/cnpj/{cnpj}/socios
 ```
+
+### Saldo de créditos em lote
+```
+GET /api/v1/batch/credits
+```
+
+### Pacotes de créditos
+```
+GET /api/v1/batch/packages
+POST /api/v1/batch/packages/{package_id}/purchase
+```
+
+---
+
+## 🔒 Observação importante
+
+- `GET /api/v1/search` é endpoint administrativo e não deve ser usado por parceiros.
+- Para terceiros, use `POST /api/v1/batch/search`.
 
 ---
 
@@ -71,61 +98,37 @@ GET /cnpj/{cnpj}/socios
 
 ### Empresas Ativas em São Paulo
 ```
-GET /search?uf=SP&situacao_cadastral=02
+POST /api/v1/batch/search?uf=SP&situacao_cadastral=02&limit=100&offset=0
 ```
 
 ### MEIs no Rio de Janeiro
 ```
-GET /search?mei=S&uf=RJ&situacao_cadastral=02
+POST /api/v1/batch/search?mei=S&uf=RJ&situacao_cadastral=02&limit=100&offset=0
 ```
 
 ### Grandes Empresas com Capital > 1 milhão
 ```
-GET /search?porte=4&capital_social_min=1000000&situacao_cadastral=02
+POST /api/v1/batch/search?porte=4&capital_social_min=1000000&situacao_cadastral=02&limit=100&offset=0
 ```
 
 ### Empresas Abertas em 2024
 ```
-GET /search?data_inicio_atividade_de=2024-01-01&data_inicio_atividade_ate=2024-12-31
+POST /api/v1/batch/search?data_inicio_atividade_min=2024-01-01&data_inicio_atividade_max=2024-12-31&limit=100&offset=0
 ```
 
 ### Supermercados em Campinas
 ```
-GET /search?cnae=4711302&municipio=3509502&situacao_cadastral=02
+POST /api/v1/batch/search?cnae=4711302&municipio=3509502&situacao_cadastral=02&limit=100&offset=0
 ```
 
 ### Buscar por Nome
 ```
-GET /search?razao_social=PETROBRAS
+POST /api/v1/batch/search?razao_social=PETROBRAS&limit=100&offset=0
 ```
 
 ### Buscar por Endereço
 ```
-GET /search?logradouro=Paulista&uf=SP
-```
-
-### Buscar Sócios por Nome
-```
-GET /socios/search?nome_socio=JOÃO SILVA&limit=100
-```
-
-### Buscar Pessoas Físicas Administradoras
-```
-GET /socios/search?identificador_socio=2&qualificacao_socio=05
-```
-
-### Buscar Sócios por Faixa Etária
-```
-GET /socios/search?faixa_etaria=4&identificador_socio=2
-```
-
-### Encontrar Empresas de um Sócio
-```
-# 1. Buscar sócios por CPF
-GET /socios/search?cpf_cnpj=12345678900
-
-# 2. Usar o cnpj_basico retornado para buscar empresas
-GET /search?cnpj={cnpj_basico}
+POST /api/v1/batch/search?logradouro=Paulista&uf=SP&limit=100&offset=0
 ```
 
 ---
@@ -143,7 +146,9 @@ GET /search?cnpj={cnpj_basico}
 | **Tipo** | identificador_matriz_filial (1=Matriz, 2=Filial) |
 | **Tributário** | simples (S/N), mei (S/N) |
 | **Outros** | ente_federativo, email |
-| **Paginação** | page, per_page |
+| **Paginação** | limit, offset |
+
+> Para integração atual de parceiros, use `limit` e `offset` no endpoint `POST /api/v1/batch/search`.
 
 ### Busca de Sócios (5 filtros!)
 
@@ -186,12 +191,13 @@ GET /search?cnpj={cnpj_basico}
 | 401 | API Key não enviada | Adicionar header `X-API-Key` |
 | 404 | CNPJ não existe | Verificar número do CNPJ |
 | 400 | CNPJ inválido | CNPJ deve ter 14 dígitos |
+| 402 | Créditos insuficientes em lote | Comprar pacote em `/api/v1/batch/packages` |
 
 ---
 
 ## 💡 Dicas Rápidas
 
-1. **Use paginação**: `per_page=100` (máximo) para otimizar
+1. **Use paginação de lote**: `limit=100` e incremente `offset`
 2. **Combine filtros**: Quanto mais específico, melhor
 3. **Cache local**: Armazene resultados que não mudam
 4. **Formato de data**: Sempre `YYYY-MM-DD`
@@ -201,7 +207,7 @@ GET /search?cnpj={cnpj_basico}
 ## 📚 Documentação Completa
 
 - **Documentação Detalhada**: `DOCUMENTACAO_API_TERCEIROS.md`
-- **Swagger UI**: `https://sua-api.com.br/docs`
+- **Swagger UI**: `https://www.dbempresas.com.br/docs`
 - **Todos os Filtros**: `FILTROS_COMPLETOS.md`
 
 ---
@@ -214,6 +220,6 @@ Ver arquivo: `EXEMPLOS_CODIGO.md` (múltiplas linguagens)
 
 ## 📞 Precisa de Ajuda?
 
-- 📧 suporte@sua-api.com.br
+- 📧 contato@dbempresas.com.br
 - 💬 Chat no painel de clientes
-- 📖 https://sua-api.com.br/docs
+- 📖 https://www.dbempresas.com.br/docs

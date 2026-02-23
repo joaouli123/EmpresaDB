@@ -19,6 +19,7 @@ Sistema completo de consulta de dados públicos da Receita Federal do Brasil (RF
 - 🔐 **Autenticação** via API Keys
 - 📈 **Monitoramento** de uso em tempo real
 - 💳 **Sistema de assinaturas** com planos mensais
+- 📦 **Consultas em lote para parceiros** com créditos via endpoint dedicado
 
 ## 🎯 Uso
 
@@ -26,7 +27,7 @@ Sistema completo de consulta de dados públicos da Receita Federal do Brasil (RF
 
 ```bash
 curl -H "X-API-Key: sua-chave-aqui" \
-  http://localhost:5000/api/v1/cnpj/00000000000191/socios
+  https://www.dbempresas.com.br/api/v1/cnpj/00000000000191/socios
 ```
 
 **Resposta**:
@@ -63,9 +64,25 @@ python run_etl.py
 python main.py
 ```
 
-A API estará disponível em: `http://0.0.0.0:5000`
+A API estará disponível em: `http://localhost:5000`
 
-Documentação interativa: `http://0.0.0.0:5000/docs`
+Documentação interativa: `http://localhost:5000/docs`
+
+## 🤝 Integração para Parceiros (produção)
+
+Para integrações de terceiros em produção, use:
+
+- Base URL: `https://www.dbempresas.com.br/api/v1`
+- Header obrigatório: `X-API-Key: SUA_CHAVE`
+- Endpoint de consulta em lote (parceiros): `POST /batch/search`
+- Paginação em lote: `limit` e `offset` (não usar `page/per_page`)
+
+Exemplo real de parceiro:
+
+```bash
+curl -X POST "https://www.dbempresas.com.br/api/v1/batch/search?uf=SP&situacao_cadastral=02&limit=100&offset=0" \
+  -H "X-API-Key: SUA_CHAVE"
+```
 
 ## 📡 Endpoints Principais
 
@@ -76,9 +93,9 @@ Documentação interativa: `http://0.0.0.0:5000/docs`
 
 ### CNPJ
 - `GET /api/v1/cnpj/{cnpj}` - Buscar por CNPJ
-- `GET /api/v1/search` - Busca avançada
+- `GET /api/v1/search` - Busca avançada (**uso administrativo**)
 - `GET /api/v1/cnpj/{cnpj}/socios` - Sócios da empresa
-- `GET /api/v1/stats` - Estatísticas do banco
+- `POST /api/v1/batch/search` - Busca em lote para parceiros (com créditos)
 
 ### Gerenciamento
 - `GET /profile` - Perfil do usuário
@@ -92,7 +109,7 @@ Documentação interativa: `http://0.0.0.0:5000/docs`
 - **Banco de Dados**: PostgreSQL 16+ (externo na VPS)
 - **Frontend**: React + Vite
 - **ETL**: Pandas, psycopg2
-- **Cache**: In-memory (dict + TTL)
+- **Cache**: Redis compartilhado (com fallback local)
 
 ## 🔧 Configuração
 
