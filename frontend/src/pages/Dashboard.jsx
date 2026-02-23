@@ -53,6 +53,17 @@ const Dashboard = () => {
     }
   };
 
+  const usageData = useMemo(() => {
+    if (!usage || !usage.daily_usage) {
+      return [];
+    }
+
+    return usage.daily_usage.map(item => ({
+      date: item.date,
+      requests: item.requests || 0
+    }));
+  }, [usage]);
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -72,17 +83,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const usageData = useMemo(() => {
-    if (!usage || !usage.daily_usage) {
-      return [];
-    }
-
-    return usage.daily_usage.map(item => ({
-      date: item.date,
-      requests: item.requests || 0
-    }));
-  }, [usage]);
 
   const normalUsed = subscription?.queries_used || 0;
   const normalTotal = subscription?.total_limit || 200;

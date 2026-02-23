@@ -6,6 +6,7 @@ const baseURL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || '')
 
 const api = axios.create({
   baseURL: baseURL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -57,6 +58,11 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject(new Error('Tempo limite excedido. Tente novamente em instantes.'));
+    }
+
     return Promise.reject(error);
   }
 );

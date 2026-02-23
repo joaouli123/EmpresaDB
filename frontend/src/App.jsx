@@ -1,10 +1,43 @@
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ContactModalProvider } from './contexts/ContactModalContext';
 import Layout from './components/Layout';
 import ContactModal from './components/ContactModal';
 import { useContactModal } from './contexts/ContactModalContext';
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.error('Erro na interface:', error);
+  }
+
+  handleReload = () => {
+    window.location.reload();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-container">
+          <h2>Ops! Algo deu errado ao carregar a página.</h2>
+          <p>Tente atualizar para continuar.</p>
+          <button onClick={this.handleReload} className="retry-button">Atualizar página</button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const Login = lazy(() => import('./pages/Login'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -136,8 +169,10 @@ function App() {
   return (
     <ContactModalProvider>
       <AuthProvider>
-        <AppWithModals />
-        <ContactModalContent />
+        <AppErrorBoundary>
+          <AppWithModals />
+          <ContactModalContent />
+        </AppErrorBoundary>
       </AuthProvider>
     </ContactModalProvider>
   );
