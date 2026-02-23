@@ -59,6 +59,14 @@ code {
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   position: relative;
+  z-index: 40;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 30;
 }
 
 .sidebar.collapsed {
@@ -747,6 +755,8 @@ code {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .dashboard-header h1,
@@ -1815,15 +1825,35 @@ code {
 
 @media (max-width: 768px) {
   .app-layout {
-    flex-direction: column;
+    display: block;
   }
 
   .sidebar {
-    width: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 280px;
+  }
+
+  .sidebar-toggle {
+    right: -14px;
+    top: 20px;
   }
 
   .main-content {
     padding: 16px;
+    min-height: 100vh;
   }
 
   .stats-grid,

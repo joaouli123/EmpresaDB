@@ -20,6 +20,8 @@ import { subscriptionAPI } from '../services/api';
 const Sidebar = () => {
   const { user, logout, isAdmin } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
 
   const userMenuItems = [
@@ -38,6 +40,19 @@ const Sidebar = () => {
   ];
 
   useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const fetchSubscription = async () => {
       try {
         const response = await subscriptionAPI.getMySubscription();
@@ -50,8 +65,7 @@ const Sidebar = () => {
     if (user) {
       fetchSubscription();
       
-      // Atualizar em tempo real a cada 10 segundos
-      const interval = setInterval(fetchSubscription, 10000);
+      const interval = setInterval(fetchSubscription, 60000);
       return () => clearInterval(interval);
     }
   }, [user]);
@@ -59,19 +73,35 @@ const Sidebar = () => {
   // Valores padrão se subscription ainda não carregou
   const queries_used = subscription?.queries_used || 0;
   const total_limit = subscription?.total_limit || 200;
-  const plan_name = subscription?.plan_name || 'Free';
   
   const percentageUsed = Math.min((queries_used / total_limit) * 100, 100);
-  const isExhausted = queries_used >= total_limit;
+
+  const handleToggle = () => {
+    if (isMobile) {
+      setMobileOpen((prev) => !prev);
+      return;
+    }
+    setCollapsed((prev) => !prev);
+  };
+
+  const closeMobileMenu = () => {
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  };
 
   return (
-    <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <>
+      {isMobile && mobileOpen && <div className="sidebar-backdrop" onClick={closeMobileMenu} />}
+      <div className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       <button 
         className="sidebar-toggle" 
-        onClick={() => setCollapsed(!collapsed)}
-        title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+        onClick={handleToggle}
+        title={isMobile ? (mobileOpen ? 'Fechar menu' : 'Abrir menu') : (collapsed ? 'Expandir menu' : 'Recolher menu')}
       >
-        {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        {isMobile
+          ? (mobileOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />)
+          : (collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />)}
       </button>
 
       <div className="sidebar-header">
@@ -145,6 +175,7 @@ const Sidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={closeMobileMenu}
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
               title={collapsed ? item.label : ''}
             >
@@ -161,6 +192,7 @@ const Sidebar = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={closeMobileMenu}
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 title={collapsed ? item.label : ''}
               >
@@ -173,7 +205,10 @@ const Sidebar = () => {
 
         <div className="nav-section">
           <button 
-            onClick={logout} 
+            onClick={() => {
+              closeMobileMenu();
+              logout();
+            }}
             className="nav-item logout-btn"
             title={collapsed ? 'Sair' : ''}
           >
@@ -182,7 +217,8 @@ const Sidebar = () => {
           </button>
         </div>
       </nav>
-    </div>
+      </div>
+    </>
   );
 };
 

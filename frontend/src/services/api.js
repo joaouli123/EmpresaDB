@@ -11,34 +11,48 @@ const api = axios.create({
   },
 });
 
+const isDev = import.meta.env.DEV;
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('[API] Requisição com token:', config.method.toUpperCase(), config.url);
+      if (isDev) {
+        console.log('[API] Requisição com token:', config.method.toUpperCase(), config.url);
+      }
     } else {
-      console.warn('[API] Requisição SEM token:', config.method.toUpperCase(), config.url);
+      if (isDev) {
+        console.warn('[API] Requisição SEM token:', config.method.toUpperCase(), config.url);
+      }
     }
     return config;
   },
   (error) => {
-    console.error('[API] Erro no interceptor de requisição:', error);
+    if (isDev) {
+      console.error('[API] Erro no interceptor de requisição:', error);
+    }
     return Promise.reject(error);
   }
 );
 
 api.interceptors.response.use(
   (response) => {
-    console.log('[API] ✅ Resposta recebida:', response.config.method.toUpperCase(), response.config.url, 'Status:', response.status);
+    if (isDev) {
+      console.log('[API] ✅ Resposta recebida:', response.config.method.toUpperCase(), response.config.url, 'Status:', response.status);
+    }
     return response;
   },
   (error) => {
-    console.error('[API] ❌ Erro na requisição:', error.config?.method?.toUpperCase(), error.config?.url);
-    console.error('[API] Status:', error.response?.status, 'Erro:', error.response?.data);
+    if (isDev) {
+      console.error('[API] ❌ Erro na requisição:', error.config?.method?.toUpperCase(), error.config?.url);
+      console.error('[API] Status:', error.response?.status, 'Erro:', error.response?.data);
+    }
     
     if (error.response?.status === 401) {
-      console.warn('[API] Token inválido ou expirado. Redirecionando para login...');
+      if (isDev) {
+        console.warn('[API] Token inválido ou expirado. Redirecionando para login...');
+      }
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

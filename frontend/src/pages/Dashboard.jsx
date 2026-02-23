@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { cnpjAPI, userAPI, api } from '../services/api';
+import { useMemo, useState, useEffect } from 'react';
+import { userAPI, api } from '../services/api';
 import {
   Database,
   Building2,
@@ -19,13 +19,6 @@ const Dashboard = () => {
   const [batchCredits, setBatchCredits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Números fixos do banco de dados (não consulta API)
-  const dbStats = {
-    total_empresas: 64000000,
-    total_estabelecimentos: 47000000,
-    total_socios: 26000000
-  };
 
   useEffect(() => {
     loadData();
@@ -80,8 +73,7 @@ const Dashboard = () => {
     );
   }
 
-  // Dados de uso para o gráfico (últimos 7 dias) - DADOS REAIS DO USUÁRIO
-  const generateUsageData = () => {
+  const usageData = useMemo(() => {
     if (!usage || !usage.daily_usage) {
       return [];
     }
@@ -90,9 +82,17 @@ const Dashboard = () => {
       date: item.date,
       requests: item.requests || 0
     }));
-  };
+  }, [usage]);
 
-  const usageData = generateUsageData();
+  const normalUsed = subscription?.queries_used || 0;
+  const normalTotal = subscription?.total_limit || 200;
+  const normalRemaining = Math.max(normalTotal - normalUsed, 0);
+  const normalStroke = Math.min((normalUsed / Math.max(normalTotal, 1)) * 314, 314);
+
+  const batchUsed = batchCredits?.used_credits || 0;
+  const batchTotal = batchCredits?.total_credits || 0;
+  const batchAvailable = batchCredits?.available_credits || 0;
+  const batchStroke = batchTotal > 0 ? Math.min((batchUsed / batchTotal) * 314, 314) : 0;
 
   return (
     <div className="dashboard">
@@ -152,15 +152,21 @@ const Dashboard = () => {
             <h2>Uso da API (Últimos 7 dias)</h2>
           </div>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={usageData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="requests" stroke="#3b82f6" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            {usageData.length === 0 ? (
+              <p style={{ color: '#6b7280', textAlign: 'center', padding: '32px 0' }}>
+                Ainda não há dados de uso para exibir.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={usageData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="requests" stroke="#3b82f6" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -181,22 +187,22 @@ const Dashboard = () => {
                     cy="60" 
                     r="50" 
                     fill="none" 
-                    stroke={subscription && (subscription.queries_used || 0) >= (subscription.total_limit || 0) ? '#ef4444' : '#3b82f6'}
+                    stroke={normalUsed >= normalTotal ? '#ef4444' : '#3b82f6'}
                     strokeWidth="10"
-                    strokeDasharray={`${subscription ? ((subscription.queries_used || 0) / (subscription.total_limit || 1)) * 314 : 0} 314`}
+                    strokeDasharray={`${normalStroke} 314`}
                     strokeLinecap="round"
                   ></circle>
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
                   <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usadas</p>
                   <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
-                    {subscription?.queries_used || 0}
+                    {normalUsed}
                   </p>
-                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {subscription?.total_limit || 200}</p>
+                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {normalTotal}</p>
                 </div>
               </div>
               <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
-                {subscription ? (subscription.total_limit || 0) - (subscription.queries_used || 0) : 200} consultas restantes
+                {normalRemaining} consultas restantes
               </p>
               {subscription?.plan_name === 'Free' && (
                 <a href="/home#pricing" style={{ 
@@ -224,22 +230,22 @@ const Dashboard = () => {
                     cy="60" 
                     r="50" 
                     fill="none" 
-                    stroke={batchCredits && (batchCredits.used_credits || 0) >= (batchCredits.total_credits || 1) ? '#ef4444' : '#10b981'}
+                    stroke={batchTotal > 0 && batchUsed >= batchTotal ? '#ef4444' : '#10b981'}
                     strokeWidth="10"
-                    strokeDasharray={`${batchCredits ? ((batchCredits.used_credits || 0) / (batchCredits.total_credits || 1)) * 314 : 0} 314`}
+                    strokeDasharray={`${batchStroke} 314`}
                     strokeLinecap="round"
                   ></circle>
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
                   <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usados</p>
                   <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
-                    {batchCredits?.used_credits || 0}
+                    {batchUsed}
                   </p>
-                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {batchCredits?.total_credits || 0}</p>
+                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {batchTotal}</p>
                 </div>
               </div>
               <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
-                {batchCredits ? (batchCredits.available_credits || 0) : 0} créditos restantes
+                {batchAvailable} créditos restantes
               </p>
               {subscription?.plan_name === 'Free' && (
                 <a href="/home#pricing" style={{ 

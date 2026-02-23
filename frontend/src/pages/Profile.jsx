@@ -6,6 +6,7 @@ import { User, Mail, Shield, Calendar, Save } from 'lucide-react';
 const Profile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [initialProfile, setInitialProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -18,9 +19,11 @@ const Profile = () => {
     try {
       const response = await userAPI.getProfile();
       setProfile(response.data);
+      setInitialProfile(response.data);
     } catch (error) {
       console.error('Error loading profile:', error);
       setProfile(user);
+      setInitialProfile(user);
     } finally {
       setLoading(false);
     }
@@ -65,6 +68,16 @@ const Profile = () => {
     
     setProfile({ ...profile, [e.target.name]: value });
   };
+
+  const hasChanges = Boolean(
+    profile &&
+    initialProfile &&
+    (
+      (profile.email || '') !== (initialProfile.email || '') ||
+      (profile.phone || '') !== (initialProfile.phone || '') ||
+      (profile.cpf || '') !== (initialProfile.cpf || '')
+    )
+  );
 
   if (loading) {
     return (
@@ -128,9 +141,8 @@ const Profile = () => {
                 name="email"
                 value={profile?.email || ''}
                 onChange={handleChange}
-                disabled
               />
-              <small>O email não pode ser alterado</small>
+              <small>Use um email válido para receber notificações</small>
             </div>
 
             <div className="form-group">
@@ -144,9 +156,8 @@ const Profile = () => {
                 value={profile?.phone || ''}
                 onChange={handleChange}
                 placeholder="(00) 00000-0000"
-                disabled
               />
-              <small>O telefone não pode ser alterado</small>
+              <small>Formato: (00) 00000-0000</small>
             </div>
 
             <div className="form-group">
@@ -160,9 +171,8 @@ const Profile = () => {
                 value={profile?.cpf || ''}
                 onChange={handleChange}
                 placeholder="000.000.000-00"
-                disabled
               />
-              <small>O CPF não pode ser alterado</small>
+              <small>Formato: 000.000.000-00</small>
             </div>
 
             <div className="form-group">
@@ -189,9 +199,9 @@ const Profile = () => {
               />
             </div>
 
-            <button type="submit" className="btn-primary" disabled={saving}>
+            <button type="submit" className="btn-primary" disabled={saving || !hasChanges}>
               <Save size={20} />
-              {saving ? 'Salvando...' : 'Salvar Alterações'}
+              {saving ? 'Salvando...' : hasChanges ? 'Salvar Alterações' : 'Sem alterações'}
             </button>
           </form>
         </div>
