@@ -70,11 +70,7 @@ const Sidebar = () => {
     }
   }, [user]);
 
-  // Valores padrão se subscription ainda não carregou
-  const queries_used = subscription?.queries_used || 0;
-  const total_limit = subscription?.total_limit || 200;
-  
-  const percentageUsed = Math.min((queries_used / total_limit) * 100, 100);
+  const currentPlan = subscription?.plan_name || 'Free';
 
   const handleToggle = () => {
     if (isMobile) {
@@ -108,63 +104,6 @@ const Sidebar = () => {
         <div className="logo">
           <Database size={32} className="logo-icon" />
           {!collapsed && <h1>DB Empresas</h1>}
-        </div>
-        <div className="user-info">
-          <div className="user-avatar">
-            {user?.username?.charAt(0).toUpperCase()}
-          </div>
-          {!collapsed && (
-            <>
-              <div className="user-details">
-                <p className="user-name">{user?.company_name || user?.username}</p>
-                <span className={`user-role ${subscription?.plan_name?.toLowerCase() || 'free'}`} style={{
-                  background: subscription?.plan_name === 'Free' ? '#3b82f6' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  color: 'white',
-                  padding: '2px 8px',
-                  borderRadius: '8px',
-                  fontSize: '10px',
-                  fontWeight: '500',
-                  textTransform: 'capitalize'
-                }}>
-                  {subscription?.plan_name || 'Plano free'}
-                </span>
-              </div>
-              {subscription && (
-                <div className="user-subscription">
-                  <div className="plan-info">
-                    <span className="plan-usage" style={{ 
-                      fontSize: '11px',
-                      color: '#9ca3af',
-                      display: 'block',
-                      marginTop: '8px'
-                    }}>
-                      {subscription.queries_used?.toLocaleString('pt-BR') || 0}/{subscription.total_limit?.toLocaleString('pt-BR') || 0} consultas
-                    </span>
-                  </div>
-                  <div className="usage-bar" style={{
-                    width: '100%',
-                    height: '6px',
-                    backgroundColor: '#3b82f6',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    marginTop: '6px'
-                  }}>
-                    <div 
-                      className="usage-fill" 
-                      style={{ 
-                        width: `${100 - percentageUsed}%`,
-                        height: '100%',
-                        backgroundColor: '#e0f2fe',
-                        borderRadius: '4px',
-                        transition: 'width 0.3s ease',
-                        marginLeft: 'auto'
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </>
-          )}
         </div>
       </div>
 
@@ -215,6 +154,18 @@ const Sidebar = () => {
             <LogOut size={20} />
             {!collapsed && <span>Sair</span>}
           </button>
+
+          <div className="sidebar-user-bottom" title={collapsed ? (user?.company_name || user?.username || 'Usuário') : ''}>
+            <div className="user-avatar sidebar-user-avatar">
+              {user?.username?.charAt(0).toUpperCase()}
+            </div>
+            {!collapsed && (
+              <div className="sidebar-user-details">
+                <p className="sidebar-user-name">{user?.company_name || user?.username}</p>
+                <p className="sidebar-user-plan">Plano atual: {currentPlan}</p>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
       </div>

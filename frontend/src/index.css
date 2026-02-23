@@ -109,12 +109,12 @@ code {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .sidebar.collapsed .logo {
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .logo-icon {
@@ -279,6 +279,54 @@ code {
 
 .logout-btn {
   color: var(--danger);
+}
+
+.sidebar-user-bottom {
+  margin: 10px 12px 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-user-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 13px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.sidebar-user-plan {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.sidebar.collapsed .sidebar-user-bottom {
+  margin: 10px auto 0;
+  width: 48px;
+  padding: 6px;
+  justify-content: center;
 }
 
 .main-content {
