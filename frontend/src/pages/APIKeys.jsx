@@ -11,6 +11,7 @@ const APIKeys = () => {
   const [newKeyName, setNewKeyName] = useState('');
   const [copiedKey, setCopiedKey] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     loadAPIKeys();
@@ -18,12 +19,14 @@ const APIKeys = () => {
 
   const loadAPIKeys = async () => {
     try {
+      setLoadError('');
       const response = await userAPI.getAPIKeys();
       const keys = Array.isArray(response.data) ? response.data : [];
       setApiKeys(keys);
     } catch (error) {
       console.error('Error loading API keys:', error);
-      setApiKeys([]);
+      const backendMessage = error?.response?.data?.detail;
+      setLoadError(backendMessage || 'Não foi possível carregar suas chaves no momento.');
     } finally {
       setLoading(false);
     }
@@ -32,12 +35,18 @@ const APIKeys = () => {
   const handleCreateKey = async (e) => {
     e.preventDefault();
     if (creating) return; // Previne múltiplos cliques
+
+    const trimmedName = (newKeyName || '').trim();
+    if (!trimmedName) {
+      setMessage({ type: 'error', text: 'Informe um nome válido para a chave.' });
+      return;
+    }
     
     setCreating(true);
     setMessage({ type: '', text: '' });
     
     try {
-      await userAPI.createAPIKey({ name: newKeyName });
+      await userAPI.createAPIKey({ name: trimmedName });
       setNewKeyName('');
       setShowCreateForm(false);
       setMessage({ type: 'success', text: 'Chave de API criada com sucesso!' });
@@ -45,7 +54,11 @@ const APIKeys = () => {
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
       console.error('Error creating API key:', error);
-      setMessage({ type: 'error', text: 'Erro ao criar chave de API. Tente novamente.' });
+      const backendMessage = error?.response?.data?.detail;
+      setMessage({
+        type: 'error',
+        text: backendMessage || 'Erro ao criar chave de API. Tente novamente.'
+      });
     } finally {
       setCreating(false);
     }
@@ -105,6 +118,12 @@ const APIKeys = () => {
       {message.text && (
         <div className={`alert alert-${message.type}`}>
           {message.text}
+        </div>
+      )}
+
+      {loadError && (
+        <div className="alert alert-error">
+          {loadError}
         </div>
       )}
 

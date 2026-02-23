@@ -91,10 +91,32 @@ class DatabaseManager:
         - 100+ req/s
         """
         conn = None
+        from_pool = False
         try:
             if self.connection_pool:
                 # ✅ OTIMIZADO: Pega conexão do pool (RÁPIDO!)
                 conn = self.connection_pool.getconn()
+                from_pool = True
+
+                # Conexão pode ter sido fechada pelo servidor (timeout/idle)
+                if conn.closed:
+                    try:
+                        self.connection_pool.putconn(conn, close=True)
+                    except Exception:
+                        pass
+                    conn = self.connection_pool.getconn()
+
+                # Pre-ping para garantir que a conexão está realmente viva
+                try:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT 1")
+                    cursor.close()
+                except Exception:
+                    try:
+                        self.connection_pool.putconn(conn, close=True)
+                    except Exception:
+                        pass
+                    conn = self.connection_pool.getconn()
             else:
                 # ⚠️ Fallback se pool falhar (lento, mas funcional)
                 conn = psycopg2.connect(self.connection_string)
@@ -103,17 +125,27 @@ class DatabaseManager:
             conn.commit()
         except Exception as e:
             if conn:
-                conn.rollback()
+                try:
+                    if not conn.closed:
+                        conn.rollback()
+                except Exception:
+                    pass
             logger.error(f"Erro na conexão com banco de dados: {e}")
             raise
         finally:
             if conn:
-                if self.connection_pool:
+                if self.connection_pool and from_pool:
                     # ✅ Devolve conexão para o pool (reutiliza!)
-                    self.connection_pool.putconn(conn)
+                    try:
+                        self.connection_pool.putconn(conn, close=bool(conn.closed))
+                    except Exception:
+                        pass
                 else:
                     # Fallback: fecha conexão (lento)
-                    conn.close()
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
 
     def test_connection(self) -> bool:
         """Testa se a conexão com o banco de dados está funcionando"""
