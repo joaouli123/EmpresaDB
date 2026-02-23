@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ContactModalProvider } from './contexts/ContactModalContext';
@@ -84,6 +84,28 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
 function AppRoutes() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const preloadLoggedPages = () => {
+      import('./pages/Dashboard');
+      import('./pages/Profile');
+      import('./pages/APIKeys');
+      import('./pages/Subscription');
+      import('./pages/Docs');
+    };
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(preloadLoggedPages, { timeout: 1500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(preloadLoggedPages, 400);
+    return () => window.clearTimeout(timeoutId);
+  }, [user]);
 
   return (
     <Router>

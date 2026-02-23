@@ -807,6 +807,10 @@ code {
   flex-wrap: wrap;
 }
 
+.page-header > div {
+  min-width: 0;
+}
+
 .dashboard-header h1,
 .page-header h1 {
   font-size: 32px;
@@ -1052,6 +1056,11 @@ code {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
+  align-items: start;
+}
+
+.profile-page {
+  max-width: 1280px;
 }
 
 .profile-card {
@@ -1106,6 +1115,16 @@ code {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-form-grid .form-group {
+  margin-bottom: 0;
 }
 
 .profile-stats {
@@ -1912,6 +1931,45 @@ code {
   .profile-container,
   .docs-container {
     grid-template-columns: 1fr;
+  }
+
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .profile-card,
+  .profile-stats {
+    padding: 20px;
+  }
+
+  .profile-avatar-section {
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+  }
+
+  .profile-avatar-large {
+    width: 62px;
+    height: 62px;
+    font-size: 22px;
+  }
+
+  .profile-info h2 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .page-header h1,
+  .dashboard-header h1 {
+    font-size: 26px;
+    line-height: 1.2;
+  }
+
+  .page-header p,
+  .dashboard-header p {
+    font-size: 14px;
   }
 
   .features-grid {

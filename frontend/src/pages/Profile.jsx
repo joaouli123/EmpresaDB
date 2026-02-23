@@ -9,7 +9,7 @@ const Profile = () => {
   const [initialProfile, setInitialProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     loadProfile();
@@ -32,13 +32,31 @@ const Profile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setMessage('');
+    setMessage({ type: '', text: '' });
+
+    const payload = {
+      email: (profile?.email || '').trim(),
+      phone: profile?.phone || '',
+      cpf: profile?.cpf || ''
+    };
+
+    if (!payload.email) {
+      setMessage({ type: 'error', text: 'Informe um e-mail válido para salvar.' });
+      setSaving(false);
+      return;
+    }
 
     try {
-      await userAPI.updateProfile(profile);
-      setMessage('Perfil atualizado com sucesso!');
+      await userAPI.updateProfile(payload);
+      setProfile((prev) => ({ ...prev, ...payload }));
+      setInitialProfile((prev) => ({ ...prev, ...payload }));
+      setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
     } catch (error) {
-      setMessage('Erro ao atualizar perfil.');
+      const backendMessage = error?.response?.data?.detail;
+      setMessage({
+        type: 'error',
+        text: backendMessage || 'Erro ao atualizar perfil.'
+      });
     } finally {
       setSaving(false);
     }
@@ -110,93 +128,95 @@ const Profile = () => {
           </div>
 
           <form onSubmit={handleSave} className="profile-form">
-            {message && (
-              <div className={`message ${message.includes('sucesso') ? 'success' : 'error'}`}>
-                {message}
+            {message.text && (
+              <div className={`message ${message.type}`}>
+                {message.text}
               </div>
             )}
 
-            <div className="form-group">
-              <label>
-                <User size={18} />
-                Nome de Usuário
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={profile?.username || ''}
-                onChange={handleChange}
-                disabled
-              />
-              <small>O nome de usuário não pode ser alterado</small>
-            </div>
+            <div className="profile-form-grid">
+              <div className="form-group">
+                <label>
+                  <User size={18} />
+                  Nome de Usuário
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={profile?.username || ''}
+                  onChange={handleChange}
+                  disabled
+                />
+                <small>O nome de usuário não pode ser alterado</small>
+              </div>
 
-            <div className="form-group">
-              <label>
-                <Mail size={18} />
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={profile?.email || ''}
-                onChange={handleChange}
-              />
-              <small>Use um email válido para receber notificações</small>
-            </div>
+              <div className="form-group">
+                <label>
+                  <Mail size={18} />
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profile?.email || ''}
+                  onChange={handleChange}
+                />
+                <small>Use um email válido para receber notificações</small>
+              </div>
 
-            <div className="form-group">
-              <label>
-                <User size={18} />
-                Telefone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={profile?.phone || ''}
-                onChange={handleChange}
-                placeholder="(00) 00000-0000"
-              />
-              <small>Formato: (00) 00000-0000</small>
-            </div>
+              <div className="form-group">
+                <label>
+                  <User size={18} />
+                  Telefone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={profile?.phone || ''}
+                  onChange={handleChange}
+                  placeholder="(00) 00000-0000"
+                />
+                <small>Formato: (00) 00000-0000</small>
+              </div>
 
-            <div className="form-group">
-              <label>
-                <Shield size={18} />
-                CPF
-              </label>
-              <input
-                type="text"
-                name="cpf"
-                value={profile?.cpf || ''}
-                onChange={handleChange}
-                placeholder="000.000.000-00"
-              />
-              <small>Formato: 000.000.000-00</small>
-            </div>
+              <div className="form-group">
+                <label>
+                  <Shield size={18} />
+                  CPF
+                </label>
+                <input
+                  type="text"
+                  name="cpf"
+                  value={profile?.cpf || ''}
+                  onChange={handleChange}
+                  placeholder="000.000.000-00"
+                />
+                <small>Formato: 000.000.000-00</small>
+              </div>
 
-            <div className="form-group">
-              <label>
-                <Shield size={18} />
-                Tipo de Conta
-              </label>
-              <input
-                type="text"
-                value={profile?.role === 'admin' ? 'Administrador' : 'Usuário'}
-                disabled
-              />
-            </div>
+              <div className="form-group">
+                <label>
+                  <Shield size={18} />
+                  Tipo de Conta
+                </label>
+                <input
+                  type="text"
+                  value={profile?.role === 'admin' ? 'Administrador' : 'Usuário'}
+                  disabled
+                />
+              </div>
 
-            <div className="form-group">
-              <label>
-                <Calendar size={18} />
-                Membro desde
-              </label>
-              <input
-                type="text"
-                value={new Date(profile?.created_at || Date.now()).toLocaleDateString('pt-BR')}
-                disabled
-              />
+              <div className="form-group">
+                <label>
+                  <Calendar size={18} />
+                  Membro desde
+                </label>
+                <input
+                  type="text"
+                  value={new Date(profile?.created_at || Date.now()).toLocaleDateString('pt-BR')}
+                  disabled
+                />
+              </div>
             </div>
 
             <button type="submit" className="btn-primary" disabled={saving || !hasChanges}>
