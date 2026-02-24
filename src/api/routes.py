@@ -639,7 +639,7 @@ async def search_companies(
             # Se a busca tem ILIKE (razao_social ou nome_fantasia), usar estimativa
             use_fast_count = razao_social or nome_fantasia
 
-            if use_fast_count and offset == 0:
+            if use_fast_count and effective_offset == 0:
                 # Para primeira página, usar EXPLAIN para estimativa rápida
                 explain_query = f"""
                     EXPLAIN (FORMAT JSON)
@@ -678,6 +678,10 @@ async def search_companies(
                 # Para páginas subsequentes com ILIKE, usar cache ou estimativa
                 total = 1000000  # Estimativa alta para permitir paginação
 
+            # Evitar ORDER BY pesado em buscas amplas (ex: UF+município sem texto),
+            # que pode estourar statement timeout ao ordenar centenas de milhares de linhas.
+            order_clause = "ORDER BY razao_social" if (razao_social or nome_fantasia) else "ORDER BY cnpj_completo"
+
             data_query = f"""
                 SELECT 
                     cnpj_completo, identificador_matriz_filial, razao_social,
@@ -689,7 +693,7 @@ async def search_companies(
                     opcao_simples, opcao_mei
                 FROM vw_estabelecimentos_completos
                 WHERE {where_clause}
-                ORDER BY razao_social
+                {order_clause}
                 LIMIT %s OFFSET %s
             """
 
