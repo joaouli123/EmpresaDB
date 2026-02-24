@@ -511,6 +511,8 @@ async def search_companies(
     situacao: str = Query(None, description="Situação cadastral"),
     data_inicio_atividade_min: str = Query(None, description="Data início atividade mínima (YYYY-MM-DD)"),
     data_inicio_atividade_max: str = Query(None, description="Data início atividade máxima (YYYY-MM-DD)"),
+    page: int = Query(None, ge=1, description="Página (compatível com integrações legadas)"),
+    per_page: int = Query(None, ge=1, le=1000, description="Itens por página (compatível com integrações legadas)"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     current_user: dict = Depends(verify_api_key)
@@ -564,6 +566,14 @@ async def search_companies(
             conditions = []
             params = []
 
+            # Compatibilidade de paginação:
+            # - preferir page/per_page quando informados
+            # - fallback para limit/offset (padrão atual)
+            effective_limit = per_page if per_page is not None else limit
+            effective_offset = offset
+            if page is not None:
+                effective_offset = (page - 1) * effective_limit
+
             if razao_social:
                 conditions.append("razao_social ILIKE %s")
                 params.append(f"%{razao_social}%")
@@ -577,8 +587,13 @@ async def search_companies(
                 params.append(cnae)
 
             if municipio:
-                conditions.append("municipio = %s")
-                params.append(municipio)
+                municipio_clean = municipio.strip()
+                if municipio_clean.isdigit():
+                    conditions.append("municipio_desc = (SELECT descricao FROM municipios WHERE codigo = %s LIMIT 1)")
+                    params.append(municipio_clean)
+                else:
+                    conditions.append("municipio_desc ILIKE %s")
+                    params.append(f"%{municipio_clean}%")
 
             if uf:
                 conditions.append("uf = %s")
@@ -681,9 +696,9 @@ async def search_companies(
             # Log da query completa para debug
             logger.info(f"📊 Query WHERE: {where_clause}")
             logger.info(f"📊 Params: {params}")
-            logger.info(f"📊 Limit: {limit}, Offset: {offset}")
+            logger.info(f"📊 Limit: {effective_limit}, Offset: {effective_offset}")
 
-            cursor.execute(data_query, params + [limit, offset])
+            cursor.execute(data_query, params + [effective_limit, effective_offset])
             results = cursor.fetchall()
 
             # Log dos primeiros 3 resultados para debug
@@ -724,12 +739,12 @@ async def search_companies(
 
                 items.append(EstabelecimentoCompleto(**data))
 
-            total_pages = (total + limit - 1) // limit
+            total_pages = (total + effective_limit - 1) // effective_limit
 
             return PaginatedResponse(
                 total=total,
-                page=offset // limit + 1,
-                per_page=limit,
+                page=effective_offset // effective_limit + 1,
+                per_page=effective_limit,
                 total_pages=total_pages,
                 items=items
             )
