@@ -42,7 +42,7 @@ const Login = () => {
   // reCAPTCHA v3 state
   const [recaptchaToken, setRecaptchaToken] = useState('');
   const recaptchaLoadPromiseRef = useRef(null);
-  const recaptchaSiteKeyRef = useRef(import.meta.env.VITE_RECAPTCHA_SITE_KEY || '');
+  const recaptchaSiteKeyRef = useRef('');
 
   useEffect(() => {
     if (activatedParam === 'true') {
@@ -70,11 +70,17 @@ const Login = () => {
       }
 
       const config = await response.json();
-      recaptchaSiteKeyRef.current = config?.recaptchaSiteKey || '';
+      recaptchaSiteKeyRef.current = (config?.recaptchaSiteKey || '').trim();
+
+      if (!recaptchaSiteKeyRef.current) {
+        recaptchaSiteKeyRef.current = (import.meta.env.VITE_RECAPTCHA_SITE_KEY || '').trim();
+      }
+
       return recaptchaSiteKeyRef.current;
     } catch (error) {
       console.warn('[reCAPTCHA] runtime config load failed:', error?.message || error);
-      return '';
+      recaptchaSiteKeyRef.current = (import.meta.env.VITE_RECAPTCHA_SITE_KEY || '').trim();
+      return recaptchaSiteKeyRef.current;
     }
   };
 
