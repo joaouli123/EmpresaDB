@@ -89,17 +89,17 @@ const Login = () => {
       throw new Error('Janela indisponível para carregar reCAPTCHA');
     }
 
-    if (window.grecaptcha?.execute) {
+    if (window.grecaptcha?.enterprise?.execute) {
       return siteKey;
     }
 
     if (!recaptchaLoadPromiseRef.current) {
       recaptchaLoadPromiseRef.current = new Promise((resolve, reject) => {
-        const existingScript = document.querySelector(`script[src="https://www.google.com/recaptcha/api.js?render=${siteKey}"]`);
+        const existingScript = document.querySelector(`script[src="https://www.google.com/recaptcha/enterprise.js?render=${siteKey}"]`);
 
         if (existingScript) {
           const waitForGrecaptcha = () => {
-            if (window.grecaptcha?.execute) {
+            if (window.grecaptcha?.enterprise?.execute) {
               resolve(siteKey);
               return;
             }
@@ -111,12 +111,12 @@ const Login = () => {
         }
 
         const script = document.createElement('script');
-        script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+        script.src = `https://www.google.com/recaptcha/enterprise.js?render=${siteKey}`;
         script.async = true;
         script.defer = true;
         script.onload = () => {
           const waitForGrecaptcha = () => {
-            if (window.grecaptcha?.execute) {
+            if (window.grecaptcha?.enterprise?.execute) {
               resolve(siteKey);
               return;
             }
@@ -155,8 +155,8 @@ const Login = () => {
         let resolved = false;
 
         ensureRecaptchaReady().then((siteKey) => {
-          window.grecaptcha.ready(() => {
-            window.grecaptcha.execute(siteKey, { action }).then((token) => {
+          window.grecaptcha.enterprise.ready(() => {
+            window.grecaptcha.enterprise.execute(siteKey, { action }).then((token) => {
               if (resolved) return;
               resolved = true;
               setRecaptchaToken(token);
