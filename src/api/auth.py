@@ -39,6 +39,7 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     username: str  # Pode ser username ou email
     password: str
+    recaptcha_token: Optional[str] = None
 
 class TokenData(BaseModel):
     username: Optional[str] = None
@@ -494,6 +495,32 @@ async def register(user: UserCreate):
 
 @router.post("/login", response_model=dict)
 async def login(form_data: UserLogin):
+    # Verificar reCAPTCHA se configurado (opcional)
+    try:
+        secret = settings.RECAPTCHA_SECRET_KEY
+    except Exception:
+        secret = None
+
+    if secret:
+        token = form_data.recaptcha_token
+        if not token:
+            raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
+
+        try:
+            resp = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={'secret': secret, 'response': token},
+                timeout=5
+            )
+            result = resp.json()
+        except Exception as e:
+            logger.error(f"Erro ao verificar reCAPTCHA (login): {e}")
+            raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
+
+        if not result.get('success'):
+            logger.warning(f"reCAPTCHA falhou (login): {result}")
+            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
     # Tenta buscar por username primeiro
     user = await db_manager.get_user_by_username(form_data.username)
 

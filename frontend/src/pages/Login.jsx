@@ -264,8 +264,9 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        // LOGIN
-        const result = await login({ username: formData.username, password: formData.password });
+        // LOGIN - execute reCAPTCHA if available
+        const loginRecaptchaToken = await executeRecaptcha();
+        const result = await login({ username: formData.username, password: formData.password, recaptcha_token: loginRecaptchaToken });
         
         if (result.success) {
           if (planParam && planParam !== 'free') {
