@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Database, Mail, Lock, User as UserIcon, Eye, EyeOff, CheckCircle, AlertCircle, Phone, CreditCard } from 'lucide-react';
@@ -38,12 +38,93 @@ const Login = () => {
   const navigate = useNavigate();
   const activatedParam = searchParams.get('activated');
 
+  // reCAPTCHA refs/state
+  const recaptchaWidgetIdRef = useRef(null);
+  const recaptchaResolveRef = useRef(null);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
+
   useEffect(() => {
     if (activatedParam === 'true') {
       setSuccess('Conta ativada com sucesso! Faça login para continuar.');
       setIsLogin(true);
     }
   }, [activatedParam]);
+
+  // Load Google reCAPTCHA script once
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.grecaptcha) return; // already loaded
+
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // keep script (other pages may use it)
+    };
+  }, []);
+
+  // Render invisible widget when registration form is shown
+  useEffect(() => {
+    if (isLogin) return; // only for registration
+    const tryRender = () => {
+      if (!window.grecaptcha || recaptchaWidgetIdRef.current !== null) return;
+
+      try {
+        const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+        if (!siteKey) return;
+
+        const widgetId = window.grecaptcha.render('recaptcha-container', {
+          sitekey: siteKey,
+          size: 'invisible',
+          callback: (token) => {
+            setRecaptchaToken(token);
+            if (recaptchaResolveRef.current) {
+              recaptchaResolveRef.current(token);
+              recaptchaResolveRef.current = null;
+            }
+          }
+        });
+
+        recaptchaWidgetIdRef.current = widgetId;
+      } catch (e) {
+        // ignore until grecaptcha is ready
+        setTimeout(tryRender, 500);
+      }
+    };
+
+    tryRender();
+  }, [isLogin]);
+
+  const executeRecaptcha = () => {
+    return new Promise((resolve, reject) => {
+      const widgetId = recaptchaWidgetIdRef.current;
+      if (!window.grecaptcha || widgetId === null) {
+        return resolve('');
+      }
+
+      // set resolver and execute
+      recaptchaResolveRef.current = (token) => {
+        resolve(token);
+      };
+
+      try {
+        window.grecaptcha.execute(widgetId);
+        // fallback timeout
+        setTimeout(() => {
+          if (recaptchaResolveRef.current) {
+            recaptchaResolveRef.current = null;
+            resolve('');
+          }
+        }, 10000);
+      } catch (e) {
+        recaptchaResolveRef.current = null;
+        resolve('');
+      }
+    });
+  };
 
   // Validações em tempo real
   useEffect(() => {
@@ -284,12 +365,16 @@ const Login = () => {
         }
 
         try {
+          // execute reCAPTCHA (invisible) and get token
+          const token = await executeRecaptcha();
+
           const response = await api.post('/auth/register', {
             username: formData.username,
             email: formData.email,
             phone: formData.phone.replace(/\D/g, ''),
             cpf: formData.cpf.replace(/\D/g, ''),
-            password: formData.password
+            password: formData.password,
+            recaptcha_token: token
           });
           
           if (response.data.message && response.data.email) {
@@ -623,6 +708,7 @@ const Login = () => {
               </div>
             )}
 
+            <div id="recaptcha-container" style={{display: 'none'}}></div>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
                 <>

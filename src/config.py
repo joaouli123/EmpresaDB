@@ -107,6 +107,9 @@ class Settings(BaseSettings):
     CNPJ_API_URL: Optional[str] = None
     CNPJ_API_TOKEN: Optional[str] = None
 
+    # reCAPTCHA (Google) - usado para verificar tokens enviados pelo frontend
+    RECAPTCHA_SECRET_KEY: Optional[str] = ""
+
     # Email Configuration - Resend API (substituiu SMTP)
     RESEND_API_KEY: str = ""
     EMAIL_FROM: str = "noreply@dbempresas.com.br"

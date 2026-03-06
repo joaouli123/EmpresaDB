@@ -9,6 +9,7 @@ from src.database.connection import db_manager
 from src.config import settings
 import logging
 import os
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class UserCreate(BaseModel):
     phone: str
     cpf: str
     password: str
+    recaptcha_token: Optional[str] = None
 
 class UserLogin(BaseModel):
     username: str  # Pode ser username ou email
@@ -354,6 +356,32 @@ def validate_cpf(cpf: str) -> bool:
 
 @router.post("/register", response_model=dict)
 async def register(user: UserCreate):
+    # Verificar reCAPTCHA se configurado
+    try:
+        secret = settings.RECAPTCHA_SECRET_KEY
+    except Exception:
+        secret = None
+
+    if secret:
+        token = user.recaptcha_token
+        if not token:
+            raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
+
+        try:
+            resp = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={'secret': secret, 'response': token},
+                timeout=5
+            )
+            result = resp.json()
+        except Exception as e:
+            logger.error(f"Erro ao verificar reCAPTCHA: {e}")
+            raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
+
+        if not result.get('success'):
+            logger.warning(f"reCAPTCHA falhou: {result}")
+            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
     # Validar CPF
     if not validate_cpf(user.cpf):
         raise HTTPException(status_code=400, detail="CPF inválido")
