@@ -110,6 +110,8 @@ class Settings(BaseSettings):
     # reCAPTCHA (Google) - usado para verificar tokens enviados pelo frontend
     RECAPTCHA_SITE_KEY: Optional[str] = ""
     RECAPTCHA_SECRET_KEY: Optional[str] = ""
+    RECAPTCHA_PROJECT_ID: Optional[str] = ""
+    RECAPTCHA_API_KEY: Optional[str] = ""
     # reCAPTCHA v3 score threshold (0.0 - 1.0). Requests with score below this are rejected.
     RECAPTCHA_THRESHOLD: float = 0.5
 

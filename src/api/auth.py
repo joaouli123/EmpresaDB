@@ -154,7 +154,63 @@ def is_disposable_email(email: str) -> bool:
     return domain in domains
 
 
-def verify_recaptcha_v3(token: Optional[str], expected_action: str, client_ip: str) -> None:
+def verify_recaptcha_v3(token: Optional[str], expected_action: str, client_ip: str, request: Request) -> None:
+    project_id = (settings.RECAPTCHA_PROJECT_ID or '').strip()
+    api_key = (settings.RECAPTCHA_API_KEY or '').strip()
+    site_key = (settings.RECAPTCHA_SITE_KEY or '').strip()
+
+    if project_id and api_key and site_key:
+        enterprise_url = f"https://recaptchaenterprise.googleapis.com/v1/projects/{project_id}/assessments?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "event": {
+                "token": token,
+                "siteKey": site_key,
+                "expectedAction": expected_action,
+                "userIpAddress": client_ip,
+                "userAgent": request.headers.get('user-agent', ''),
+            }
+        }
+
+        if not token:
+            raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
+
+        try:
+            resp = requests.post(enterprise_url, json=payload, headers=headers, timeout=8)
+            resp.raise_for_status()
+            result = resp.json()
+        except requests.RequestException as exc:
+            logger.error(f"Erro ao criar assessment reCAPTCHA Enterprise ({expected_action}): {exc}")
+            raise HTTPException(status_code=503, detail="Serviço de validação reCAPTCHA indisponível")
+
+        token_props = result.get('tokenProperties', {}) or {}
+        risk = result.get('riskAnalysis', {}) or {}
+        valid = bool(token_props.get('valid'))
+        action = token_props.get('action')
+        hostname = token_props.get('hostname')
+        invalid_reason = token_props.get('invalidReason')
+        score = float(risk.get('score', 0.0) or 0.0)
+        expected_host = (request.headers.get('host') or '').split(':')[0].lower()
+
+        logger.info(
+            f"reCAPTCHA enterprise {expected_action} valid={valid} score={score} "
+            f"action={action} hostname={hostname} expected_host={expected_host} reason={invalid_reason}"
+        )
+
+        if not valid:
+            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
+        if action and action != expected_action:
+            raise HTTPException(status_code=400, detail="Ação inválida do reCAPTCHA")
+
+        if hostname and expected_host and hostname.lower() != expected_host:
+            raise HTTPException(status_code=400, detail="Hostname inválido do reCAPTCHA")
+
+        if score < settings.RECAPTCHA_THRESHOLD:
+            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
+        return
+
     secret = None
     try:
         secret = settings.RECAPTCHA_SECRET_KEY
@@ -465,7 +521,7 @@ async def register(user: UserCreate, request: Request):
     if is_disposable_email(user.email):
         raise HTTPException(status_code=400, detail="Emails descartáveis não são permitidos")
 
-    verify_recaptcha_v3(user.recaptcha_token, 'register', client_ip)
+    verify_recaptcha_v3(user.recaptcha_token, 'register', client_ip, request)
 
     # Validar CPF
     if not validate_cpf(user.cpf):
@@ -585,7 +641,7 @@ async def login(form_data: UserLogin, request: Request):
     if is_rate_limited(client_ip, 'login', settings.RATE_LIMIT_MAX_ATTEMPTS_LOGIN, settings.RATE_LIMIT_WINDOW_SECONDS):
         raise HTTPException(status_code=429, detail="Muitas tentativas de login. Tente novamente mais tarde.")
 
-    verify_recaptcha_v3(form_data.recaptcha_token, 'login', client_ip)
+    verify_recaptcha_v3(form_data.recaptcha_token, 'login', client_ip, request)
 
     # Tenta buscar por username primeiro
     user = await db_manager.get_user_by_username(form_data.username)
