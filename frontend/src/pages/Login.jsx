@@ -61,6 +61,15 @@ const Login = () => {
     script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
     script.async = true;
     script.defer = true;
+    script.onload = () => {
+      // debug: confirm script loaded in production
+      // eslint-disable-next-line no-console
+      console.debug('[reCAPTCHA] script loaded with siteKey:', siteKey);
+    };
+    script.onerror = () => {
+      // eslint-disable-next-line no-console
+      console.warn('[reCAPTCHA] failed to load script');
+    };
     document.body.appendChild(script);
 
     return () => {
@@ -73,19 +82,43 @@ const Login = () => {
     return new Promise((resolve) => {
       try {
         const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+        // eslint-disable-next-line no-console
+        console.debug('[reCAPTCHA] executeRecaptcha called', { action, siteKey });
         if (!siteKey || !window.grecaptcha || !window.grecaptcha.execute) {
+          // eslint-disable-next-line no-console
+          console.debug('[reCAPTCHA] unavailable, resolving empty token');
           return resolve('');
         }
 
+        let resolved = false;
+
         window.grecaptcha.ready(() => {
           window.grecaptcha.execute(siteKey, { action }).then((token) => {
+            if (resolved) return;
+            resolved = true;
+            // eslint-disable-next-line no-console
+            console.debug('[reCAPTCHA] token received', { action, tokenLength: token?.length });
             setRecaptchaToken(token);
             resolve(token);
-          }).catch(() => resolve(''));
+          }).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn('[reCAPTCHA] execute failed', err);
+            if (!resolved) { resolved = true; resolve(''); }
+          });
         });
+
         // fallback timeout
-        setTimeout(() => resolve(''), 8000);
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            // eslint-disable-next-line no-console
+            console.debug('[reCAPTCHA] fallback timeout reached, resolving empty token');
+            resolve('');
+          }
+        }, 8000);
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('[reCAPTCHA] exception', e);
         resolve('');
       }
     });
