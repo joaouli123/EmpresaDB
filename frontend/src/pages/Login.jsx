@@ -41,6 +41,7 @@ const Login = () => {
 
   // reCAPTCHA v3 state
   const [recaptchaToken, setRecaptchaToken] = useState('');
+  const recaptchaLoadPromiseRef = useRef(null);
 
   useEffect(() => {
     if (activatedParam === 'true') {
@@ -49,28 +50,70 @@ const Login = () => {
     }
   }, [activatedParam]);
 
+  const ensureRecaptchaReady = async () => {
+    const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+    if (!siteKey) {
+      throw new Error('reCAPTCHA não configurado no frontend');
+    }
+
+    if (typeof window === 'undefined') {
+      throw new Error('Janela indisponível para carregar reCAPTCHA');
+    }
+
+    if (window.grecaptcha?.execute) {
+      return siteKey;
+    }
+
+    if (!recaptchaLoadPromiseRef.current) {
+      recaptchaLoadPromiseRef.current = new Promise((resolve, reject) => {
+        const existingScript = document.querySelector(`script[src="https://www.google.com/recaptcha/api.js?render=${siteKey}"]`);
+
+        if (existingScript) {
+          const waitForGrecaptcha = () => {
+            if (window.grecaptcha?.execute) {
+              resolve(siteKey);
+              return;
+            }
+            window.setTimeout(waitForGrecaptcha, 150);
+          };
+
+          waitForGrecaptcha();
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          const waitForGrecaptcha = () => {
+            if (window.grecaptcha?.execute) {
+              resolve(siteKey);
+              return;
+            }
+            window.setTimeout(waitForGrecaptcha, 150);
+          };
+
+          waitForGrecaptcha();
+        };
+        script.onerror = () => {
+          recaptchaLoadPromiseRef.current = null;
+          reject(new Error('Falha ao carregar script do reCAPTCHA'));
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    return recaptchaLoadPromiseRef.current;
+  };
+
   // Load Google reCAPTCHA script once
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (window.grecaptcha) return; // already loaded
-
-    const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-    if (!siteKey) return;
-
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      // debug: confirm script loaded in production
-      // eslint-disable-next-line no-console
-      console.debug('[reCAPTCHA] script loaded with siteKey:', siteKey);
-    };
-    script.onerror = () => {
-      // eslint-disable-next-line no-console
-      console.warn('[reCAPTCHA] failed to load script');
-    };
-    document.body.appendChild(script);
+    ensureRecaptchaReady().catch((error) => {
+      console.warn('[reCAPTCHA] preload failed:', error?.message || error);
+    });
 
     return () => {
       // keep script (other pages may use it)
@@ -81,44 +124,39 @@ const Login = () => {
   const executeRecaptcha = (action = 'register') => {
     return new Promise((resolve) => {
       try {
-        const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-        // eslint-disable-next-line no-console
-        console.debug('[reCAPTCHA] executeRecaptcha called', { action, siteKey });
-        if (!siteKey || !window.grecaptcha || !window.grecaptcha.execute) {
-          // eslint-disable-next-line no-console
-          console.debug('[reCAPTCHA] unavailable, resolving empty token');
-          return resolve('');
-        }
-
         let resolved = false;
 
-        window.grecaptcha.ready(() => {
-          window.grecaptcha.execute(siteKey, { action }).then((token) => {
-            if (resolved) return;
-            resolved = true;
-            // eslint-disable-next-line no-console
-            console.debug('[reCAPTCHA] token received', { action, tokenLength: token?.length });
-            setRecaptchaToken(token);
-            resolve(token);
-          }).catch((err) => {
-            // eslint-disable-next-line no-console
-            console.warn('[reCAPTCHA] execute failed', err);
-            if (!resolved) { resolved = true; resolve(''); }
+        ensureRecaptchaReady().then((siteKey) => {
+          window.grecaptcha.ready(() => {
+            window.grecaptcha.execute(siteKey, { action }).then((token) => {
+              if (resolved) return;
+              resolved = true;
+              setRecaptchaToken(token);
+              resolve(token || '');
+            }).catch((err) => {
+              console.warn('[reCAPTCHA] execute failed', err);
+              if (!resolved) {
+                resolved = true;
+                resolve('');
+              }
+            });
           });
+        }).catch((err) => {
+          console.warn('[reCAPTCHA] unavailable', err);
+          if (!resolved) {
+            resolved = true;
+            resolve('');
+          }
         });
 
         // fallback timeout
         setTimeout(() => {
           if (!resolved) {
             resolved = true;
-            // eslint-disable-next-line no-console
-            console.debug('[reCAPTCHA] fallback timeout reached, resolving empty token');
             resolve('');
           }
         }, 8000);
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('[reCAPTCHA] exception', e);
         resolve('');
       }
     });
@@ -264,6 +302,10 @@ const Login = () => {
       if (isLogin) {
         // LOGIN - execute reCAPTCHA v3 with action 'login'
         const loginRecaptchaToken = await executeRecaptcha('login');
+        if (!loginRecaptchaToken) {
+          setError('Falha ao validar reCAPTCHA. Atualize a página e tente novamente.');
+          return;
+        }
         const result = await login({ username: formData.username, password: formData.password, recaptcha_token: loginRecaptchaToken });
         
         if (result.success) {
@@ -366,6 +408,10 @@ const Login = () => {
         try {
           // execute reCAPTCHA v3 with action 'register' and get token
           const token = await executeRecaptcha('register');
+          if (!token) {
+            setError('Falha ao validar reCAPTCHA. Atualize a página e tente novamente.');
+            return;
+          }
 
           const response = await api.post('/auth/register', {
             username: formData.username,
@@ -387,6 +433,7 @@ const Login = () => {
               cpf: '',
               password: '',
               confirmPassword: '',
+              hp: '',
             });
             setValidations({
               username: { valid: null, message: '' },

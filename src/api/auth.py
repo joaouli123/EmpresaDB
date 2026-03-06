@@ -153,6 +153,67 @@ def is_disposable_email(email: str) -> bool:
     domains = set([d.strip().lower() for d in env_list.split(',') if d.strip()])
     return domain in domains
 
+
+def verify_recaptcha_v3(token: Optional[str], expected_action: str, client_ip: str) -> None:
+    secret = None
+    try:
+        secret = settings.RECAPTCHA_SECRET_KEY
+    except Exception:
+        secret = None
+
+    if not secret:
+        return
+
+    if not token:
+        raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
+
+    payload = {
+        'secret': secret,
+        'response': token,
+        'remoteip': client_ip,
+    }
+
+    endpoints = [
+        'https://www.google.com/recaptcha/api/siteverify',
+        'https://www.recaptcha.net/recaptcha/api/siteverify',
+    ]
+
+    last_exception = None
+    result = None
+
+    for endpoint in endpoints:
+        try:
+            resp = requests.post(endpoint, data=payload, timeout=5)
+            resp.raise_for_status()
+            result = resp.json()
+            break
+        except requests.RequestException as exc:
+            last_exception = exc
+            logger.warning(f"reCAPTCHA request failed via {endpoint}: {exc}")
+
+    if result is None:
+        logger.error(f"Erro ao verificar reCAPTCHA ({expected_action}): {last_exception}")
+        raise HTTPException(status_code=503, detail="Serviço de validação reCAPTCHA indisponível")
+
+    score = float(result.get('score', 0.0)) if result.get('score') is not None else 0.0
+    action = result.get('action')
+    hostname = result.get('hostname')
+    error_codes = result.get('error-codes', [])
+
+    logger.info(
+        f"reCAPTCHA {expected_action} success={result.get('success')} score={score} "
+        f"action={action} hostname={hostname} ip={client_ip} errors={error_codes}"
+    )
+
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
+    if action and action != expected_action:
+        raise HTTPException(status_code=400, detail="Ação inválida do reCAPTCHA")
+
+    if score < settings.RECAPTCHA_THRESHOLD:
+        raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+
 @router.get("/activate/{token}", response_class=HTMLResponse)
 async def activate_account(token: str):
     """
@@ -404,35 +465,7 @@ async def register(user: UserCreate, request: Request):
     if is_disposable_email(user.email):
         raise HTTPException(status_code=400, detail="Emails descartáveis não são permitidos")
 
-    # Verificar reCAPTCHA v3 se configurado
-    try:
-        secret = settings.RECAPTCHA_SECRET_KEY
-    except Exception:
-        secret = None
-
-    if secret:
-        token = user.recaptcha_token
-        if not token:
-            raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
-
-        try:
-            resp = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={'secret': secret, 'response': token},
-                timeout=5
-            )
-            result = resp.json()
-        except Exception as e:
-            logger.error(f"Erro ao verificar reCAPTCHA: {e}")
-            raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
-
-        score = float(result.get('score', 0.0)) if result.get('score') is not None else 0.0
-        action = result.get('action')
-        logger.info(f"reCAPTCHA register score={score} action={action} ip={client_ip}")
-
-        if not result.get('success') or score < settings.RECAPTCHA_THRESHOLD:
-            logger.warning(f"reCAPTCHA v3 falhou (score too low): {result}")
-            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+    verify_recaptcha_v3(user.recaptcha_token, 'register', client_ip)
 
     # Validar CPF
     if not validate_cpf(user.cpf):
@@ -552,35 +585,7 @@ async def login(form_data: UserLogin, request: Request):
     if is_rate_limited(client_ip, 'login', settings.RATE_LIMIT_MAX_ATTEMPTS_LOGIN, settings.RATE_LIMIT_WINDOW_SECONDS):
         raise HTTPException(status_code=429, detail="Muitas tentativas de login. Tente novamente mais tarde.")
 
-    # Verificar reCAPTCHA v3 se configurado (opcional)
-    try:
-        secret = settings.RECAPTCHA_SECRET_KEY
-    except Exception:
-        secret = None
-
-    if secret:
-        token = form_data.recaptcha_token
-        if not token:
-            raise HTTPException(status_code=400, detail="reCAPTCHA token ausente")
-
-        try:
-            resp = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={'secret': secret, 'response': token},
-                timeout=5
-            )
-            result = resp.json()
-        except Exception as e:
-            logger.error(f"Erro ao verificar reCAPTCHA (login): {e}")
-            raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
-
-        score = float(result.get('score', 0.0)) if result.get('score') is not None else 0.0
-        action = result.get('action')
-        logger.info(f"reCAPTCHA login score={score} action={action} ip={client_ip}")
-
-        if not result.get('success') or score < settings.RECAPTCHA_THRESHOLD:
-            logger.warning(f"reCAPTCHA v3 falhou (login) score too low: {result}")
-            raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
+    verify_recaptcha_v3(form_data.recaptcha_token, 'login', client_ip)
 
     # Tenta buscar por username primeiro
     user = await db_manager.get_user_by_username(form_data.username)
