@@ -42,6 +42,7 @@ const Login = () => {
   // reCAPTCHA v3 state
   const [recaptchaToken, setRecaptchaToken] = useState('');
   const recaptchaLoadPromiseRef = useRef(null);
+  const recaptchaSiteKeyRef = useRef(import.meta.env.VITE_RECAPTCHA_SITE_KEY || '');
 
   useEffect(() => {
     if (activatedParam === 'true') {
@@ -50,8 +51,35 @@ const Login = () => {
     }
   }, [activatedParam]);
 
+  const getRecaptchaSiteKey = async () => {
+    if (recaptchaSiteKeyRef.current) {
+      return recaptchaSiteKeyRef.current;
+    }
+
+    try {
+      const response = await fetch('/api/runtime-config', {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Falha ao carregar config em runtime (${response.status})`);
+      }
+
+      const config = await response.json();
+      recaptchaSiteKeyRef.current = config?.recaptchaSiteKey || '';
+      return recaptchaSiteKeyRef.current;
+    } catch (error) {
+      console.warn('[reCAPTCHA] runtime config load failed:', error?.message || error);
+      return '';
+    }
+  };
+
   const ensureRecaptchaReady = async () => {
-    const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+    const siteKey = await getRecaptchaSiteKey();
 
     if (!siteKey) {
       throw new Error('reCAPTCHA não configurado no frontend');

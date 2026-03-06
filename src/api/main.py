@@ -102,6 +102,13 @@ async def api_root():
         "docs": "/api-docs"
     }
 
+
+@app.get("/api/runtime-config")
+async def runtime_config():
+    return {
+        "recaptchaSiteKey": settings.RECAPTCHA_SITE_KEY or ""
+    }
+
 @app.get("/health")
 async def health_check():
     """Health check para monitoramento do deployment"""
