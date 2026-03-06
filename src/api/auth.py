@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+import time
 from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
@@ -35,6 +36,7 @@ class UserCreate(BaseModel):
     cpf: str
     password: str
     recaptcha_token: Optional[str] = None
+    hp: Optional[str] = None
 
 class UserLogin(BaseModel):
     username: str  # Pode ser username ou email
@@ -120,6 +122,36 @@ async def get_current_admin_user(token: str = Depends(db_manager.oauth2_scheme))
         )
 
     return user
+
+
+# Simple in-memory rate limiter store: {(ip, endpoint): [count, first_ts]}
+RATE_LIMIT_STORE: dict = {}
+
+def is_rate_limited(client_ip: str, endpoint: str, max_attempts: int, window_seconds: int) -> bool:
+    key = (client_ip, endpoint)
+    now = int(time.time())
+    entry = RATE_LIMIT_STORE.get(key)
+    if not entry:
+        RATE_LIMIT_STORE[key] = [1, now]
+        return False
+
+    count, first_ts = entry
+    if now - first_ts > window_seconds:
+        RATE_LIMIT_STORE[key] = [1, now]
+        return False
+
+    if count >= max_attempts:
+        return True
+
+    RATE_LIMIT_STORE[key][0] += 1
+    return False
+
+
+def is_disposable_email(email: str) -> bool:
+    domain = email.split('@')[-1].lower()
+    env_list = settings.DISPOSABLE_EMAIL_DOMAINS or ''
+    domains = set([d.strip().lower() for d in env_list.split(',') if d.strip()])
+    return domain in domains
 
 @router.get("/activate/{token}", response_class=HTMLResponse)
 async def activate_account(token: str):
@@ -356,8 +388,23 @@ def validate_cpf(cpf: str) -> bool:
     return True
 
 @router.post("/register", response_model=dict)
-async def register(user: UserCreate):
-    # Verificar reCAPTCHA se configurado
+async def register(user: UserCreate, request: Request):
+    client_ip = request.client.host if request.client else 'unknown'
+
+    # Rate limiting per IP for register
+    if is_rate_limited(client_ip, 'register', settings.RATE_LIMIT_MAX_ATTEMPTS_REGISTER, settings.RATE_LIMIT_WINDOW_SECONDS):
+        raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente mais tarde.")
+
+    # Honeypot: if filled, it's a bot
+    if user.hp:
+        logger.warning(f"Honeypot triggered for IP {client_ip}")
+        raise HTTPException(status_code=400, detail="Invalid request")
+
+    # Disposable email check
+    if is_disposable_email(user.email):
+        raise HTTPException(status_code=400, detail="Emails descartáveis não são permitidos")
+
+    # Verificar reCAPTCHA v3 se configurado
     try:
         secret = settings.RECAPTCHA_SECRET_KEY
     except Exception:
@@ -379,8 +426,12 @@ async def register(user: UserCreate):
             logger.error(f"Erro ao verificar reCAPTCHA: {e}")
             raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
 
-        if not result.get('success'):
-            logger.warning(f"reCAPTCHA falhou: {result}")
+        score = float(result.get('score', 0.0)) if result.get('score') is not None else 0.0
+        action = result.get('action')
+        logger.info(f"reCAPTCHA register score={score} action={action} ip={client_ip}")
+
+        if not result.get('success') or score < settings.RECAPTCHA_THRESHOLD:
+            logger.warning(f"reCAPTCHA v3 falhou (score too low): {result}")
             raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
 
     # Validar CPF
@@ -494,8 +545,14 @@ async def register(user: UserCreate):
     }
 
 @router.post("/login", response_model=dict)
-async def login(form_data: UserLogin):
-    # Verificar reCAPTCHA se configurado (opcional)
+async def login(form_data: UserLogin, request: Request):
+    client_ip = request.client.host if request.client else 'unknown'
+
+    # Rate limiting per IP for login
+    if is_rate_limited(client_ip, 'login', settings.RATE_LIMIT_MAX_ATTEMPTS_LOGIN, settings.RATE_LIMIT_WINDOW_SECONDS):
+        raise HTTPException(status_code=429, detail="Muitas tentativas de login. Tente novamente mais tarde.")
+
+    # Verificar reCAPTCHA v3 se configurado (opcional)
     try:
         secret = settings.RECAPTCHA_SECRET_KEY
     except Exception:
@@ -517,8 +574,12 @@ async def login(form_data: UserLogin):
             logger.error(f"Erro ao verificar reCAPTCHA (login): {e}")
             raise HTTPException(status_code=400, detail="Erro ao verificar reCAPTCHA")
 
-        if not result.get('success'):
-            logger.warning(f"reCAPTCHA falhou (login): {result}")
+        score = float(result.get('score', 0.0)) if result.get('score') is not None else 0.0
+        action = result.get('action')
+        logger.info(f"reCAPTCHA login score={score} action={action} ip={client_ip}")
+
+        if not result.get('success') or score < settings.RECAPTCHA_THRESHOLD:
+            logger.warning(f"reCAPTCHA v3 falhou (login) score too low: {result}")
             raise HTTPException(status_code=400, detail="Falha na verificação reCAPTCHA")
 
     # Tenta buscar por username primeiro

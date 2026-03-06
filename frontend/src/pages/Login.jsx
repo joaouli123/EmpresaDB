@@ -16,6 +16,7 @@ const Login = () => {
     cpf: '',
     password: '',
     confirmPassword: '',
+    hp: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -38,9 +39,7 @@ const Login = () => {
   const navigate = useNavigate();
   const activatedParam = searchParams.get('activated');
 
-  // reCAPTCHA refs/state
-  const recaptchaWidgetIdRef = useRef(null);
-  const recaptchaResolveRef = useRef(null);
+  // reCAPTCHA v3 state
   const [recaptchaToken, setRecaptchaToken] = useState('');
 
   useEffect(() => {
@@ -55,8 +54,11 @@ const Login = () => {
     if (typeof window === 'undefined') return;
     if (window.grecaptcha) return; // already loaded
 
+    const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+    if (!siteKey) return;
+
     const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
@@ -66,61 +68,24 @@ const Login = () => {
     };
   }, []);
 
-  // Render invisible widget when registration form is shown
-  useEffect(() => {
-    if (isLogin) return; // only for registration
-    const tryRender = () => {
-      if (!window.grecaptcha || recaptchaWidgetIdRef.current !== null) return;
-
+  // Execute reCAPTCHA v3 for a given action ('register' | 'login')
+  const executeRecaptcha = (action = 'register') => {
+    return new Promise((resolve) => {
       try {
         const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-        if (!siteKey) return;
+        if (!siteKey || !window.grecaptcha || !window.grecaptcha.execute) {
+          return resolve('');
+        }
 
-        const widgetId = window.grecaptcha.render('recaptcha-container', {
-          sitekey: siteKey,
-          size: 'invisible',
-          callback: (token) => {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha.execute(siteKey, { action }).then((token) => {
             setRecaptchaToken(token);
-            if (recaptchaResolveRef.current) {
-              recaptchaResolveRef.current(token);
-              recaptchaResolveRef.current = null;
-            }
-          }
+            resolve(token);
+          }).catch(() => resolve(''));
         });
-
-        recaptchaWidgetIdRef.current = widgetId;
-      } catch (e) {
-        // ignore until grecaptcha is ready
-        setTimeout(tryRender, 500);
-      }
-    };
-
-    tryRender();
-  }, [isLogin]);
-
-  const executeRecaptcha = () => {
-    return new Promise((resolve, reject) => {
-      const widgetId = recaptchaWidgetIdRef.current;
-      if (!window.grecaptcha || widgetId === null) {
-        return resolve('');
-      }
-
-      // set resolver and execute
-      recaptchaResolveRef.current = (token) => {
-        resolve(token);
-      };
-
-      try {
-        window.grecaptcha.execute(widgetId);
         // fallback timeout
-        setTimeout(() => {
-          if (recaptchaResolveRef.current) {
-            recaptchaResolveRef.current = null;
-            resolve('');
-          }
-        }, 10000);
+        setTimeout(() => resolve(''), 8000);
       } catch (e) {
-        recaptchaResolveRef.current = null;
         resolve('');
       }
     });
@@ -264,8 +229,8 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        // LOGIN - execute reCAPTCHA if available
-        const loginRecaptchaToken = await executeRecaptcha();
+        // LOGIN - execute reCAPTCHA v3 with action 'login'
+        const loginRecaptchaToken = await executeRecaptcha('login');
         const result = await login({ username: formData.username, password: formData.password, recaptcha_token: loginRecaptchaToken });
         
         if (result.success) {
@@ -366,8 +331,8 @@ const Login = () => {
         }
 
         try {
-          // execute reCAPTCHA (invisible) and get token
-          const token = await executeRecaptcha();
+          // execute reCAPTCHA v3 with action 'register' and get token
+          const token = await executeRecaptcha('register');
 
           const response = await api.post('/auth/register', {
             username: formData.username,
@@ -375,7 +340,8 @@ const Login = () => {
             phone: formData.phone.replace(/\D/g, ''),
             cpf: formData.cpf.replace(/\D/g, ''),
             password: formData.password,
-            recaptcha_token: token
+            recaptcha_token: token,
+            hp: formData.hp
           });
           
           if (response.data.message && response.data.email) {
@@ -565,6 +531,16 @@ const Login = () => {
 
             {!isLogin && (
               <>
+                {/* Honeypot hidden field to trap basic bots */}
+                <input
+                  type="text"
+                  name="hp"
+                  value={formData.hp}
+                  onChange={handleChange}
+                  style={{ display: 'none' }}
+                  autoComplete="off"
+                  tabIndex={-1}
+                />
                 <div className="form-group">
                   <div className={`input-with-icon ${getInputClassName('email')}`}>
                     <Mail size={18} />
