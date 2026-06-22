@@ -12,7 +12,11 @@ CREATE TABLE IF NOT EXISTS clientes.users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    activation_token VARCHAR(255),
+    activation_token_expires TIMESTAMP,
+    reset_password_token VARCHAR(255),
+    reset_password_token_expires TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS clientes.api_keys (
@@ -39,3 +43,11 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON clientes.users(email);
 CREATE INDEX IF NOT EXISTS idx_api_keys_key ON clientes.api_keys(key);
 CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON clientes.api_keys(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_usage_user_date ON clientes.user_usage(user_id, date);
+
+-- Auto-heal: garante as colunas de ativação/reset mesmo em tabela já existente (DB-Q01)
+ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS activation_token VARCHAR(255);
+ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS activation_token_expires TIMESTAMP;
+ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS reset_password_token VARCHAR(255);
+ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS reset_password_token_expires TIMESTAMP;
+CREATE INDEX IF NOT EXISTS idx_users_activation_token ON clientes.users(activation_token);
+CREATE INDEX IF NOT EXISTS idx_users_reset_token ON clientes.users(reset_password_token);

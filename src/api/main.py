@@ -76,14 +76,42 @@ app = FastAPI(
 # ⚠️ SEGURANÇA: Configure ALLOWED_ORIGINS no .env para produção!
 # Exemplo: ALLOWED_ORIGINS=https://seu-dominio.com,https://www.seu-dominio.com
 cors_origins = settings.get_cors_origins()
+# SEC-05: navegadores rejeitam '*' + credentials. Se origins='*', desliga credentials.
+_allow_all_origins = cors_origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins if cors_origins != ["*"] else ["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=not _allow_all_origins,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+
+# SEC-API-01: cabeçalhos de segurança em todas as respostas
+_CSP = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://js.stripe.com; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com; "
+    "img-src 'self' data: https:; "
+    "connect-src 'self' https://www.google.com; "
+    "frame-src https://www.google.com https://js.stripe.com"
+)
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    # CSP em Report-Only por padrão (não quebra a SPA); trocar para enforce após validar
+    response.headers["Content-Security-Policy-Report-Only"] = _CSP
+    if settings.ENVIRONMENT.lower() == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 static_path = Path(__file__).parent.parent.parent / "static"
 if static_path.exists():

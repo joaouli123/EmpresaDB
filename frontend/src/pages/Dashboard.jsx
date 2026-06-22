@@ -1,17 +1,29 @@
 import { useMemo, useState, useEffect } from 'react';
 import { userAPI, api } from '../services/api';
-import {
-  Database,
-  Building2,
-  Users,
-  Activity,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Package
-} from 'lucide-react';
+import { Building2, Database, Users, Activity, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const pct = (used, total) => (total > 0 ? Math.min((used / total) * 100, 100) : 0);
+
+const UsageBar = ({ label, used, total, remaining, remainingLabel, green, showUpgrade }) => {
+  const percent = pct(used, total);
+  const full = total > 0 && used >= total;
+  return (
+    <div className="usage-block">
+      <div className="usage-row">
+        <span className="usage-label">{label}</span>
+        <span className="usage-count"><strong>{used.toLocaleString('pt-BR')}</strong> de {total.toLocaleString('pt-BR')}</span>
+      </div>
+      <div className="usage-track">
+        <div className={`usage-bar-fill${full ? ' is-full' : green ? ' is-green' : ''}`} style={{ width: `${percent}%` }} />
+      </div>
+      <div className="usage-hint">
+        <span>{remaining.toLocaleString('pt-BR')} {remainingLabel}</span>
+        {showUpgrade && <a href="/home#pricing">Fazer upgrade →</a>}
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const [usage, setUsage] = useState(null);
@@ -20,9 +32,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -31,22 +41,19 @@ const Dashboard = () => {
       const [usageRes, subRes, creditsRes] = await Promise.allSettled([
         userAPI.getUsage(),
         api.get('/api/v1/subscriptions/my-subscription'),
-        api.get('/api/v1/batch/credits')
+        api.get('/api/v1/batch/credits'),
       ]);
-
       const usageData = usageRes.status === 'fulfilled' ? usageRes.value.data : null;
       const subscriptionData = subRes.status === 'fulfilled' ? subRes.value.data : null;
       const creditsData = creditsRes.status === 'fulfilled' ? creditsRes.value.data : null;
-
       setUsage(usageData);
       setSubscription(subscriptionData);
       setBatchCredits(creditsData);
-
       if (!usageData && !subscriptionData && !creditsData) {
         throw new Error('Dashboard data unavailable');
       }
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
       setError('Falha ao carregar dados do dashboard.');
     } finally {
       setLoading(false);
@@ -54,20 +61,14 @@ const Dashboard = () => {
   };
 
   const usageData = useMemo(() => {
-    if (!usage || !usage.daily_usage) {
-      return [];
-    }
-
-    return usage.daily_usage.map(item => ({
-      date: item.date,
-      requests: item.requests || 0
-    }));
+    if (!usage || !usage.daily_usage) return [];
+    return usage.daily_usage.map((item) => ({ date: item.date, requests: item.requests || 0 }));
   }, [usage]);
 
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="spinner" />
         <p>Carregando dashboard...</p>
       </div>
     );
@@ -75,24 +76,30 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="error-container">
-        <AlertCircle size={48} className="error-icon" />
+      <div className="loading-container">
+        <AlertCircle size={40} color="var(--danger)" />
         <h2>Erro</h2>
         <p>{error}</p>
-        <button onClick={loadData} className="retry-button">Tentar Novamente</button>
+        <button onClick={loadData} className="btn-primary">Tentar Novamente</button>
       </div>
     );
   }
 
+  const isFree = subscription?.plan_name === 'Free';
   const normalUsed = subscription?.queries_used || 0;
   const normalTotal = subscription?.total_limit || 200;
   const normalRemaining = Math.max(normalTotal - normalUsed, 0);
-  const normalStroke = Math.min((normalUsed / Math.max(normalTotal, 1)) * 314, 314);
-
   const batchUsed = batchCredits?.used_credits || 0;
   const batchTotal = batchCredits?.total_credits || 0;
   const batchAvailable = batchCredits?.available_credits || 0;
-  const batchStroke = batchTotal > 0 ? Math.min((batchUsed / batchTotal) * 314, 314) : 0;
+  const queriesToday = usage?.queries_used_today || usage?.requests_today || 0;
+
+  const stats = [
+    { icon: Building2, color: 'blue', label: 'Empresas', value: '66,0 mi' },
+    { icon: Database, color: 'green', label: 'Estabelecimentos', value: '69,2 mi' },
+    { icon: Users, color: 'purple', label: 'Sócios', value: '26,5 mi' },
+    { icon: Activity, color: 'orange', label: 'Consultas hoje', value: queriesToday.toLocaleString('pt-BR') },
+  ];
 
   return (
     <div className="dashboard">
@@ -102,68 +109,34 @@ const Dashboard = () => {
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon blue">
-            <Building2 size={24} />
+        {stats.map(({ icon: Icon, color, label, value }) => (
+          <div className="stat-card" key={label}>
+            <div className={`stat-icon ${color}`}><Icon size={20} /></div>
+            <div className="stat-content">
+              <p className="stat-label">{label}</p>
+              <h3 className="stat-value">{value}</h3>
+            </div>
           </div>
-          <div className="stat-content">
-            <p className="stat-label">Total de Empresas</p>
-            <h3 className="stat-value">+65Mi</h3>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <Database size={24} />
-          </div>
-          <div className="stat-content">
-            <p className="stat-label">Estabelecimentos</p>
-            <h3 className="stat-value">+47Mi</h3>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon purple">
-            <Users size={24} />
-          </div>
-          <div className="stat-content">
-            <p className="stat-label">Total de Sócios</p>
-            <h3 className="stat-value">+26Mi</h3>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon orange">
-            <Activity size={24} />
-          </div>
-          <div className="stat-content">
-            <p className="stat-label">Requisições Hoje</p>
-            <h3 className="stat-value">
-              {loading ? '...' : (usage?.queries_used_today || usage?.requests_today || 0).toLocaleString('pt-BR')}
-            </h3>
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="dashboard-grid">
         <div className="card">
           <div className="card-header">
-            <TrendingUp size={20} />
-            <h2>Uso da API (Últimos 7 dias)</h2>
+            <TrendingUp size={18} />
+            <h2>Uso da API (últimos 7 dias)</h2>
           </div>
           <div className="chart-container">
             {usageData.length === 0 ? (
-              <p style={{ color: '#6b7280', textAlign: 'center', padding: '32px 0' }}>
-                Ainda não há dados de uso para exibir.
-              </p>
+              <p className="chart-empty">Ainda não há dados de uso para exibir.</p>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={usageData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" stroke="var(--text-secondary)" fontSize={12} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={12} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="requests" stroke="#3b82f6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="requests" stroke="var(--primary)" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -172,100 +145,28 @@ const Dashboard = () => {
 
         <div className="card">
           <div className="card-header">
-            <Activity size={20} />
-            <h2>Uso de Consultas</h2>
+            <Activity size={18} />
+            <h2>Uso de consultas</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', padding: '20px 0' }}>
-            {/* Círculo Consultas Normais */}
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>Consultas Normais</p>
-              <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 16px' }}>
-                <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
-                  <circle 
-                    cx="60" 
-                    cy="60" 
-                    r="50" 
-                    fill="none" 
-                    stroke={normalUsed >= normalTotal ? '#ef4444' : '#3b82f6'}
-                    strokeWidth="10"
-                    strokeDasharray={`${normalStroke} 314`}
-                    strokeLinecap="round"
-                  ></circle>
-                </svg>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                  <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usadas</p>
-                  <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
-                    {normalUsed}
-                  </p>
-                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {normalTotal}</p>
-                </div>
-              </div>
-              <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
-                {normalRemaining} consultas restantes
-              </p>
-              {subscription?.plan_name === 'Free' && (
-                <a href="/home#pricing" style={{ 
-                  display: 'inline-block',
-                  fontSize: '11px',
-                  color: '#ffffff',
-                  backgroundColor: '#3b82f6',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontWeight: '500',
-                  transition: 'all 0.3s ease'
-                }}>Fazer upgrade →</a>
-              )}
-            </div>
-
-            {/* Círculo Consultas em Lote */}
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>Consultas em Lote</p>
-              <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 16px' }}>
-                <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="10"></circle>
-                  <circle 
-                    cx="60" 
-                    cy="60" 
-                    r="50" 
-                    fill="none" 
-                    stroke={batchTotal > 0 && batchUsed >= batchTotal ? '#ef4444' : '#10b981'}
-                    strokeWidth="10"
-                    strokeDasharray={`${batchStroke} 314`}
-                    strokeLinecap="round"
-                  ></circle>
-                </svg>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                  <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>Usados</p>
-                  <p style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1f2937' }}>
-                    {batchUsed}
-                  </p>
-                  <p style={{ fontSize: '10px', color: '#9ca3af', margin: 0 }}>de {batchTotal}</p>
-                </div>
-              </div>
-              <p style={{ fontSize: '12px', color: '#10b981', margin: '0 0 8px 0', fontWeight: '500' }}>
-                {batchAvailable} créditos restantes
-              </p>
-              {subscription?.plan_name === 'Free' && (
-                <a href="/home#pricing" style={{ 
-                  display: 'inline-block',
-                  fontSize: '11px',
-                  color: '#ffffff',
-                  backgroundColor: '#3b82f6',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontWeight: '500',
-                  transition: 'all 0.3s ease'
-                }}>Fazer upgrade →</a>
-              )}
-            </div>
-          </div>
+          <UsageBar
+            label="Consultas avulsas"
+            used={normalUsed}
+            total={normalTotal}
+            remaining={normalRemaining}
+            remainingLabel="restantes este mês"
+            showUpgrade={isFree}
+          />
+          <UsageBar
+            label="Consultas em lote"
+            used={batchUsed}
+            total={batchTotal}
+            remaining={batchAvailable}
+            remainingLabel="créditos restantes"
+            green
+            showUpgrade={isFree && batchTotal === 0}
+          />
         </div>
       </div>
-
-
     </div>
   );
 };

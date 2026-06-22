@@ -228,7 +228,17 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
 
 @router.post("/subscribe/{plan_id}")
 async def subscribe_to_plan(plan_id: int, current_user: dict = Depends(get_current_user)):
-    """Cria ou atualiza assinatura para um plano"""
+    """
+    [DESATIVADO POR SEGURANÇA — BILL-02]
+    Assinaturas NÃO podem ser concedidas sem pagamento. Use o checkout do Stripe;
+    a assinatura é materializada APENAS pelo webhook após o pagamento confirmado.
+    """
+    raise HTTPException(
+        status_code=400,
+        detail="Para assinar um plano, finalize o pagamento via checkout do Stripe. "
+               "A assinatura é ativada automaticamente após a confirmação do pagamento."
+    )
+    # --- Código antigo (inseguro) mantido abaixo, porém INALCANÇÁVEL ---
     # Admins cannot subscribe to plans through this endpoint
     if current_user.get('role') == 'admin':
         raise HTTPException(status_code=403, detail="Admins cannot subscribe to plans.")

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Database, Mail, Lock, User as UserIcon, Eye, EyeOff, CheckCircle, AlertCircle, Phone, CreditCard } from 'lucide-react';
 import { api } from '../services/api';
+import './Login.css';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -538,15 +539,55 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <Database size={48} className="login-logo" />
-          <h1>DB Empresas</h1>
-          <p>Consulta e Gestão de Dados da Receita Federal</p>
+    <div className="auth-split">
+      <aside className="auth-brand">
+        <div className="auth-brand-inner">
+          <div className="auth-logo">
+            <Database size={32} />
+            <span>DB Empresas</span>
+          </div>
+          <h1 className="auth-brand-title">A base completa de empresas do Brasil</h1>
+          <p className="auth-brand-sub">
+            Consulta de CNPJ, sócios e Simples Nacional com dados oficiais da Receita Federal — pelo painel ou pela API.
+          </p>
+          <ul className="auth-features">
+            <li><CheckCircle size={18} /> 66 milhões de empresas</li>
+            <li><CheckCircle size={18} /> 69 milhões de estabelecimentos</li>
+            <li><CheckCircle size={18} /> API REST com sua própria chave</li>
+            <li><CheckCircle size={18} /> Atualização mensal automática</li>
+          </ul>
+          <div className="auth-stats">
+            <div><strong>66M+</strong><span>empresas</span></div>
+            <div><strong>27M+</strong><span>sócios</span></div>
+            <div><strong>99.9%</strong><span>disponibilidade</span></div>
+          </div>
         </div>
+      </aside>
 
-        {planParam && (
+      <main className="auth-panel">
+        <div className="auth-form-wrap">
+          <div className="auth-logo auth-logo-mobile">
+            <Database size={28} />
+            <span>DB Empresas</span>
+          </div>
+
+          {!showResetPassword && (
+            <div className="auth-tabs">
+              <button type="button" className={isLogin ? 'active' : ''} onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }}>
+                Entrar
+              </button>
+              <button type="button" className={!isLogin ? 'active' : ''} onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }}>
+                Criar conta
+              </button>
+            </div>
+          )}
+
+          <div className="auth-head">
+            <h2>{showResetPassword ? 'Recuperar senha' : isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}</h2>
+            <p>{showResetPassword ? 'Enviaremos um link para redefinir sua senha.' : isLogin ? 'Entre para acessar seu painel.' : 'Comece grátis em segundos.'}</p>
+          </div>
+
+          {planParam && (
           <div className="plan-banner">
             {planParam === 'free' 
               ? '🎉 Plano Free selecionado - Comece grátis agora!'
@@ -811,36 +852,10 @@ const Login = () => {
               )}
             </button>
 
-            <div className="toggle-mode">
-              {isLogin ? (
-                <p>
-                  Não tem uma conta?{' '}
-                  <a href="#" onClick={(e) => {
-                    e.preventDefault();
-                    setIsLogin(false);
-                    setError('');
-                    setSuccess('');
-                  }}>
-                    Cadastre-se
-                  </a>
-                </p>
-              ) : (
-                <p>
-                  Já tem uma conta?{' '}
-                  <a href="#" onClick={(e) => {
-                    e.preventDefault();
-                    setIsLogin(true);
-                    setError('');
-                    setSuccess('');
-                  }}>
-                    Entrar
-                  </a>
-                </p>
-              )}
-            </div>
           </form>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

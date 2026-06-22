@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import asyncio
 import logging
+from src.api.cache_redis import cache as shared_cache
 
 logger = logging.getLogger(__name__)
 
@@ -49,54 +50,57 @@ class RateLimiter:
             max_requests: Limite customizado (sobrescreve plano)
             window_seconds: Janela de tempo customizada (sobrescreve plano)
         """
-        # 🔓 ADMIN TEM ACESSO ILIMITADO - sem rate limiting!
-        if user_role == 'admin':
-            logger.info(f"✅ Admin user {user_id} - unlimited access (no rate limiting)")
-            return
-        
-        now = datetime.now()
-        
-        # Usar limites do plano ou customizados
+        # Resolve limites por plano (admin = teto alto, NÃO mais ilimitado)
+        plan_key = 'admin' if user_role == 'admin' else user_plan
         if max_requests is None or window_seconds is None:
-            plan_limits = self.RATE_LIMITS.get(user_plan, self.RATE_LIMITS['free'])
+            plan_limits = self.RATE_LIMITS.get(plan_key, self.RATE_LIMITS['free'])
             max_requests = max_requests or plan_limits['requests']
             window_seconds = window_seconds or plan_limits['window']
-        
-        window_start = now - timedelta(seconds=window_seconds)
-        
-        # Limpar requisições antigas
-        self.requests[user_id] = [
-            (ts, count) for ts, count in self.requests[user_id]
-            if ts > window_start
-        ]
-        
-        # Contar requisições na janela
-        total = sum(count for _, count in self.requests[user_id])
-        
-        # ⚡ VERIFICAÇÃO DE BURST (último minuto)
-        burst_window = now - timedelta(seconds=60)
-        burst_requests = sum(
-            count for ts, count in self.requests[user_id]
-            if ts > burst_window
-        )
-        
-        burst_limit = self.BURST_LIMITS.get(user_plan, 30)
-        
-        if burst_requests >= burst_limit:
-            logger.warning(f"🔥 BURST limit exceeded - User {user_id} ({user_plan}): {burst_requests}/{burst_limit} req/min")
+        burst_limit = self.BURST_LIMITS.get(plan_key, 30)
+
+        # Caminho preferencial: Redis (contadores atômicos, GLOBAIS entre workers)
+        hourly = shared_cache.incr_rate(f"rl:h:{user_id}:{window_seconds}", window_seconds)
+        burst = shared_cache.incr_rate(f"rl:b:{user_id}", 60)
+
+        if hourly == -1 or burst == -1:
+            # Redis indisponível -> fallback em memória do processo
+            return self._check_rate_limit_memory(user_id, max_requests, window_seconds, burst_limit)
+
+        if burst > burst_limit:
+            logger.warning(f"🔥 BURST limit - User {user_id} ({plan_key}): {burst}/{burst_limit} req/min")
             raise HTTPException(
                 status_code=429,
                 detail=f"Limite de burst excedido: {burst_limit} requisições por minuto. Aguarde alguns segundos."
             )
-        
-        if total >= max_requests:
-            logger.warning(f"⚠️ Rate limit exceeded - User {user_id} ({user_plan}): {total}/{max_requests} req/{window_seconds}s")
+        if hourly > max_requests:
+            logger.warning(f"⚠️ Rate limit - User {user_id} ({plan_key}): {hourly}/{max_requests} req/{window_seconds}s")
             raise HTTPException(
                 status_code=429,
                 detail=f"Limite de {max_requests} requisições por {window_seconds//3600}h excedido. Considere fazer upgrade do plano."
             )
-        
-        # Adicionar requisição atual
+
+    def _check_rate_limit_memory(self, user_id: int, max_requests: int, window_seconds: int, burst_limit: int):
+        """Fallback em memória (válido apenas dentro de um worker; usado se o Redis cair)."""
+        now = datetime.now()
+        window_start = now - timedelta(seconds=window_seconds)
+        self.requests[user_id] = [
+            (ts, count) for ts, count in self.requests[user_id] if ts > window_start
+        ]
+        total = sum(count for _, count in self.requests[user_id])
+        burst_window = now - timedelta(seconds=60)
+        burst_requests = sum(
+            count for ts, count in self.requests[user_id] if ts > burst_window
+        )
+        if burst_requests >= burst_limit:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Limite de burst excedido: {burst_limit} requisições por minuto. Aguarde alguns segundos."
+            )
+        if total >= max_requests:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Limite de {max_requests} requisições por {window_seconds//3600}h excedido. Considere fazer upgrade do plano."
+            )
         self.requests[user_id].append((now, 1))
     
     async def cleanup_old_entries(self):

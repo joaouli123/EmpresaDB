@@ -234,7 +234,7 @@ class BatchStripeService:
                     
                     # Buscar total de créditos após compra
                     cursor.execute("""
-                        SELECT total_credits FROM clientes.batch_credits WHERE user_id = %s
+                        SELECT total_credits FROM clientes.batch_query_credits WHERE user_id = %s
                     """, (user_id,))
                     credits_row = cursor.fetchone()
                     

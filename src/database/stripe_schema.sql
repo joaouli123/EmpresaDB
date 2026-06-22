@@ -124,8 +124,8 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_stripe_customers_updated_at BEFORE UPDATE ON clientes.stripe_customers
+CREATE OR REPLACE TRIGGER update_stripe_customers_updated_at BEFORE UPDATE ON clientes.stripe_customers
     FOR EACH ROW EXECUTE FUNCTION clientes.update_updated_at_column();
 
-CREATE TRIGGER update_stripe_subscriptions_updated_at BEFORE UPDATE ON clientes.stripe_subscriptions
+CREATE OR REPLACE TRIGGER update_stripe_subscriptions_updated_at BEFORE UPDATE ON clientes.stripe_subscriptions
     FOR EACH ROW EXECUTE FUNCTION clientes.update_updated_at_column();

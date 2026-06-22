@@ -411,33 +411,22 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None, 
         # Ler o corpo da requisição
         payload = await request.body()
         
-        # Verificar se o webhook secret está configurado
+        # SEC-03: assinatura do Stripe é SEMPRE obrigatória, em qualquer ambiente.
         if not webhook_secret:
-            # Em produção, o webhook secret é OBRIGATÓRIO
-            environment = os.getenv('ENVIRONMENT', 'development')
-            if environment == 'production':
-                logger.error("STRIPE_WEBHOOK_SECRET não configurado em produção!")
-                raise HTTPException(
-                    status_code=500, 
-                    detail="Webhook secret not configured in production"
-                )
-            else:
-                logger.warning("⚠️ STRIPE_WEBHOOK_SECRET não configurado! Processando sem validação (DEV ONLY)")
-                event = stripe.Event.construct_from(
-                    await request.json(),
-                    stripe.api_key
-                )
-        else:
-            # Validar assinatura do webhook
-            try:
-                event = stripe.Webhook.construct_event(
-                    payload, stripe_signature, webhook_secret
-                )
-            except Exception as e:
-                if "Signature" in str(e):
-                    logger.error(f"❌ Assinatura inválida do webhook: {e}")
-                    raise HTTPException(status_code=400, detail="Invalid signature")
-                raise
+            logger.error("STRIPE_WEBHOOK_SECRET não configurado — webhook recusado")
+            raise HTTPException(status_code=500, detail="Webhook secret not configured")
+        if not stripe_signature:
+            logger.error("❌ Webhook sem cabeçalho de assinatura — recusado")
+            raise HTTPException(status_code=400, detail="Missing signature")
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, stripe_signature, webhook_secret
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"❌ Assinatura inválida do webhook: {e}")
+            raise HTTPException(status_code=400, detail="Invalid signature")
         
         # Registrar evento no banco para auditoria
         with db_manager.get_connection() as conn:

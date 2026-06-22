@@ -18,3 +18,4 @@ argon2-cffi
 redis
 stripe
 resend
+gunicorn==21.2.0

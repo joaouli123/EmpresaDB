@@ -20,38 +20,58 @@ class RedisCache:
     Cache Redis com compressão e serialização otimizada
     """
     
-    def __init__(self, host='localhost', port=6379, db=0, password=None):
+    def __init__(self, url=None, host='localhost', port=6379, db=0, password=None):
         """
-        Inicializa conexão com Redis
-        
-        Para VPS, instale Redis:
-        sudo apt update
-        sudo apt install redis-server
-        sudo systemctl enable redis-server
-        sudo systemctl start redis-server
+        Inicializa conexão com Redis. Prioriza a URL (REDIS_URL do Railway);
+        cai para host/port se não houver URL. Em falha, usa cache em memória.
         """
+        common = dict(
+            decode_responses=False,        # bytes (para compressão)
+            socket_keepalive=True,
+            socket_connect_timeout=5,
+            max_connections=50,
+            health_check_interval=30,
+        )
         try:
-            self.redis_client = redis.Redis(
-                host=host,
-                port=port,
-                db=db,
-                password=password,
-                decode_responses=False,  # Para usar bytes (compressão)
-                socket_keepalive=True,
-                socket_connect_timeout=5,
-                max_connections=50,
-                health_check_interval=30
-            )
-            # Testar conexão
+            if url:
+                self.redis_client = redis.Redis.from_url(url, **common)
+                target = url.split('@')[-1]
+            else:
+                self.redis_client = redis.Redis(host=host, port=port, db=db,
+                                                password=password, **common)
+                target = f"{host}:{port}"
             self.redis_client.ping()
             self.enabled = True
-            logger.info(f"✅ Redis conectado em {host}:{port}")
+            logger.info(f"✅ Redis conectado em {target}")
         except Exception as e:
             logger.warning(f"⚠️ Redis não disponível: {e}. Cache em memória será usado.")
             self.redis_client = None
             self.enabled = False
             # Fallback: cache em memória (dict simples)
             self._memory_cache = {}
+
+    # Lua: INCR e define EXPIRE só na PRIMEIRA requisição da janela. Evita renovar
+    # o TTL a cada chamada (que causaria lockout permanente sob tráfego — RL-01).
+    _INCR_RATE_LUA = (
+        "local c = redis.call('INCR', KEYS[1]) "
+        "if c == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end "
+        "return c"
+    )
+
+    def incr_rate(self, key: str, window_seconds: int) -> int:
+        """
+        Contador atômico para rate limiting, compartilhado entre TODOS os workers.
+        A janela expira de verdade (TTL definido apenas na 1ª requisição).
+        Retorna o nº de requisições na janela atual; -1 em falha (fail-open).
+        """
+        if not self.enabled:
+            return -1
+        try:
+            count = self.redis_client.eval(self._INCR_RATE_LUA, 1, key, window_seconds)
+            return int(count)
+        except Exception as e:
+            logger.error(f"Erro no incr_rate: {e}")
+            return -1
     
     def _generate_key(self, prefix: str, *args, **kwargs) -> str:
         """
@@ -281,16 +301,15 @@ def cache_decorator(ttl_seconds: int = 3600, key_prefix: str = ""):
     return decorator
 
 
-# Instância global do cache
-# Redis configurado na VPS com senha!
+# Instância global do cache — usa REDIS_URL (Railway) quando disponível.
 import os
-from src.config import settings
 
 cache = RedisCache(
-    host=os.getenv('REDIS_HOST', '72.61.217.143'),  # IP da VPS
+    url=os.getenv('REDIS_URL'),
+    host=os.getenv('REDIS_HOST', 'localhost'),
     port=int(os.getenv('REDIS_PORT', '6379')),
     db=0,
-    password=os.getenv('REDIS_PASSWORD', None)  # Senha do Redis
+    password=os.getenv('REDIS_PASSWORD', None),
 )
 
 # Exemplo de uso:

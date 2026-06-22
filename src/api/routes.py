@@ -20,11 +20,11 @@ import asyncio
 from functools import lru_cache
 from datetime import datetime, timedelta, timezone
 from src.utils.cnpj_utils import clean_cnpj
+from src.utils.security_utils import mask_cpf_socio as _mask_cpf_socio
 from src.api.security_logger import log_query
 from src.api.cache_redis import cache as shared_cache
 
-# ℹ️ Todos os dados estão no banco da VPS (72.61.217.143:5432/cnpj_db)
-# DATABASE_URL configurado no .env aponta para a VPS
+# ℹ️ A conexão ao banco vem exclusivamente de DATABASE_URL (variável de ambiente).
 
 logger = logging.getLogger(__name__)
 
@@ -917,7 +917,14 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
                 'faixa_etaria', 'faixa_etaria_desc'
             ]
 
-            socios = [SocioModel(**dict(zip(columns, row))) for row in results]
+            socios = []
+            for row in results:
+                data = dict(zip(columns, row))
+                # LGPD: mascara CPF de pessoa física também nesta rota (LGPD-01)
+                data['cnpj_cpf_socio'] = _mask_cpf_socio(
+                    data.get('cnpj_cpf_socio'), data.get('identificador_socio')
+                )
+                socios.append(SocioModel(**data))
 
             if len(socios) == 0:
                 logger.info(f"ℹ️ Nenhum sócio encontrado para CNPJ básico {cnpj_basico}")
@@ -933,6 +940,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
 
 @router.get("/socios/search", response_model=List[SocioModel])
 async def search_socios(
+    user: dict = Depends(verify_api_key),
     nome_socio: Optional[str] = Query(None, description="Nome do sócio (busca parcial)"),
     cpf_cnpj: Optional[str] = Query(None, description="CPF ou CNPJ do sócio (completo ou parcial)"),
     identificador_socio: Optional[str] = Query(None, description="Tipo de sócio (1-Pessoa Jurídica, 2-Pessoa Física, 3-Estrangeiro)"),
@@ -989,7 +997,13 @@ async def search_socios(
                 'cnpj_cpf_socio', 'qualificacao_socio', 'data_entrada_sociedade'
             ]
 
-            socios = [SocioModel(**dict(zip(columns, row))) for row in results]
+            socios = []
+            for row in results:
+                data = dict(zip(columns, row))
+                data['cnpj_cpf_socio'] = _mask_cpf_socio(
+                    data.get('cnpj_cpf_socio'), data.get('identificador_socio')
+                )
+                socios.append(SocioModel(**data))
             return socios
 
     except Exception as e:
@@ -998,6 +1012,7 @@ async def search_socios(
 
 @router.get("/cnaes", response_model=List[CNAEModel])
 async def list_cnaes(
+    user: dict = Depends(verify_api_key),
     search: Optional[str] = Query(None, description="Buscar na descrição"),
     limit: int = Query(100, ge=1, le=1000)
 ):
@@ -1033,7 +1048,7 @@ async def list_cnaes(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/municipios/{uf}", response_model=List[MunicipioModel])
-async def list_municipios(uf: str):
+async def list_municipios(uf: str, user: dict = Depends(verify_api_key)):
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()

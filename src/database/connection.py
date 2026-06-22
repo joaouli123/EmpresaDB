@@ -8,6 +8,7 @@ from typing import Optional, Dict, List
 from src.config import settings
 from fastapi.security import OAuth2PasswordBearer
 import secrets
+from src.utils.security_utils import hash_api_key as _hash_api_key
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,11 +46,13 @@ class DatabaseManager:
         """
         try:
             self.connection_pool = pool.ThreadedConnectionPool(
-                minconn=5,      # Mínimo sempre aberto (prontas para uso)
-                maxconn=20,     # Máximo simultâneo (pico de carga)
-                dsn=self.connection_string
+                minconn=2,      # Mínimo sempre aberto
+                maxconn=10,     # Máximo por worker (ESC-02: workers*maxconn deve ser < max_connections)
+                dsn=self.connection_string,
+                # ESC-01: timeouts na origem da conexão — query pesada não segura o worker por 120s
+                options='-c statement_timeout=15000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000',
             )
-            logger.info("✅ Connection pool inicializado: 5-20 conexões reutilizáveis")
+            logger.info("✅ Connection pool inicializado: 2-10 conexões/worker (statement_timeout=15s)")
         except Exception as e:
             logger.error(f"❌ Erro ao criar connection pool: {e}")
             self.connection_pool = None
@@ -60,9 +63,9 @@ class DatabaseManager:
             # NÃO alterar para usar variáveis separadas ou banco local Replit!
             self.engine = create_engine(
                 self.connection_string,
-                pool_size=10,
-                max_overflow=20,
-                pool_pre_ping=True
+                pool_size=2,        # ESC-02: o engine SQLAlchemy só serve /health — pool pequeno
+                max_overflow=3,
+                pool_pre_ping=True,
             )
         return self.engine
 
@@ -602,16 +605,21 @@ class DatabaseManager:
     async def create_api_key(self, user_id: int, name: str) -> Optional[Dict]:
         try:
             key = f"sk_{secrets.token_urlsafe(32)}"
+            key_hash = _hash_api_key(key)  # SEC-04: persistimos apenas o hash
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
                     INSERT INTO clientes.api_keys (user_id, name, key)
                     VALUES (%s, %s, %s)
                     RETURNING id, user_id, name, key, created_at, total_requests
-                """, (user_id, name, key))
+                """, (user_id, name, key_hash))
                 api_key = cursor.fetchone()
                 cursor.close()
-                return dict(api_key) if api_key else None
+                if not api_key:
+                    return None
+                result = dict(api_key)
+                result['key'] = key  # texto puro exibido UMA única vez ao usuário
+                return result
         except Exception as e:
             logger.error(f"Erro ao criar API key: {e}")
             raise
@@ -628,7 +636,13 @@ class DatabaseManager:
                 """, (user_id,))
                 keys = cursor.fetchall()
                 cursor.close()
-                return [dict(key) for key in keys] if keys else []
+                # SEC-04: a chave em texto puro nunca é reexibida (só na criação)
+                masked = []
+                for k in (keys or []):
+                    d = dict(k)
+                    d['key'] = 'sk_••••••••••••'
+                    masked.append(d)
+                return masked
         except Exception as e:
             logger.error(f"Erro ao buscar API keys: {e}")
             return []
@@ -667,7 +681,7 @@ class DatabaseManager:
                         u.is_active
                     FROM updated_key uk
                     JOIN clientes.users u ON u.id = uk.user_id
-                """, (key,))
+                """, (_hash_api_key(key),))
                 result = cursor.fetchone()
                 cursor.close()
                 return dict(result) if result else None

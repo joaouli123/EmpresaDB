@@ -65,7 +65,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_update_followup_timestamp
+CREATE OR REPLACE TRIGGER trigger_update_followup_timestamp
     BEFORE UPDATE ON clientes.subscription_followup_tracking
     FOR EACH ROW
     EXECUTE FUNCTION update_followup_updated_at();

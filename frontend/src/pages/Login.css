@@ -1,0 +1,188 @@
+/* ===== Login split-screen ===== */
+.auth-split {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Lado da marca (imagem + infos + logo) */
+.auth-brand {
+  flex: 1.1;
+  background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #1d4ed8 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(620px circle at 82% 18%, rgba(255, 255, 255, 0.10), transparent 60%),
+    radial-gradient(520px circle at 10% 95%, rgba(255, 255, 255, 0.06), transparent 55%);
+  pointer-events: none;
+}
+
+.auth-brand-inner {
+  position: relative;
+  max-width: 430px;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.auth-brand-title {
+  font-size: 34px;
+  line-height: 1.15;
+  margin: 30px 0 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.auth-brand-sub {
+  font-size: 15px;
+  opacity: 0.92;
+  line-height: 1.65;
+  margin-bottom: 30px;
+}
+
+.auth-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+  display: grid;
+  gap: 13px;
+}
+
+.auth-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+}
+
+.auth-features svg {
+  color: #93c5fd;
+  flex-shrink: 0;
+}
+
+.auth-stats {
+  display: flex;
+  gap: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.auth-stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-stats strong {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.auth-stats span {
+  font-size: 12px;
+  opacity: 0.82;
+  margin-top: 2px;
+}
+
+/* Lado do formulário */
+.auth-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--bg);
+}
+
+.auth-form-wrap {
+  width: 100%;
+  max-width: 410px;
+}
+
+.auth-logo-mobile {
+  display: none;
+  color: var(--primary);
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--light-gray);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 26px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.auth-tabs button.active {
+  background: var(--white);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-head {
+  margin-bottom: 22px;
+}
+
+.auth-head h2 {
+  font-size: 23px;
+  color: var(--dark);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.auth-head p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Responsivo: empilha no mobile (marca some, logo aparece no topo do form) */
+@media (max-width: 900px) {
+  .auth-brand {
+    display: none;
+  }
+  .auth-logo-mobile {
+    display: flex;
+  }
+  .auth-panel {
+    min-height: 100vh;
+    padding: 32px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-form-wrap {
+    max-width: 100%;
+  }
+  .auth-head h2 {
+    font-size: 21px;
+  }
+}

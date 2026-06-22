@@ -114,11 +114,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER trigger_update_batch_credits_timestamp 
+CREATE OR REPLACE TRIGGER trigger_update_batch_credits_timestamp 
 BEFORE UPDATE ON clientes.batch_query_credits
 FOR EACH ROW EXECUTE FUNCTION clientes.update_batch_credits_timestamp();
 
-CREATE TRIGGER trigger_update_batch_packages_timestamp 
+CREATE OR REPLACE TRIGGER trigger_update_batch_packages_timestamp 
 BEFORE UPDATE ON clientes.batch_query_packages
 FOR EACH ROW EXECUTE FUNCTION clientes.update_batch_credits_timestamp();
 
