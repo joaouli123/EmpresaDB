@@ -7,7 +7,7 @@
 /* Lado da marca (imagem + infos + logo) */
 .auth-brand {
   flex: 1.1;
-  background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #1d4ed8 100%);
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 45%, #4a43c9 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
 }
 
 .auth-features svg {
-  color: #93c5fd;
+  color: #c7c2f5;
   flex-shrink: 0;
 }
 

@@ -7,10 +7,10 @@
 }
 
 :root {
-  /* Paleta profissional — slate + azul confiável */
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-soft: #eff4ff;
+  /* Paleta refinada — índigo confiante (Stripe/Notion) + slate */
+  --primary: #5b54e0;
+  --primary-dark: #4a43c9;
+  --primary-soft: #f1effc;
   --secondary: #0ea5e9;
   --danger: #dc2626;
   --warning: #d97706;
@@ -2135,6 +2135,109 @@ code {
   .btn-secondary {
     min-height: 44px;
   }
+}
+
+/* ===== Refino premium (claro refinado — Stripe/Notion) ===== */
+
+/* Ícones flat — sem degradê (o que dava cara de template) */
+.user-avatar,
+.sidebar-user-avatar,
+.profile-avatar-large,
+.key-icon,
+.table-icon,
+.feature svg,
+.section-icon {
+  background: var(--primary-soft);
+  color: var(--primary);
+  box-shadow: none;
+  border: none;
+}
+.section-icon,
+.feature svg {
+  background: transparent;
+}
+
+/* Sidebar clara e refinada */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  box-shadow: none;
+}
+.sidebar-header {
+  border-bottom: 1px solid var(--border);
+}
+.sidebar .logo h1,
+.user-name,
+.sidebar-user-name {
+  color: var(--text);
+}
+.logo-icon {
+  color: var(--primary);
+}
+.nav-section-title {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.nav-item {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+}
+.nav-item:hover {
+  background: var(--light-gray);
+  color: var(--text);
+}
+.nav-item.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
+}
+.logout-btn {
+  color: var(--danger);
+}
+.sidebar-toggle {
+  border-color: var(--border);
+  background: var(--primary);
+}
+.sidebar-user-bottom {
+  background: var(--light-gray);
+  border: 1px solid var(--border);
+}
+.sidebar-user-plan,
+.plan-usage {
+  color: var(--text-secondary);
+}
+.user-subscription {
+  border-top-color: var(--border);
+}
+.usage-bar {
+  background: var(--light-gray);
+  box-shadow: none;
+}
+.usage-fill {
+  background: var(--primary);
+  box-shadow: none;
+}
+.user-role {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Cartões e tipografia mais refinados */
+.card,
+.stat-card,
+.key-card,
+.table-card,
+.profile-card,
+.profile-stats {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.dashboard-header h1,
+.page-header h1,
+.profile-info h2,
+.database-tables h2 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* ===== Acessibilidade (skill: foco visível + movimento reduzido) ===== */
