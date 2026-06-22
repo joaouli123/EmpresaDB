@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { subscriptionAPI } from '../services/api';
-import { ChevronDown, User as UserIcon, LogOut, CreditCard, Zap } from 'lucide-react';
+import { ChevronDown, User as UserIcon, LogOut, CreditCard, Zap, Search } from 'lucide-react';
 import './TopBar.css';
 
 const TopBar = () => {
@@ -46,6 +46,11 @@ const TopBar = () => {
 
   return (
     <header className="topbar">
+      <form className="topbar-search" onSubmit={(e) => e.preventDefault()}>
+        <Search size={16} />
+        <input type="text" placeholder="Buscar CNPJ, empresa ou sócio..." aria-label="Buscar" />
+      </form>
+
       <div className="topbar-right">
         <div className="topbar-usage" title={`${used.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} consultas usadas este mês`}>
           <Zap size={15} />

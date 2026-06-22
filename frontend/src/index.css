@@ -7,10 +7,10 @@
 }
 
 :root {
-  /* Paleta refinada — índigo confiante (Stripe/Notion) + slate */
-  --primary: #5b54e0;
-  --primary-dark: #4a43c9;
-  --primary-soft: #f1effc;
+  /* Paleta referência (Dashboardly/Stripe) — azul confiante + neutros claros */
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-soft: #eaf2fe;
   --secondary: #0ea5e9;
   --danger: #dc2626;
   --warning: #d97706;
@@ -2345,6 +2345,58 @@ h1, h2, h3, h4, h5 {
   font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+/* ===== Match referência (Dashboardly/Stripe) ===== */
+
+/* Ícones em tom azul suave (como a referência) */
+.stat-icon,
+.stat-icon.blue,
+.stat-icon.green,
+.stat-icon.purple,
+.stat-icon.orange,
+.stat-icon.gray,
+.key-icon,
+.table-icon,
+.section-icon {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Sidebar: item ativo como pílula arredondada azul-clara */
+.sidebar-nav {
+  padding: 10px 0;
+}
+.nav-item {
+  margin: 1px 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border-left: none;
+}
+.nav-item:hover {
+  background: var(--light-gray);
+}
+.nav-item.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-left: none;
+  font-weight: 600;
+}
+.nav-item.active svg {
+  color: var(--primary);
+}
+.nav-section-title {
+  padding-left: 24px;
+}
+
+/* Cards arredondados e suaves (referência) */
+.card,
+.stat-card,
+.key-card,
+.table-card,
+.profile-card,
+.profile-stats {
+  border-radius: 12px;
 }
 
 /* ===== Acessibilidade (skill: foco visível + movimento reduzido) ===== */
