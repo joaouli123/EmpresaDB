@@ -452,6 +452,264 @@
   margin: 0 0 8px;
 }
 
+.pempty .ico {
+  color: var(--text-secondary);
+  opacity: 0.55;
+}
+
+/* Nome do plano */
+.plan-name {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Métricas inline (3 colunas) */
+.pmetrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.pmetrics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pmetrics .k {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pmetrics .v {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* Barra de uso */
+.usage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.usage-head .uused {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ubar {
+  height: 8px;
+  background: var(--light-gray);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ubar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.ubar-fill.warn {
+  background: #d99405;
+}
+
+.ubar-fill.over {
+  background: var(--danger);
+}
+
+/* Tabela */
+.ptable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ptable th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  padding: 0 12px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ptable td {
+  font-size: 13.5px;
+  color: var(--text);
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ptable tr:last-child td {
+  border-bottom: none;
+}
+
+.ptable .amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Cartão de pagamento */
+.pay-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pay-row:first-child {
+  padding-top: 0;
+}
+
+.pay-row:last-child {
+  border-bottom: none;
+}
+
+.pay-brand {
+  width: 46px;
+  height: 31px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.pay-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pay-info .num {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pay-info .exp {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+/* ===== Documentação — callouts neutros e profissionais ===== */
+.docs-callout {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 18px 0;
+}
+
+.docs-callout h4 {
+  margin: 0 0 6px !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text) !important;
+}
+
+.docs-callout p {
+  margin: 0 !important;
+  font-size: 13.5px;
+  color: var(--text-secondary) !important;
+  line-height: 1.65 !important;
+}
+
+.docs-callout ul,
+.docs-callout ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.docs-callout li {
+  margin-bottom: 4px;
+}
+
+.docs-callout code {
+  background: var(--light-gray);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.docs-callout.warn {
+  border-left: 3px solid #d99405;
+}
+
+.docs-callout.info {
+  border-left: 3px solid var(--primary);
+}
+
+.docs-callout.danger {
+  border-left: 3px solid var(--danger);
+}
+
+/* Pacotes de créditos — cartões neutros */
+.price-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.price-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--surface);
+}
+
+.price-card h4 {
+  margin: 0 0 12px !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text) !important;
+}
+
+.price-card .num {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.price-card .unit {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.price-card .per {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 500;
+  margin: 12px 0 0;
+}
+
 @media (max-width: 900px) {
   .pgrid-sidebar,
   .pgrid-2 {

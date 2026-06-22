@@ -1,19 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
-import { 
-  CreditCard, 
-  Calendar, 
-  AlertCircle, 
-  Check, 
+import {
+  CreditCard,
+  Check,
   X,
   TrendingUp,
-  DollarSign,
-  Clock,
   Eye,
-  Trash2
+  Trash2,
+  AlertCircle,
 } from 'lucide-react';
-import './Subscription.css';
 
 const Subscription = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,28 +37,27 @@ const Subscription = () => {
     setError(null);
     try {
       const [subRes, transRes, cardsRes] = await Promise.all([
-        api.get('/api/v1/subscriptions/my-subscription').catch(err => {
+        api.get('/api/v1/subscriptions/my-subscription').catch((err) => {
           console.error('Erro ao buscar assinatura:', err);
           return { data: null };
         }),
-        api.get('/api/v1/subscriptions/transactions').catch(err => {
+        api.get('/api/v1/subscriptions/transactions').catch((err) => {
           console.error('Erro ao buscar transações:', err);
           return { data: [] };
         }),
-        api.get('/api/v1/subscriptions/payment-methods').catch(err => {
+        api.get('/api/v1/subscriptions/payment-methods').catch((err) => {
           console.error('Erro ao buscar métodos de pagamento:', err);
           return { data: [] };
-        })
+        }),
       ]);
-      
-      // Verificar se retornou erro 404
+
       if (subRes.data && subRes.data.error) {
         setError('Não foi possível carregar informações da assinatura. Tente novamente.');
         setSubscription(null);
       } else {
         setSubscription(subRes.data);
       }
-      
+
       setTransactions(Array.isArray(transRes.data) ? transRes.data : []);
       setCards(Array.isArray(cardsRes.data) ? cardsRes.data : []);
     } catch (error) {
@@ -78,7 +73,7 @@ const Subscription = () => {
       await api.post('/stripe/cancel-subscription');
       setShowCancelModal(false);
       loadData();
-      alert('Assinatura cancelada com sucesso! Seu acesso continuará até o final do período pago.');
+      alert('Assinatura cancelada com sucesso. Seu acesso continua até o final do período pago.');
     } catch (error) {
       console.error('Erro ao cancelar assinatura:', error);
       alert('Erro ao cancelar assinatura. Tente novamente.');
@@ -88,9 +83,8 @@ const Subscription = () => {
   const handleViewSubscriptionDetails = async () => {
     try {
       const response = await api.post('/stripe/customer-portal', {
-        return_url: `${window.location.origin}/subscription`
+        return_url: `${window.location.origin}/subscription`,
       });
-      
       if (response.data.url) {
         window.location.href = response.data.url;
       }
@@ -102,11 +96,10 @@ const Subscription = () => {
 
   const handleRemoveCard = async (cardId) => {
     if (!confirm('Deseja remover este cartão?')) return;
-    
     try {
       await api.delete(`/api/v1/subscriptions/payment-methods/${cardId}`);
       loadData();
-      alert('Cartão removido com sucesso!');
+      alert('Cartão removido com sucesso.');
     } catch (error) {
       console.error('Erro ao remover cartão:', error);
       alert('Erro ao remover cartão. Tente novamente.');
@@ -116,82 +109,66 @@ const Subscription = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="spinner" />
         <p>Carregando informações da assinatura...</p>
       </div>
     );
   }
 
-  const renderSuccessMessage = () => {
-    if (!showSuccessMessage) return null;
-    
+  if (error || !subscription) {
     return (
-      <div className="pmsg success" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Check size={18} />
-        <span>Assinatura realizada com sucesso. Sua conta já está ativa.</span>
-      </div>
-    );
-  };
-
-  if (error) {
-    return (
-      <div className="subscription-empty">
-        <AlertCircle size={64} />
-        <h2>Erro ao Carregar</h2>
-        <p>{error}</p>
-        <button onClick={loadData} className="btn-primary">Tentar Novamente</button>
-      </div>
-    );
-  }
-
-  // Não remover este bloco - usuários sempre terão subscription (Free ou paga)
-  if (!subscription) {
-    return (
-      <div className="subscription-empty">
-        <AlertCircle size={64} />
-        <h2>Erro ao Carregar Assinatura</h2>
-        <p>Não foi possível carregar suas informações de assinatura.</p>
-        <button onClick={loadData} className="btn-primary">Tentar Novamente</button>
+      <div className="pg">
+        <div className="pcard">
+          <div className="pempty">
+            <AlertCircle size={34} className="ico" />
+            <h3>Não foi possível carregar a assinatura</h3>
+            <p>{error || 'Tente novamente em alguns instantes.'}</p>
+            <button onClick={loadData} className="btn-flat primary">Tentar novamente</button>
+          </div>
+        </div>
       </div>
     );
   }
 
   const isFree = subscription.plan_name === 'Free';
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      active: { text: 'Ativo', className: 'status-active' },
-      cancelled: { text: 'Cancelado', className: 'status-cancelled' },
-      expired: { text: 'Expirado', className: 'status-expired' },
-      pending: { text: 'Pendente', className: 'status-pending' }
-    };
-    return badges[status] || { text: status, className: 'status-unknown' };
+  const statusMap = {
+    active: { text: 'Ativo', cls: 'green' },
+    cancelled: { text: 'Cancelado', cls: 'red' },
+    expired: { text: 'Expirado', cls: 'gray' },
+    pending: { text: 'Pendente', cls: 'blue' },
   };
+  const statusBadge = statusMap[subscription.status] || { text: subscription.status, cls: 'gray' };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-  const statusBadge = getStatusBadge(subscription.status);
+  const total = subscription.total_limit || 0;
+  const used = subscription.queries_used || 0;
+  const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
+  const barCls = pct >= 90 ? 'over' : pct >= 70 ? 'warn' : '';
 
   return (
-    <div className="subscription-page">
-      <div className="page-header">
-        <h1>Minha Assinatura</h1>
-        <p>Gerencie seu plano, pagamentos e histórico</p>
+    <div className="pg">
+      <div className="pg-head">
+        <div>
+          <h1>Minha assinatura</h1>
+          <p>Gerencie seu plano, pagamentos e histórico</p>
+        </div>
       </div>
 
-      {renderSuccessMessage()}
+      {showSuccessMessage && (
+        <div className="pmsg success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Check size={16} />
+          <span>Assinatura realizada com sucesso. Sua conta já está ativa.</span>
+        </div>
+      )}
 
-      {/* Banner de Upgrade para usuários Free */}
       {isFree && (
         <div className="upgrade-banner">
           <div>
@@ -202,109 +179,71 @@ const Subscription = () => {
         </div>
       )}
 
-      {/* Plano Ativo */}
-      <div className="subscription-card">
-        <div className="card-header">
-          <h2>Plano Atual</h2>
-          <span className={`status-badge ${statusBadge.className}`}>
-            {statusBadge.text}
-          </span>
+      {/* Plano atual */}
+      <div className="pcard">
+        <div className="pcard-head">
+          <div>
+            <h2>Plano atual</h2>
+            <p className="sub">Detalhes e consumo do ciclo</p>
+          </div>
+          <span className={`pbadge ${statusBadge.cls}`}>{statusBadge.text}</span>
         </div>
-        
-        <div className="plan-details">
-          <div className="plan-main-info">
-            <h3>{subscription.plan_name}</h3>
-            <div className="plan-limits">
-              <div className="limit-item">
-                <TrendingUp size={20} />
-                <div>
-                  <span className="limit-label">Consultas Mensais</span>
-                  <span className="limit-value">{subscription.monthly_limit.toLocaleString('pt-BR')}</span>
-                </div>
-              </div>
-              <div className="limit-item">
-                <DollarSign size={20} />
-                <div>
-                  <span className="limit-label">Créditos Extras</span>
-                  <span className="limit-value">{subscription.extra_credits}</span>
-                </div>
-              </div>
-              {!isFree && (
-                <div className="limit-item">
-                  <Calendar size={20} />
-                  <div>
-                    <span className="limit-label">Próxima Renovação</span>
-                    <span className="limit-value">{formatDate(subscription.renewal_date)}</span>
-                  </div>
-                </div>
-              )}
-              {isFree && (
-                <div className="limit-item">
-                  <Clock size={20} />
-                  <div>
-                    <span className="limit-label">Renovação</span>
-                    <span className="limit-value">Mensal (Gratuito)</span>
-                  </div>
-                </div>
-              )}
+        <div className="pcard-body">
+          <h3 className="plan-name">{subscription.plan_name}</h3>
+
+          <div className="pmetrics">
+            <div>
+              <span className="k">Usado</span>
+              <span className="v">{used.toLocaleString('pt-BR')}</span>
+            </div>
+            <div>
+              <span className="k">Restante</span>
+              <span className="v">{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</span>
+            </div>
+            <div>
+              <span className="k">Total</span>
+              <span className="v">{total.toLocaleString('pt-BR')}</span>
             </div>
           </div>
 
-          <div className="usage-info">
-            <div className="usage-stats">
-              <div className="stat">
-                <span className="stat-value">{subscription.queries_used}</span>
-                <span className="stat-label">Usado</span>
-              </div>
-              <div className="stat">
-                <span className="stat-value">{subscription.queries_remaining}</span>
-                <span className="stat-label">Restante</span>
-              </div>
-              <div className="stat">
-                <span className="stat-value">{subscription.total_limit}</span>
-                <span className="stat-label">Total</span>
-              </div>
+          <div>
+            <div className="usage-head">
+              <span><span className="uused">{used.toLocaleString('pt-BR')}</span> de {total.toLocaleString('pt-BR')} consultas</span>
+              <span>{pct.toFixed(1)}%</span>
             </div>
-            <div className="usage-bar">
-              <div 
-                className="usage-bar-fill" 
-                style={{ 
-                  width: `${(subscription.queries_used / subscription.total_limit * 100).toFixed(1)}%` 
-                }}
-              />
+            <div className="ubar">
+              <div className={`ubar-fill ${barCls}`} style={{ width: `${pct}%` }} />
             </div>
-            <span className="usage-percentage">
-              {((subscription.queries_used / subscription.total_limit) * 100).toFixed(1)}% utilizado
-            </span>
+          </div>
+
+          <div className="dlist" style={{ marginTop: '20px' }}>
+            <div className="dlist-row">
+              <span className="k">Consultas mensais</span>
+              <span className="v">{(subscription.monthly_limit || 0).toLocaleString('pt-BR')}</span>
+            </div>
+            <div className="dlist-row">
+              <span className="k">Créditos extras</span>
+              <span className="v">{(subscription.extra_credits || 0).toLocaleString('pt-BR')}</span>
+            </div>
+            <div className="dlist-row">
+              <span className="k">{isFree ? 'Renovação' : 'Próxima renovação'}</span>
+              <span className="v">{isFree ? 'Mensal (gratuito)' : formatDate(subscription.renewal_date)}</span>
+            </div>
           </div>
         </div>
-
-        <div className="plan-actions">
+        <div className="pcard-foot">
           {isFree ? (
-            <a 
-              href="/home#pricing" 
-              className="btn-primary"
-              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
-            >
-              <TrendingUp size={18} />
-              Fazer Upgrade do Plano
+            <a href="/home#pricing" className="btn-flat primary" style={{ textDecoration: 'none' }}>
+              <TrendingUp size={16} /> Fazer upgrade
             </a>
           ) : (
             <>
-              <button 
-                className="btn-secondary"
-                onClick={handleViewSubscriptionDetails}
-              >
-                <Eye size={18} />
-                Ver Detalhes da Assinatura
+              <button className="btn-flat ghost" onClick={handleViewSubscriptionDetails}>
+                <Eye size={16} /> Ver detalhes
               </button>
               {subscription.status === 'active' && (
-                <button 
-                  className="btn-danger"
-                  onClick={() => setShowCancelModal(true)}
-                >
-                  <X size={18} />
-                  Cancelar Assinatura
+                <button className="btn-flat danger" onClick={() => setShowCancelModal(true)}>
+                  <X size={16} /> Cancelar
                 </button>
               )}
             </>
@@ -312,133 +251,88 @@ const Subscription = () => {
         </div>
       </div>
 
-      {/* Cartões Cadastrados */}
-      <div className="subscription-card">
-        <div className="card-header">
-          <h2>Formas de Pagamento</h2>
+      {/* Formas de pagamento */}
+      <div className="pcard">
+        <div className="pcard-head">
+          <h2>Formas de pagamento</h2>
         </div>
-        
-        {cards.length === 0 ? (
-          <div className="empty-state">
-            <CreditCard size={48} />
-            <p>Nenhum cartão cadastrado</p>
-            <p className="demo-note">
-              <AlertCircle size={16} />
-              Demo: Configure o Stripe para adicionar cartões reais
-            </p>
-          </div>
-        ) : (
-          <div className="cards-list">
-            {cards.map((card) => (
-              <div key={card.id} className={`payment-card ${card.is_default ? 'default' : ''}`}>
-                <div className="card-icon">
-                  <CreditCard size={32} />
+        <div className="pcard-body">
+          {cards.length === 0 ? (
+            <div className="pempty">
+              <CreditCard size={30} className="ico" />
+              <h3>Nenhum cartão cadastrado</h3>
+              <p>A integração de pagamento será ativada em breve.</p>
+            </div>
+          ) : (
+            cards.map((card) => (
+              <div className="pay-row" key={card.id}>
+                <div className="pay-brand"><CreditCard size={18} /></div>
+                <div className="pay-info">
+                  <span className="num">{(card.brand || '').toUpperCase()} •••• {card.last4}</span>
+                  <span className="exp">Válido até {card.exp_month}/{card.exp_year}</span>
                 </div>
-                <div className="card-info">
-                  <div className="card-brand">{card.brand.toUpperCase()}</div>
-                  <div className="card-number">•••• •••• •••• {card.last4}</div>
-                  <div className="card-expiry">Válido até {card.exp_month}/{card.exp_year}</div>
-                </div>
-                {card.is_default && (
-                  <span className="default-badge">Padrão</span>
-                )}
-                <button 
-                  className="btn-icon-danger"
-                  onClick={() => handleRemoveCard(card.id)}
-                  title="Remover cartão"
-                >
-                  <Trash2 size={18} />
+                {card.is_default && <span className="pbadge gray">Padrão</span>}
+                <button className="btn-icon del" onClick={() => handleRemoveCard(card.id)} aria-label="Remover cartão">
+                  <Trash2 size={16} />
                 </button>
               </div>
-            ))}
-          </div>
-        )}
-        
-        <button className="btn-primary" style={{ marginTop: '1rem' }}>
-          <CreditCard size={18} />
-          Adicionar Novo Cartão
-        </button>
-        <p className="demo-note" style={{ marginTop: '0.5rem' }}>
-          <AlertCircle size={14} />
-          Demo: Integração com Stripe será ativada em breve
-        </p>
+            ))
+          )}
+        </div>
       </div>
 
-      {/* Histórico de Transações */}
-      <div className="subscription-card">
-        <div className="card-header">
-          <h2>Histórico de Transações</h2>
+      {/* Histórico de transações */}
+      <div className="pcard">
+        <div className="pcard-head">
+          <h2>Histórico de transações</h2>
         </div>
-        
-        {transactions.length === 0 ? (
-          <div className="empty-state">
-            <Clock size={48} />
-            <p>Nenhuma transação encontrada</p>
-          </div>
-        ) : (
-          <div className="transactions-table">
-            <table>
+        <div className="pcard-body">
+          {transactions.length === 0 ? (
+            <div className="pempty">
+              <CreditCard size={30} className="ico" />
+              <h3>Nenhuma transação</h3>
+              <p>Suas cobranças aparecerão aqui.</p>
+            </div>
+          ) : (
+            <table className="ptable">
               <thead>
                 <tr>
                   <th>Data</th>
                   <th>Descrição</th>
                   <th>Status</th>
                   <th>Valor</th>
-                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td>{formatDate(transaction.date)}</td>
-                    <td>{transaction.description}</td>
-                    <td>
-                      <span className={`status-badge ${getStatusBadge(transaction.status).className}`}>
-                        {transaction.status === 'paid' ? (
-                          <><Check size={14} /> Pago</>
-                        ) : transaction.status === 'pending' ? (
-                          <><Clock size={14} /> Pendente</>
-                        ) : (
-                          <><X size={14} /> Falhou</>
-                        )}
-                      </span>
-                    </td>
-                    <td className="amount">{formatCurrency(transaction.amount)}</td>
-                    <td>
-                      <button className="btn-link">Ver Recibo</button>
-                    </td>
-                  </tr>
-                ))}
+                {transactions.map((t) => {
+                  const tcls = t.status === 'paid' ? 'green' : t.status === 'pending' ? 'blue' : 'red';
+                  const ttext = t.status === 'paid' ? 'Pago' : t.status === 'pending' ? 'Pendente' : 'Falhou';
+                  return (
+                    <tr key={t.id}>
+                      <td>{formatDate(t.date)}</td>
+                      <td>{t.description}</td>
+                      <td><span className={`pbadge ${tcls}`}>{ttext}</span></td>
+                      <td className="amount">{formatCurrency(t.amount)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Modal de Cancelamento */}
+      {/* Modal de cancelamento */}
       {showCancelModal && (
         <div className="modal-overlay" onClick={() => setShowCancelModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Cancelar Assinatura</h3>
-              <button onClick={() => setShowCancelModal(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p>Tem certeza que deseja cancelar sua assinatura?</p>
-              <p className="warning-text">
-                <AlertCircle size={16} />
-                Você perderá acesso aos benefícios do plano atual ao final do período de faturamento.
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowCancelModal(false)}>
-                Manter Assinatura
-              </button>
-              <button className="btn-danger" onClick={handleCancelSubscription}>
-                Confirmar Cancelamento
-              </button>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ fontSize: '17px', fontWeight: 600, margin: '0 0 10px' }}>Cancelar assinatura</h2>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.6 }}>
+              Tem certeza que deseja cancelar? Você perderá os benefícios do plano ao final do período de faturamento já pago.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button className="btn-flat ghost" onClick={() => setShowCancelModal(false)}>Manter assinatura</button>
+              <button className="btn-flat danger" onClick={handleCancelSubscription}>Confirmar cancelamento</button>
             </div>
           </div>
         </div>
