@@ -2267,6 +2267,16 @@ code {
   height: 18px;
 }
 
+/* Layout em coluna: topbar + conteúdo */
+.main-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
 /* Densidade maior (compacto) */
 .main-content {
   padding: 20px 24px;

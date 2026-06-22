@@ -142,31 +142,6 @@ const Sidebar = () => {
           </div>
         )}
 
-        <div className="nav-section">
-          <button 
-            onClick={() => {
-              closeMobileMenu();
-              logout();
-            }}
-            className="nav-item logout-btn"
-            title={collapsed ? 'Sair' : ''}
-          >
-            <LogOut size={20} />
-            {!collapsed && <span>Sair</span>}
-          </button>
-
-          <div className="sidebar-user-bottom" title={collapsed ? (user?.company_name || user?.username || 'Usuário') : ''}>
-            <div className="user-avatar sidebar-user-avatar">
-              {user?.username?.charAt(0).toUpperCase()}
-            </div>
-            {!collapsed && (
-              <div className="sidebar-user-details">
-                <p className="sidebar-user-name">{user?.company_name || user?.username}</p>
-                <p className="sidebar-user-plan">Plano atual: {currentPlan}</p>
-              </div>
-            )}
-          </div>
-        </div>
       </nav>
       </div>
     </>
