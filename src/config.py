@@ -124,8 +124,10 @@ class Settings(BaseSettings):
     DISPOSABLE_EMAIL_DOMAINS: str = "mailinator.com,trashmail.com,10minutemail.com,guerrillamail.com,tempmail.com"
 
     # Email Configuration - Resend API (substituiu SMTP)
+    # EMAIL_FROM deve usar um remetente em domínio VERIFICADO no Resend.
+    # 'contato@dbempresas.com.br' é o remetente verificado e testado.
     RESEND_API_KEY: str = ""
-    EMAIL_FROM: str = "noreply@dbempresas.com.br"
+    EMAIL_FROM: str = "contato@dbempresas.com.br"
     
     # SMTP (Legacy - não usar mais)
     EMAIL_HOST: str = "smtp.hostinger.com"

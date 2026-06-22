@@ -561,27 +561,6 @@ async def register(user: UserCreate, request: Request):
     # Gerar token de ativação
     activation_token = db_manager.generate_activation_token()
 
-    # Criar usuário INATIVO (is_active=False)
-    hashed_password = get_password_hash(user.password)
-    phone_numbers = ''.join(filter(str.isdigit, user.phone))
-    cpf_numbers = ''.join(filter(str.isdigit, user.cpf))
-    
-    new_user = await db_manager.create_user(
-        username=user.username,
-        email=user.email,
-        phone=phone_numbers,
-        cpf=cpf_numbers,
-        hashed_password=hashed_password,
-        activation_token=activation_token,
-        is_active=False
-    )
-
-    if not new_user or "id" not in new_user:
-        raise HTTPException(
-            status_code=500,
-            detail="Erro ao criar usuário. Tente novamente."
-        )
-
     # Construir link de ativação (aponta para o backend endpoint)
     # O endpoint retorna HTML que redireciona para o frontend
     base_url = os.getenv('BASE_URL', '')
@@ -600,31 +579,65 @@ async def register(user: UserCreate, request: Request):
 
     activation_link = f"{base_url}/auth/activate/{activation_token}"
 
-    # Enviar email de ATIVAÇÃO (não boas-vindas!)
-    try:
-        from src.services.email_service import email_service
-        from src.services.email_tracking import email_tracking_service
+    # Enviar o email de ATIVAÇÃO ANTES de criar a conta.
+    # Se o envio falhar (ex.: RESEND_API_KEY ausente no ambiente), abortamos
+    # SEM deixar uma conta inativa "presa" que bloquearia email/CPF/telefone
+    # numa nova tentativa de cadastro.
+    from src.services.email_service import email_service
+    from src.services.email_tracking import email_tracking_service
 
+    try:
         email_sent = email_service.send_account_activation_email(
             to_email=user.email,
             username=user.username,
             activation_link=activation_link
         )
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de ativação: {e}")
+        email_sent = False
 
-        # Registrar envio no tracking
+    if not email_sent:
+        logger.critical(
+            "FALHA ao enviar email de ativação via Resend. "
+            "Verifique RESEND_API_KEY e EMAIL_FROM no ambiente de produção."
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Não foi possível enviar o email de ativação no momento. Tente novamente em instantes."
+        )
+
+    # Email enviado com sucesso: criar usuário INATIVO (is_active=False)
+    hashed_password = get_password_hash(user.password)
+    phone_numbers = ''.join(filter(str.isdigit, user.phone))
+    cpf_numbers = ''.join(filter(str.isdigit, user.cpf))
+
+    new_user = await db_manager.create_user(
+        username=user.username,
+        email=user.email,
+        phone=phone_numbers,
+        cpf=cpf_numbers,
+        hashed_password=hashed_password,
+        activation_token=activation_token,
+        is_active=False
+    )
+
+    if not new_user or "id" not in new_user:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao criar usuário. Tente novamente."
+        )
+
+    # Registrar envio no tracking (best-effort, não bloqueia o cadastro)
+    try:
         email_tracking_service.log_email_sent(
             user_id=new_user["id"],
             email_type='account_activation',
             recipient_email=user.email,
             subject="Ative sua conta no DB Empresas",
-            status='sent' if email_sent else 'failed'
+            status='sent'
         )
     except Exception as e:
-        logger.error(f"Erro ao enviar email de ativação: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Erro ao enviar email de ativação. Tente novamente."
-        )
+        logger.error(f"Erro ao registrar tracking de email: {e}")
 
     # NÃO retornar access_token - usuário precisa ativar primeiro!
     # NÃO enviar email de boas-vindas - será enviado após ativação

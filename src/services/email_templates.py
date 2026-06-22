@@ -164,7 +164,7 @@ def get_password_reset_template(reset_link: str) -> str:
 
         <div style="margin: 24px 0 0 0; padding: 16px; background-color: #fef2f2; border-left: 4px solid #ef4444; border-radius: 4px;">
             <p style="margin: 0; color: #991b1b; font-size: 14px;">
-                <strong>⚠️ Não solicitou esta alteração?</strong><br>
+                <strong>Não solicitou esta alteração?</strong><br>
                 Se você não solicitou a redefinição de senha, ignore este email. Sua senha permanecerá a mesma.
             </p>
         </div>
