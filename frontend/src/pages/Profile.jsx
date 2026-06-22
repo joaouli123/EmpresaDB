@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Shield, Calendar, Save } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -11,9 +10,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  useEffect(() => { loadProfile(); }, []);
 
   const loadProfile = async () => {
     try {
@@ -33,30 +30,24 @@ const Profile = () => {
     e.preventDefault();
     setSaving(true);
     setMessage({ type: '', text: '' });
-
     const payload = {
       email: (profile?.email || '').trim(),
       phone: profile?.phone || '',
-      cpf: profile?.cpf || ''
+      cpf: profile?.cpf || '',
     };
-
     if (!payload.email) {
       setMessage({ type: 'error', text: 'Informe um e-mail válido para salvar.' });
       setSaving(false);
       return;
     }
-
     try {
       await userAPI.updateProfile(payload);
       setProfile((prev) => ({ ...prev, ...payload }));
       setInitialProfile((prev) => ({ ...prev, ...payload }));
-      setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
+      setMessage({ type: 'success', text: 'Perfil atualizado com sucesso.' });
     } catch (error) {
       const backendMessage = error?.response?.data?.detail;
-      setMessage({
-        type: 'error',
-        text: backendMessage || 'Erro ao atualizar perfil.'
-      });
+      setMessage({ type: 'error', text: backendMessage || 'Erro ao atualizar perfil.' });
     } finally {
       setSaving(false);
     }
@@ -64,9 +55,7 @@ const Profile = () => {
 
   const formatPhone = (value) => {
     const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 10) {
-      return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    }
+    if (numbers.length <= 10) return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
     return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
   };
 
@@ -77,20 +66,13 @@ const Profile = () => {
 
   const handleChange = (e) => {
     let value = e.target.value;
-    
-    if (e.target.name === 'phone') {
-      value = formatPhone(value);
-    } else if (e.target.name === 'cpf') {
-      value = formatCPF(value);
-    }
-    
+    if (e.target.name === 'phone') value = formatPhone(value);
+    else if (e.target.name === 'cpf') value = formatCPF(value);
     setProfile({ ...profile, [e.target.name]: value });
   };
 
   const hasChanges = Boolean(
-    profile &&
-    initialProfile &&
-    (
+    profile && initialProfile && (
       (profile.email || '') !== (initialProfile.email || '') ||
       (profile.phone || '') !== (initialProfile.phone || '') ||
       (profile.cpf || '') !== (initialProfile.cpf || '')
@@ -100,146 +82,91 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="spinner" />
         <p>Carregando perfil...</p>
       </div>
     );
   }
 
+  const isAdmin = profile?.role === 'admin';
+
   return (
-    <div className="profile-page">
-      <div className="page-header">
-        <h1>Meu Perfil</h1>
-        <p>Gerencie suas informações pessoais</p>
+    <div className="pg">
+      <div className="pg-head">
+        <div>
+          <h1>Meu perfil</h1>
+          <p>Gerencie suas informações pessoais e da conta</p>
+        </div>
       </div>
 
-      <div className="profile-container">
-        <div className="profile-card">
-          <div className="profile-avatar-section">
-            <div className="profile-avatar-large">
-              {profile?.username?.charAt(0).toUpperCase()}
-            </div>
-            <div className="profile-info">
-              <h2>{profile?.username}</h2>
-              <span className={`role-badge ${profile?.role}`}>
-                {profile?.role === 'admin' ? 'Administrador' : 'Usuário'}
-              </span>
+      <div className="pgrid-sidebar">
+        <div className="pcard">
+          <div className="pcard-body">
+            <div className="pident">
+              <div className="pident-avatar">{(profile?.username || 'U').charAt(0).toUpperCase()}</div>
+              <div>
+                <h2>{profile?.username}</h2>
+                <span className={`pbadge ${isAdmin ? 'blue' : 'gray'}`}>{isAdmin ? 'Administrador' : 'Usuário'}</span>
+              </div>
             </div>
           </div>
 
-          <form onSubmit={handleSave} className="profile-form">
-            {message.text && (
-              <div className={`message ${message.type}`}>
-                {message.text}
-              </div>
-            )}
-
-            <div className="profile-form-grid">
-              <div className="form-group">
-                <label>
-                  <User size={18} />
-                  Nome de Usuário
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={profile?.username || ''}
-                  onChange={handleChange}
-                  disabled
-                />
-                <small>O nome de usuário não pode ser alterado</small>
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <Mail size={18} />
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={profile?.email || ''}
-                  onChange={handleChange}
-                />
-                <small>Use um email válido para receber notificações</small>
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <User size={18} />
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={profile?.phone || ''}
-                  onChange={handleChange}
-                  placeholder="(00) 00000-0000"
-                />
-                <small>Formato: (00) 00000-0000</small>
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <Shield size={18} />
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  name="cpf"
-                  value={profile?.cpf || ''}
-                  onChange={handleChange}
-                  placeholder="000.000.000-00"
-                />
-                <small>Formato: 000.000.000-00</small>
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <Shield size={18} />
-                  Tipo de Conta
-                </label>
-                <input
-                  type="text"
-                  value={profile?.role === 'admin' ? 'Administrador' : 'Usuário'}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>
-                  <Calendar size={18} />
-                  Membro desde
-                </label>
-                <input
-                  type="text"
-                  value={new Date(profile?.created_at || Date.now()).toLocaleDateString('pt-BR')}
-                  disabled
-                />
+          <form onSubmit={handleSave}>
+            <div className="pcard-body" style={{ borderTop: '1px solid var(--border)' }}>
+              {message.text && <div className={`pmsg ${message.type}`}>{message.text}</div>}
+              <div className="field-grid">
+                <div className="field">
+                  <label>Nome de usuário</label>
+                  <input type="text" name="username" value={profile?.username || ''} disabled />
+                  <span className="hint">Não pode ser alterado</span>
+                </div>
+                <div className="field">
+                  <label>Email</label>
+                  <input type="email" name="email" value={profile?.email || ''} onChange={handleChange} />
+                  <span className="hint">Usado para notificações</span>
+                </div>
+                <div className="field">
+                  <label>Telefone</label>
+                  <input type="tel" name="phone" value={profile?.phone || ''} onChange={handleChange} placeholder="(00) 00000-0000" />
+                </div>
+                <div className="field">
+                  <label>CPF</label>
+                  <input type="text" name="cpf" value={profile?.cpf || ''} onChange={handleChange} placeholder="000.000.000-00" />
+                </div>
+                <div className="field">
+                  <label>Tipo de conta</label>
+                  <input type="text" value={isAdmin ? 'Administrador' : 'Usuário'} disabled />
+                </div>
+                <div className="field">
+                  <label>Membro desde</label>
+                  <input type="text" value={new Date(profile?.created_at || Date.now()).toLocaleDateString('pt-BR')} disabled />
+                </div>
               </div>
             </div>
-
-            <button type="submit" className="btn-primary" disabled={saving || !hasChanges}>
-              <Save size={20} />
-              {saving ? 'Salvando...' : hasChanges ? 'Salvar Alterações' : 'Sem alterações'}
-            </button>
+            <div className="pcard-foot">
+              <button type="submit" className="btn-flat primary" disabled={saving || !hasChanges}>
+                {saving ? 'Salvando...' : 'Salvar alterações'}
+              </button>
+            </div>
           </form>
         </div>
 
-        <div className="profile-stats">
-          <h3>Estatísticas de Uso</h3>
-          <div className="stats-list">
-            <div className="stat-item">
-              <p className="stat-label">Total de Requisições</p>
-              <p className="stat-value">{(profile?.total_requests || 0).toLocaleString('pt-BR')}</p>
-            </div>
-            <div className="stat-item">
-              <p className="stat-label">API Keys Ativas</p>
-              <p className="stat-value">{profile?.active_api_keys || 0}</p>
-            </div>
-            <div className="stat-item">
-              <p className="stat-label">Última Atividade</p>
-              <p className="stat-value">{profile?.last_activity || 'Hoje'}</p>
+        <div className="pcard">
+          <div className="pcard-head"><h2>Estatísticas de uso</h2></div>
+          <div className="pcard-body">
+            <div className="dlist">
+              <div className="dlist-row">
+                <span className="k">Total de requisições</span>
+                <span className="v">{(profile?.total_requests || 0).toLocaleString('pt-BR')}</span>
+              </div>
+              <div className="dlist-row">
+                <span className="k">API keys ativas</span>
+                <span className="v">{profile?.active_api_keys || 0}</span>
+              </div>
+              <div className="dlist-row">
+                <span className="k">Última atividade</span>
+                <span className="v">{profile?.last_activity || 'Hoje'}</span>
+              </div>
             </div>
           </div>
         </div>

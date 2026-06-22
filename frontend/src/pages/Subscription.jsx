@@ -126,26 +126,9 @@ const Subscription = () => {
     if (!showSuccessMessage) return null;
     
     return (
-      <div style={{
-        padding: '20px',
-        backgroundColor: '#10b981',
-        color: 'white',
-        borderRadius: '12px',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-      }}>
-        <Check size={28} />
-        <div>
-          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
-            🎉 Assinatura realizada com sucesso!
-          </h3>
-          <p style={{ margin: '4px 0 0 0', fontSize: '14px', opacity: 0.9 }}>
-            Bem-vindo! Sua assinatura já está ativa e você pode começar a usar agora mesmo.
-          </p>
-        </div>
+      <div className="pmsg success" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Check size={18} />
+        <span>Assinatura realizada com sucesso. Sua conta já está ativa.</span>
       </div>
     );
   };
@@ -210,41 +193,12 @@ const Subscription = () => {
 
       {/* Banner de Upgrade para usuários Free */}
       {isFree && (
-        <div style={{
-          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-          padding: '24px',
-          borderRadius: '12px',
-          marginBottom: '24px',
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
+        <div className="upgrade-banner">
           <div>
-            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
-              Aproveite mais com um plano pago!
-            </h3>
-            <p style={{ margin: '8px 0 0 0', opacity: 0.9, fontSize: '14px' }}>
-              Desbloqueie milhares de consultas mensais e recursos exclusivos
-            </p>
+            <h3>Aproveite mais com um plano pago</h3>
+            <p>Desbloqueie milhares de consultas mensais e recursos exclusivos.</p>
           </div>
-          <a 
-            href="/home#pricing" 
-            style={{
-              display: 'inline-block',
-              backgroundColor: 'white',
-              color: '#2563eb',
-              padding: '12px 24px',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              fontWeight: '600',
-              fontSize: '14px'
-            }}
-          >
-            Ver Planos Disponíveis
-          </a>
+          <a href="/home#pricing" className="upgrade-banner-btn">Ver planos</a>
         </div>
       )}
 

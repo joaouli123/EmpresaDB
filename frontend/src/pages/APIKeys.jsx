@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI } from '../services/api';
-import { Key, Plus, Trash2, Copy, CheckCircle2, Calendar } from 'lucide-react';
+import { Key, Plus, Trash2, Copy, Check } from 'lucide-react';
 
 const APIKeys = () => {
   const [apiKeys, setApiKeys] = useState([]);
@@ -13,20 +13,16 @@ const APIKeys = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loadError, setLoadError] = useState('');
 
-  useEffect(() => {
-    loadAPIKeys();
-  }, []);
+  useEffect(() => { loadAPIKeys(); }, []);
 
   const loadAPIKeys = async () => {
     try {
       setLoadError('');
       const response = await userAPI.getAPIKeys();
-      const keys = Array.isArray(response.data) ? response.data : [];
-      setApiKeys(keys);
+      setApiKeys(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error loading API keys:', error);
-      const backendMessage = error?.response?.data?.detail;
-      setLoadError(backendMessage || 'Não foi possível carregar suas chaves no momento.');
+      setLoadError(error?.response?.data?.detail || 'Não foi possível carregar suas chaves no momento.');
     } finally {
       setLoading(false);
     }
@@ -34,49 +30,37 @@ const APIKeys = () => {
 
   const handleCreateKey = async (e) => {
     e.preventDefault();
-    if (creating) return; // Previne múltiplos cliques
-
+    if (creating) return;
     const trimmedName = (newKeyName || '').trim();
     if (!trimmedName) {
       setMessage({ type: 'error', text: 'Informe um nome válido para a chave.' });
       return;
     }
-    
     setCreating(true);
     setMessage({ type: '', text: '' });
-    
     try {
       await userAPI.createAPIKey({ name: trimmedName });
       setNewKeyName('');
       setShowCreateForm(false);
-      setMessage({ type: 'success', text: 'Chave de API criada com sucesso!' });
+      setMessage({ type: 'success', text: 'Chave de API criada com sucesso.' });
       await loadAPIKeys();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error creating API key:', error);
-      const backendMessage = error?.response?.data?.detail;
-      setMessage({
-        type: 'error',
-        text: backendMessage || 'Erro ao criar chave de API. Tente novamente.'
-      });
+      setMessage({ type: 'error', text: error?.response?.data?.detail || 'Erro ao criar chave. Tente novamente.' });
     } finally {
       setCreating(false);
     }
   };
 
   const handleDeleteKey = async (id) => {
-    if (!confirm('Tem certeza que deseja excluir esta chave de API?')) {
-      return;
-    }
-
+    if (!confirm('Tem certeza que deseja excluir esta chave de API?')) return;
     setDeleting(id);
     try {
       await userAPI.deleteAPIKey(id);
-      setMessage({ type: 'success', text: 'Chave de API excluída com sucesso!' });
+      setMessage({ type: 'success', text: 'Chave de API excluída com sucesso.' });
       await loadAPIKeys();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error deleting API key:', error);
       setMessage({ type: 'error', text: 'Erro ao excluir chave de API.' });
     } finally {
       setDeleting(null);
@@ -92,145 +76,103 @@ const APIKeys = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="spinner" />
         <p>Carregando chaves de API...</p>
       </div>
     );
   }
 
   return (
-    <div className="api-keys-page">
-      <div className="page-header">
+    <div className="pg">
+      <div className="pg-head">
         <div>
           <h1>Chaves de API</h1>
           <p>Gerencie suas chaves de acesso à API</p>
         </div>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowCreateForm(true)}
-          disabled={creating}
-        >
-          <Plus size={20} />
-          Nova Chave
+        <button className="btn-flat primary" onClick={() => setShowCreateForm(true)} disabled={creating}>
+          <Plus size={16} /> Nova chave
         </button>
       </div>
 
-      {message.text && (
-        <div className={`alert alert-${message.type}`}>
-          {message.text}
-        </div>
-      )}
-
-      {loadError && (
-        <div className="alert alert-error">
-          {loadError}
-        </div>
-      )}
+      {message.text && <div className={`pmsg ${message.type}`}>{message.text}</div>}
+      {loadError && <div className="pmsg error">{loadError}</div>}
 
       {showCreateForm && (
         <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Criar Nova Chave de API</h2>
+            <h2 style={{ fontSize: '17px', fontWeight: 600, margin: '0 0 16px' }}>Criar nova chave</h2>
             <form onSubmit={handleCreateKey}>
-              <div className="form-group">
-                <label>Nome da Chave</label>
-                <input
-                  type="text"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="Ex: Minha Aplicação Web"
-                  required
-                />
-                <small>Escolha um nome descritivo para identificar esta chave</small>
+              <div className="field">
+                <label>Nome da chave</label>
+                <input type="text" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} placeholder="Ex: Minha aplicação web" required />
+                <span className="hint">Um nome descritivo para identificar esta chave</span>
               </div>
-              <div className="modal-actions">
-                <button 
-                  type="button" 
-                  className="btn-secondary"
-                  onClick={() => setShowCreateForm(false)}
-                  disabled={creating}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="btn-primary" disabled={creating}>
-                  {creating ? 'Criando...' : 'Criar Chave'}
-                </button>
+              <div className="modal-actions" style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button type="button" className="btn-flat ghost" onClick={() => setShowCreateForm(false)} disabled={creating}>Cancelar</button>
+                <button type="submit" className="btn-flat primary" disabled={creating}>{creating ? 'Criando...' : 'Criar chave'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      <div className="api-keys-container">
-        {!Array.isArray(apiKeys) || apiKeys.length === 0 ? (
-          <div className="empty-state">
-            <Key size={48} />
-            <h3>Nenhuma chave de API criada</h3>
-            <p>Crie sua primeira chave para começar a usar a API</p>
-            <button className="btn-primary" onClick={() => setShowCreateForm(true)}>
-              <Plus size={20} />
-              Criar Primeira Chave
-            </button>
+      {apiKeys.length === 0 ? (
+        <div className="pcard">
+          <div className="pempty">
+            <div className="key-icon-sq" style={{ width: '48px', height: '48px' }}><Key size={22} /></div>
+            <h3>Nenhuma chave criada</h3>
+            <p>Crie sua primeira chave para começar a usar a API.</p>
+            <button className="btn-flat primary" onClick={() => setShowCreateForm(true)}><Plus size={16} /> Criar chave</button>
           </div>
-        ) : (
-          <div className="keys-list">
-            {apiKeys.map((key) => (
-              <div key={key.id} className="key-card">
-                <div className="key-header">
-                  <div className="key-icon">
-                    <Key size={24} />
-                  </div>
-                  <div className="key-info">
-                    <h3>{key.name}</h3>
-                    <div className="key-meta">
-                      <Calendar size={14} />
-                      <span>Criada em {new Date(key.created_at).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                  <button 
-                    className="btn-icon-danger"
-                    onClick={() => handleDeleteKey(key.id)}
-                    disabled={deleting === key.id}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-                <div className="key-value">
-                  <code>{key.key}</code>
-                  <button 
-                    className="btn-icon"
-                    onClick={() => handleCopyKey(key.key)}
-                  >
-                    {copiedKey === key.key ? (
-                      <CheckCircle2 size={18} className="success" />
-                    ) : (
-                      <Copy size={18} />
-                    )}
-                  </button>
-                </div>
-                <div className="key-stats">
-                  <div className="key-stat">
-                    <p className="label">Total de Requisições</p>
-                    <p className="value">{(key.total_requests || 0).toLocaleString('pt-BR')}</p>
-                  </div>
-                  <div className="key-stat">
-                    <p className="label">Última Utilização</p>
-                    <p className="value">{key.last_used || 'Nunca'}</p>
-                  </div>
-                  <div className="key-stat">
-                    <p className="label">Status</p>
-                    <p className="value status-active">Ativa</p>
-                  </div>
+        </div>
+      ) : (
+        apiKeys.map((key) => (
+          <div className="pcard" key={key.id}>
+            <div className="pcard-head">
+              <div className="pcard-head-id">
+                <div className="key-icon-sq"><Key size={18} /></div>
+                <div>
+                  <h2>{key.name}</h2>
+                  <p className="sub">Criada em {new Date(key.created_at).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
-            ))}
+              <button className="btn-icon del" onClick={() => handleDeleteKey(key.id)} disabled={deleting === key.id} aria-label="Excluir chave">
+                <Trash2 size={17} />
+              </button>
+            </div>
+            <div className="pcard-body">
+              <div className="keycode">
+                <code>{key.key}</code>
+                <button className="btn-icon" onClick={() => handleCopyKey(key.key)} aria-label="Copiar chave">
+                  {copiedKey === key.key ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+              <div className="keystats">
+                <div>
+                  <span className="k">Total de requisições</span>
+                  <span className="v">{(key.total_requests || 0).toLocaleString('pt-BR')}</span>
+                </div>
+                <div>
+                  <span className="k">Última utilização</span>
+                  <span className="v">{key.last_used || 'Nunca'}</span>
+                </div>
+                <div>
+                  <span className="k">Status</span>
+                  <span className="pbadge green" style={{ width: 'fit-content' }}>Ativa</span>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        ))
+      )}
 
-      <div className="info-card">
-        <h3>📚 Precisa de ajuda?</h3>
-        <p>Acesse a <a href="/docs" style={{ color: '#3b82f6', fontWeight: 'bold' }}>Documentação Completa</a> para ver exemplos de código, endpoints disponíveis e guias de integração.</p>
+      <div className="pcard">
+        <div className="pcard-body">
+          <h3 style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Precisa de ajuda?</h3>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+            Veja a <a href="/docs" className="plink">documentação completa</a> com exemplos de código, endpoints disponíveis e guias de integração.
+          </p>
+        </div>
       </div>
     </div>
   );
