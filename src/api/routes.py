@@ -30,39 +30,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/_chk")
-async def _chk():
-    from src.database.connection import db_manager
-    try:
-        with db_manager.get_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT id, email, role FROM clientes.users WHERE id=1")
-            row = cur.fetchone()
-            cur.execute("SELECT count(*) FROM clientes.api_keys WHERE user_id=1 AND is_active=TRUE")
-            key_count = cur.fetchone()[0]
-            cur.execute("SELECT count(*) FROM vw_estabelecimentos_completos")
-            total = cur.fetchone()[0]
-            cur.close()
-        return {"user": {"id": row[0], "email": row[1], "role": row[2]}, "active_keys": key_count, "total_empresas": total}
-    except Exception as e:
-        return {"error": str(e)}
-
-@router.get("/_test_search")
-async def _test_search(q: str = "ux code"):
-    from src.database.connection import db_manager
-    import time
-    try:
-        with db_manager.get_connection() as conn:
-            cur = conn.cursor()
-            t0 = time.time()
-            cur.execute("SELECT cnpj_completo, razao_social, uf, municipio_desc FROM vw_estabelecimentos_completos WHERE razao_social ILIKE %s LIMIT 5", (f'%{q}%',))
-            rows = [{"cnpj": r[0], "razao": r[1], "uf": r[2], "municipio": r[3]} for r in cur.fetchall()]
-            elapsed = round(time.time() - t0, 3)
-            cur.close()
-        return {"query": q, "results": len(rows), "time_s": elapsed, "data": rows}
-    except Exception as e:
-        return {"error": str(e)}
-
 # Cache em memória para resultados (expira em 1 hora)
 _cache = {}
 _cache_timeout = {}
@@ -552,35 +519,16 @@ async def search_companies(
 ):
     """
     Pesquisa empresas por múltiplos critérios
-    ⚠️ ENDPOINT EXCLUSIVO PARA ADMINISTRADOR
-    Acesso ilimitado com API Key de admin
+    Acesso controlado por rate limiting baseado no plano do usuário
     """
-    # Verificar se usuário é admin
-    if current_user.get('role') != 'admin':
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "admin_only",
-                "message": "Este endpoint é exclusivo para administradores.",
-                "endpoint": "/search",
-                "current_user": current_user.get('email'),
-                "required_role": "admin",
-                "help": "O endpoint /search é restrito apenas ao administrador do sistema. Use o endpoint /cnpj/{cnpj} para consultas individuais.",
-                "suggestions": [
-                    "Use GET /cnpj/{cnpj} para consultar empresas específicas",
-                    "Entre em contato com o suporte se precisar de acesso especial"
-                ]
-            }
-        )
     try:
-        # Log de auditoria (admin tem acesso ilimitado)
+        # Log de auditoria
         await log_query(
             user_id=current_user['id'],
-            action='search_admin',
+            action='search',
             resource='/search',
             details={
-                'admin_email': current_user.get('email'),
-                'unlimited_access': True,
+                'email': current_user.get('email'),
                 'filters': {
                     'razao_social': razao_social,
                     'cnae': cnae,
