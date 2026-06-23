@@ -15,6 +15,7 @@ O TOKEN é configurável por env RFB_SHARE_TOKEN (caso a Receita rotacione o lin
 """
 import os
 import re
+import time
 import logging
 from pathlib import Path
 from urllib.parse import unquote, quote
@@ -54,26 +55,47 @@ class SerproDownloader:
         hrefs = self._propfind(f"{WEBDAV_BASE}/{folder}/")
         return sorted({h.split("/")[-1] for h in hrefs if h.endswith(".zip")})
 
-    def download_file(self, folder: str, filename: str) -> Path:
+    def download_file(self, folder: str, filename: str, max_retries: int = 5) -> Path:
         dest = self.download_dir / filename
         if dest.exists() and dest.stat().st_size > 0:
             logger.info("  já existe (pulando): %s", filename)
             return dest
         url = f"{WEBDAV_BASE}/{folder}/{quote(filename)}"
         tmp = dest.with_suffix(dest.suffix + ".part")
-        logger.info("  baixando: %s", filename)
-        with requests.get(url, auth=self.auth, stream=True, timeout=900) as r:
-            r.raise_for_status()
-            with open(tmp, "wb") as f:
-                for chunk in r.iter_content(1024 * 1024):
-                    if chunk:
-                        f.write(chunk)
-        tmp.rename(dest)
-        logger.info("  ✓ %s (%.1f MB)", filename, dest.stat().st_size / 1e6)
-        return dest
+        last_err = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Retoma de onde parou (HTTP Range) se já houver um .part parcial
+                pos = tmp.stat().st_size if tmp.exists() else 0
+                headers = {"Range": f"bytes={pos}-"} if pos else {}
+                logger.info("  baixando: %s (tentativa %d/%d, offset %.1f MB)",
+                            filename, attempt, max_retries, pos / 1e6)
+                with requests.get(url, auth=self.auth, stream=True, timeout=1800, headers=headers) as r:
+                    mode = "ab" if pos else "wb"
+                    # Se o servidor ignorou o Range (200 em vez de 206), recomeça do zero
+                    if pos and r.status_code == 200:
+                        mode = "wb"
+                    r.raise_for_status()
+                    with open(tmp, mode) as f:
+                        for chunk in r.iter_content(1024 * 1024):
+                            if chunk:
+                                f.write(chunk)
+                tmp.rename(dest)
+                logger.info("  ✓ %s (%.1f MB)", filename, dest.stat().st_size / 1e6)
+                return dest
+            except Exception as e:
+                last_err = e
+                logger.warning("  ⚠ falha parcial em %s (tentativa %d/%d): %s",
+                               filename, attempt, max_retries, str(e)[:100])
+                time.sleep(min(8 * attempt, 40))
+        raise RuntimeError(f"Falha ao baixar {filename} após {max_retries} tentativas: {last_err}")
 
     def download_latest(self, only: list = None) -> dict:
-        """Baixa todos os .zip da pasta mais recente. only = lista de prefixos (ex.: ['Empresas'])."""
+        """Baixa todos os .zip da pasta mais recente. only = lista de prefixos (ex.: ['Empresas']).
+
+        Se QUALQUER arquivo falhar após todas as retentativas, levanta exceção — assim a
+        atualização aborta ANTES de truncar o banco, evitando carga incompleta.
+        """
         folder = self.get_latest_folder()
         files = self.list_zip_files(folder)
         if only:
@@ -81,11 +103,9 @@ class SerproDownloader:
         logger.info("Pasta %s: %d arquivo(s) a baixar", folder, len(files))
         out = {"folder": folder, "files": []}
         for fn in files:
-            try:
-                p = self.download_file(folder, fn)
-                out["files"].append(str(p))
-            except Exception as e:
-                logger.error("  ✗ falha em %s: %s", fn, e)
+            p = self.download_file(folder, fn)  # lança se esgotar as retentativas
+            out["files"].append(str(p))
+        logger.info("✓ Todos os %d arquivos baixados com sucesso", len(files))
         return out
 
 
