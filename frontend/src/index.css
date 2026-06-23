@@ -1289,6 +1289,28 @@ code {
   letter-spacing: 0.3px;
 }
 
+.key-reveal-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fef9c3;
+  border: 1.5px solid #facc15;
+  border-radius: 8px;
+}
+
+.key-reveal-code {
+  flex: 1;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  color: #1e293b;
+  background: none;
+  padding: 0;
+  word-break: break-all;
+  letter-spacing: 0.2px;
+  font-weight: 600;
+}
+
 .key-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -10,6 +10,7 @@ const APIKeys = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [copiedKey, setCopiedKey] = useState(null);
+  const [revealKey, setRevealKey] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loadError, setLoadError] = useState('');
 
@@ -39,11 +40,13 @@ const APIKeys = () => {
     setCreating(true);
     setMessage({ type: '', text: '' });
     try {
-      await userAPI.createAPIKey({ name: trimmedName });
+      const response = await userAPI.createAPIKey({ name: trimmedName });
+      const newKey = response.data;
       setNewKeyName('');
       setShowCreateForm(false);
       setMessage({ type: 'success', text: 'Chave de API criada com sucesso.' });
-      await loadAPIKeys();
+      setRevealKey(newKey);
+      setApiKeys(prev => [newKey, ...prev]);
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
       setMessage({ type: 'error', text: error?.response?.data?.detail || 'Erro ao criar chave. Tente novamente.' });
@@ -112,6 +115,44 @@ const APIKeys = () => {
                 <button type="submit" className="btn-flat primary" disabled={creating}>{creating ? 'Criando...' : 'Criar chave'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {revealKey && (
+        <div className="modal-overlay" onClick={() => setRevealKey(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+            <h2 style={{ fontSize: '17px', fontWeight: 600, margin: '0 0 8px' }}>
+              Chave criada: {revealKey.name}
+            </h2>
+            <p className="hint" style={{ margin: '0 0 16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+              Copie esta chave agora. <strong>Ela não será exibida novamente.</strong>
+            </p>
+            <div className="key-reveal-box">
+              <code className="key-reveal-code">{revealKey.key}</code>
+              <button
+                className="btn-flat primary"
+                style={{ whiteSpace: 'nowrap', fontSize: '13px', padding: '8px 16px' }}
+                onClick={() => {
+                  navigator.clipboard.writeText(revealKey.key);
+                  setCopiedKey(revealKey.key);
+                  setTimeout(() => setCopiedKey(null), 2000);
+                }}
+              >
+                {copiedKey === revealKey.key ? <><Check size={14} /> Copiado</> : <><Copy size={14} /> Copiar</>}
+              </button>
+            </div>
+            <div className="modal-actions" style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                className="btn-flat primary"
+                onClick={() => {
+                  navigator.clipboard.writeText(revealKey.key);
+                  setRevealKey(null);
+                }}
+              >
+                Copiar e fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
