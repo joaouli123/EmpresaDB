@@ -207,20 +207,35 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 # 🔓 ADMIN TEM CONSULTAS ILIMITADAS - pular verificação de limite
                 if user.get('role') != 'admin':
                     month_year = datetime.now().strftime('%Y-%m')
+                    monthly_limit = user.get('monthly_queries', 200)  # Default para 200 se não encontrado
+
+                    # PLAN-01: checagem + incremento ATÔMICOS (evita corrida sob alta concorrência).
+                    # - 1ª consulta do mês: INSERT entra com 1.
+                    # - Demais: só incrementa se ainda abaixo do limite (cláusula WHERE).
+                    # - Se nada retornar no conflito => já estava no limite (sem incrementar).
                     cursor.execute("""
-                        SELECT queries_used 
-                        FROM clientes.monthly_usage
-                        WHERE user_id = %s AND month_year = %s
-                    """, (user['id'], month_year))
-                    usage = cursor.fetchone()
+                        INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
+                        VALUES (%s, %s, 1, NOW())
+                        ON CONFLICT (user_id, month_year)
+                        DO UPDATE SET
+                            queries_used = clientes.monthly_usage.queries_used + 1,
+                            last_query_at = NOW()
+                        WHERE clientes.monthly_usage.queries_used < %s
+                        RETURNING queries_used
+                    """, (user['id'], month_year, monthly_limit))
+                    incremented = cursor.fetchone()
 
-                    queries_used = usage[0] if usage else 0
-                    monthly_limit = user.get('monthly_queries', 200) # Default para 200 se não encontrado
+                    # Verificar se excedeu o limite (nada retornado = já no teto)
+                    if incremented is None:
+                        cursor.execute("""
+                            SELECT queries_used FROM clientes.monthly_usage
+                            WHERE user_id = %s AND month_year = %s
+                        """, (user['id'], month_year))
+                        cur_usage = cursor.fetchone()
+                        queries_used = cur_usage[0] if cur_usage else monthly_limit
 
-                    # Verificar se excedeu o limite
-                    if queries_used >= monthly_limit:
                         # Calcular data de renovação
-                        period_end = subscription[1] if subscription else None # Pega do subscription se existir
+                        period_end = subscription[1] if subscription else None  # Pega do subscription se existir
                         renewal_date = "N/A"
                         if period_end:
                             if period_end.tzinfo is None:
@@ -251,19 +266,10 @@ async def verify_api_key(x_api_key: str = Header(None)):
                             }
                         )
 
-                    # Incrementar contador de uso mensal
-                    cursor.execute("""
-                        INSERT INTO clientes.monthly_usage (user_id, month_year, queries_used, last_query_at)
-                        VALUES (%s, %s, 1, NOW())
-                        ON CONFLICT (user_id, month_year) 
-                        DO UPDATE SET 
-                            queries_used = clientes.monthly_usage.queries_used + 1,
-                            last_query_at = NOW()
-                    """, (user['id'], month_year))
-
                     # Armazenar informações de uso para logging
-                    user['queries_used'] = queries_used + 1  # Incluir esta consulta
-                    user['queries_remaining'] = monthly_limit - (queries_used + 1)
+                    new_used = incremented[0]
+                    user['queries_used'] = new_used
+                    user['queries_remaining'] = max(0, monthly_limit - new_used)
                 else:
                     # Admin tem acesso ilimitado - configurar valores especiais
                     logger.info(f"✅ Admin user {user['id']} - unlimited queries (no monthly limit)")
