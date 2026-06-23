@@ -112,7 +112,7 @@ async def admin_overview(current_admin: dict = Depends(get_current_admin_user)):
             "estabelecimentos": int(_est('estabelecimentos') or 0),
             "socios": int(_est('socios') or 0),
             "size": _scalar(conn, "SELECT pg_size_pretty(pg_database_size(current_database()))", default="N/D"),
-            "competencia": _scalar(conn, "SELECT competencia FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1", default=None),
+            "competencia": _scalar(conn, "SELECT month FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1", default=None),
         }
 
     return {
@@ -325,7 +325,7 @@ async def admin_db_health(current_admin: dict = Depends(get_current_admin_user))
             ORDER BY reltuples DESC
         """)
         table_stats = [{"table": t[0], "rows": int(t[1] or 0), "size": t[2]} for t in tables]
-        competencia = _scalar(conn, "SELECT competencia FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1", default=None)
+        competencia = _scalar(conn, "SELECT month FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1", default=None)
     return {
         "size": size, "active_connections": int(active_conn), "max_connections": int(max_conn),
         "tables": table_stats, "competencia": competencia,
@@ -342,7 +342,7 @@ async def admin_etl_status(current_admin: dict = Depends(get_current_admin_user)
         competencia = None
         last_import = None
         if has_state:
-            row = _rows(conn, "SELECT competencia, imported_at FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1")
+            row = _rows(conn, "SELECT month, imported_at FROM public.etl_import_state ORDER BY imported_at DESC LIMIT 1")
             if row:
                 competencia = row[0][0]
                 last_import = row[0][1].isoformat() if row[0][1] else None
