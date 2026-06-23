@@ -33,14 +33,33 @@ router = APIRouter()
 @router.get("/_chk")
 async def _chk():
     from src.database.connection import db_manager
-    from src.utils.security_utils import hash_api_key as _hash_api_key
     try:
         with db_manager.get_connection() as conn:
             cur = conn.cursor()
-            cur.execute("SELECT plan FROM clientes.users WHERE id=1")
-            plan = cur.fetchone()
+            cur.execute("SELECT id, email, role FROM clientes.users WHERE id=1")
+            row = cur.fetchone()
+            cur.execute("SELECT count(*) FROM clientes.api_keys WHERE user_id=1 AND is_active=TRUE")
+            key_count = cur.fetchone()[0]
+            cur.execute("SELECT count(*) FROM vw_estabelecimentos_completos")
+            total = cur.fetchone()[0]
             cur.close()
-        return {"plan": plan[0] if plan else None}
+        return {"user": {"id": row[0], "email": row[1], "role": row[2]}, "active_keys": key_count, "total_empresas": total}
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.get("/_test_search")
+async def _test_search(q: str = "ux code"):
+    from src.database.connection import db_manager
+    import time
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            t0 = time.time()
+            cur.execute("SELECT cnpj_completo, razao_social, uf, municipio_desc FROM vw_estabelecimentos_completos WHERE razao_social ILIKE %s LIMIT 5", (f'%{q}%',))
+            rows = [{"cnpj": r[0], "razao": r[1], "uf": r[2], "municipio": r[3]} for r in cur.fetchall()]
+            elapsed = round(time.time() - t0, 3)
+            cur.close()
+        return {"query": q, "results": len(rows), "time_s": elapsed, "data": rows}
     except Exception as e:
         return {"error": str(e)}
 
