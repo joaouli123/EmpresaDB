@@ -16,7 +16,6 @@ from src.api.websocket_manager import ws_manager
 from src.api.etl_controller import etl_controller
 from src.api.rate_limiter import rate_limiter
 import logging
-import os
 import asyncio
 from functools import lru_cache
 from datetime import datetime, timedelta, timezone
@@ -30,43 +29,6 @@ from src.api.cache_redis import cache as shared_cache
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-@router.get("/_migrate_trigram")
-async def migrate_trigram():
-    """Executa a migracao de indices trigram (uso unico via admin)"""
-    import psycopg2
-    try:
-        dsn = os.environ.get('DATABASE_URL')
-        conn = psycopg2.connect(dsn)
-        conn.autocommit = True
-        cur = conn.cursor()
-        cur.execute("SET lock_timeout = 0")
-        cur.execute("SET statement_timeout = 0")
-        sql_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'scripts', 'fix_trigram_indexes.sql')
-        with open(sql_path, 'r', encoding='utf-8') as f:
-            sql = f.read()
-        cur.execute(sql)
-        notices = [n.strip() for n in conn.notices]
-        cur.close()
-        conn.close()
-        return {"status": "ok", "notices": notices}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
-
-@router.get("/_check_indexes")
-async def check_indexes():
-    """Verifica se os indices trigram existem"""
-    try:
-        with db_manager.get_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT indexname FROM pg_indexes WHERE tablename='vw_estabelecimentos_completos' AND indexname LIKE '%trgm%'")
-            rows = [r[0] for r in cur.fetchall()]
-            cur.execute("SELECT relkind FROM pg_class WHERE relname='vw_estabelecimentos_completos'")
-            relkind = cur.fetchone()
-            cur.close()
-            return {"relkind": relkind[0] if relkind else None, "trgm_indexes": rows}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
 
 # Cache em memória para resultados (expira em 1 hora)
 _cache = {}
