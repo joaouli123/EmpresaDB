@@ -109,6 +109,90 @@ class SerproDownloader:
         return out
 
 
+class CasaDosDadosDownloader:
+    """
+    Espelho da Casa dos Dados com CDN Cloudflare na frente — MUITO mais rápido e
+    estável que o SERPRO+ para baixar EXATAMENTE os mesmos zips da Receita.
+
+    Listagem Apache em /arquivos/, com pastas por data de publicação (AAAA-MM-DD/).
+    Sem WebDAV e sem autenticação — HTTP GET simples (com suporte a Range/resume).
+    """
+    BASE = "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos"
+
+    def __init__(self, download_dir: str = "downloads"):
+        self.download_dir = Path(download_dir)
+        self.download_dir.mkdir(parents=True, exist_ok=True)
+        self._dated_folder = None
+
+    def _html(self, url: str) -> str:
+        r = requests.get(url, timeout=60)
+        r.raise_for_status()
+        return r.text
+
+    def _latest_dated(self) -> str:
+        html = self._html(self.BASE + "/")
+        folders = sorted(set(re.findall(r"(\d{4}-\d{2}-\d{2})/", html)))
+        if not folders:
+            raise RuntimeError("Nenhuma pasta encontrada no espelho Casa dos Dados")
+        self._dated_folder = folders[-1]
+        logger.info("📅 Casa dos Dados — pasta mais recente: %s", self._dated_folder)
+        return self._dated_folder
+
+    def get_latest_folder(self) -> str:
+        """Retorna a COMPETÊNCIA (AAAA-MM) da pasta mais recente (para estado/comparação)."""
+        return self._latest_dated()[:7]
+
+    def list_zip_files(self, dated_folder: str):
+        html = self._html(f"{self.BASE}/{dated_folder}/")
+        return sorted(set(re.findall(r'href="([^"/]+\.zip)"', html)))
+
+    def download_file(self, dated_folder: str, filename: str, max_retries: int = 5) -> Path:
+        dest = self.download_dir / filename
+        if dest.exists() and dest.stat().st_size > 0:
+            logger.info("  já existe (pulando): %s", filename)
+            return dest
+        url = f"{self.BASE}/{dated_folder}/{quote(filename)}"
+        tmp = dest.with_suffix(dest.suffix + ".part")
+        last_err = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                pos = tmp.stat().st_size if tmp.exists() else 0
+                headers = {"Range": f"bytes={pos}-"} if pos else {}
+                logger.info("  baixando: %s (tentativa %d/%d, offset %.1f MB)",
+                            filename, attempt, max_retries, pos / 1e6)
+                with requests.get(url, stream=True, timeout=1800, headers=headers) as r:
+                    mode = "ab" if pos else "wb"
+                    if pos and r.status_code == 200:
+                        mode = "wb"
+                    r.raise_for_status()
+                    with open(tmp, mode) as f:
+                        for chunk in r.iter_content(1024 * 1024):
+                            if chunk:
+                                f.write(chunk)
+                tmp.rename(dest)
+                logger.info("  ✓ %s (%.1f MB)", filename, dest.stat().st_size / 1e6)
+                return dest
+            except Exception as e:
+                last_err = e
+                logger.warning("  ⚠ falha parcial em %s (tentativa %d/%d): %s",
+                               filename, attempt, max_retries, str(e)[:100])
+                time.sleep(min(8 * attempt, 40))
+        raise RuntimeError(f"Falha ao baixar {filename} após {max_retries} tentativas: {last_err}")
+
+    def download_latest(self, only: list = None) -> dict:
+        dated = self._dated_folder or self._latest_dated()
+        files = self.list_zip_files(dated)
+        if only:
+            files = [f for f in files if any(f.startswith(p) for p in only)]
+        logger.info("Casa dos Dados %s: %d arquivo(s) a baixar", dated, len(files))
+        out = {"folder": dated[:7], "files": []}
+        for fn in files:
+            p = self.download_file(dated, fn)  # lança se esgotar as retentativas
+            out["files"].append(str(p))
+        logger.info("✓ Todos os %d arquivos baixados (Casa dos Dados)", len(files))
+        return out
+
+
 def main():
     import argparse
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")

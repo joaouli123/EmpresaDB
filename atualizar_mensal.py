@@ -29,7 +29,7 @@ from pathlib import Path
 import psycopg2
 
 sys.path.append(str(Path(__file__).parent))
-from src.etl.downloader_serpro import SerproDownloader
+from src.etl.downloader_serpro import SerproDownloader, CasaDosDadosDownloader
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("atualizar")
@@ -102,6 +102,18 @@ def run(cmd):
     subprocess.run(cmd, check=True, cwd=str(BASE), env={**os.environ})
 
 
+def make_downloader():
+    """Casa dos Dados (CDN Cloudflare, ~50 MB/s) como primário; SERPRO+ como fallback."""
+    try:
+        d = CasaDosDadosDownloader(download_dir=str(DOWNLOADS))
+        d.get_latest_folder()  # valida listagem/conectividade
+        log.info("📡 Fonte de download: Casa dos Dados (CDN Cloudflare)")
+        return d
+    except Exception as e:
+        log.warning("Casa dos Dados indisponível (%s) — caindo para SERPRO+", str(e)[:100])
+        return SerproDownloader(download_dir=str(DOWNLOADS))
+
+
 # Todos os arquivos da Receita (zips + CSVs extraídos) — removidos após importar
 RFB_PATTERNS = [
     "*.zip", "*.EMPRECSV", "*.ESTABELE", "*.SOCIOCSV", "*.CNAECSV",
@@ -133,7 +145,7 @@ def main():
     conn = get_conn()
     last = last_imported_month(conn)
 
-    d = SerproDownloader(download_dir=str(DOWNLOADS))
+    d = make_downloader()
     latest = d.get_latest_folder()
     log.info("Mês no banco: %s | Mês mais recente na Receita: %s", last, latest)
 
