@@ -25,4 +25,4 @@ RUN cd /app/frontend && npm run build
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "gunicorn src.api.main:app -k uvicorn.workers.UvicornWorker -w ${WEB_CONCURRENCY:-3} -b 0.0.0.0:${PORT:-8000} --timeout 120 --graceful-timeout 30"]
+CMD ["sh", "-c", "python startup_migration.py && gunicorn src.api.main:app -k uvicorn.workers.UvicornWorker -w ${WEB_CONCURRENCY:-3} -b 0.0.0.0:${PORT:-8000} --timeout 120 --graceful-timeout 30"]
