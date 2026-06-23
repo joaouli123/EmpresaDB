@@ -1,160 +1,96 @@
 import { useState, useEffect } from 'react';
-import { cnpjAPI, etlAPI } from '../services/api';
-import { Database, RefreshCw, HardDrive, Table, AlertCircle } from 'lucide-react';
+import { adminAPI } from '../services/api';
+import { Database, HardDrive, Activity, AlertCircle } from 'lucide-react';
+
+const fmt = (n) => (n || 0).toLocaleString('pt-BR');
 
 const AdminDatabase = () => {
-  const [stats, setStats] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadStats();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  const loadStats = async () => {
+  const load = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const response = await cnpjAPI.getStats();
-      setStats(response.data);
-    } catch (error) {
-      console.error('Error loading database stats:', error);
+      const res = await adminAPI.getDbHealth();
+      setData(res.data);
+    } catch (e) {
+      setError(e?.response?.data?.detail || 'Não foi possível carregar a saúde do banco.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadStats();
-    setRefreshing(false);
-  };
-
   if (loading) {
+    return <div className="loading-container"><div className="spinner" /><p>Carregando...</p></div>;
+  }
+
+  if (error) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Carregando estatísticas do banco de dados...</p>
+      <div className="pg">
+        <div className="pcard"><div className="pempty">
+          <AlertCircle size={34} className="ico" />
+          <h3>Erro ao carregar</h3><p>{error}</p>
+          <button className="btn-flat primary" onClick={load}>Tentar novamente</button>
+        </div></div>
       </div>
     );
   }
 
-  const tables = [
-    { name: 'empresas', label: 'Empresas', count: stats?.total_empresas || 0 },
-    { name: 'estabelecimentos', label: 'Estabelecimentos', count: stats?.total_estabelecimentos || 0 },
-    { name: 'socios', label: 'Sócios', count: stats?.total_socios || 0 },
-    { name: 'cnaes', label: 'CNAEs', count: stats?.total_cnaes || 0 },
-    { name: 'municipios', label: 'Municípios', count: stats?.total_municipios || 0 },
-    { name: 'simples_nacional', label: 'Simples Nacional', count: stats?.total_simples || 0 },
-  ];
-
-  const totalRecords = tables.reduce((sum, table) => sum + table.count, 0);
+  const connPct = data.max_connections ? Math.min((data.active_connections / data.max_connections) * 100, 100) : 0;
+  const connLevel = connPct >= 90 ? 'over' : connPct >= 70 ? 'warn' : '';
 
   return (
-    <div className="admin-database">
-      <div className="page-header">
+    <div className="pg" style={{ maxWidth: '1100px' }}>
+      <div className="pg-head">
         <div>
-          <h1>Banco de Dados</h1>
-          <p>Estatísticas e informações do banco de dados</p>
+          <h1>Banco de dados</h1>
+          <p>Saúde, tamanho, conexões e volume das tabelas</p>
         </div>
-        <button 
-          className="btn-primary" 
-          onClick={handleRefresh}
-          disabled={refreshing}
-        >
-          <RefreshCw size={20} />
-          {refreshing ? 'Atualizando...' : 'Atualizar'}
-        </button>
+        <span className={`pbadge ${data.status === 'operacional' ? 'green' : 'red'}`}>
+          {data.status === 'operacional' ? 'Operacional' : 'Indisponível'}
+        </span>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-            <Database size={28} />
-          </div>
-          <div>
-            <p className="stat-label">Total de Registros</p>
-            <p className="stat-value">{totalRecords.toLocaleString('pt-BR')}</p>
-          </div>
+      <div className="kpi-grid">
+        <div className="kpi">
+          <span className="kpi-label"><HardDrive size={15} /> Tamanho do banco</span>
+          <div className="kpi-value" style={{ fontSize: 22 }}>{data.size}</div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-            <Table size={28} />
-          </div>
-          <div>
-            <p className="stat-label">Tabelas Ativas</p>
-            <p className="stat-value">{tables.filter(t => t.count > 0).length}</p>
-          </div>
+        <div className="kpi">
+          <span className="kpi-label"><Activity size={15} /> Conexões ativas</span>
+          <div className="kpi-value">{fmt(data.active_connections)}<span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 400 }}> / {fmt(data.max_connections)}</span></div>
+          <div className="ubar" style={{ marginTop: 8 }}><div className={`ubar-fill ${connLevel}`} style={{ width: `${connPct}%` }} /></div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-            <HardDrive size={28} />
-          </div>
-          <div>
-            <p className="stat-label">Status do Banco</p>
-            <p className="stat-value">Operacional</p>
-          </div>
+        <div className="kpi">
+          <span className="kpi-label"><Database size={15} /> Competência dos dados</span>
+          <div className="kpi-value" style={{ fontSize: 20 }}>{data.competencia || 'Não registrada'}</div>
         </div>
       </div>
 
-      <div className="database-tables">
-        <h2>Tabelas do Sistema</h2>
-        
-        {totalRecords === 0 && (
-          <div className="alert alert-warning" style={{ 
-            background: '#fff3cd', 
-            color: '#856404', 
-            borderLeft: '4px solid #ffc107' 
-          }}>
-            <AlertCircle size={20} />
-            <div>
-              <strong>Banco de Dados Vazio</strong>
-              <p>Nenhum dado foi importado ainda. Execute o processo ETL para importar os dados da Receita Federal.</p>
-            </div>
-          </div>
-        )}
-
-        <div className="tables-list">
-          {tables.map((table) => (
-            <div key={table.name} className="table-card">
-              <div className="table-header">
-                <div className="table-icon">
-                  <Table size={24} />
-                </div>
-                <div className="table-info">
-                  <h3>{table.label}</h3>
-                  <p className="table-name">Tabela: {table.name}</p>
-                </div>
-              </div>
-              <div className="table-stats">
-                <div className="table-stat">
-                  <p className="label">Total de Registros</p>
-                  <p className="value">{table.count.toLocaleString('pt-BR')}</p>
-                </div>
-                <div className="table-stat">
-                  <p className="label">Status</p>
-                  <p className={`value ${table.count > 0 ? 'status-active' : 'status-empty'}`}>
-                    {table.count > 0 ? 'Com Dados' : 'Vazio'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="pcard">
+        <div className="pcard-head"><h2>Tabelas (volume e tamanho)</h2></div>
+        <div className="pcard-body">
+          {(!data.tables || data.tables.length === 0) ? (
+            <div className="pempty"><p>Sem informações de tabelas.</p></div>
+          ) : (
+            <table className="ptable">
+              <thead><tr><th>Tabela</th><th>Registros (estimado)</th><th>Tamanho</th></tr></thead>
+              <tbody>
+                {data.tables.map((t, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 600 }}>{t.table}</td>
+                    <td>{fmt(t.rows)}</td>
+                    <td>{t.size}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-      </div>
-
-      <div className="info-card">
-        <h3>Sobre o Banco de Dados</h3>
-        <p>
-          O sistema utiliza PostgreSQL para armazenar todos os dados públicos da Receita Federal.
-          As tabelas são organizadas para otimizar consultas e garantir a integridade dos dados.
-        </p>
-        <p>
-          <strong>Tabelas Principais:</strong> Empresas, Estabelecimentos e Sócios
-        </p>
-        <p>
-          <strong>Tabelas Auxiliares:</strong> CNAEs, Municípios, Simples Nacional
-        </p>
       </div>
     </div>
   );
