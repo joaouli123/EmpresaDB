@@ -1,28 +1,27 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  User, 
-  Key, 
-  FileText, 
-  RefreshCw, 
+import { NavLink, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  User,
+  Key,
+  FileText,
+  RefreshCw,
   LogOut,
   Database,
   Activity,
   CreditCard,
   Mail,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { subscriptionAPI } from '../services/api';
 
-const Sidebar = () => {
-  const { user, logout, isAdmin } = useAuth();
+const Sidebar = ({ mobileOpen, setMobileOpen }) => {
+  const { logout, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [subscription, setSubscription] = useState(null);
 
   const userMenuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -43,91 +42,51 @@ const Sidebar = () => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (!mobile) {
-        setMobileOpen(false);
-      }
+      if (!mobile) setMobileOpen(false);
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const response = await subscriptionAPI.getMySubscription();
-        setSubscription(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar assinatura:', error);
-      }
-    };
-    
-    if (user) {
-      fetchSubscription();
-      
-      const interval = setInterval(fetchSubscription, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
-
-  const currentPlan = subscription?.plan_name || 'Free';
-
-  const handleToggle = () => {
-    if (isMobile) {
-      setMobileOpen((prev) => !prev);
-      return;
-    }
-    setCollapsed((prev) => !prev);
-  };
+  }, [setMobileOpen]);
 
   const closeMobileMenu = () => {
-    if (isMobile) {
-      setMobileOpen(false);
-    }
+    if (isMobile) setMobileOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
     <>
       {isMobile && mobileOpen && <div className="sidebar-backdrop" onClick={closeMobileMenu} />}
       <div className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
-      <button 
-        className="sidebar-toggle" 
-        onClick={handleToggle}
-        title={isMobile ? (mobileOpen ? 'Fechar menu' : 'Abrir menu') : (collapsed ? 'Expandir menu' : 'Recolher menu')}
-      >
-        {isMobile
-          ? (mobileOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />)
-          : (collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />)}
-      </button>
+        {!isMobile && (
+          <button
+            className="sidebar-toggle"
+            onClick={() => setCollapsed((prev) => !prev)}
+            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
+        )}
 
-      <div className="sidebar-header">
-        <div className="logo">
-          <Database size={32} className="logo-icon" />
-          {!collapsed && <h1>DB Empresas</h1>}
-        </div>
-      </div>
-
-      <nav className="sidebar-nav">
-        <div className="nav-section">
-          {!collapsed && <h3 className="nav-section-title">Menu Principal</h3>}
-          {userMenuItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={closeMobileMenu}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-              title={collapsed ? item.label : ''}
-            >
-              <item.icon size={20} />
-              {!collapsed && <span>{item.label}</span>}
-            </NavLink>
-          ))}
+        <div className="sidebar-header">
+          <div className="logo">
+            <Database size={28} className="logo-icon" />
+            {!collapsed && <h1>DB Empresas</h1>}
+          </div>
+          {isMobile && (
+            <button className="sidebar-close" onClick={closeMobileMenu} aria-label="Fechar menu">
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-        {isAdmin() && (
+        <nav className="sidebar-nav">
           <div className="nav-section">
-            {!collapsed && <h3 className="nav-section-title">Administração</h3>}
-            {adminMenuItems.map((item) => (
+            {!collapsed && <h3 className="nav-section-title">Menu Principal</h3>}
+            {userMenuItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
@@ -140,9 +99,36 @@ const Sidebar = () => {
               </NavLink>
             ))}
           </div>
-        )}
 
-      </nav>
+          {isAdmin() && (
+            <div className="nav-section">
+              {!collapsed && <h3 className="nav-section-title">Administração</h3>}
+              {adminMenuItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={closeMobileMenu}
+                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                  title={collapsed ? item.label : ''}
+                >
+                  <item.icon size={20} />
+                  {!collapsed && <span>{item.label}</span>}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </nav>
+
+        <div className="sidebar-footer">
+          <button
+            className="nav-item logout-btn"
+            onClick={handleLogout}
+            title={collapsed ? 'Sair' : ''}
+          >
+            <LogOut size={20} />
+            {!collapsed && <span>Sair</span>}
+          </button>
+        </div>
       </div>
     </>
   );

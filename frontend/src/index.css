@@ -2565,3 +2565,56 @@ textarea:focus-visible {
   font-size: 12.5px;
   color: var(--text);
 }
+
+/* ===== Sidebar: rodapé com Sair + fechar no mobile ===== */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-footer .logout-btn {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.sidebar.collapsed .sidebar-footer .logout-btn {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.sidebar-close:hover {
+  background: var(--light-gray);
+  color: var(--text);
+}
+
+@media (max-width: 768px) {
+  .sidebar-close {
+    display: flex;
+  }
+}

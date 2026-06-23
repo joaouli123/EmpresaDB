@@ -19,6 +19,13 @@ class ProfileUpdate(BaseModel):
 class APIKeyCreate(BaseModel):
     name: str
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+class AvatarUpdate(BaseModel):
+    image: str  # data URI (data:image/...;base64,....)
+
 @router.get("/profile")
 async def get_profile(current_user: dict = Depends(get_current_user)):
     """
@@ -77,6 +84,61 @@ async def update_profile(
     except Exception as e:
         logger.error(f"Error updating profile: {e}")
         raise HTTPException(status_code=500, detail="Error updating profile")
+
+@router.post("/change-password")
+async def change_password(
+    data: PasswordChange,
+    current_user: dict = Depends(get_current_user)
+):
+    """Troca a senha do usuário autenticado (exige a senha atual)."""
+    from src.api.auth import verify_password, get_password_hash
+
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="A nova senha deve ter no mínimo 6 caracteres")
+
+    stored_hash = current_user.get('password')
+    if not stored_hash or not verify_password(data.current_password, stored_hash):
+        raise HTTPException(status_code=400, detail="Senha atual incorreta")
+
+    if verify_password(data.new_password, stored_hash):
+        raise HTTPException(status_code=400, detail="A nova senha deve ser diferente da atual")
+
+    new_hash = get_password_hash(data.new_password)
+    success = await db_manager.update_user_password(current_user['id'], new_hash)
+    if not success:
+        raise HTTPException(status_code=500, detail="Erro ao atualizar a senha")
+
+    return {"message": "Senha alterada com sucesso"}
+
+
+@router.post("/avatar")
+async def update_avatar(
+    data: AvatarUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Salva o avatar (imagem em data URI já redimensionada no cliente)."""
+    img = (data.image or '').strip()
+    if not img.startswith('data:image/'):
+        raise HTTPException(status_code=400, detail="Imagem inválida")
+    # Limite defensivo (~150KB de string base64)
+    if len(img) > 200_000:
+        raise HTTPException(status_code=400, detail="Imagem muito grande. Use uma imagem menor.")
+
+    success = await db_manager.update_user_avatar(current_user['id'], img)
+    if not success:
+        raise HTTPException(status_code=500, detail="Erro ao salvar o avatar")
+
+    return {"avatar_url": img}
+
+
+@router.delete("/avatar")
+async def delete_avatar(current_user: dict = Depends(get_current_user)):
+    """Remove o avatar e volta para a inicial."""
+    success = await db_manager.update_user_avatar(current_user['id'], None)
+    if not success:
+        raise HTTPException(status_code=500, detail="Erro ao remover o avatar")
+    return {"message": "Avatar removido"}
+
 
 @router.get("/api-keys")
 async def get_api_keys(current_user: dict = Depends(get_current_user)):

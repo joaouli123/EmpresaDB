@@ -278,9 +278,9 @@
 }
 
 .pident-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   background: var(--primary-soft);
   color: var(--primary);
   display: flex;
@@ -289,6 +289,64 @@
   font-size: 20px;
   font-weight: 600;
   flex-shrink: 0;
+}
+
+.pident-avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.pident-avatar-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.avatar-edit {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: 2px solid var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.avatar-edit:hover {
+  background: var(--primary-dark);
+}
+
+.avatar-edit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.plink-sm {
+  margin-top: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.plink-sm:hover {
+  color: var(--danger);
+  text-decoration: underline;
 }
 
 .pident h2 {

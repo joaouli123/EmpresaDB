@@ -10,50 +10,29 @@
   padding: 0 24px;
 }
 
-.topbar-search {
-  display: flex;
+.topbar-hamburger {
+  display: none;
   align-items: center;
-  gap: 9px;
-  flex: 1;
-  max-width: 420px;
+  justify-content: center;
+  width: 38px;
   height: 38px;
-  padding: 0 14px;
-  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 9px;
-  color: var(--text-secondary);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.topbar-search:focus-within {
-  border-color: var(--primary);
-  box-shadow: var(--ring);
-}
-
-.topbar-search input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 13.5px;
+  background: var(--surface);
   color: var(--text);
-  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.topbar-search input::placeholder {
-  color: var(--muted);
-}
-
-@media (max-width: 640px) {
-  .topbar-search {
-    max-width: none;
-  }
+.topbar-hamburger:hover {
+  background: var(--light-gray);
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 14px;
+  margin-left: auto;
 }
 
 .topbar-usage {
@@ -69,6 +48,15 @@
 .topbar-usage > svg {
   color: var(--primary);
   flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.topbar-usage.warn > svg {
+  color: var(--warning);
+}
+
+.topbar-usage.over > svg {
+  color: var(--danger);
 }
 
 .topbar-usage-text {
@@ -96,10 +84,23 @@
   overflow: hidden;
 }
 
-.topbar-usage-bar > div {
+.topbar-usage-fill {
   height: 100%;
-  background: var(--primary);
+  background: var(--success);
   border-radius: 999px;
+  transition: width 0.3s ease, background 0.2s;
+}
+
+.topbar-usage.warn .topbar-usage-fill {
+  background: var(--warning);
+}
+
+.topbar-usage.over .topbar-usage-fill {
+  background: var(--danger);
+}
+
+.topbar-usage.over .topbar-usage-count {
+  color: var(--danger);
 }
 
 .topbar-plan {
@@ -134,7 +135,7 @@
 .topbar-avatar {
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: 50%;
   background: var(--primary);
   color: #fff;
   display: flex;
@@ -142,6 +143,12 @@
   justify-content: center;
   font-size: 13px;
   font-weight: 600;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+img.topbar-avatar {
+  border: 1px solid var(--border);
 }
 
 .topbar-username {
@@ -186,15 +193,27 @@
   color: var(--danger);
 }
 
+@media (max-width: 768px) {
+  .topbar-hamburger {
+    display: flex;
+  }
+}
+
 @media (max-width: 600px) {
   .topbar {
     padding: 0 14px;
+    gap: 10px;
   }
-  .topbar-username,
-  .topbar-usage-label {
+  .topbar-username {
     display: none;
   }
-  .topbar-usage-bar {
+  .topbar-right {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar-usage-text {
     display: none;
   }
 }

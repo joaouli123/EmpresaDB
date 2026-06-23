@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { subscriptionAPI } from '../services/api';
-import { ChevronDown, User as UserIcon, LogOut, CreditCard, Zap, Search } from 'lucide-react';
+import { ChevronDown, User as UserIcon, LogOut, CreditCard, Zap, Menu } from 'lucide-react';
 import './TopBar.css';
 
-const TopBar = () => {
+const TopBar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sub, setSub] = useState(null);
@@ -42,30 +42,40 @@ const TopBar = () => {
   const total = sub?.total_limit ?? 200;
   const remaining = Math.max(total - used, 0);
   const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
+  const level = pct >= 90 ? 'over' : pct >= 70 ? 'warn' : 'ok';
+  const avatarUrl = user?.avatar_url;
   const initial = (user?.username || 'U').charAt(0).toUpperCase();
 
   return (
     <header className="topbar">
-      <form className="topbar-search" onSubmit={(e) => e.preventDefault()}>
-        <Search size={16} />
-        <input type="text" placeholder="Buscar CNPJ, empresa ou sócio..." aria-label="Buscar" />
-      </form>
+      <button className="topbar-hamburger" onClick={onMenuClick} aria-label="Abrir menu">
+        <Menu size={20} />
+      </button>
 
       <div className="topbar-right">
-        <div className="topbar-usage" title={`${used.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} consultas usadas este mês`}>
+        <div
+          className={`topbar-usage ${level}`}
+          title={`${used.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} consultas usadas este mês`}
+        >
           <Zap size={15} />
           <div className="topbar-usage-text">
             <span className="topbar-usage-count">{remaining.toLocaleString('pt-BR')}</span>
-            <span className="topbar-usage-label">consultas restantes</span>
+            <span className="topbar-usage-label">restantes</span>
           </div>
-          <div className="topbar-usage-bar"><div style={{ width: `${pct}%` }} /></div>
+          <div className="topbar-usage-bar">
+            <div className="topbar-usage-fill" style={{ width: `${pct}%` }} />
+          </div>
         </div>
 
         <span className="topbar-plan">{plan}</span>
 
         <div className="topbar-user" ref={ref}>
           <button className="topbar-avatar-btn" onClick={() => setMenuOpen((o) => !o)}>
-            <span className="topbar-avatar">{initial}</span>
+            {avatarUrl ? (
+              <img className="topbar-avatar" src={avatarUrl} alt={user?.username || ''} />
+            ) : (
+              <span className="topbar-avatar">{initial}</span>
+            )}
             <span className="topbar-username">{user?.username}</span>
             <ChevronDown size={15} />
           </button>

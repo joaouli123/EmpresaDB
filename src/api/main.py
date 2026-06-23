@@ -169,6 +169,21 @@ app.include_router(stripe_webhook_router)
 app.include_router(email_logs_router)
 app.include_router(batch_router, prefix="/api/v1")
 
+
+@app.on_event("startup")
+async def ensure_schema():
+    """Migrations idempotentes leves no startup (ex.: coluna de avatar)."""
+    from src.database.connection import db_manager
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS avatar_url TEXT")
+            cursor.close()
+        logging.info("✅ Schema verificado (avatar_url)")
+    except Exception as e:
+        logging.error(f"⚠️ ensure_schema falhou: {e}")
+
+
 # ⚠️ IMPORTANTE: Catch-all route DEVE vir DEPOIS de todos os routers
 # para não interceptar as rotas de API
 @app.get("/{full_path:path}")

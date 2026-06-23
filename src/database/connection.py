@@ -375,7 +375,7 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active, avatar_url
                     FROM clientes.users
                     WHERE username = %s
                 """, (username,))
@@ -391,7 +391,7 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active, avatar_url
                     FROM clientes.users
                     WHERE email = %s
                 """, (email,))
@@ -407,7 +407,7 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active
+                    SELECT id, username, email, phone, cpf, password, role, created_at, last_login, is_active, avatar_url
                     FROM clientes.users
                     WHERE phone = %s
                 """, (phone,))
@@ -558,8 +558,8 @@ class DatabaseManager:
             with self.get_connection() as conn:
                 cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
                 cursor.execute("""
-                    SELECT 
-                        u.id, u.username, u.email, u.phone, u.cpf, u.role, u.created_at, u.last_login,
+                    SELECT
+                        u.id, u.username, u.email, u.phone, u.cpf, u.role, u.created_at, u.last_login, u.avatar_url,
                         COUNT(DISTINCT ak.id) as active_api_keys,
                         COALESCE(SUM(uu.requests), 0) as total_requests
                     FROM clientes.users u
@@ -600,6 +600,37 @@ class DatabaseManager:
                 return True
         except Exception as e:
             logger.error(f"Erro ao atualizar perfil: {e}")
+            return False
+
+    async def update_user_password(self, user_id: int, new_password_hash: str) -> bool:
+        """Atualiza o hash de senha do usuário autenticado"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE clientes.users SET password = %s WHERE id = %s",
+                    (new_password_hash, user_id)
+                )
+                cursor.close()
+                return True
+        except Exception as e:
+            logger.error(f"Erro ao atualizar senha: {e}")
+            return False
+
+    async def update_user_avatar(self, user_id: int, avatar_url: Optional[str]) -> bool:
+        """Grava (ou remove, se None) o avatar do usuário. Coluna criada sob demanda."""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS avatar_url TEXT")
+                cursor.execute(
+                    "UPDATE clientes.users SET avatar_url = %s WHERE id = %s",
+                    (avatar_url, user_id)
+                )
+                cursor.close()
+                return True
+        except Exception as e:
+            logger.error(f"Erro ao atualizar avatar: {e}")
             return False
 
     async def create_api_key(self, user_id: int, name: str) -> Optional[Dict]:

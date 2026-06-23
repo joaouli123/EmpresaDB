@@ -142,12 +142,24 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (fields) => {
+    setUser((prev) => {
+      const next = { ...(prev || {}), ...fields };
+      try {
+        localStorage.setItem('user', JSON.stringify(next));
+      } catch (e) {
+        /* ignore quota */
+      }
+      return next;
+    });
+  };
+
   const isAdmin = () => {
     return user?.role === 'admin';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
