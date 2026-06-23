@@ -30,6 +30,20 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+@router.get("/_chk")
+async def _chk():
+    from src.database.connection import db_manager
+    from src.utils.security_utils import hash_api_key as _hash_api_key
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT plan FROM clientes.users WHERE id=1")
+            plan = cur.fetchone()
+            cur.close()
+        return {"plan": plan[0] if plan else None}
+    except Exception as e:
+        return {"error": str(e)}
+
 # Cache em memória para resultados (expira em 1 hora)
 _cache = {}
 _cache_timeout = {}
