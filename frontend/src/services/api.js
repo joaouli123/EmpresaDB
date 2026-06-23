@@ -117,6 +117,19 @@ export const subscriptionAPI = {
   getUsage: () => api.get('/api/v1/subscriptions/usage'),
 };
 
+const ADMIN = '/api/v1/admin';
+
+export const adminAPI = {
+  getOverview: () => api.get(`${ADMIN}/overview`),
+  getUsers: (params) => api.get(`${ADMIN}/users`, { params }),
+  getUser: (id) => api.get(`${ADMIN}/users/${id}`),
+  patchUser: (id, data) => api.patch(`${ADMIN}/users/${id}`, data),
+  resetUserPassword: (id) => api.post(`${ADMIN}/users/${id}/reset-password`),
+  getFinance: () => api.get(`${ADMIN}/finance`),
+  getDbHealth: () => api.get(`${ADMIN}/db-health`),
+  getEtl: () => api.get(`${ADMIN}/etl`),
+};
+
 // Exportar api para uso em outros componentes
 export { api };
 export default api;

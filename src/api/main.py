@@ -10,6 +10,7 @@ from src.api.stripe_routes import router as stripe_router
 from src.api.stripe_webhook import router as stripe_webhook_router
 from src.api.email_logs import router as email_logs_router
 from src.api.batch_routes import router as batch_router
+from src.api.admin_routes import router as admin_router
 from src.config import settings
 import logging
 import os
@@ -168,6 +169,7 @@ app.include_router(stripe_router)
 app.include_router(stripe_webhook_router)
 app.include_router(email_logs_router)
 app.include_router(batch_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

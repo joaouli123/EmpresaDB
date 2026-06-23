@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   User,
+  Users,
   Key,
   FileText,
   RefreshCw,
@@ -32,7 +33,8 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
   ];
 
   const adminMenuItems = [
-    { path: '/admin', icon: Activity, label: 'Admin Dashboard' },
+    { path: '/admin', icon: Activity, label: 'Visão Geral' },
+    { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/etl', icon: RefreshCw, label: 'Atualização ETL' },
     { path: '/admin/database', icon: Database, label: 'Banco de Dados' },
     { path: '/admin/email-logs', icon: Mail, label: 'Logs de Email' },
@@ -90,6 +92,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                end={item.path === '/admin'}
                 onClick={closeMobileMenu}
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 title={collapsed ? item.label : ''}

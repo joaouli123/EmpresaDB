@@ -44,6 +44,8 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminETL = lazy(() => import('./pages/admin/AdminETL'));
 const AdminDatabase = lazy(() => import('./pages/AdminDatabase'));
 const EmailLogs = lazy(() => import('./pages/admin/EmailLogs'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -158,9 +160,14 @@ function AppRoutes() {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+            <Route path="admin/users" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
             <Route path="admin/etl" element={
               <ProtectedRoute adminOnly={true}>
-                <AdminDashboard />
+                <AdminETL />
               </ProtectedRoute>
             } />
             <Route path="admin/database" element={
