@@ -274,6 +274,12 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 # Garantir que cursor sempre seja fechado
                 cursor.close()
 
+            # Rastrear uso diario (grafico do dashboard)
+            try:
+                await db_manager.track_usage(user['id'])
+            except Exception as e:
+                logger.error(f"Erro ao rastrear uso diario: {e}")
+
     except HTTPException:
         raise
     except Exception as e:
