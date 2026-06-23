@@ -240,6 +240,7 @@ code {
   flex: 1;
   padding: 16px 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .nav-section {
@@ -1966,8 +1967,7 @@ code {
   }
 
   .main-content {
-    padding: 16px;
-    min-height: 100vh;
+    padding: 16px 16px 48px;
   }
 
   .stats-grid,
@@ -1978,6 +1978,24 @@ code {
   .profile-container,
   .docs-container {
     grid-template-columns: 1fr;
+  }
+
+  /* Indice da doc não pode ficar sticky no mobile (sobrepõe o conteúdo) */
+  .docs-nav {
+    position: static;
+    top: auto;
+  }
+  .docs-content {
+    padding: 20px 16px;
+  }
+  /* Tabelas largas rolam dentro do próprio bloco, sem estourar a página */
+  .doc-section table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .docs-container {
+    gap: 16px;
   }
 
   .profile-form-grid {

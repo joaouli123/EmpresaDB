@@ -1,0 +1,5 @@
+# Garante LF em scripts/arquivos consumidos por containers Linux (evita quebra por CRLF do Windows)
+*.sh text eol=lf
+start.sh text eol=lf
+Dockerfile text eol=lf
+*.py text eol=lf
