@@ -50,9 +50,9 @@ class DatabaseManager:
                 maxconn=10,     # Máximo por worker (ESC-02: workers*maxconn deve ser < max_connections)
                 dsn=self.connection_string,
                 # ESC-01: timeouts na origem da conexão — query pesada não segura o worker por 120s
-                options='-c statement_timeout=15000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000',
+                options='-c statement_timeout=60000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000',
             )
-            logger.info("✅ Connection pool inicializado: 2-10 conexões/worker (statement_timeout=15s)")
+            logger.info("✅ Connection pool inicializado: 2-10 conexões/worker (statement_timeout=60s)")
         except Exception as e:
             logger.error(f"❌ Erro ao criar connection pool: {e}")
             self.connection_pool = None
