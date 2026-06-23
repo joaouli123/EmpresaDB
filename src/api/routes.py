@@ -53,6 +53,21 @@ async def migrate_trigram():
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
+@router.get("/_check_indexes")
+async def check_indexes():
+    """Verifica se os indices trigram existem"""
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT indexname FROM pg_indexes WHERE tablename='vw_estabelecimentos_completos' AND indexname LIKE '%trgm%'")
+            rows = [r[0] for r in cur.fetchall()]
+            cur.execute("SELECT relkind FROM pg_class WHERE relname='vw_estabelecimentos_completos'")
+            relkind = cur.fetchone()
+            cur.close()
+            return {"relkind": relkind[0] if relkind else None, "trgm_indexes": rows}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 # Cache em memória para resultados (expira em 1 hora)
 _cache = {}
 _cache_timeout = {}
