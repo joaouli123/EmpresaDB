@@ -103,16 +103,20 @@ def main():
         log.info("\n[2] (use --lines para comparar com os CSVs de origem)")
 
     # 3) integridade de FK (órfãos)
-    log.info("\n[3] Integridade referencial (órfãos sem empresa-mãe)")
+    # A Receita publica ocasionalmente registros sem empresa-mãe (erro de origem).
+    # Toleramos até 100 órfãos por tabela como aviso, não falha fatal.
+    ORPHAN_TOLERANCE = 100
+    log.info("\n[3] Integridade referencial (órfãos sem empresa-mãe, tolerância=%d)", ORPHAN_TOLERANCE)
     for t in ("estabelecimentos", "socios", "simples_nacional"):
         cur.execute(f"""
             SELECT count(*) FROM {t} x
             WHERE NOT EXISTS (SELECT 1 FROM empresas e WHERE e.cnpj_basico = x.cnpj_basico)
         """)
         orf = cur.fetchone()[0]
-        if orf > 0:
-            fail(f"{t}: {orf:,} linhas órfãs (cnpj_basico sem empresa)")
-        log.info("  %s %-20s órfãos: %s", "✅" if orf == 0 else "❌", t, f"{orf:,}")
+        if orf > ORPHAN_TOLERANCE:
+            fail(f"{t}: {orf:,} linhas órfãs (cnpj_basico sem empresa) — acima da tolerância de {ORPHAN_TOLERANCE}")
+        status = "✅" if orf == 0 else ("⚠️" if orf <= ORPHAN_TOLERANCE else "❌")
+        log.info("  %s %-20s órfãos: %s", status, t, f"{orf:,}")
 
     # 4) sanidade de datas/nulos
     log.info("\n[4] Sanidade de datas")
