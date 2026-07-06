@@ -24,7 +24,7 @@ const Subscription = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successText, setSuccessText] = useState('');
-  const [activeTab, setActiveTab] = useState('pagamentos');
+  const [activeTab, setActiveTab] = useState('atual');
   const [subscribing, setSubscribing] = useState(null);
   const [purchasing, setPurchasing] = useState(null);
   const plansRef = useRef(null);
@@ -254,85 +254,16 @@ const Subscription = () => {
         </div>
       )}
 
-      {/* Plano atual */}
-      <div className="pcard">
-        <div className="pcard-head">
-          <div>
-            <h2>Plano atual</h2>
-            <p className="sub">Detalhes e consumo do ciclo</p>
-          </div>
-          <span className={`pbadge ${statusBadge.cls}`}>{statusBadge.text}</span>
-        </div>
-        <div className="pcard-body">
-          <h3 className="plan-name">{subscription.plan_name}</h3>
-
-          <div className="pmetrics">
-            <div>
-              <span className="k">Usado</span>
-              <span className="v">{used.toLocaleString('pt-BR')}</span>
-            </div>
-            <div>
-              <span className="k">Restante</span>
-              <span className="v">{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</span>
-            </div>
-            <div>
-              <span className="k">Total</span>
-              <span className="v">{total.toLocaleString('pt-BR')}</span>
-            </div>
-          </div>
-
-          <div>
-            <div className="usage-head">
-              <span><span className="uused">{used.toLocaleString('pt-BR')}</span> de {total.toLocaleString('pt-BR')} consultas</span>
-              <span>{pct.toFixed(1)}%</span>
-            </div>
-            <div className="ubar">
-              <div className={`ubar-fill ${barCls}`} style={{ width: `${pct}%` }} />
-            </div>
-          </div>
-
-          <div className="dlist" style={{ marginTop: '20px' }}>
-            <div className="dlist-row">
-              <span className="k">Consultas mensais</span>
-              <span className="v">{(subscription.monthly_limit || 0).toLocaleString('pt-BR')}</span>
-            </div>
-            <div className="dlist-row">
-              <span className="k">Créditos extras</span>
-              <span className="v">{(subscription.extra_credits || 0).toLocaleString('pt-BR')}</span>
-            </div>
-            <div className="dlist-row">
-              <span className="k">{isFree ? 'Renovação' : 'Próxima renovação'}</span>
-              <span className="v">{isFree ? 'Mensal (gratuito)' : formatDate(subscription.renewal_date)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="pcard-foot">
-          {isFree ? (
-            <button className="btn-flat primary" onClick={scrollToPlans}>
-              <TrendingUp size={16} /> Fazer upgrade
-            </button>
-          ) : (
-            <>
-              <button className="btn-flat ghost" onClick={scrollToPlans}>
-                <TrendingUp size={16} /> Trocar de plano
-              </button>
-              <button className="btn-flat ghost" onClick={handleViewSubscriptionDetails}>
-                <Eye size={16} /> Ver detalhes
-              </button>
-              {subscription.status === 'active' && (
-                <button className="btn-flat danger" onClick={() => setShowCancelModal(true)}>
-                  <X size={16} /> Cancelar
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Pagamentos e histórico por abas */}
+      {/* Plano atual / Pagamentos / Histórico por abas */}
       <div className="pcard">
         <div className="pcard-head">
           <div className="ptabs">
+            <button
+              className={`ptab-btn ${activeTab === 'atual' ? 'active' : ''}`}
+              onClick={() => setActiveTab('atual')}
+            >
+              Plano atual
+            </button>
             <button
               className={`ptab-btn ${activeTab === 'pagamentos' ? 'active' : ''}`}
               onClick={() => setActiveTab('pagamentos')}
@@ -346,9 +277,56 @@ const Subscription = () => {
               Histórico
             </button>
           </div>
+          {activeTab === 'atual' && <span className={`pbadge ${statusBadge.cls}`}>{statusBadge.text}</span>}
         </div>
         <div className="pcard-body">
-          {activeTab === 'pagamentos' ? (
+          {activeTab === 'atual' && (
+            <>
+              <h3 className="plan-name">{subscription.plan_name}</h3>
+
+              <div className="pmetrics">
+                <div>
+                  <span className="k">Usado</span>
+                  <span className="v">{used.toLocaleString('pt-BR')}</span>
+                </div>
+                <div>
+                  <span className="k">Restante</span>
+                  <span className="v">{(subscription.queries_remaining || 0).toLocaleString('pt-BR')}</span>
+                </div>
+                <div>
+                  <span className="k">Total</span>
+                  <span className="v">{total.toLocaleString('pt-BR')}</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="usage-head">
+                  <span><span className="uused">{used.toLocaleString('pt-BR')}</span> de {total.toLocaleString('pt-BR')} consultas</span>
+                  <span>{pct.toFixed(1)}%</span>
+                </div>
+                <div className="ubar">
+                  <div className={`ubar-fill ${barCls}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+
+              <div className="dlist" style={{ marginTop: '20px' }}>
+                <div className="dlist-row">
+                  <span className="k">Consultas mensais</span>
+                  <span className="v">{(subscription.monthly_limit || 0).toLocaleString('pt-BR')}</span>
+                </div>
+                <div className="dlist-row">
+                  <span className="k">Créditos extras</span>
+                  <span className="v">{(subscription.extra_credits || 0).toLocaleString('pt-BR')}</span>
+                </div>
+                <div className="dlist-row">
+                  <span className="k">{isFree ? 'Renovação' : 'Próxima renovação'}</span>
+                  <span className="v">{isFree ? 'Mensal (gratuito)' : formatDate(subscription.renewal_date)}</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'pagamentos' && (
             cards.length === 0 ? (
               <div className="pempty">
                 <CreditCard size={30} className="ico" />
@@ -370,7 +348,9 @@ const Subscription = () => {
                 </div>
               ))
             )
-          ) : (
+          )}
+
+          {activeTab === 'historico' && (
             transactions.length === 0 ? (
               <div className="pempty">
                 <CreditCard size={30} className="ico" />
@@ -405,6 +385,29 @@ const Subscription = () => {
             )
           )}
         </div>
+        {activeTab === 'atual' && (
+          <div className="pcard-foot">
+            {isFree ? (
+              <button className="btn-flat primary" onClick={scrollToPlans}>
+                <TrendingUp size={16} /> Fazer upgrade
+              </button>
+            ) : (
+              <>
+                <button className="btn-flat ghost" onClick={scrollToPlans}>
+                  <TrendingUp size={16} /> Trocar de plano
+                </button>
+                <button className="btn-flat ghost" onClick={handleViewSubscriptionDetails}>
+                  <Eye size={16} /> Ver detalhes
+                </button>
+                {subscription.status === 'active' && (
+                  <button className="btn-flat danger" onClick={() => setShowCancelModal(true)}>
+                    <X size={16} /> Cancelar
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Planos disponíveis — sempre visível, é o alvo do botão "Fazer upgrade" */}
