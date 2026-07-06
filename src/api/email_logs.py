@@ -9,7 +9,10 @@ import math
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/admin", tags=["Admin - Email Logs"])
+# Prefixo /api/v1 no proprio router: main.py inclui este router SEM prefixo,
+# e /admin/email-logs (sem /api/v1) colidia com a rota SPA /admin/email-logs
+# (F5 na pagina devolvia JSON 401 em vez do app).
+router = APIRouter(prefix="/api/v1/admin", tags=["Admin - Email Logs"])
 
 @router.get("/email-logs")
 async def get_email_logs(
@@ -136,6 +139,44 @@ async def get_email_logs(
     except Exception as e:
         logger.error(f"Erro ao buscar email logs: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao buscar logs de email: {str(e)}")
+
+
+@router.get("/email-logs/stats")
+async def get_email_logs_stats(
+    current_admin: dict = Depends(get_current_admin_user)
+):
+    """
+    Estatísticas agregadas dos logs de email (apenas admins).
+
+    Retorna: total, total_sent, total_failed, last_7_days.
+    """
+    try:
+        stats_query = """
+            SELECT
+                COUNT(*) AS total,
+                COUNT(*) FILTER (WHERE el.status = 'sent') AS total_sent,
+                COUNT(*) FILTER (WHERE el.status = 'failed') AS total_failed,
+                COUNT(*) FILTER (WHERE el.sent_at >= NOW() - INTERVAL '7 days') AS last_7_days
+            FROM clientes.email_logs el
+            INNER JOIN clientes.users u ON el.user_id = u.id
+        """
+
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor(cursor_factory=extras.RealDictCursor)
+            cursor.execute(stats_query)
+            row = cursor.fetchone()
+            cursor.close()
+
+            return {
+                "total": row["total"] if row else 0,
+                "total_sent": row["total_sent"] if row else 0,
+                "total_failed": row["total_failed"] if row else 0,
+                "last_7_days": row["last_7_days"] if row else 0
+            }
+
+    except Exception as e:
+        logger.error(f"Erro ao buscar estatísticas de email logs: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar estatísticas de email: {str(e)}")
 
 
 @router.get("/followup-tracking")

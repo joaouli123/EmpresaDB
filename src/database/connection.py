@@ -47,15 +47,33 @@ class DatabaseManager:
         try:
             self.connection_pool = pool.ThreadedConnectionPool(
                 minconn=2,      # Mínimo sempre aberto
-                maxconn=10,     # Máximo por worker (ESC-02: workers*maxconn deve ser < max_connections)
+                maxconn=20,     # Máximo por worker (ESC-02: workers*maxconn deve ser < max_connections=500)
                 dsn=self.connection_string,
                 # ESC-01: timeouts na origem da conexão — query pesada não segura o worker por 120s
                 options='-c statement_timeout=60000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000',
             )
-            logger.info("✅ Connection pool inicializado: 2-10 conexões/worker (statement_timeout=60s)")
+            logger.info("✅ Connection pool inicializado: 2-20 conexões/worker (statement_timeout=60s)")
         except Exception as e:
             logger.error(f"❌ Erro ao criar connection pool: {e}")
             self.connection_pool = None
+
+    def _getconn_with_wait(self, timeout_seconds: float = 5.0):
+        """
+        getconn() do ThreadedConnectionPool lança PoolError IMEDIATO quando o pool
+        esgota — sob pico isso viraria HTTP 500. Aqui esperamos (com backoff curto)
+        por uma conexão liberada por até timeout_seconds antes de desistir.
+        """
+        import time as _time
+        deadline = _time.monotonic() + timeout_seconds
+        delay = 0.05
+        while True:
+            try:
+                return self.connection_pool.getconn()
+            except pool.PoolError:
+                if _time.monotonic() >= deadline:
+                    raise
+                _time.sleep(delay)
+                delay = min(delay * 2, 0.4)
 
     def get_engine(self):
         if not self.engine:
@@ -97,8 +115,8 @@ class DatabaseManager:
         from_pool = False
         try:
             if self.connection_pool:
-                # ✅ OTIMIZADO: Pega conexão do pool (RÁPIDO!)
-                conn = self.connection_pool.getconn()
+                # ✅ OTIMIZADO: Pega conexão do pool (com espera se o pool esgotar)
+                conn = self._getconn_with_wait()
                 from_pool = True
 
                 # Conexão pode ter sido fechada pelo servidor (timeout/idle)
@@ -107,7 +125,7 @@ class DatabaseManager:
                         self.connection_pool.putconn(conn, close=True)
                     except Exception:
                         pass
-                    conn = self.connection_pool.getconn()
+                    conn = self._getconn_with_wait()
 
                 # Pre-ping para garantir que a conexão está realmente viva
                 try:
@@ -119,7 +137,7 @@ class DatabaseManager:
                         self.connection_pool.putconn(conn, close=True)
                     except Exception:
                         pass
-                    conn = self.connection_pool.getconn()
+                    conn = self._getconn_with_wait()
             else:
                 # ⚠️ Fallback se pool falhar (lento, mas funcional)
                 conn = psycopg2.connect(self.connection_string)
@@ -618,11 +636,10 @@ class DatabaseManager:
             return False
 
     async def update_user_avatar(self, user_id: int, avatar_url: Optional[str]) -> bool:
-        """Grava (ou remove, se None) o avatar do usuário. Coluna criada sob demanda."""
+        """Grava (ou remove, se None) o avatar do usuário. Coluna garantida no startup (main.py)."""
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("ALTER TABLE clientes.users ADD COLUMN IF NOT EXISTS avatar_url TEXT")
                 cursor.execute(
                     "UPDATE clientes.users SET avatar_url = %s WHERE id = %s",
                     (avatar_url, user_id)

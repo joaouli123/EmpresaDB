@@ -128,6 +128,8 @@ export const adminAPI = {
   getFinance: () => api.get(`${ADMIN}/finance`),
   getDbHealth: () => api.get(`${ADMIN}/db-health`),
   getEtl: () => api.get(`${ADMIN}/etl`),
+  getPlans: () => api.get(`${ADMIN}/plans`),
+  patchPlan: (id, data) => api.patch(`${ADMIN}/plans/${id}`, data),
 };
 
 // Exportar api para uso em outros componentes

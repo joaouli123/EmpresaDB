@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Docs = () => {
   const { isAdmin } = useAuth();
-  const API_URL = `${window.location.origin}/api/v1`;
+  const API_URL = 'https://www.dbempresas.com.br/api/v1';
   const showAdmin = isAdmin();
 
   return (
@@ -43,7 +43,7 @@ const Docs = () => {
 
             <div className="docs-callout warn">
               <h4>Autenticação obrigatória</h4>
-              <p>Todas as requisições à API precisam do header:</p>
+              <p>Os endpoints de consulta de dados precisam do header:</p>
               <div className="code-block" style={{ marginTop: '10px' }}>
                 <code>X-API-Key: sua_chave_api_aqui</code>
               </div>
@@ -57,7 +57,7 @@ const Docs = () => {
           <section id="auth" className="doc-section">
             <div className="section-icon"><Shield size={22} /></div>
             <h2>Autenticação</h2>
-            <p>Todas as requisições à API requerem autenticação via <strong>API Key</strong> no header:</p>
+            <p>Os endpoints de consulta de dados requerem autenticação via <strong>API Key</strong> no header:</p>
             <div className="code-block">
               <code>X-API-Key: sua_chave_api_aqui</code>
             </div>
@@ -74,10 +74,13 @@ const Docs = () => {
             </div>
 
             <div className="docs-callout info">
-              <h4>Autenticação simplificada</h4>
+              <h4>Dois tipos de autenticação</h4>
               <p>
-                Este sistema utiliza apenas API Key para autenticação. Não é necessário gerenciar
-                tokens JWT ou sessões. Basta incluir o header <code>X-API-Key</code> em todas as requisições.
+                Os endpoints de consulta de dados (CNPJ, busca, sócios, CNAEs, municípios e
+                consultas em lote via <code>/batch/search</code>) usam apenas o header <code>X-API-Key</code>.
+                Já os endpoints de conta — <code>/stats</code>, <code>/batch/credits</code> e{' '}
+                <code>/batch/usage</code> — exigem o token JWT da sua sessão web, enviado no header{' '}
+                <code>Authorization: Bearer &lt;token&gt;</code> (obtido ao fazer login no dashboard).
               </p>
             </div>
 
@@ -121,10 +124,10 @@ X-API-Key: sua_chave_api`}</pre>
                   <span className="method get">GET</span>
                   <code>/search</code>
                 </div>
-                <p>Busca avançada com múltiplos filtros. Retorna resultados paginados. 28 filtros disponíveis.</p>
+                <p>Busca avançada com múltiplos filtros. Retorna resultados paginados. 8 filtros disponíveis.</p>
 
                 <div className="params-table">
-                  <h4>Dados da empresa</h4>
+                  <h4>Filtros disponíveis</h4>
                   <table>
                     <thead>
                       <tr>
@@ -135,12 +138,6 @@ X-API-Key: sua_chave_api`}</pre>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td><code>cnpj</code></td>
-                        <td>string</td>
-                        <td>CNPJ completo ou parcial</td>
-                        <td>33000167</td>
-                      </tr>
                       <tr>
                         <td><code>razao_social</code></td>
                         <td>string</td>
@@ -150,47 +147,21 @@ X-API-Key: sua_chave_api`}</pre>
                       <tr>
                         <td><code>nome_fantasia</code></td>
                         <td>string</td>
-                        <td>Busca parcial</td>
+                        <td>Busca parcial (case-insensitive)</td>
                         <td>Extra</td>
                       </tr>
                       <tr>
-                        <td><code>natureza_juridica</code></td>
+                        <td><code>cnae</code></td>
                         <td>string</td>
-                        <td>Código da natureza jurídica</td>
-                        <td>2062</td>
+                        <td>CNAE principal (código exato)</td>
+                        <td>4712100</td>
                       </tr>
                       <tr>
-                        <td><code>porte</code></td>
+                        <td><code>municipio</code></td>
                         <td>string</td>
-                        <td>1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais</td>
-                        <td>4</td>
+                        <td>Código TOM/RFB do município (4 dígitos) ou nome (busca parcial)</td>
+                        <td>7107 ou SAO PAULO</td>
                       </tr>
-                      <tr>
-                        <td><code>capital_social_min</code></td>
-                        <td>number</td>
-                        <td>Capital social mínimo</td>
-                        <td>100000</td>
-                      </tr>
-                      <tr>
-                        <td><code>capital_social_max</code></td>
-                        <td>number</td>
-                        <td>Capital social máximo</td>
-                        <td>1000000</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Localização</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
                       <tr>
                         <td><code>uf</code></td>
                         <td>string</td>
@@ -198,99 +169,11 @@ X-API-Key: sua_chave_api`}</pre>
                         <td>SP</td>
                       </tr>
                       <tr>
-                        <td><code>municipio</code></td>
+                        <td><code>situacao</code></td>
                         <td>string</td>
-                        <td>Código do município (IBGE)</td>
-                        <td>3550308</td>
-                      </tr>
-                      <tr>
-                        <td><code>cep</code></td>
-                        <td>string</td>
-                        <td>CEP completo ou parcial</td>
-                        <td>01310</td>
-                      </tr>
-                      <tr>
-                        <td><code>bairro</code></td>
-                        <td>string</td>
-                        <td>Nome do bairro (busca parcial)</td>
-                        <td>Centro</td>
-                      </tr>
-                      <tr>
-                        <td><code>logradouro</code></td>
-                        <td>string</td>
-                        <td>Nome da rua/avenida (busca parcial)</td>
-                        <td>Paulista</td>
-                      </tr>
-                      <tr>
-                        <td><code>tipo_logradouro</code></td>
-                        <td>string</td>
-                        <td>Tipo do logradouro (busca parcial)</td>
-                        <td>AVENIDA</td>
-                      </tr>
-                      <tr>
-                        <td><code>numero</code></td>
-                        <td>string</td>
-                        <td>Número do estabelecimento</td>
-                        <td>1000</td>
-                      </tr>
-                      <tr>
-                        <td><code>complemento</code></td>
-                        <td>string</td>
-                        <td>Complemento do endereço</td>
-                        <td>SALA</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Situação cadastral</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><code>situacao_cadastral</code></td>
-                        <td>string</td>
-                        <td>01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
+                        <td>Situação cadastral: 01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
                         <td>02</td>
                       </tr>
-                      <tr>
-                        <td><code>motivo_situacao_cadastral</code></td>
-                        <td>string</td>
-                        <td>Motivo da situação (busca parcial)</td>
-                        <td>ENCERRAMENTO</td>
-                      </tr>
-                      <tr>
-                        <td><code>data_situacao_cadastral_de</code></td>
-                        <td>date</td>
-                        <td>Data da situação cadastral DE (YYYY-MM-DD)</td>
-                        <td>2020-01-01</td>
-                      </tr>
-                      <tr>
-                        <td><code>data_situacao_cadastral_ate</code></td>
-                        <td>date</td>
-                        <td>Data da situação cadastral ATÉ (YYYY-MM-DD)</td>
-                        <td>2024-12-31</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Datas</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
                       <tr>
                         <td><code>data_inicio_atividade_min</code></td>
                         <td>date</td>
@@ -302,78 +185,6 @@ X-API-Key: sua_chave_api`}</pre>
                         <td>date</td>
                         <td>Data de início máxima (YYYY-MM-DD)</td>
                         <td>2024-12-31</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Atividade econômica</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><code>cnae</code></td>
-                        <td>string</td>
-                        <td>CNAE principal (atividade econômica)</td>
-                        <td>4712100</td>
-                      </tr>
-                      <tr>
-                        <td><code>cnae_secundario</code></td>
-                        <td>string</td>
-                        <td>CNAE secundário (busca parcial)</td>
-                        <td>6421</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Tipo de estabelecimento</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><code>identificador_matriz_filial</code></td>
-                        <td>string</td>
-                        <td>1=Matriz, 2=Filial</td>
-                        <td>1</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <h4 style={{ marginTop: '24px' }}>Regime tributário</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Parâmetro</th>
-                        <th>Tipo</th>
-                        <th>Descrição</th>
-                        <th>Exemplo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><code>simples</code></td>
-                        <td>string</td>
-                        <td>Optante pelo Simples Nacional (S/N)</td>
-                        <td>S</td>
-                      </tr>
-                      <tr>
-                        <td><code>mei</code></td>
-                        <td>string</td>
-                        <td>Optante pelo MEI (S/N)</td>
-                        <td>S</td>
                       </tr>
                     </tbody>
                   </table>
@@ -392,17 +203,39 @@ X-API-Key: sua_chave_api`}</pre>
                       <tr>
                         <td><code>page</code></td>
                         <td>number</td>
-                        <td>Número da página (padrão: 1)</td>
+                        <td>Número da página (alternativa a <code>offset</code>)</td>
                         <td>1</td>
                       </tr>
                       <tr>
                         <td><code>per_page</code></td>
                         <td>number</td>
-                        <td>Itens por página (padrão: 20, máx: 100)</td>
+                        <td>Itens por página (1 a 1000; teto conforme plano)</td>
                         <td>50</td>
+                      </tr>
+                      <tr>
+                        <td><code>limit</code></td>
+                        <td>number</td>
+                        <td>Máximo de resultados quando <code>per_page</code> não é usado (padrão: 100, máx: 1000)</td>
+                        <td>100</td>
+                      </tr>
+                      <tr>
+                        <td><code>offset</code></td>
+                        <td>number</td>
+                        <td>Deslocamento inicial quando <code>page</code> não é usado (padrão: 0)</td>
+                        <td>0</td>
                       </tr>
                     </tbody>
                   </table>
+                </div>
+
+                <div className="docs-callout info">
+                  <h4>Código de município (TOM/RFB)</h4>
+                  <p>
+                    O parâmetro <code>municipio</code> aceita o código TOM usado pela Receita Federal
+                    (4 dígitos, ex: 7107 = São Paulo), e <strong>não</strong> o código IBGE de 7 dígitos.
+                    Obtenha os códigos válidos no endpoint <code>/municipios/:uf</code>. Também é possível
+                    informar o nome do município (busca parcial, ex: <code>municipio=SAO PAULO</code>).
+                  </p>
                 </div>
 
                 <div className="endpoint-example">
@@ -410,23 +243,23 @@ X-API-Key: sua_chave_api`}</pre>
                   <pre>{`{
   "total": 1234,
   "page": 1,
-  "per_page": 20,
-  "total_pages": 62,
+  "per_page": 100,
+  "total_pages": 13,
   "items": [...]
 }`}</pre>
 
                   <h4>Exemplos de requisição</h4>
                   <pre>{`# Empresas ativas em SP
-GET ${API_URL}/search?uf=SP&situacao_cadastral=02
+GET ${API_URL}/search?uf=SP&situacao=02
 
-# Grandes empresas com capital > 1 milhão
-GET ${API_URL}/search?porte=4&capital_social_min=1000000
+# Busca por razão social
+GET ${API_URL}/search?razao_social=PETROBRAS
 
-# MEIs no RJ
-GET ${API_URL}/search?mei=S&uf=RJ&situacao_cadastral=02
+# Empresas de tecnologia em São Paulo (código TOM 7107)
+GET ${API_URL}/search?cnae=6201500&municipio=7107&situacao=02
 
 # Empresas abertas em 2024
-GET ${API_URL}/search?data_inicio_atividade_de=2024-01-01&data_inicio_atividade_ate=2024-12-31`}</pre>
+GET ${API_URL}/search?data_inicio_atividade_min=2024-01-01&data_inicio_atividade_max=2024-12-31`}</pre>
                 </div>
               </div>
             )}
@@ -436,11 +269,32 @@ GET ${API_URL}/search?data_inicio_atividade_de=2024-01-01&data_inicio_atividade_
                 <span className="method get">GET</span>
                 <code>/cnpj/:cnpj/socios</code>
               </div>
-              <p>Lista os sócios de uma empresa.</p>
+              <p>Lista os sócios de uma empresa (máximo 1.000 resultados por CNPJ).</p>
               <div className="endpoint-example">
-                <h4>Exemplo</h4>
+                <h4>Performance</h4>
+                <p>Resultados em cache por 30 minutos.</p>
+                <h4>Exemplo de requisição</h4>
                 <pre>{`GET ${API_URL}/cnpj/00000000000191/socios
 X-API-Key: sua_chave_api`}</pre>
+                <h4>Exemplo de resposta</h4>
+                <pre>{`[
+  {
+    "cnpj_basico": "00000000",
+    "identificador_socio": "2",
+    "identificador_socio_desc": "Pessoa Física",
+    "nome_socio": "JOÃO DA SILVA",
+    "cnpj_cpf_socio": "***123456**",
+    "qualificacao_socio": "49",
+    "qualificacao_socio_desc": "Sócio-Administrador",
+    "data_entrada_sociedade": "2020-01-15",
+    "faixa_etaria": "4",
+    "faixa_etaria_desc": "31-40 anos"
+  }
+]`}</pre>
+                <p style={{ marginTop: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  Nota: por questões de performance, empresas com mais de 1.000 sócios terão seus
+                  resultados limitados. CPFs de pessoas físicas são retornados mascarados (LGPD).
+                </p>
               </div>
             </div>
 
@@ -611,14 +465,19 @@ X-API-Key: sua_chave_api`}</pre>
                 <h4>Resposta</h4>
                 <pre>{`[
   {
-    "codigo": "3550308",
-    "descricao": "SAO PAULO"
+    "codigo": "6291",
+    "descricao": "CAMPINAS"
   },
   {
-    "codigo": "3509502",
-    "descricao": "CAMPINAS"
+    "codigo": "7107",
+    "descricao": "SAO PAULO"
   }
 ]`}</pre>
+                <p style={{ marginTop: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  Os códigos retornados são os códigos TOM da Receita Federal (4 dígitos), diferentes
+                  dos códigos IBGE (7 dígitos). Use-os no filtro <code>municipio</code> de{' '}
+                  <code>/search</code> e <code>/batch/search</code>.
+                </p>
               </div>
             </div>
 
@@ -627,8 +486,15 @@ X-API-Key: sua_chave_api`}</pre>
                 <span className="method get">GET</span>
                 <code>/stats</code>
               </div>
-              <p>Retorna estatísticas gerais do banco de dados (não requer autenticação).</p>
+              <p>
+                Retorna estatísticas gerais do banco de dados. Requer autenticação via token JWT
+                (header <code>Authorization: Bearer</code>), obtido ao fazer login — este endpoint
+                não aceita <code>X-API-Key</code>. Resultado em cache por 10 minutos.
+              </p>
               <div className="endpoint-example">
+                <h4>Exemplo de requisição</h4>
+                <pre>{`GET ${API_URL}/stats
+Authorization: Bearer seu_token_jwt`}</pre>
                 <h4>Resposta</h4>
                 <pre>{`{
   "total_empresas": 52678123,
@@ -640,36 +506,6 @@ X-API-Key: sua_chave_api`}</pre>
               </div>
             </div>
 
-            <div className="endpoint">
-              <div className="endpoint-header">
-                <span className="method get">GET</span>
-                <code>/api/v1/cnpj/:cnpj/socios</code>
-              </div>
-              <p>Retorna os sócios de uma empresa (máximo 1.000 resultados).</p>
-              <div className="endpoint-example">
-                <h4>Base de dados</h4>
-                <p>26,5 milhões de sócios cadastrados.</p>
-                <h4>Performance</h4>
-                <p>Consulta otimizada com cache de 30 minutos.</p>
-                <h4>Exemplo de requisição</h4>
-                <pre>{`GET ${API_URL}/api/v1/cnpj/00000000000191/socios
-X-API-Key: sua_chave_api`}</pre>
-                <h4>Exemplo de resposta</h4>
-                <pre>{`[
-  {
-    "cnpj_basico": "00000000",
-    "identificador_socio": "2",
-    "nome_socio": "JOÃO DA SILVA",
-    "cnpj_cpf_socio": "***123456**",
-    "qualificacao_socio": "49",
-    "data_entrada_sociedade": "2020-01-15"
-  }
-]`}</pre>
-                <p style={{ marginTop: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  Nota: por questões de performance, empresas com mais de 1.000 sócios terão seus resultados limitados.
-                </p>
-              </div>
-            </div>
           </section>
 
           <section id="batch" className="doc-section">
@@ -706,19 +542,25 @@ X-API-Key: sua_chave_api`}</pre>
                 <h4>Starter</h4>
                 <div className="num">1.000</div>
                 <p className="unit">créditos</p>
-                <p className="per">~R$ 0,10/crédito</p>
+                <p className="per">R$ 49,90 (~R$ 0,05/crédito)</p>
               </div>
               <div className="price-card">
-                <h4>Business</h4>
+                <h4>Basic</h4>
                 <div className="num">5.000</div>
                 <p className="unit">créditos</p>
-                <p className="per">~R$ 0,08/crédito</p>
+                <p className="per">R$ 199,90 (~R$ 0,04/crédito)</p>
+              </div>
+              <div className="price-card">
+                <h4>Professional</h4>
+                <div className="num">10.000</div>
+                <p className="unit">créditos</p>
+                <p className="per">R$ 349,90 (~R$ 0,035/crédito)</p>
               </div>
               <div className="price-card">
                 <h4>Enterprise</h4>
-                <div className="num">25.000</div>
+                <div className="num">50.000</div>
                 <p className="unit">créditos</p>
-                <p className="per">~R$ 0,06/crédito</p>
+                <p className="per">R$ 1.499,90 (~R$ 0,03/crédito)</p>
               </div>
             </div>
 
@@ -726,19 +568,32 @@ X-API-Key: sua_chave_api`}</pre>
               <h4>Dica de economia</h4>
               <p>
                 Quanto maior o pacote, menor o custo por crédito. Economize até 40% comprando pacotes maiores.
-                Os créditos nunca expiram, então você pode comprar agora e usar quando quiser.
+                Os créditos nunca expiram, então você pode comprar agora e usar quando quiser. A lista
+                sempre atualizada de pacotes e preços está disponível em <code>GET /batch/packages</code>.
               </p>
             </div>
 
             <div className="endpoint">
               <div className="endpoint-header">
                 <span className="method post">POST</span>
-                <code>/api/v1/batch/search</code>
+                <code>/batch/search</code>
               </div>
-              <p>Executa uma busca em lote com filtros avançados. Retorna empresas que correspondem aos critérios.</p>
+              <p>
+                Executa uma busca em lote com filtros avançados. Retorna empresas que correspondem
+                aos critérios. Autenticação via <code>X-API-Key</code>.
+              </p>
+
+              <div className="docs-callout danger">
+                <h4>Filtros vão na query string, não no corpo</h4>
+                <p>
+                  Apesar do método POST, este endpoint <strong>não lê corpo JSON</strong>: todos os
+                  filtros devem ser passados como parâmetros de query string na URL. Filtros enviados
+                  no corpo são ignorados — a busca roda sem filtro nenhum e consome créditos do mesmo jeito.
+                </p>
+              </div>
 
               <div className="params-table">
-                <h4>Filtros disponíveis (corpo da requisição — JSON)</h4>
+                <h4>Filtros disponíveis (query string)</h4>
                 <table>
                   <thead>
                     <tr>
@@ -753,55 +608,109 @@ X-API-Key: sua_chave_api`}</pre>
                       <td><code>razao_social</code></td>
                       <td>string</td>
                       <td>Busca parcial na razão social</td>
-                      <td>"TECH"</td>
+                      <td>TECH</td>
+                    </tr>
+                    <tr>
+                      <td><code>nome_fantasia</code></td>
+                      <td>string</td>
+                      <td>Busca parcial no nome fantasia</td>
+                      <td>Extra</td>
                     </tr>
                     <tr>
                       <td><code>cnae</code></td>
                       <td>string</td>
-                      <td>Código CNAE (atividade econômica)</td>
-                      <td>"6201500"</td>
+                      <td>CNAE principal (código exato)</td>
+                      <td>6201500</td>
+                    </tr>
+                    <tr>
+                      <td><code>cnae_secundario</code></td>
+                      <td>string</td>
+                      <td>CNAE secundário (busca parcial)</td>
+                      <td>6421</td>
                     </tr>
                     <tr>
                       <td><code>uf</code></td>
                       <td>string</td>
                       <td>Sigla do estado</td>
-                      <td>"SP"</td>
+                      <td>SP</td>
                     </tr>
                     <tr>
                       <td><code>municipio</code></td>
                       <td>string</td>
-                      <td>Código do município (IBGE)</td>
-                      <td>"3550308"</td>
-                    </tr>
-                    <tr>
-                      <td><code>porte</code></td>
-                      <td>string</td>
-                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande</td>
-                      <td>"4"</td>
+                      <td>Código TOM/RFB do município (4 dígitos, exato — veja /municipios/:uf)</td>
+                      <td>7107</td>
                     </tr>
                     <tr>
                       <td><code>situacao_cadastral</code></td>
                       <td>string</td>
-                      <td>02=Ativa, 04=Inapta, 08=Baixada</td>
-                      <td>"02"</td>
+                      <td>01=Nula, 02=Ativa, 03=Suspensa, 04=Inapta, 08=Baixada</td>
+                      <td>02</td>
                     </tr>
                     <tr>
-                      <td><code>capital_social_min</code></td>
-                      <td>number</td>
-                      <td>Capital social mínimo</td>
-                      <td>1000000</td>
+                      <td><code>data_inicio_atividade_min</code></td>
+                      <td>date</td>
+                      <td>Data de início mínima (YYYY-MM-DD)</td>
+                      <td>2020-01-01</td>
                     </tr>
                     <tr>
-                      <td><code>capital_social_max</code></td>
-                      <td>number</td>
-                      <td>Capital social máximo</td>
-                      <td>10000000</td>
+                      <td><code>data_inicio_atividade_max</code></td>
+                      <td>date</td>
+                      <td>Data de início máxima (YYYY-MM-DD)</td>
+                      <td>2024-12-31</td>
+                    </tr>
+                    <tr>
+                      <td><code>porte</code></td>
+                      <td>string</td>
+                      <td>1=Micro, 2=Pequena, 3=Média, 4=Grande, 5=Demais</td>
+                      <td>4</td>
+                    </tr>
+                    <tr>
+                      <td><code>identificador_matriz_filial</code></td>
+                      <td>string</td>
+                      <td>1=Matriz, 2=Filial</td>
+                      <td>1</td>
+                    </tr>
+                    <tr>
+                      <td><code>simples</code></td>
+                      <td>string</td>
+                      <td>Optante pelo Simples Nacional (S/N)</td>
+                      <td>S</td>
+                    </tr>
+                    <tr>
+                      <td><code>mei</code></td>
+                      <td>string</td>
+                      <td>Optante pelo MEI (S/N)</td>
+                      <td>S</td>
+                    </tr>
+                    <tr>
+                      <td><code>cep</code></td>
+                      <td>string</td>
+                      <td>CEP completo ou parcial</td>
+                      <td>01310</td>
+                    </tr>
+                    <tr>
+                      <td><code>bairro</code></td>
+                      <td>string</td>
+                      <td>Nome do bairro (busca parcial)</td>
+                      <td>Centro</td>
+                    </tr>
+                    <tr>
+                      <td><code>logradouro</code></td>
+                      <td>string</td>
+                      <td>Nome da rua/avenida (busca parcial)</td>
+                      <td>Paulista</td>
                     </tr>
                     <tr>
                       <td><code>limit</code></td>
                       <td>number</td>
-                      <td>Limite de resultados (máx: 10.000)</td>
+                      <td>Resultados por página (padrão: 100, máx: 1000)</td>
                       <td>100</td>
+                    </tr>
+                    <tr>
+                      <td><code>offset</code></td>
+                      <td>number</td>
+                      <td>Deslocamento inicial (padrão: 0)</td>
+                      <td>0</td>
                     </tr>
                   </tbody>
                 </table>
@@ -813,94 +722,113 @@ X-API-Key: sua_chave_api`}</pre>
                   <p>
                     Cada empresa retornada na resposta consome 1 crédito. Se sua busca retornar 500 empresas,
                     você gastará 500 créditos. Use o parâmetro <code>limit</code> para controlar o consumo.
+                    Se não houver créditos suficientes para a página solicitada, a API retorna
+                    <code> 402 Payment Required</code> sem consumir nada.
                   </p>
                 </div>
 
                 <h4>Exemplo 1: empresas de tecnologia ativas em SP</h4>
-                <pre>{`POST ${API_URL}/api/v1/batch/search
-X-API-Key: sua_chave_api
-Content-Type: application/json
-
-{
-  "cnae": "6201500",
-  "uf": "SP",
-  "situacao_cadastral": "02",
-  "limit": 100
-}
+                <pre>{`curl -X POST "${API_URL}/batch/search?cnae=6201500&uf=SP&situacao_cadastral=02&limit=100" \\
+  -H "X-API-Key: sua_chave_api"
 
 Resposta:
 {
-  "success": true,
-  "total_found": 1234,
-  "returned": 100,
-  "credits_used": 100,
-  "remaining_credits": 900,
-  "results": [
+  "total": 1234,
+  "page": 1,
+  "per_page": 100,
+  "total_pages": 13,
+  "items": [
     {
-      "cnpj": "12345678000190",
+      "cnpj_completo": "12345678000190",
       "razao_social": "TECH SOLUTIONS LTDA",
       "nome_fantasia": "TECH SOLUTIONS",
-      "cnae": "6201500",
+      "situacao_cadastral": "02",
+      "cnae_fiscal_principal": "6201500",
       "uf": "SP",
-      "municipio": "SAO PAULO",
-      "porte": "2",
+      "municipio_desc": "SAO PAULO",
+      "porte_empresa": "2",
       "capital_social": "50000.00",
-      "situacao_cadastral": "02"
+      ...
     },
     ...
   ]
-}`}</pre>
-
-                <h4>Exemplo 2: grandes empresas com capital acima de R$ 1 milhão no RJ</h4>
-                <pre>{`POST ${API_URL}/api/v1/batch/search
-X-API-Key: sua_chave_api
-Content-Type: application/json
-
-{
-  "uf": "RJ",
-  "porte": "4",
-  "capital_social_min": 1000000,
-  "situacao_cadastral": "02",
-  "limit": 50
 }
+
+# 100 empresas retornadas = 100 créditos consumidos`}</pre>
+
+                <h4>Exemplo 2: MEIs ativos no RJ</h4>
+                <pre>{`curl -X POST "${API_URL}/batch/search?uf=RJ&mei=S&situacao_cadastral=02&limit=50" \\
+  -H "X-API-Key: sua_chave_api"
 
 # Retorna até 50 empresas
 # Consome 50 créditos (ou menos se houver menos resultados)`}</pre>
 
                 <h4>Exemplo 3: busca por razão social parcial</h4>
-                <pre>{`POST ${API_URL}/api/v1/batch/search
-X-API-Key: sua_chave_api
-Content-Type: application/json
+                <pre>{`curl -X POST "${API_URL}/batch/search?razao_social=RESTAURANTE&uf=SP&municipio=7107&limit=200" \\
+  -H "X-API-Key: sua_chave_api"
 
-{
-  "razao_social": "RESTAURANTE",
-  "uf": "SP",
-  "municipio": "3550308",
-  "limit": 200
-}
-
-# Busca todas as empresas com "RESTAURANTE" no nome
-# em São Paulo/SP, retorna até 200 resultados`}</pre>
+# Busca empresas com "RESTAURANTE" no nome
+# em São Paulo/SP (código TOM 7107), retorna até 200 resultados`}</pre>
               </div>
             </div>
 
             <div className="endpoint">
               <div className="endpoint-header">
                 <span className="method get">GET</span>
-                <code>/api/v1/batch/credits</code>
+                <code>/batch/credits</code>
               </div>
-              <p>Consulta o saldo atual de créditos de consultas em lote.</p>
+              <p>
+                Consulta o saldo atual de créditos de consultas em lote. Requer token JWT da sessão
+                web (header <code>Authorization: Bearer</code>) — este endpoint não aceita{' '}
+                <code>X-API-Key</code>. Você também pode ver o saldo direto no dashboard.
+              </p>
               <div className="endpoint-example">
                 <h4>Exemplo de requisição</h4>
-                <pre>{`GET ${API_URL}/api/v1/batch/credits
-X-API-Key: sua_chave_api
+                <pre>{`GET ${API_URL}/batch/credits
+Authorization: Bearer seu_token_jwt
 
 Resposta:
 {
   "total_credits": 1000,
   "used_credits": 250,
-  "remaining_credits": 750
+  "available_credits": 750,
+  "monthly_included_credits": 0,
+  "purchased_credits": 1000,
+  "plan_monthly_batch_queries": 0,
+  "batch_queries_this_month": 250
 }`}</pre>
+              </div>
+            </div>
+
+            <div className="endpoint">
+              <div className="endpoint-header">
+                <span className="method get">GET</span>
+                <code>/batch/packages</code>
+              </div>
+              <p>Lista os pacotes de créditos disponíveis para compra. Não requer autenticação.</p>
+              <div className="endpoint-example">
+                <h4>Exemplo de requisição</h4>
+                <pre>{`GET ${API_URL}/batch/packages
+
+Resposta:
+[
+  {
+    "id": 1,
+    "name": "starter",
+    "display_name": "Pacote Starter",
+    "description": "1.000 consultas em lote - Ideal para começar",
+    "credits": 1000,
+    "price_brl": 49.9,
+    "price_per_unit": 0.0499,
+    "sort_order": 1,
+    "is_active": true
+  },
+  ...
+]`}</pre>
+                <p style={{ marginTop: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  A compra é feita pelo dashboard (checkout Stripe). Após o pagamento, os créditos
+                  são adicionados automaticamente à sua conta.
+                </p>
               </div>
             </div>
 
@@ -959,7 +887,7 @@ const buscarEmpresas = async () => {
     const response = await api.get('/search', {
       params: {
         uf: 'SP',
-        situacao_cadastral: '02',
+        situacao: '02',
         page: 1,
         per_page: 20
       }
@@ -1037,11 +965,10 @@ def buscar_empresas(filtros):
         print(f'Erro: {response.status_code} - {response.text}')
         return None
 
-# Exemplo: Buscar empresas de grande porte em SP, ativas
+# Exemplo: Buscar empresas ativas em SP
 filtros = {
     "uf": "SP",
-    "porte": "4",
-    "situacao_cadastral": "02",
+    "situacao": "02",
     "page": 1,
     "per_page": 50
 }
@@ -1122,7 +1049,7 @@ ${showAdmin ? `
 // Buscar empresas com filtros (APENAS ADMIN)
 $params = http_build_query([
     'uf' => 'SP',
-    'situacao_cadastral' => '02',
+    'situacao' => '02',
     'page' => 1
 ]);
 $resultado = apiRequest("$apiUrl/search?$params", $apiKey);
@@ -1153,11 +1080,11 @@ curl -X GET "${API_URL}/cnpj/00000000000191" \\
   -H "X-API-Key: sua_chave_api"
 
 ${showAdmin ? `# 2. Buscar empresas ativas em SP (APENAS ADMIN)
-curl -X GET "${API_URL}/search?uf=SP&situacao_cadastral=02&page=1&per_page=20" \\
+curl -X GET "${API_URL}/search?uf=SP&situacao=02&page=1&per_page=20" \\
   -H "X-API-Key: sua_chave_api"
 
 # 3. Buscar empresas com múltiplos filtros (APENAS ADMIN)
-curl -X GET "${API_URL}/search?uf=RJ&porte=4&capital_social_min=1000000&simples=N&identificador_matriz_filial=1" \\
+curl -X GET "${API_URL}/search?uf=RJ&cnae=6201500&situacao=02&data_inicio_atividade_min=2024-01-01" \\
   -H "X-API-Key: sua_chave_api"` : '# Endpoints /search disponíveis apenas para administrador'}
 
 # Listar sócios de uma empresa
@@ -1172,8 +1099,9 @@ curl -X GET "${API_URL}/cnpj/00000000000191/cnaes-secundarios" \\
 curl -X GET "${API_URL}/search?razao_social=petrobras&page=1" \\
   -H "X-API-Key: sua_chave_api"
 
-# Ver estatísticas gerais (não requer API Key)
-curl -X GET "${API_URL}/stats"`}</pre>
+# Ver estatísticas gerais (requer token JWT do login, não API Key)
+curl -X GET "${API_URL}/stats" \\
+  -H "Authorization: Bearer seu_token_jwt"`}</pre>
             </div>
 
             <div className="docs-callout info">
@@ -1368,7 +1296,17 @@ curl -X GET "${API_URL}/stats"`}</pre>
                 <tr>
                   <td><code>401</code></td>
                   <td>Unauthorized</td>
-                  <td>API Key não fornecida ou inválida</td>
+                  <td>API Key (ou token JWT) não fornecida ou inválida</td>
+                </tr>
+                <tr>
+                  <td><code>402</code></td>
+                  <td>Payment Required</td>
+                  <td>Créditos de consultas em lote insuficientes — adquira um pacote</td>
+                </tr>
+                <tr>
+                  <td><code>403</code></td>
+                  <td>Forbidden</td>
+                  <td>Recurso não incluído no seu plano — faça upgrade</td>
                 </tr>
                 <tr>
                   <td><code>404</code></td>

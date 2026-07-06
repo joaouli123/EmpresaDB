@@ -36,6 +36,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
   const adminMenuItems = [
     { path: '/admin', icon: Activity, label: 'Visão Geral' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
+    { path: '/admin/plans', icon: CreditCard, label: 'Planos' },
     { path: '/admin/finance', icon: DollarSign, label: 'Financeiro' },
     { path: '/admin/etl', icon: RefreshCw, label: 'Atualização ETL' },
     { path: '/admin/database', icon: Database, label: 'Banco de Dados' },

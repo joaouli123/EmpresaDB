@@ -9,6 +9,8 @@ from src.database.connection import db_manager
 from src.api.models import PaginatedResponse, EstabelecimentoCompleto
 from src.api.auth import get_current_user
 from src.api.security_logger import log_query
+from src.api.rate_limiter import rate_limiter
+from src.api.plan_service import plan_service, require_feature
 from pydantic import BaseModel
 import logging
 from datetime import datetime
@@ -62,7 +64,8 @@ class PurchaseResponse(BaseModel):
 
 async def verify_api_key_for_batch(x_api_key: str = Header(None)):
     """
-    Verifica API Key e retorna informações do usuário
+    Verifica API Key, resolve o plano do usuário (assinatura Stripe) e aplica
+    rate limiting por plano — mesma política dos demais endpoints da API.
     Usado especificamente para endpoints de consultas em lote
     """
     if not x_api_key:
@@ -77,46 +80,159 @@ async def verify_api_key_for_batch(x_api_key: str = Header(None)):
             status_code=401,
             detail="API Key inválida ou expirada"
         )
-    
-    return user
 
-async def get_user_batch_credits(user_id: int) -> Dict[str, Any]:
-    """Busca créditos de consultas em lote do usuário"""
+    # VERIFICAÇÃO DE ASSINATURA (mesma lógica dos endpoints em routes.py)
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT * FROM clientes.vw_user_batch_credits
-                WHERE user_id = %s
-            """, (user_id,))
-            
-            result = cursor.fetchone()
-            cursor.close()
-            
-            if not result:
+            try:
+                cursor.execute("""
+                    SELECT p.name
+                    FROM clientes.stripe_subscriptions ss
+                    JOIN clientes.plans p ON ss.plan_id = p.id
+                    WHERE ss.user_id = %s
+                        AND ss.current_period_end > NOW()
+                        AND ss.status IN ('active', 'trialing', 'canceled')
+                    ORDER BY ss.created_at DESC
+                    LIMIT 1
+                """, (user['id'],))
+                subscription = cursor.fetchone()
+
+                if subscription:
+                    user['plan'] = subscription[0]
+                else:
+                    # Sem assinatura válida: verificar se há assinatura com pagamento pendente
+                    cursor.execute("""
+                        SELECT ss.status
+                        FROM clientes.stripe_subscriptions ss
+                        WHERE ss.user_id = %s
+                        ORDER BY ss.created_at DESC
+                        LIMIT 1
+                    """, (user['id'],))
+                    any_subscription = cursor.fetchone()
+
+                    if any_subscription and any_subscription[0] in ('past_due', 'unpaid'):
+                        raise HTTPException(
+                            status_code=402,
+                            detail={
+                                "error": "payment_required",
+                                "message": "Sua assinatura está com pagamento pendente. Por favor, atualize suas informações de pagamento para continuar usando a API.",
+                                "action_url": "/subscription",
+                                "help": "Acesse a página de assinatura para atualizar seu método de pagamento",
+                                "suggestions": [
+                                    "Atualize suas informações de pagamento",
+                                    "Verifique se seu cartão não está expirado",
+                                    "Entre em contato com o suporte se o problema persistir"
+                                ]
+                            }
+                        )
+
+                    # Sem assinatura Stripe ativa: plano Free
+                    user['plan'] = 'free'
+            finally:
+                cursor.close()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao verificar assinatura (batch): {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao verificar assinatura. Por favor, tente novamente."
+        )
+
+    # Rate limiting com limites do plano (configuráveis no admin via clientes.plans)
+    user_plan = user.get('plan', 'free')
+    user_role = user.get('role', 'user')
+    plan_cfg = plan_service.get(user_plan)
+    user['plan_config'] = plan_cfg
+    if user_role == 'admin':
+        await rate_limiter.check_rate_limit(user['id'], user_plan, user_role)
+    else:
+        await rate_limiter.check_rate_limit(
+            user['id'], user_plan, user_role,
+            max_requests=plan_cfg['rate_per_hour'],
+            window_seconds=3600,
+            burst_limit=plan_cfg['burst_per_min'],
+        )
+
+    return user
+
+async def get_user_batch_credits(user_id: int) -> Dict[str, Any]:
+    """
+    Busca créditos de consultas em lote do usuário.
+
+    Concessão LAZY dos créditos mensais do plano: se o plano do usuário inclui
+    monthly_batch_queries > 0 e ainda não houve concessão/renovação no mês
+    corrente, os créditos do mês são concedidos automaticamente aqui (upsert
+    idempotente — no máximo uma renovação por usuário por mês).
+    """
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("""
+                    SELECT * FROM clientes.vw_user_batch_credits
+                    WHERE user_id = %s
+                """, (user_id,))
+
+                result = cursor.fetchone()
+
+                if not result:
+                    return {
+                        'total_credits': 0,
+                        'used_credits': 0,
+                        'available_credits': 0,
+                        'monthly_included_credits': 0,
+                        'purchased_credits': 0,
+                        'plan_monthly_batch_queries': 0,
+                        'batch_queries_this_month': 0
+                    }
+
+                # View retorna: user_id(0), username(1), email(2), plan_monthly_batch_queries(3),
+                # total_credits(4), used_credits(5), available_credits(6), monthly_included_credits(7),
+                # purchased_credits(8), batch_queries_this_month(9), subscription_status(10), subscription_end_date(11)
+                plan_monthly = result[3] or 0
+
+                # Concessão lazy dos créditos mensais inclusos no plano:
+                # - INSERT se o usuário ainda não tem registro de créditos;
+                # - UPDATE (renovação) apenas se a última concessão foi em mês anterior
+                #   ou se o plano passou a incluir mais créditos mensais (upgrade).
+                # Idempotente: chamadas repetidas no mesmo mês não concedem de novo.
+                if plan_monthly > 0:
+                    cursor.execute("""
+                        INSERT INTO clientes.batch_query_credits
+                            (user_id, total_credits, used_credits, monthly_included_credits, purchased_credits, last_reset_at)
+                        VALUES (%s, %s, 0, %s, 0, date_trunc('month', CURRENT_DATE))
+                        ON CONFLICT (user_id) DO UPDATE SET
+                            used_credits = 0,
+                            total_credits = EXCLUDED.monthly_included_credits + clientes.batch_query_credits.purchased_credits,
+                            monthly_included_credits = EXCLUDED.monthly_included_credits,
+                            last_reset_at = date_trunc('month', CURRENT_DATE),
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE clientes.batch_query_credits.last_reset_at < date_trunc('month', CURRENT_DATE)
+                           OR COALESCE(clientes.batch_query_credits.monthly_included_credits, 0) < EXCLUDED.monthly_included_credits
+                    """, (user_id, plan_monthly, plan_monthly))
+
+                    if cursor.rowcount > 0:
+                        logger.info(f"✅ Créditos mensais de lote concedidos: user_id={user_id}, créditos={plan_monthly}")
+                        # Reler a view para refletir os créditos recém-concedidos
+                        cursor.execute("""
+                            SELECT * FROM clientes.vw_user_batch_credits
+                            WHERE user_id = %s
+                        """, (user_id,))
+                        result = cursor.fetchone()
+
                 return {
-                    'total_credits': 0,
-                    'used_credits': 0,
-                    'available_credits': 0,
-                    'monthly_included_credits': 0,
-                    'purchased_credits': 0,
-                    'plan_monthly_batch_queries': 0,
-                    'batch_queries_this_month': 0
+                    'total_credits': result[4] or 0,
+                    'used_credits': result[5] or 0,
+                    'available_credits': result[6] or 0,
+                    'monthly_included_credits': result[7] or 0,
+                    'purchased_credits': result[8] or 0,
+                    'plan_monthly_batch_queries': result[3] or 0,
+                    'batch_queries_this_month': result[9] or 0
                 }
-            
-            # View retorna: user_id(0), username(1), email(2), plan_monthly_batch_queries(3),
-            # total_credits(4), used_credits(5), available_credits(6), monthly_included_credits(7),
-            # purchased_credits(8), batch_queries_this_month(9), subscription_status(10), subscription_end_date(11)
-            return {
-                'total_credits': result[4] or 0,
-                'used_credits': result[5] or 0,
-                'available_credits': result[6] or 0,
-                'monthly_included_credits': result[7] or 0,
-                'purchased_credits': result[8] or 0,
-                'plan_monthly_batch_queries': result[3] or 0,
-                'batch_queries_this_month': result[9] or 0
-            }
+            finally:
+                cursor.close()
     except Exception as e:
         logger.error(f"Erro ao buscar créditos: {e}")
         return {
@@ -140,7 +256,7 @@ async def batch_search_companies(
     cnae: str = Query(None, description="CNAE principal"),
     cnae_secundario: str = Query(None, description="CNAE secundário"),
     uf: str = Query(None, description="UF"),
-    municipio: str = Query(None, description="Código IBGE do município"),
+    municipio: str = Query(None, description="Nome do município ou código IBGE"),
     situacao_cadastral: str = Query(None, description="Situação cadastral"),
     data_inicio_atividade_min: str = Query(None, description="Data início atividade mínima (YYYY-MM-DD)"),
     data_inicio_atividade_max: str = Query(None, description="Data início atividade máxima (YYYY-MM-DD)"),
@@ -175,8 +291,11 @@ async def batch_search_companies(
     - Tipo (matriz/filial)
     - Regime tributário (Simples Nacional, MEI)
     """
+    # Gate por plano: consultas em lote precisam estar inclusas no plano
+    require_feature(user, 'can_batch', 'Consultas em lote')
+
     try:
-        # Verificar créditos disponíveis
+        # Verificar créditos disponíveis (com concessão lazy dos créditos mensais do plano)
         credits_info = await get_user_batch_credits(user['id'])
         available_credits = credits_info['available_credits']
         
@@ -200,10 +319,7 @@ async def batch_search_companies(
         # Construir query dinâmica
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-            
-            # Desabilitar parallel workers
-            cursor.execute("SET max_parallel_workers_per_gather = 0")
-            
+
             conditions = []
             params = []
             
@@ -228,8 +344,15 @@ async def batch_search_companies(
                 params.append(uf.upper())
             
             if municipio:
-                conditions.append("municipio = %s")
-                params.append(municipio)
+                # A MV não tem a coluna 'municipio' (código): usar municipio_desc.
+                # Aceita nome (ILIKE) ou código IBGE (resolve a descrição), como em /search.
+                municipio_clean = municipio.strip()
+                if municipio_clean.isdigit():
+                    conditions.append("municipio_desc = (SELECT descricao FROM municipios WHERE codigo = %s LIMIT 1)")
+                    params.append(municipio_clean)
+                else:
+                    conditions.append("municipio_desc ILIKE %s")
+                    params.append(f"%{municipio_clean}%")
             
             if situacao_cadastral:
                 conditions.append("situacao_cadastral = %s")
@@ -286,7 +409,40 @@ async def batch_search_companies(
                 params.append(f"%{logradouro}%")
             
             where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
+
+            # COBRAR ANTES da query cara: reserva atômica de 'limit' créditos
+            # (máximo que esta página pode retornar). Se não houver saldo,
+            # retorna 402 SEM executar COUNT/busca. O excedente é estornado
+            # após a busca, na MESMA transação (rollback automático em erro).
+            cursor.execute("""
+                UPDATE clientes.batch_query_credits
+                SET used_credits = used_credits + %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s
+                  AND (total_credits - used_credits) >= %s
+                RETURNING available_credits
+            """, (limit, user['id'], limit))
+            reservation = cursor.fetchone()
+
+            if not reservation:
+                cursor.close()
+                raise HTTPException(
+                    status_code=402,
+                    detail={
+                        "error": "insufficient_batch_credits",
+                        "message": f"Você precisa de {limit} créditos, mas tem apenas {available_credits} disponíveis.",
+                        "action_url": "/batch/packages",
+                        "help": "Adquira mais créditos para continuar",
+                        "credits_needed": limit,
+                        "credits_available": available_credits,
+                        "suggestions": [
+                            f"Compre um pacote de consultas em lote (+{limit} créditos)",
+                            "Reduza o número de resultados por página (use o parâmetro 'limit')",
+                            "Faça upgrade do seu plano"
+                        ]
+                    }
+                )
+
             # COUNT exato para empresas
             count_query = f"""
                 SELECT COUNT(*)
@@ -296,9 +452,16 @@ async def batch_search_companies(
             cursor.execute(count_query, params)
             total_result = cursor.fetchone()
             total = total_result[0] if total_result else 0
-            
+
             # Verificar se há resultados para retornar
             if total == 0:
+                # Estornar a reserva integralmente (nenhum resultado retornado)
+                cursor.execute("""
+                    UPDATE clientes.batch_query_credits
+                    SET used_credits = GREATEST(used_credits - %s, 0),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE user_id = %s
+                """, (limit, user['id']))
                 cursor.close()
                 return PaginatedResponse(
                     total=0,
@@ -307,29 +470,7 @@ async def batch_search_companies(
                     total_pages=0,
                     items=[]
                 )
-            
-            # Calcular quantos créditos serão necessários para esta página
-            results_in_page = min(limit, total - offset)
-            
-            if results_in_page > available_credits:
-                cursor.close()
-                raise HTTPException(
-                    status_code=402,
-                    detail={
-                        "error": "insufficient_batch_credits",
-                        "message": f"Você precisa de {results_in_page} créditos, mas tem apenas {available_credits} disponíveis.",
-                        "action_url": "/batch/packages",
-                        "help": "Adquira mais créditos para continuar",
-                        "credits_needed": results_in_page,
-                        "credits_available": available_credits,
-                        "suggestions": [
-                            f"Compre um pacote de consultas em lote (+{results_in_page} créditos)",
-                            "Reduza o número de resultados por página (use o parâmetro 'limit')",
-                            "Faça upgrade do seu plano"
-                        ]
-                    }
-                )
-            
+
             # Buscar dados
             data_query = f"""
                 SELECT 
@@ -348,8 +489,7 @@ async def batch_search_companies(
             
             cursor.execute(data_query, params + [limit, offset])
             results = cursor.fetchall()
-            cursor.close()
-            
+
             columns = [
                 'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
                 'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
@@ -378,9 +518,18 @@ async def batch_search_companies(
                 
                 items.append(EstabelecimentoCompleto(**data))
             
-            # COBRAR CRÉDITOS - Apenas pelos resultados retornados
+            # COBRAR CRÉDITOS - Apenas pelos resultados retornados:
+            # estorna a diferença entre a reserva ('limit') e o efetivamente retornado
             credits_to_consume = len(items)
-            
+            refund = limit - credits_to_consume
+            if refund > 0:
+                cursor.execute("""
+                    UPDATE clientes.batch_query_credits
+                    SET used_credits = GREATEST(used_credits - %s, 0),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE user_id = %s
+                """, (refund, user['id']))
+
             # Registrar filtros usados para auditoria
             filters_used = {
                 'razao_social': razao_social,
@@ -403,29 +552,31 @@ async def batch_search_companies(
                 'offset': offset
             }
             
-            # Consumir créditos
-            with db_manager.get_connection() as conn:
-                cursor = conn.cursor()
-                try:
-                    cursor.execute("""
-                        SELECT clientes.consume_batch_credits(%s, %s, %s, %s, %s, %s)
-                    """, (
-                        user['id'],
-                        credits_to_consume,
-                        None,  # api_key_id - TODO: pegar do header
-                        json.dumps(filters_used),
-                        len(items),
-                        '/batch/search'
-                    ))
-                    cursor.close()
-                except Exception as e:
-                    cursor.close()
-                    logger.error(f"Erro ao consumir créditos: {e}")
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Erro ao processar cobrança de créditos: {str(e)}"
-                    )
-            
+            # Registrar uso para auditoria (mesma transação da cobrança:
+            # se algo falhar, cobrança e registro são revertidos juntos)
+            if credits_to_consume > 0:
+                cursor.execute("""
+                    INSERT INTO clientes.batch_query_usage (
+                        user_id, api_key_id, credits_used, filters_used, results_returned, endpoint
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    user['id'],
+                    None,  # api_key_id - TODO: pegar do header
+                    credits_to_consume,
+                    json.dumps(filters_used),
+                    len(items),
+                    '/batch/search'
+                ))
+
+                cursor.execute("""
+                    INSERT INTO clientes.monthly_usage (user_id, month_year, batch_queries_used)
+                    VALUES (%s, TO_CHAR(CURRENT_DATE, 'YYYY-MM'), %s)
+                    ON CONFLICT (user_id, month_year)
+                    DO UPDATE SET batch_queries_used = COALESCE(clientes.monthly_usage.batch_queries_used, 0) + EXCLUDED.batch_queries_used
+                """, (user['id'], credits_to_consume))
+
+            cursor.close()
+
             # Log de auditoria
             await log_query(
                 user_id=user['id'],

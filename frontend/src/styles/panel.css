@@ -511,6 +511,115 @@
   margin-top: 14px;
 }
 
+/* ---- Editor de planos (admin) ---- */
+.plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.plan-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.plan-title h2 {
+  margin: 0;
+}
+
+.plan-subs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.plan-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.plan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.plan-field span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.plan-field input {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.plan-toggles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.plan-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: all .15s;
+}
+
+.plan-toggle.on {
+  border-color: var(--primary);
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.plan-toggle input {
+  accent-color: var(--primary);
+}
+
+.plan-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.plan-actions .btn-flat:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.plan-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--success, #16a34a);
+}
+
 .pager span {
   font-size: 13px;
   color: var(--text-secondary);

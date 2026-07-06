@@ -119,10 +119,11 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
             subscription = cursor.fetchone()
 
             if not subscription:
-                # Plano Free (200 consultas/mês) — usar o consumo REAL do mês corrente
+                # Plano Free — limite lido de clientes.plans (configurável no admin)
+                from src.api.plan_service import plan_service
                 now = datetime.now()
                 next_month = now.replace(day=1, month=now.month % 12 + 1, year=now.year if now.month < 12 else now.year + 1)
-                monthly_limit = 200
+                monthly_limit = plan_service.get('free')['monthly_queries']
                 cursor.execute("""
                     SELECT queries_used FROM clientes.monthly_usage
                     WHERE user_id = %s AND month_year = %s
@@ -213,9 +214,10 @@ async def get_usage_stats(current_user: dict = Depends(get_current_user)):
                     total_limit = monthly_limit
                     remaining = max(0, total_limit - queries_this_month)
                 else:
-                    # Usuário Free - 200 consultas/mês
-                    total_limit = 200
-                    remaining = max(0, 200 - queries_this_month)
+                    # Usuário Free — limite lido de clientes.plans (configurável no admin)
+                    from src.api.plan_service import plan_service
+                    total_limit = plan_service.get('free')['monthly_queries']
+                    remaining = max(0, total_limit - queries_this_month)
 
             cursor.close()
 

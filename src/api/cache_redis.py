@@ -20,35 +20,68 @@ class RedisCache:
     Cache Redis com compressão e serialização otimizada
     """
     
+    # Fallback em memória não pode crescer sem limite (memória do worker)
+    _MEMORY_CACHE_MAX_KEYS = 5000
+    # Após falha de conexão, tenta reconectar no máximo a cada N segundos
+    _RECONNECT_INTERVAL = 30
+
     def __init__(self, url=None, host='localhost', port=6379, db=0, password=None):
         """
         Inicializa conexão com Redis. Prioriza a URL (REDIS_URL do Railway);
-        cai para host/port se não houver URL. Em falha, usa cache em memória.
+        cai para host/port se não houver URL. Em falha, usa cache em memória
+        e RECONECTA automaticamente (um blip no boot não desliga o cache para sempre).
         """
+        self._conn_params = dict(url=url, host=host, port=port, db=db, password=password)
+        self._memory_cache = {}
+        self._next_reconnect = 0.0
+        self.redis_client = None
+        self.enabled = False
+        self._try_connect(log_success=True)
+
+    def _try_connect(self, log_success=False):
+        import time as _time
+        p = self._conn_params
         common = dict(
             decode_responses=False,        # bytes (para compressão)
             socket_keepalive=True,
             socket_connect_timeout=5,
+            socket_timeout=2,              # leitura pendurada NÃO trava o worker
             max_connections=50,
             health_check_interval=30,
         )
         try:
-            if url:
-                self.redis_client = redis.Redis.from_url(url, **common)
-                target = url.split('@')[-1]
+            if p["url"]:
+                client = redis.Redis.from_url(p["url"], **common)
+                target = p["url"].split('@')[-1]
             else:
-                self.redis_client = redis.Redis(host=host, port=port, db=db,
-                                                password=password, **common)
-                target = f"{host}:{port}"
-            self.redis_client.ping()
+                client = redis.Redis(host=p["host"], port=p["port"], db=p["db"],
+                                     password=p["password"], **common)
+                target = f"{p['host']}:{p['port']}"
+            client.ping()
+            self.redis_client = client
             self.enabled = True
-            logger.info(f"✅ Redis conectado em {target}")
+            if log_success:
+                logger.info(f"✅ Redis conectado em {target}")
+            else:
+                logger.info(f"✅ Redis reconectado em {target}")
+            return True
         except Exception as e:
             logger.warning(f"⚠️ Redis não disponível: {e}. Cache em memória será usado.")
             self.redis_client = None
             self.enabled = False
-            # Fallback: cache em memória (dict simples)
-            self._memory_cache = {}
+            self._next_reconnect = _time.time() + self._RECONNECT_INTERVAL
+            return False
+
+    def _maybe_reconnect(self):
+        """Se o Redis caiu, tenta religar (no máx. 1x a cada _RECONNECT_INTERVAL s)."""
+        import time as _time
+        if not self.enabled and _time.time() >= self._next_reconnect:
+            self._try_connect()
+
+    def _memory_set(self, key, value):
+        if len(self._memory_cache) >= self._MEMORY_CACHE_MAX_KEYS:
+            self._memory_cache.clear()  # descarte simples: cache é descartável
+        self._memory_cache[key] = value
 
     # Lua: INCR e define EXPIRE só na PRIMEIRA requisição da janela. Evita renovar
     # o TTL a cada chamada (que causaria lockout permanente sob tráfego — RL-01).
@@ -64,6 +97,7 @@ class RedisCache:
         A janela expira de verdade (TTL definido apenas na 1ª requisição).
         Retorna o nº de requisições na janela atual; -1 em falha (fail-open).
         """
+        self._maybe_reconnect()
         if not self.enabled:
             return -1
         try:
@@ -115,6 +149,7 @@ class RedisCache:
         """
         Busca valor do cache
         """
+        self._maybe_reconnect()
         if not self.enabled:
             # Fallback: memória
             return self._memory_cache.get(key)
@@ -134,9 +169,10 @@ class RedisCache:
         """
         Salva valor no cache com TTL (time to live)
         """
+        self._maybe_reconnect()
         if not self.enabled:
-            # Fallback: memória (sem TTL automático)
-            self._memory_cache[key] = value
+            # Fallback: memória (sem TTL automático, com teto de chaves)
+            self._memory_set(key, value)
             return True
         
         try:

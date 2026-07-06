@@ -16,8 +16,17 @@ Pré-requisitos:
 Uso:
   DATABASE_URL=postgresql://... python run_import_fast.py
   DATABASE_URL=... python run_import_fast.py --only simples_nacional   # validar um tipo
+  DATABASE_URL=... python run_import_fast.py --suffix _new             # carga em STAGING
+
+Modo STAGING (--suffix _new):
+  Cria empresas_new, estabelecimentos_new, socios_new e simples_nacional_new
+  do zero (DROP IF EXISTS + DDL canônico de 01_core_tables.sql com nomes
+  sufixados) e carrega NELAS. NÃO toca nas tabelas de produção em nada:
+  sem TRUNCATE, sem DROP/ADD de FK na produção. O swap atômico é feito
+  depois pelo atualizar_mensal.py.
 """
 import os
+import re
 import sys
 import time
 import argparse
@@ -30,6 +39,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("import_fast")
 
 DOWNLOADS = Path(__file__).parent / "downloads"
+CORE_DDL = Path(__file__).parent / "src" / "database" / "setup" / "01_core_tables.sql"
 
 
 class _NullStripReader:
@@ -114,20 +124,74 @@ CREATE OR REPLACE FUNCTION rfb_num(s text) RETURNS numeric AS $$
 $$ LANGUAGE sql IMMUTABLE;
 """
 
-DROP_FKS = """
-ALTER TABLE estabelecimentos DROP CONSTRAINT IF EXISTS estabelecimentos_cnpj_basico_fkey;
-ALTER TABLE socios DROP CONSTRAINT IF EXISTS socios_cnpj_basico_fkey;
-ALTER TABLE simples_nacional DROP CONSTRAINT IF EXISTS simples_nacional_cnpj_basico_fkey;
-"""
+FK_TABLES = ["estabelecimentos", "socios", "simples_nacional"]
 
-READD_FKS = """
-ALTER TABLE estabelecimentos ADD CONSTRAINT estabelecimentos_cnpj_basico_fkey
-  FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico) NOT VALID;
-ALTER TABLE socios ADD CONSTRAINT socios_cnpj_basico_fkey
-  FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico) NOT VALID;
-ALTER TABLE simples_nacional ADD CONSTRAINT simples_nacional_cnpj_basico_fkey
-  FOREIGN KEY (cnpj_basico) REFERENCES empresas(cnpj_basico) NOT VALID;
-"""
+
+def drop_fks_sql(suffix: str = "") -> str:
+    """DROP das FKs antes da carga (acelera COPY/INSERT).
+    Com suffix, os nomes são os auto-gerados nas tabelas _new
+    ({tabela}{suffix}_cnpj_basico_fkey) — produção intocada."""
+    return "\n".join(
+        f"ALTER TABLE {t}{suffix} DROP CONSTRAINT IF EXISTS {t}{suffix}_cnpj_basico_fkey;"
+        for t in FK_TABLES
+    )
+
+
+def readd_fks_sql(suffix: str = "") -> str:
+    """Readiciona FKs como NOT VALID. Com suffix, nomes sufixados
+    ({tabela}{suffix}_cnpj_basico_fkey) apontando para empresas{suffix};
+    o swap do atualizar_mensal.py renomeia para o nome canônico."""
+    return "\n".join(
+        f"ALTER TABLE {t}{suffix} ADD CONSTRAINT {t}{suffix}_cnpj_basico_fkey\n"
+        f"  FOREIGN KEY (cnpj_basico) REFERENCES empresas{suffix}(cnpj_basico) NOT VALID;"
+        for t in FK_TABLES
+    )
+
+
+def validate_suffix(suffix: str) -> str:
+    """Sufixo é interpolado em SQL — restringe a identificador seguro (_new, _stg...)."""
+    if not re.fullmatch(r"_[a-z][a-z0-9_]*", suffix):
+        log.error("--suffix inválido: %r (use algo como '_new')", suffix)
+        sys.exit(2)
+    return suffix
+
+
+def apply_suffix_to_ddl(sql: str, suffix: str) -> str:
+    """Renomeia as 4 tabelas núcleo no DDL canônico (01_core_tables.sql).
+    \\b usa '_' como caractere de palavra, então nomes compostos como
+    'qualificacoes_socios' e 'vw_estabelecimentos_completos' NÃO são tocados;
+    as auxiliares (cnaes, municipios, ...) permanecem com o nome original."""
+    return re.sub(r"\b(empresas|estabelecimentos|socios|simples_nacional)\b",
+                  lambda m: m.group(1) + suffix, sql)
+
+
+def create_staging_tables(conn, suffix: str, types):
+    """Cria as tabelas de staging do zero a partir do DDL CANÔNICO
+    (01_core_tables.sql) com os nomes sufixados.
+
+    Por que o DDL canônico e não CREATE TABLE (LIKE ...)?
+      - Fidelidade garantida de colunas/tipos/coluna gerada (cnpj_completo)
+        com a única fonte de verdade do schema;
+      - LIKE ... INCLUDING DEFAULTS copiaria o DEFAULT nextval() apontando
+        para a MESMA sequence de produção (socios_id_seq) — o DROP da tabela
+        antiga no swap derrubaria o DEFAULT da tabela nova. Com o DDL
+        canônico, o SERIAL cria uma sequence própria (socios{suffix}_id_seq),
+        renomeada no swap.
+
+    O DDL usa IF NOT EXISTS, então os CREATEs das auxiliares e extensões
+    são no-ops inofensivos. PK/UNIQUE/FK sem nome recebem nomes auto-gerados
+    já sufixados ({tabela}{suffix}_pkey etc.), sem colisão com a produção."""
+    ddl = apply_suffix_to_ddl(CORE_DDL.read_text(encoding="utf-8"), suffix)
+    cur = conn.cursor()
+    # remove sobras de uma execução anterior que falhou no meio
+    cur.execute(f"DROP MATERIALIZED VIEW IF EXISTS vw_estabelecimentos_completos{suffix} CASCADE")
+    for t in types:
+        cur.execute(f"DROP TABLE IF EXISTS {SPECS[t]['target']}{suffix} CASCADE")
+    cur.execute(ddl)
+    conn.commit()
+    cur.close()
+    log.info("Tabelas de staging criadas do zero (sufixo %s): %s",
+             suffix, ", ".join(SPECS[t]["target"] + suffix for t in types))
 
 
 def make_stg_ddl(name, ncols):
@@ -135,8 +199,9 @@ def make_stg_ddl(name, ncols):
     return f"CREATE TEMP TABLE IF NOT EXISTS {name} ({cols})"
 
 
-def load_type(conn, type_name, files):
+def load_type(conn, type_name, files, suffix=""):
     spec = SPECS[type_name]
+    target = spec["target"] + suffix
     cur = conn.cursor()
     cur.execute(make_stg_ddl(spec["stg"], spec["stg_cols"]))
     conn.commit()
@@ -152,7 +217,7 @@ def load_type(conn, type_name, files):
         cur.execute(f"SELECT count(*) FROM {spec['stg']}")
         staged = cur.fetchone()[0]
         cur.execute(
-            f"INSERT INTO {spec['target']} ({spec['cols']}) "
+            f"INSERT INTO {target} ({spec['cols']}) "
             f"SELECT {spec['select']} FROM {spec['stg']} "
             f"ON CONFLICT {spec['conflict']} DO NOTHING"
         )
@@ -171,12 +236,16 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--only", help="tipos separados por vírgula (ex.: empresas,socios)")
     p.add_argument("--keep", action="store_true", help="NÃO truncar as tabelas antes (append)")
+    p.add_argument("--suffix", default="",
+                   help="carga em staging: cria e carrega tabelas {nome}{suffix} "
+                        "(ex.: _new) SEM tocar na produção")
     args = p.parse_args()
 
     url = os.getenv("DATABASE_URL")
     if not url:
         log.error("DATABASE_URL não definida."); sys.exit(2)
 
+    suffix = validate_suffix(args.suffix) if args.suffix else ""
     types = ORDER if not args.only else [t.strip() for t in args.only.split(",")]
 
     conn = psycopg2.connect(url, connect_timeout=30)
@@ -189,14 +258,23 @@ def main():
 
     cur.execute(HELPERS_SQL); conn.commit()
     log.info("Funções auxiliares rfb_date/rfb_num criadas.")
-    cur.execute(DROP_FKS); conn.commit()
-    log.info("FKs removidas para acelerar a carga.")
+
+    if suffix:
+        # STAGING: tabelas novas do zero; produção 100% intocada
+        create_staging_tables(conn, suffix, types)
+
+    cur.execute(drop_fks_sql(suffix)); conn.commit()
+    log.info("FKs removidas para acelerar a carga%s.",
+             f" (staging {suffix})" if suffix else "")
 
     if not args.keep:
+        # com suffix as tabelas acabaram de ser criadas — TRUNCATE é no-op
+        # inofensivo (mantido para reexecuções com --only/--keep)
         for t in types:
-            cur.execute(f"TRUNCATE {SPECS[t]['target']} CASCADE")
+            cur.execute(f"TRUNCATE {SPECS[t]['target']}{suffix} CASCADE")
         conn.commit()
-        log.info("Tabelas-alvo truncadas: %s", ", ".join(types))
+        log.info("Tabelas-alvo truncadas: %s",
+                 ", ".join(SPECS[t]["target"] + suffix for t in types))
 
     grand = time.time()
     for t in types:
@@ -204,19 +282,20 @@ def main():
         if not files:
             log.warning("Nenhum arquivo p/ %s (%s)", t, SPECS[t]["glob"]); continue
         log.info("=== %s: %d arquivo(s) ===", t.upper(), len(files))
-        n = load_type(conn, t, files)
+        n = load_type(conn, t, files, suffix)
         log.info("=== %s concluído: %s linhas ===", t, f"{n:,}")
 
     # Re-adiciona FKs como NOT VALID (documenta relação sem revalidar tudo)
     try:
-        cur.execute(READD_FKS); conn.commit()
-        log.info("FKs readicionadas (NOT VALID).")
+        cur.execute(readd_fks_sql(suffix)); conn.commit()
+        log.info("FKs readicionadas (NOT VALID)%s.",
+                 f" com nomes sufixados {suffix}" if suffix else "")
     except Exception as e:
         conn.rollback()
         log.warning("Não foi possível readicionar FKs agora: %s", e)
 
     for t in types:
-        cur.execute(f"ANALYZE {SPECS[t]['target']}")
+        cur.execute(f"ANALYZE {SPECS[t]['target']}{suffix}")
     conn.commit()
     cur.close(); conn.close()
     log.info("CARGA RÁPIDA COMPLETA em %.1f min.", (time.time() - grand) / 60)

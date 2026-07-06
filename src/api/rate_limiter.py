@@ -38,25 +38,29 @@ class RateLimiter:
         self.requests = defaultdict(list)
         self.cleanup_task = None
     
-    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', user_role: str = 'user', max_requests: int | None = None, window_seconds: int | None = None):
+    async def check_rate_limit(self, user_id: int, user_plan: str = 'free', user_role: str = 'user', max_requests: int | None = None, window_seconds: int | None = None, burst_limit: int | None = None):
         """
         Verifica se usuário excedeu limite de requisições
         Suporta limites por plano e limites customizados
-        
+
         Args:
             user_id: ID do usuário
             user_plan: Plano do usuário (free, start, growth, pro, enterprise, admin)
             user_role: Role do usuário (user, admin) - admin tem acesso ilimitado
             max_requests: Limite customizado (sobrescreve plano)
             window_seconds: Janela de tempo customizada (sobrescreve plano)
+            burst_limit: Limite de burst/min customizado (vem do plano configurável)
         """
         # Resolve limites por plano (admin = teto alto, NÃO mais ilimitado)
+        # Os dicts RATE_LIMITS/BURST_LIMITS são só FALLBACK — a fonte de verdade
+        # são as colunas rate_per_hour/burst_per_min de clientes.plans (admin).
         plan_key = 'admin' if user_role == 'admin' else user_plan
         if max_requests is None or window_seconds is None:
             plan_limits = self.RATE_LIMITS.get(plan_key, self.RATE_LIMITS['free'])
             max_requests = max_requests or plan_limits['requests']
             window_seconds = window_seconds or plan_limits['window']
-        burst_limit = self.BURST_LIMITS.get(plan_key, 30)
+        if burst_limit is None:
+            burst_limit = self.BURST_LIMITS.get(plan_key, 30)
 
         # Caminho preferencial: Redis (contadores atômicos, GLOBAIS entre workers)
         hourly = shared_cache.incr_rate(f"rl:h:{user_id}:{window_seconds}", window_seconds)

@@ -17,12 +17,16 @@ from src.api.etl_controller import etl_controller
 from src.api.rate_limiter import rate_limiter
 import logging
 import asyncio
+import anyio.to_thread
+import hashlib
+import json
 from functools import lru_cache
 from datetime import datetime, timedelta, timezone
 from src.utils.cnpj_utils import clean_cnpj
 from src.utils.security_utils import mask_cpf_socio as _mask_cpf_socio
 from src.api.security_logger import log_query
 from src.api.cache_redis import cache as shared_cache
+from src.api.plan_service import plan_service, require_feature
 
 # ℹ️ A conexão ao banco vem exclusivamente de DATABASE_URL (variável de ambiente).
 
@@ -33,6 +37,19 @@ router = APIRouter()
 # Cache em memória para resultados (expira em 1 hora)
 _cache = {}
 _cache_timeout = {}
+
+# QUOTA-TZ: um ÚNICO relógio para o mês de cota (Brasília). Antes o rollover
+# acontecia em UTC (21h de Brasília) e usava dois relógios diferentes.
+try:
+    from zoneinfo import ZoneInfo
+    _BR_TZ = ZoneInfo("America/Sao_Paulo")
+except Exception:
+    _BR_TZ = timezone(timedelta(hours=-3))  # Brasil não tem mais horário de verão
+
+
+def current_month_year() -> str:
+    """Mês corrente (YYYY-MM) no fuso do Brasil — usado em toda a contagem de cota."""
+    return datetime.now(_BR_TZ).strftime('%Y-%m')
 
 def get_from_cache(key: str):
     """Retorna do cache se ainda válido"""
@@ -85,7 +102,9 @@ async def verify_api_key(x_api_key: str = Header(None)):
         )
 
     # VERIFICAÇÃO DE ASSINATURA ATIVA (apenas Stripe Subscriptions)
-    try:
+    # P0-EVENTLOOP: psycopg2 é síncrono — o bloco roda em threadpool (abaixo)
+    # para uma query lenta não congelar o event loop do worker inteiro.
+    def _check_subscription_and_quota():
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
 
@@ -160,35 +179,24 @@ async def verify_api_key(x_api_key: str = Header(None)):
                                 }
                             )
 
-                        # Verificar se período expirou (comparação timezone-aware)
+                        # PLAN-02: assinatura expirada NÃO bloqueia para sempre —
+                        # o usuário volta ao plano Free (mesmo comportamento que o
+                        # dashboard mostra). Antes: 403 eterno até assinar de novo.
                         if period_end:
-                            # Garantir que period_end seja timezone-aware
                             if period_end.tzinfo is None:
                                 period_end = period_end.replace(tzinfo=timezone.utc)
-
-                            now_utc = datetime.now(timezone.utc)
-                            if period_end < now_utc:
-                                raise HTTPException(
-                                    status_code=403,
-                                    detail={
-                                        "error": "subscription_expired",
-                                        "message": f"Sua assinatura expirou em {period_end.strftime('%d/%m/%Y')}. Por favor, renove sua assinatura para continuar usando a API.",
-                                        "expired_date": period_end.strftime('%d/%m/%Y'),
-                                        "action_url": "/home#pricing",
-                                        "help": "Renove sua assinatura ou escolha um novo plano",
-                                        "suggestions": [
-                                            "Renove sua assinatura para continuar usando",
-                                            "Escolha um novo plano que atenda suas necessidades",
-                                            "Entre em contato com o suporte para opções de renovação"
-                                        ]
-                                    }
+                            if period_end < datetime.now(timezone.utc):
+                                logger.info(
+                                    f"Usuário {user['id']}: assinatura expirada em "
+                                    f"{period_end.strftime('%d/%m/%Y')} — caindo para o plano Free"
                                 )
 
                     # Nenhuma assinatura encontrada ou status inválido
-                    # Assumir plano Free (200 consultas/mês)
+                    # Plano Free — limites lidos da tabela clientes.plans (configurável no admin)
+                    free_cfg = plan_service.get('free')
                     user['plan'] = 'free'
-                    user['monthly_queries'] = 200
-                    user['queries_remaining'] = 200 # Inicialmente
+                    user['monthly_queries'] = free_cfg['monthly_queries']
+                    user['queries_remaining'] = free_cfg['monthly_queries']  # Inicialmente
 
                     logger.info(f"Usuário {user['id']} usando plano Free (sem assinatura Stripe ativa)")
 
@@ -206,8 +214,8 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 # VERIFICAÇÃO DE LIMITE MENSAL DE CONSULTAS
                 # 🔓 ADMIN TEM CONSULTAS ILIMITADAS - pular verificação de limite
                 if user.get('role') != 'admin':
-                    month_year = datetime.now().strftime('%Y-%m')
-                    monthly_limit = user.get('monthly_queries', 200)  # Default para 200 se não encontrado
+                    month_year = current_month_year()  # QUOTA-TZ: fuso do Brasil
+                    monthly_limit = user.get('monthly_queries') or plan_service.get('free')['monthly_queries']
 
                     # PLAN-01: checagem + incremento ATÔMICOS (evita corrida sob alta concorrência).
                     # - 1ª consulta do mês: INSERT entra com 1.
@@ -280,11 +288,15 @@ async def verify_api_key(x_api_key: str = Header(None)):
                 # Garantir que cursor sempre seja fechado
                 cursor.close()
 
-            # Rastrear uso diario (grafico do dashboard)
-            try:
-                await db_manager.track_usage(user['id'])
-            except Exception as e:
-                logger.error(f"Erro ao rastrear uso diario: {e}")
+    try:
+        # P0-EVENTLOOP: roda o bloco de banco em threadpool — não bloqueia o event loop
+        await anyio.to_thread.run_sync(_check_subscription_and_quota)
+
+        # Rastrear uso diario (grafico do dashboard)
+        try:
+            await db_manager.track_usage(user['id'])
+        except Exception as e:
+            logger.error(f"Erro ao rastrear uso diario: {e}")
 
     except HTTPException:
         raise
@@ -295,11 +307,20 @@ async def verify_api_key(x_api_key: str = Header(None)):
             detail="Erro ao verificar assinatura. Por favor, tente novamente."
         )
 
-    # Aplicar rate limiting baseado no plano e role do usuário
-    # 🔓 Admin tem acesso ilimitado (sem rate limiting)
+    # Aplicar rate limiting com limites do plano (configuráveis no admin via clientes.plans)
     user_plan = user.get('plan', 'free')
     user_role = user.get('role', 'user')
-    await rate_limiter.check_rate_limit(user['id'], user_plan, user_role)
+    plan_cfg = plan_service.get(user_plan)
+    user['plan_config'] = plan_cfg
+    if user_role == 'admin':
+        await rate_limiter.check_rate_limit(user['id'], user_plan, user_role)
+    else:
+        await rate_limiter.check_rate_limit(
+            user['id'], user_plan, user_role,
+            max_requests=plan_cfg['rate_per_hour'],
+            window_seconds=3600,
+            burst_limit=plan_cfg['burst_per_min'],
+        )
 
     # O método verify_api_key já incrementa automaticamente os contadores
     return user
@@ -415,10 +436,12 @@ async def get_cnpj_data(
             logger.info(f"Cache hit para CNPJ {cleaned_cnpj}")
             return cached
 
-        with db_manager.get_connection() as conn:
-            cursor = conn.cursor()
+        # P0-EVENTLOOP: banco em threadpool (closure síncrona)
+        def _fetch_cnpj():
+            with db_manager.get_connection() as conn:
+                cursor = conn.cursor()
 
-            query = """
+                query = """
                 SELECT 
                     cnpj_completo, identificador_matriz_filial, razao_social,
                     nome_fantasia, situacao_cadastral, data_situacao_cadastral,
@@ -432,80 +455,82 @@ async def get_cnpj_data(
                 WHERE cnpj_completo = %s
             """
 
-            cursor.execute(query, (cleaned_cnpj,))
-            result = cursor.fetchone()
-            cursor.close()
+                cursor.execute(query, (cleaned_cnpj,))
+                result = cursor.fetchone()
+                cursor.close()
 
-            if not result:
-                raise HTTPException(
-                    status_code=404,
-                    detail={
-                        "error": "cnpj_not_found",
-                        "message": f"CNPJ {cnpj} não foi encontrado em nossa base de dados.",
-                        "cnpj": cnpj,
-                        "help": "Verifique se o CNPJ está correto. Nossa base é atualizada periodicamente com dados oficiais da Receita Federal.",
-                        "suggestions": [
-                            "Confirme se o CNPJ está digitado corretamente",
-                            "Verifique se o estabelecimento está ativo na Receita Federal",
-                            "Entre em contato com o suporte se acredita que este CNPJ deveria estar disponível"
+                if not result:
+                    raise HTTPException(
+                        status_code=404,
+                        detail={
+                            "error": "cnpj_not_found",
+                            "message": f"CNPJ {cnpj} não foi encontrado em nossa base de dados.",
+                            "cnpj": cnpj,
+                            "help": "Verifique se o CNPJ está correto. Nossa base é atualizada periodicamente com dados oficiais da Receita Federal.",
+                            "suggestions": [
+                                "Confirme se o CNPJ está digitado corretamente",
+                                "Verifique se o estabelecimento está ativo na Receita Federal",
+                                "Entre em contato com o suporte se acredita que este CNPJ deveria estar disponível"
+                            ]
+                        }
+                    )
+
+                columns = [
+                    'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
+                    'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
+                    'motivo_situacao_cadastral_desc', 'data_inicio_atividade',
+                    'cnae_fiscal_principal', 'cnae_principal_desc',
+                    'tipo_logradouro', 'logradouro', 'numero', 'complemento', 'bairro',
+                    'cep', 'uf', 'municipio_desc', 'ddd_1', 'telefone_1',
+                    'correio_eletronico', 'natureza_juridica', 'natureza_juridica_desc',
+                    'porte_empresa', 'capital_social', 'opcao_simples', 'opcao_mei', 'cnae_fiscal_secundaria'
+                ]
+
+                data = dict(zip(columns, result))
+                data['cnpj_basico'] = cleaned_cnpj[:8]
+                data['cnpj_ordem'] = cleaned_cnpj[8:12]
+                data['cnpj_dv'] = cleaned_cnpj[12:14]
+
+                # Converter datas para string (formato ISO)
+                if data.get('data_situacao_cadastral'):
+                    data['data_situacao_cadastral'] = str(data['data_situacao_cadastral'])
+                if data.get('data_inicio_atividade'):
+                    data['data_inicio_atividade'] = str(data['data_inicio_atividade'])
+
+                # Buscar CNAEs secundários com descrições
+                cnae_secundarios = []
+                if data.get('cnae_fiscal_secundaria'):
+                    codigos = data['cnae_fiscal_secundaria'].split(',')
+                    codigos = [c.strip() for c in codigos if c.strip()]
+
+                    if codigos:
+                        placeholders = ','.join(['%s'] * len(codigos))
+                        query_cnaes = f"""
+                            SELECT codigo, descricao
+                            FROM cnaes
+                            WHERE codigo IN ({placeholders})
+                            ORDER BY codigo
+                        """
+                        cursor = conn.cursor()
+                        cursor.execute(query_cnaes, codigos)
+                        cnaes_results = cursor.fetchall()
+                        cursor.close()
+
+                        cnae_secundarios = [
+                            {'codigo': row[0], 'descricao': row[1]}
+                            for row in cnaes_results
                         ]
-                    }
-                )
 
-            columns = [
-                'cnpj_completo', 'identificador_matriz_filial', 'razao_social',
-                'nome_fantasia', 'situacao_cadastral', 'data_situacao_cadastral',
-                'motivo_situacao_cadastral_desc', 'data_inicio_atividade',
-                'cnae_fiscal_principal', 'cnae_principal_desc',
-                'tipo_logradouro', 'logradouro', 'numero', 'complemento', 'bairro',
-                'cep', 'uf', 'municipio_desc', 'ddd_1', 'telefone_1',
-                'correio_eletronico', 'natureza_juridica', 'natureza_juridica_desc',
-                'porte_empresa', 'capital_social', 'opcao_simples', 'opcao_mei', 'cnae_fiscal_secundaria'
-            ]
+                data['cnae_secundarios_completos'] = cnae_secundarios
 
-            data = dict(zip(columns, result))
-            data['cnpj_basico'] = cleaned_cnpj[:8]
-            data['cnpj_ordem'] = cleaned_cnpj[8:12]
-            data['cnpj_dv'] = cleaned_cnpj[12:14]
+                return EstabelecimentoCompleto(**data)
 
-            # Converter datas para string (formato ISO)
-            if data.get('data_situacao_cadastral'):
-                data['data_situacao_cadastral'] = str(data['data_situacao_cadastral'])
-            if data.get('data_inicio_atividade'):
-                data['data_inicio_atividade'] = str(data['data_inicio_atividade'])
+        resultado = await anyio.to_thread.run_sync(_fetch_cnpj)
 
-            # Buscar CNAEs secundários com descrições
-            cnae_secundarios = []
-            if data.get('cnae_fiscal_secundaria'):
-                codigos = data['cnae_fiscal_secundaria'].split(',')
-                codigos = [c.strip() for c in codigos if c.strip()]
+        # Salva no cache (1 hora)
+        set_cache(cache_key, resultado, minutes=60)
 
-                if codigos:
-                    placeholders = ','.join(['%s'] * len(codigos))
-                    query_cnaes = f"""
-                        SELECT codigo, descricao
-                        FROM cnaes
-                        WHERE codigo IN ({placeholders})
-                        ORDER BY codigo
-                    """
-                    cursor = conn.cursor()
-                    cursor.execute(query_cnaes, codigos)
-                    cnaes_results = cursor.fetchall()
-                    cursor.close()
-
-                    cnae_secundarios = [
-                        {'codigo': row[0], 'descricao': row[1]}
-                        for row in cnaes_results
-                    ]
-
-            data['cnae_secundarios_completos'] = cnae_secundarios
-
-            resultado = EstabelecimentoCompleto(**data)
-
-            # Salva no cache (1 hora)
-            set_cache(cache_key, resultado, minutes=60)
-
-            return resultado
+        return resultado
 
     except HTTPException:
         raise
@@ -533,8 +558,37 @@ async def search_companies(
     Pesquisa empresas por múltiplos critérios
     Acesso controlado por rate limiting baseado no plano do usuário
     """
+    # Gate por plano: busca avançada + tamanho máximo de página (config no admin)
+    require_feature(current_user, 'can_search', 'Busca avançada')
+    plan_cfg = current_user.get('plan_config') or plan_service.get(current_user.get('plan', 'free'))
+    max_page = plan_cfg['max_page_size'] if current_user.get('role') != 'admin' else 1000
+
+    # Compatibilidade de paginação:
+    # - preferir page/per_page quando informados
+    # - fallback para limit/offset (padrão atual)
+    # - teto por plano (max_page_size configurável no admin)
+    effective_limit = min(per_page if per_page is not None else limit, max_page)
+    effective_offset = offset
+    if page is not None:
+        effective_offset = (page - 1) * effective_limit
+
+    # CACHE-SEARCH: a base muda 1x/mês — buscas idênticas não repetem scans trigram.
+    # O ETL invalida 'search:*' no fim de cada carga.
+    _filters_norm = {
+        'rs': razao_social, 'nf': nome_fantasia, 'cnae': cnae, 'mun': municipio,
+        'uf': uf.upper() if uf else None, 'sit': situacao,
+        'dmin': data_inicio_atividade_min, 'dmax': data_inicio_atividade_max,
+    }
+    _filters_key = hashlib.md5(
+        json.dumps(_filters_norm, sort_keys=True, default=str).encode()
+    ).hexdigest()
+    search_cache_key = f"search:{_filters_key}:{effective_limit}:{effective_offset}"
+    cached = get_from_cache(search_cache_key)
+    if cached is not None:
+        return cached
+
+    # Log de auditoria (não pode derrubar a busca)
     try:
-        # Log de auditoria
         await log_query(
             user_id=current_user['id'],
             action='search',
@@ -550,22 +604,16 @@ async def search_companies(
                 }
             }
         )
+    except Exception as e:
+        logger.warning(f"log_query falhou (seguindo): {e}")
+
+    # P0-EVENTLOOP: todo o trabalho de banco roda em threadpool (closure síncrona)
+    def _do_search():
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
 
-            # IMPORTANTE: Desabilitar parallel workers para evitar erro de memória no Replit
-            cursor.execute("SET max_parallel_workers_per_gather = 0")
-
             conditions = []
             params = []
-
-            # Compatibilidade de paginação:
-            # - preferir page/per_page quando informados
-            # - fallback para limit/offset (padrão atual)
-            effective_limit = per_page if per_page is not None else limit
-            effective_offset = offset
-            if page is not None:
-                effective_offset = (page - 1) * effective_limit
 
             if razao_social:
                 conditions.append("razao_social ILIKE %s")
@@ -657,16 +705,23 @@ async def search_companies(
                 else:
                     total = 0
             elif not use_fast_count:
-                # Para buscas exatas (sem ILIKE), fazer COUNT normal
-                count_query = f"""
-                    SELECT COUNT(*)
-                    FROM vw_estabelecimentos_completos
-                    WHERE {where_clause}
-                """
-                cursor.execute(count_query, params)
-                total_result = cursor.fetchone()
-                total = total_result[0] if total_result else 0
-                logger.info(f"📊 COUNT exato: {total} registros")
+                # COUNT exato é caro (MV de ~70M linhas) e idêntico entre páginas:
+                # cacheia por filtros (TTL 6h; base muda 1x/mês)
+                count_key = f"search:count:{_filters_key}"
+                cached_total = get_from_cache(count_key)
+                if cached_total is not None:
+                    total = int(cached_total)
+                else:
+                    count_query = f"""
+                        SELECT COUNT(*)
+                        FROM vw_estabelecimentos_completos
+                        WHERE {where_clause}
+                    """
+                    cursor.execute(count_query, params)
+                    total_result = cursor.fetchone()
+                    total = total_result[0] if total_result else 0
+                    set_cache(count_key, total, minutes=360)
+                    logger.info(f"📊 COUNT exato: {total} registros")
             else:
                 # Para páginas subsequentes com ILIKE, usar cache ou estimativa
                 total = 1000000  # Estimativa alta para permitir paginação
@@ -690,20 +745,11 @@ async def search_companies(
                 LIMIT %s OFFSET %s
             """
 
-            # Log da query completa para debug
-            logger.info(f"📊 Query WHERE: {where_clause}")
-            logger.info(f"📊 Params: {params}")
-            logger.info(f"📊 Limit: {effective_limit}, Offset: {effective_offset}")
+            logger.debug(f"📊 Query WHERE: {where_clause} | Params: {params} | "
+                         f"Limit: {effective_limit}, Offset: {effective_offset}")
 
             cursor.execute(data_query, params + [effective_limit, effective_offset])
             results = cursor.fetchall()
-
-            # Log dos primeiros 3 resultados para debug
-            if results and len(results) > 0:
-                logger.info(f"📊 Total resultados retornados: {len(results)}")
-                for i, row in enumerate(results[:3]):
-                    logger.info(f"📊 Resultado {i+1}: CNPJ={row[0]}, Data Início={row[6]}")
-
             cursor.close()
 
             columns = [
@@ -716,6 +762,7 @@ async def search_companies(
                 'opcao_simples', 'opcao_mei'
             ]
 
+            # Dicts puros (sem overhead de validação Pydantic em até 1.000 linhas)
             items = []
             for row in results:
                 data = dict(zip(columns, row))
@@ -729,23 +776,33 @@ async def search_companies(
                     data['data_situacao_cadastral'] = str(data['data_situacao_cadastral'])
                 if data.get('data_inicio_atividade'):
                     data['data_inicio_atividade'] = str(data['data_inicio_atividade'])
+                if data.get('capital_social') is not None:
+                    try:
+                        data['capital_social'] = float(data['capital_social'])
+                    except (TypeError, ValueError):
+                        pass
 
-                # Buscar CNAEs secundários (sem JOIN para manter performance)
-                # Para busca em lote, não buscar CNAEs secundários (usar endpoint específico)
+                # CNAEs secundários têm endpoint próprio (mantém a busca leve)
                 data['cnae_secundarios_completos'] = []
 
-                items.append(EstabelecimentoCompleto(**data))
+                items.append(data)
 
             total_pages = (total + effective_limit - 1) // effective_limit
 
-            return PaginatedResponse(
-                total=total,
-                page=effective_offset // effective_limit + 1,
-                per_page=effective_limit,
-                total_pages=total_pages,
-                items=items
-            )
+            return {
+                'total': total,
+                'page': effective_offset // effective_limit + 1,
+                'per_page': effective_limit,
+                'total_pages': total_pages,
+                'items': items,
+            }
 
+    try:
+        payload = await anyio.to_thread.run_sync(_do_search)
+        set_cache(search_cache_key, payload, minutes=60)
+        return payload
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Erro na busca: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -829,6 +886,7 @@ async def get_socios(cnpj: str, user: dict = Depends(verify_api_key)):
     Requer autenticação via API Key no header 'X-API-Key'
     Rate limit aplicado conforme plano de assinatura
     """
+    require_feature(user, 'can_socios', 'Consulta de sócios')
     cleaned_cnpj = clean_cnpj(cnpj)
     cnpj_basico = cleaned_cnpj[:8]
 
@@ -941,6 +999,7 @@ async def search_socios(
     faixa_etaria: Optional[str] = Query(None, description="Faixa etária do sócio"),
     limit: int = Query(100, ge=1, le=1000)
 ):
+    require_feature(user, 'can_socios', 'Busca de sócios')
     try:
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
@@ -1042,24 +1101,30 @@ async def list_cnaes(
 
 @router.get("/municipios/{uf}", response_model=List[MunicipioModel])
 async def list_municipios(uf: str, user: dict = Depends(verify_api_key)):
-    try:
+    # CACHE: DISTINCT+JOIN em 70M linhas — resultado só muda na carga mensal
+    mun_key = f"municipios:{uf.upper()}"
+    cached = get_from_cache(mun_key)
+    if cached is not None:
+        return cached
+
+    def _list_municipios():
         with db_manager.get_connection() as conn:
             cursor = conn.cursor()
-
-            query = """
+            cursor.execute("""
                 SELECT DISTINCT m.codigo, m.descricao
                 FROM municipios m
                 INNER JOIN estabelecimentos e ON e.municipio = m.codigo
                 WHERE e.uf = %s
                 ORDER BY m.descricao
-            """
-
-            cursor.execute(query, (uf.upper(),))
+            """, (uf.upper(),))
             results = cursor.fetchall()
             cursor.close()
+            return [{"codigo": row[0], "descricao": row[1]} for row in results]
 
-            return [MunicipioModel(codigo=row[0], descricao=row[1]) for row in results]
-
+    try:
+        payload = await anyio.to_thread.run_sync(_list_municipios)
+        set_cache(mun_key, payload, minutes=24 * 60)
+        return payload
     except Exception as e:
         logger.error(f"Erro ao listar municípios: {e}")
         raise HTTPException(status_code=500, detail=str(e))

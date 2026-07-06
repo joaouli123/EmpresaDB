@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from src.api.routes import router as api_router
@@ -76,6 +77,9 @@ app = FastAPI(
 
 # ⚠️ SEGURANÇA: Configure ALLOWED_ORIGINS no .env para produção!
 # Exemplo: ALLOWED_ORIGINS=https://seu-dominio.com,https://www.seu-dominio.com
+# PERF: comprime respostas grandes (ex.: /search com 1.000 itens ≈ 1MB → ~100KB)
+app.add_middleware(GZipMiddleware, minimum_size=2048)
+
 cors_origins = settings.get_cors_origins()
 # SEC-05: navegadores rejeitam '*' + credentials. Se origins='*', desliga credentials.
 _allow_all_origins = cors_origins == ["*"]
@@ -155,11 +159,14 @@ async def health_check():
             "version": settings.API_VERSION
         }
     except Exception as e:
-        return {
+        # HTTP 503 de verdade — antes retornava 200 mesmo com banco fora,
+        # e o healthcheck/monitoramento nunca detectava a falha
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content={
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e)
-        }
+        })
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(auth_router)
@@ -184,6 +191,45 @@ async def ensure_schema():
         logging.info("✅ Schema verificado (avatar_url)")
     except Exception as e:
         logging.error(f"⚠️ ensure_schema falhou: {e}")
+
+    # PLANOS CONFIGURÁVEIS: colunas de limites/recursos editáveis pelo admin.
+    # Backfill preserva o comportamento atual (limites que antes eram hardcoded).
+    try:
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            for col_ddl in (
+                "rate_per_hour INTEGER",
+                "burst_per_min INTEGER",
+                "max_page_size INTEGER",
+                "can_search BOOLEAN",
+                "can_socios BOOLEAN",
+                "can_batch BOOLEAN",
+                "can_export BOOLEAN",
+                "is_public BOOLEAN",
+                "description TEXT",
+            ):
+                cursor.execute(f"ALTER TABLE clientes.plans ADD COLUMN IF NOT EXISTS {col_ddl}")
+            # limites/hora e burst/min que estavam hardcoded no rate_limiter
+            cursor.execute("""
+                UPDATE clientes.plans SET
+                  rate_per_hour = COALESCE(rate_per_hour, CASE lower(name)
+                      WHEN 'free' THEN 600 WHEN 'start' THEN 3600 WHEN 'growth' THEN 18000
+                      WHEN 'pro' THEN 60000 WHEN 'enterprise' THEN 100000 ELSE 3600 END),
+                  burst_per_min = COALESCE(burst_per_min, CASE lower(name)
+                      WHEN 'free' THEN 10 WHEN 'start' THEN 60 WHEN 'growth' THEN 300
+                      WHEN 'pro' THEN 1000 WHEN 'enterprise' THEN 5000 ELSE 60 END),
+                  max_page_size = COALESCE(max_page_size, CASE lower(name)
+                      WHEN 'free' THEN 100 ELSE 1000 END),
+                  can_search = COALESCE(can_search, TRUE),
+                  can_socios = COALESCE(can_socios, TRUE),
+                  can_batch  = COALESCE(can_batch, TRUE),
+                  can_export = COALESCE(can_export, TRUE),
+                  is_public  = COALESCE(is_public, TRUE)
+            """)
+            cursor.close()
+        logging.info("✅ Schema verificado (plans configuráveis)")
+    except Exception as e:
+        logging.error(f"⚠️ ensure_schema (plans) falhou: {e}")
 
 
 # ⚠️ IMPORTANTE: Catch-all route DEVE vir DEPOIS de todos os routers

@@ -109,8 +109,14 @@ class StripeService:
                 if not plan:
                     logger.error(f"Plano {plan_id} não encontrado")
                     return None
-                
+
                 plan_name, display_name, monthly_queries, price_brl, stripe_price_id = plan
+
+                # SEC-BILL: plano com preço 0 (Free/Enterprise "fale conosco") NUNCA
+                # pode ser assinado via checkout — daria 1M consultas/mês de graça.
+                if not price_brl or float(price_brl) <= 0:
+                    logger.warning(f"Checkout bloqueado: plano {plan_name} tem preço {price_brl}")
+                    return None
             
             # Buscar dados do usuário
             with db_manager.get_connection() as conn:

@@ -366,3 +366,109 @@ async def admin_etl_status(current_admin: dict = Depends(get_current_admin_user)
         "cron_configured": bool(has_state),
         "history": history,
     }
+
+
+# ----------------- PLANOS (configuração de limites/recursos) -----------------
+class PlanPatch(BaseModel):
+    display_name: Optional[str] = None
+    price_brl: Optional[float] = None
+    monthly_queries: Optional[int] = None
+    rate_per_hour: Optional[int] = None
+    burst_per_min: Optional[int] = None
+    max_page_size: Optional[int] = None
+    can_search: Optional[bool] = None
+    can_socios: Optional[bool] = None
+    can_batch: Optional[bool] = None
+    can_export: Optional[bool] = None
+    is_active: Optional[bool] = None
+    is_public: Optional[bool] = None
+    description: Optional[str] = None
+    features: Optional[list] = None
+
+
+_PLAN_NUMERIC_BOUNDS = {
+    "price_brl": (0, 1_000_000),
+    "monthly_queries": (0, 1_000_000_000),
+    "rate_per_hour": (1, 10_000_000),
+    "burst_per_min": (1, 1_000_000),
+    "max_page_size": (1, 1000),
+}
+
+
+@router.get("/plans")
+async def admin_list_plans(current_admin: dict = Depends(get_current_admin_user)):
+    """Todos os planos (inclusive inativos/privados) + nº de assinantes ativos."""
+    with db_manager.get_connection() as conn:
+        rows = _rows(conn, """
+            SELECT p.id, p.name, p.display_name, p.monthly_queries, p.price_brl,
+                   p.features, p.is_active, p.rate_per_hour, p.burst_per_min,
+                   p.max_page_size, p.can_search, p.can_socios, p.can_batch,
+                   p.can_export, p.is_public, p.description,
+                   (SELECT COUNT(*) FROM clientes.stripe_subscriptions ss
+                     WHERE ss.plan_id = p.id AND ss.status IN ('active','trialing')
+                       AND ss.current_period_end > NOW()) AS subscribers
+            FROM clientes.plans p
+            ORDER BY p.price_brl, p.monthly_queries
+        """)
+        free_users = _scalar(conn, """
+            SELECT COUNT(*) FROM clientes.users u
+            WHERE u.is_active = TRUE AND u.role != 'admin'
+              AND NOT EXISTS (SELECT 1 FROM clientes.stripe_subscriptions ss
+                WHERE ss.user_id = u.id AND ss.status IN ('active','trialing')
+                  AND ss.current_period_end > NOW())
+        """)
+    plans = []
+    for r in rows:
+        plans.append({
+            "id": r[0], "name": r[1], "display_name": r[2],
+            "monthly_queries": r[3], "price_brl": float(r[4] or 0),
+            "features": r[5] or [], "is_active": bool(r[6]),
+            "rate_per_hour": r[7], "burst_per_min": r[8], "max_page_size": r[9],
+            "can_search": r[10] is not False, "can_socios": r[11] is not False,
+            "can_batch": r[12] is not False, "can_export": r[13] is not False,
+            "is_public": r[14] is not False, "description": r[15] or "",
+            "subscribers": int(r[16] or 0) if len(r) > 16 else 0,
+        })
+        if r[1] and r[1].lower() == "free":
+            plans[-1]["subscribers"] = int(free_users or 0)
+    return {"plans": plans}
+
+
+@router.patch("/plans/{plan_id}")
+async def admin_patch_plan(plan_id: int, data: PlanPatch, current_admin: dict = Depends(get_current_admin_user)):
+    """Edita limites/recursos de um plano. Vale para novos requests em até 60s (cache)."""
+    import json as _json
+    payload = data.model_dump(exclude_unset=True)
+    if not payload:
+        raise HTTPException(status_code=400, detail="Nada para atualizar")
+
+    for field, (lo, hi) in _PLAN_NUMERIC_BOUNDS.items():
+        if field in payload and payload[field] is not None and not (lo <= payload[field] <= hi):
+            raise HTTPException(status_code=400, detail=f"{field} fora da faixa permitida ({lo}–{hi})")
+
+    sets, params = [], []
+    for field, value in payload.items():
+        if field == "features":
+            sets.append("features = %s::jsonb"); params.append(_json.dumps(value))
+        else:
+            sets.append(f"{field} = %s"); params.append(value)
+    params.append(plan_id)
+
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(f"UPDATE clientes.plans SET {', '.join(sets)} WHERE id = %s RETURNING id", params)
+            updated = cur.fetchone()
+            cur.close()
+        if not updated:
+            raise HTTPException(status_code=404, detail="Plano não encontrado")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[admin] erro ao atualizar plano {plan_id}: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao atualizar plano")
+
+    from src.api.plan_service import plan_service
+    plan_service.invalidate()
+    logger.info(f"[admin] plano {plan_id} atualizado por {current_admin.get('email')}: {list(payload.keys())}")
+    return {"message": "Plano atualizado"}

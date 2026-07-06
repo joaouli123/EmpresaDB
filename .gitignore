@@ -49,3 +49,4 @@ dist/
 .config/
 .cache/
 .upm/
+scripts/.env.etl.bat

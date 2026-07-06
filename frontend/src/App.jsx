@@ -45,6 +45,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'));
 const AdminFinance = lazy(() => import('./pages/admin/AdminFinance'));
 const AdminETL = lazy(() => import('./pages/admin/AdminETL'));
 const AdminDatabase = lazy(() => import('./pages/AdminDatabase'));
@@ -164,6 +165,11 @@ function AppRoutes() {
             <Route path="admin/users" element={
               <ProtectedRoute adminOnly={true}>
                 <AdminUsers />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/plans" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminPlans />
               </ProtectedRoute>
             } />
             <Route path="admin/finance" element={
