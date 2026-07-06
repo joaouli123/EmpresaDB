@@ -130,6 +130,9 @@ export const adminAPI = {
   getEtl: () => api.get(`${ADMIN}/etl`),
   getPlans: () => api.get(`${ADMIN}/plans`),
   patchPlan: (id, data) => api.patch(`${ADMIN}/plans/${id}`, data),
+  getBatchPackages: () => api.get(`${ADMIN}/batch-packages`),
+  patchBatchPackage: (id, data) => api.patch(`${ADMIN}/batch-packages/${id}`, data),
+  createBatchPackage: (data) => api.post(`${ADMIN}/batch-packages`, data),
 };
 
 // Exportar api para uso em outros componentes

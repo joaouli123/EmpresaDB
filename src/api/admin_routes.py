@@ -472,3 +472,118 @@ async def admin_patch_plan(plan_id: int, data: PlanPatch, current_admin: dict = 
     plan_service.invalidate()
     logger.info(f"[admin] plano {plan_id} atualizado por {current_admin.get('email')}: {list(payload.keys())}")
     return {"message": "Plano atualizado"}
+
+
+# ----------------- PACOTES DE CRÉDITOS EM LOTE (batch) -----------------
+class BatchPackagePatch(BaseModel):
+    display_name: Optional[str] = None
+    description: Optional[str] = None
+    credits: Optional[int] = None
+    price_brl: Optional[float] = None
+    sort_order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+
+class BatchPackageCreate(BaseModel):
+    name: str
+    display_name: str
+    credits: int
+    price_brl: float
+    description: Optional[str] = ""
+    sort_order: Optional[int] = 99
+
+
+_PKG_BOUNDS = {"credits": (1, 100_000_000), "price_brl": (0.01, 1_000_000), "sort_order": (0, 1000)}
+
+
+@router.get("/batch-packages")
+async def admin_list_batch_packages(current_admin: dict = Depends(get_current_admin_user)):
+    """Todos os pacotes de créditos (inclusive inativos) + nº de compras pagas."""
+    with db_manager.get_connection() as conn:
+        rows = _rows(conn, """
+            SELECT p.id, p.name, p.display_name, p.description, p.credits,
+                   p.price_brl, p.sort_order, p.is_active,
+                   (SELECT COUNT(*) FROM clientes.batch_package_purchases bp
+                     WHERE bp.package_id = p.id AND bp.status = 'completed') AS purchases
+            FROM clientes.batch_query_packages p
+            ORDER BY p.sort_order, p.credits
+        """)
+    return {"packages": [{
+        "id": r[0], "name": r[1], "display_name": r[2], "description": r[3] or "",
+        "credits": int(r[4] or 0), "price_brl": float(r[5] or 0),
+        "sort_order": int(r[6] or 0), "is_active": bool(r[7]),
+        "purchases": int(r[8] or 0),
+        "price_per_unit": round(float(r[5] or 0) / max(int(r[4] or 1), 1), 4),
+    } for r in rows]}
+
+
+@router.patch("/batch-packages/{package_id}")
+async def admin_patch_batch_package(package_id: int, data: BatchPackagePatch,
+                                    current_admin: dict = Depends(get_current_admin_user)):
+    """Edita um pacote de créditos. Mudar preço/créditos/nome invalida os IDs do
+    Stripe (price é imutável lá) — são recriados na próxima compra, automático."""
+    payload = data.model_dump(exclude_unset=True)
+    if not payload:
+        raise HTTPException(status_code=400, detail="Nada para atualizar")
+
+    for field, (lo, hi) in _PKG_BOUNDS.items():
+        if field in payload and payload[field] is not None and not (lo <= payload[field] <= hi):
+            raise HTTPException(status_code=400, detail=f"{field} fora da faixa permitida ({lo}–{hi})")
+
+    sets, params = [], []
+    for field, value in payload.items():
+        sets.append(f"{field} = %s"); params.append(value)
+    # preço/crédito/nome mudou -> Stripe precisa de um price novo (o antigo cobraria valor errado)
+    if any(f in payload for f in ("price_brl", "credits", "display_name")):
+        sets.append("stripe_price_id = NULL")
+        sets.append("stripe_product_id = NULL")
+    params.append(package_id)
+
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                f"UPDATE clientes.batch_query_packages SET {', '.join(sets)} WHERE id = %s RETURNING id",
+                params)
+            updated = cur.fetchone()
+            cur.close()
+        if not updated:
+            raise HTTPException(status_code=404, detail="Pacote não encontrado")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[admin] erro ao atualizar pacote {package_id}: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao atualizar pacote")
+
+    logger.info(f"[admin] pacote {package_id} atualizado por {current_admin.get('email')}: {list(payload.keys())}")
+    return {"message": "Pacote atualizado"}
+
+
+@router.post("/batch-packages")
+async def admin_create_batch_package(data: BatchPackageCreate,
+                                     current_admin: dict = Depends(get_current_admin_user)):
+    """Cria um novo pacote de créditos (aparece na vitrine se ativo)."""
+    for field, (lo, hi) in _PKG_BOUNDS.items():
+        value = getattr(data, field, None)
+        if value is not None and not (lo <= value <= hi):
+            raise HTTPException(status_code=400, detail=f"{field} fora da faixa permitida ({lo}–{hi})")
+    try:
+        with db_manager.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO clientes.batch_query_packages
+                    (name, display_name, description, credits, price_brl, sort_order, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s, TRUE)
+                RETURNING id
+            """, (data.name.strip().lower().replace(" ", "_"), data.display_name,
+                  data.description or "", data.credits, data.price_brl, data.sort_order or 99))
+            new_id = cur.fetchone()[0]
+            cur.close()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[admin] erro ao criar pacote: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao criar pacote (nome já existe?)")
+
+    logger.info(f"[admin] pacote criado id={new_id} por {current_admin.get('email')}")
+    return {"message": "Pacote criado", "id": new_id}
