@@ -1,60 +1,52 @@
-
 <!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- DNS Prefetch e Preconnect para Performance -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Performance: resource hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- SEO Primary Tags -->
-    <title>DB Empresas - Consulta Empresas Receita Federal | 64M+ CNPJs</title>
-    <meta name="title" content="DB Empresas - Consulta Empresas Receita Federal | 64M+ CNPJs" />
-    <meta name="description" content="🚀 API profissional para consulta de CNPJ com dados oficiais da Receita Federal. Acesse 64M+ empresas, 47M+ estabelecimentos, QSA completo, 34+ filtros. Resposta em 45ms. Teste grátis!" />
-    <meta name="keywords" content="API CNPJ, consulta CNPJ Brasil, API Receita Federal, dados empresas Brasil, QSA completo, CNAE empresas, validação CNPJ, API REST CNPJ, dados CNPJ atualizados, consulta empresas online, busca avançada CNPJ, filtros CNPJ, API empresas Brasil" />
+
+    <!-- SEO -->
+    <title>Consulta CNPJ via API — 68 Milhões de Empresas da Receita Federal | DB Empresas</title>
+    <meta name="description" content="API de consulta CNPJ com dados oficiais da Receita Federal: 68M+ empresas, 71M+ estabelecimentos, QSA completo e filtros avançados por CNAE, UF e porte. Resposta em milissegundos. Comece grátis com 200 consultas/mês, sem cartão." />
+    <meta name="keywords" content="API CNPJ, consulta CNPJ, consultar CNPJ grátis, API Receita Federal, dados de empresas Brasil, QSA sócios, busca por CNAE, lista de empresas por cidade, prospecção B2B, enriquecimento de dados CNPJ, validação de CNPJ, API REST CNPJ" />
     <meta name="author" content="DB Empresas" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow" />
-    <link rel="canonical" href="https://dbempresas.com.br" />
-    
-    <!-- Geo Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://www.dbempresas.com.br/" />
+
     <meta name="geo.region" content="BR" />
-    <meta name="geo.placename" content="Brasil" />
     <meta name="language" content="Portuguese" />
-    
-    <!-- Open Graph / Facebook -->
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://dbempresas.com.br/" />
-    <meta property="og:title" content="DB Empresas - 64M+ Empresas da Receita Federal" />
-    <meta property="og:description" content="🚀 Consulte 64M+ empresas em 45ms. API profissional com dados completos da Receita Federal, QSA, 34+ filtros. Teste grátis 200 consultas/mês!" />
-    <meta property="og:image" content="https://dbempresas.com.br/og-image.jpg" />
+    <meta property="og:url" content="https://www.dbempresas.com.br/" />
+    <meta property="og:title" content="Consulta CNPJ via API — 68M+ Empresas da Receita Federal" />
+    <meta property="og:description" content="Todos os CNPJs do Brasil em uma API rápida: dados cadastrais, QSA, CNAE e filtros avançados. Comece grátis com 200 consultas/mês, sem cartão." />
+    <meta property="og:image" content="https://www.dbempresas.com.br/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="DB Empresas" />
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://dbempresas.com.br/" />
-    <meta name="twitter:title" content="DB Empresas - 64M+ Empresas Receita Federal" />
-    <meta name="twitter:description" content="🚀 Consulte 64M+ empresas em 45ms. Dados oficiais da Receita Federal. Teste grátis!" />
-    <meta name="twitter:image" content="https://dbempresas.com.br/twitter-image.jpg" />
-    <meta name="twitter:creator" content="@dbempresas" />
-    
-    <!-- Schema.org Markup (JSON-LD) - Otimizado -->
+    <meta name="twitter:title" content="Consulta CNPJ via API — 68M+ Empresas da Receita Federal" />
+    <meta name="twitter:description" content="Todos os CNPJs do Brasil em uma API rápida. Comece grátis com 200 consultas/mês." />
+    <meta name="twitter:image" content="https://www.dbempresas.com.br/og-image.jpg" />
+
+    <!-- Schema.org: SoftwareApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "DB Empresas",
-      "url": "https://dbempresas.com.br",
-      "description": "API profissional para consulta de CNPJ com dados oficiais da Receita Federal do Brasil. Acesse 64M+ empresas, 47M+ estabelecimentos e 26M+ sócios em tempo real.",
+      "name": "DB Empresas — API de Consulta CNPJ",
+      "url": "https://www.dbempresas.com.br",
+      "description": "API para consulta de CNPJ com dados oficiais da Receita Federal do Brasil: 68 milhões de empresas, 71 milhões de estabelecimentos e 27 milhões de sócios, com filtros avançados e QSA completo.",
       "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, All",
+      "operatingSystem": "Web",
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "BRL",
@@ -63,18 +55,11 @@
         "offerCount": "5",
         "availability": "https://schema.org/InStock"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "5.0",
-        "ratingCount": "500",
-        "bestRating": "5",
-        "worstRating": "1"
-      },
       "provider": {
         "@type": "Organization",
         "name": "DB Empresas",
-        "url": "https://dbempresas.com.br",
-        "logo": "https://dbempresas.com.br/logo.png",
+        "url": "https://www.dbempresas.com.br",
+        "logo": "https://www.dbempresas.com.br/favicon.png",
         "contactPoint": {
           "@type": "ContactPoint",
           "telephone": "+55-41-98785-7413",
@@ -84,22 +69,19 @@
         }
       },
       "featureList": [
-        "64M+ empresas cadastradas",
-        "47M+ estabelecimentos ativos",
-        "26M+ sócios registrados",
-        "Dados oficiais da Receita Federal",
-        "QSA completo com CPF dos sócios",
-        "34+ filtros avançados de busca",
-        "CNAEs principal e secundários",
-        "API REST simples e documentada",
-        "Resposta em menos de 45ms",
-        "Dados atualizados diariamente",
-        "200 consultas gratuitas/mês",
-        "Integração em menos de 1 hora"
+        "68 milhões de empresas da Receita Federal",
+        "71 milhões de estabelecimentos",
+        "27 milhões de sócios com QSA completo",
+        "Filtros avançados: UF, município, CNAE, porte, situação cadastral e datas",
+        "Consultas em lote para prospecção B2B",
+        "API REST documentada com resposta em milissegundos",
+        "Base sincronizada mensalmente com a publicação oficial da Receita Federal",
+        "Plano gratuito com 200 consultas/mês, sem cartão de crédito"
       ]
     }
     </script>
-    
+
+    <!-- Schema.org: FAQ (alinhado ao conteúdo visível da página) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -107,26 +89,34 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "O que é a CNPJ API?",
+          "name": "Os dados são realmente da Receita Federal?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A CNPJ API é uma API profissional que fornece acesso completo aos dados oficiais de empresas cadastradas na Receita Federal do Brasil. Com ela, você pode consultar informações detalhadas de mais de 64 milhões de empresas, incluindo dados cadastrais, QSA (Quadro de Sócios e Administradores), 34+ filtros avançados, CNAEs e muito mais. Resposta em menos de 45ms."
+            "text": "Sim. Todos os dados vêm da base pública oficial da Receita Federal do Brasil e são sincronizados mensalmente, acompanhando o calendário de publicação da própria Receita: CNPJ completo, razão social, endereço, situação cadastral, CNAE, porte, natureza jurídica e QSA (sócios e administradores)."
           }
         },
         {
           "@type": "Question",
-          "name": "Os dados são oficiais da Receita Federal?",
+          "name": "Como funciona o plano gratuito?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sim! Todos os dados fornecidos pela CNPJ API são 100% oficiais, extraídos diretamente da base de dados públicos da Receita Federal do Brasil. A base é atualizada diariamente para garantir precisão e confiabilidade absoluta."
+            "text": "O plano Free oferece 200 consultas por mês sem custo e sem cartão de crédito. Você consulta dados completos de qualquer CNPJ, incluindo QSA, e pode fazer upgrade a qualquer momento."
           }
         },
         {
           "@type": "Question",
-          "name": "Quanto custa usar a API?",
+          "name": "Quais filtros posso usar nas buscas?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Oferecemos diversos planos: Plano Free (gratuito com 200 consultas/mês), Start (R$ 79,90/mês com 10.000 consultas), Growth (R$ 249,90/mês com 100.000 consultas), Pro (R$ 799,90/mês com 500.000 consultas) e Enterprise (customizado para grandes volumes)."
+            "text": "Busque empresas por estado (UF), município, CNAE (atividade econômica), situação cadastral, razão social, nome fantasia e período de abertura — combinando múltiplos filtros. As consultas em lote oferecem ainda mais filtros, como porte, CEP, bairro, Simples Nacional, MEI e capital social."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Como funcionam as consultas em lote?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "As consultas em lote permitem buscar milhares de empresas de uma vez com filtros combinados — ideal para prospecção B2B e enriquecimento de bases. Cada empresa retornada consome 1 crédito; créditos comprados em pacotes não expiram."
           }
         },
         {
@@ -134,66 +124,42 @@
           "name": "Como integrar a API no meu sistema?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A integração é muito simples! Basta fazer uma requisição REST para nossos endpoints com sua API Key. Fornecemos documentação completa com exemplos em Python, JavaScript, PHP, Java e cURL. A maioria dos desenvolvedores consegue integrar em menos de 1 hora."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Quais filtros avançados estão disponíveis?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Você tem acesso a mais de 34 filtros avançados! Pode filtrar por: estado (UF), município, CNAE (atividade econômica), situação cadastral, porte da empresa, data de abertura, razão social, nome fantasia, CEP, bairro, logradouro, opção pelo Simples Nacional, MEI, natureza jurídica, capital social e muito mais."
+            "text": "A integração é uma requisição REST com sua API Key no header. A documentação traz exemplos prontos em Python, JavaScript, PHP e cURL — a maioria dos desenvolvedores integra em menos de 1 hora."
           }
         }
       ]
     }
     </script>
-    
+
+    <!-- Schema.org: Organization -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "DB Empresas",
-      "url": "https://dbempresas.com.br",
-      "logo": "https://dbempresas.com.br/logo.png",
-      "description": "API profissional para consulta de CNPJ com dados oficiais da Receita Federal",
-      "sameAs": [
-        "https://www.linkedin.com/company/dbempresas",
-        "https://twitter.com/dbempresas",
-        "https://www.instagram.com/dbempresas"
-      ],
+      "url": "https://www.dbempresas.com.br",
+      "logo": "https://www.dbempresas.com.br/favicon.png",
+      "description": "API de consulta CNPJ com dados oficiais da Receita Federal",
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+55-41-98785-7413",
         "contactType": "customer service",
         "email": "contato@dbempresas.com.br",
-        "availableLanguage": ["Portuguese", "English"]
+        "availableLanguage": "Portuguese"
       }
     }
     </script>
-    
-    <!-- Additional Meta Tags para SEO -->
+
     <meta name="theme-color" content="#3b82f6" />
-    <meta name="msapplication-TileColor" content="#3b82f6" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="DB Empresas" />
     <meta name="format-detection" content="telephone=no" />
-    
-    <!-- Verificação de Propriedade (adicionar tokens reais) -->
-    <!-- <meta name="google-site-verification" content="SEU_TOKEN_AQUI" /> -->
-    <!-- <meta name="facebook-domain-verification" content="SEU_TOKEN_AQUI" /> -->
-    
-    <!-- Performance: Resource Hints -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" />
-    
-    <!-- Critical CSS Inline (será adicionado via Vite) -->
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- Preload de fonte de forma assíncrona -->
+
+    <!-- Fonte carregada sem bloquear a renderização -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" />

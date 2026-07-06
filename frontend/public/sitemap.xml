@@ -1,41 +1,69 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://cnpjapi.com.br/</loc>
-    <lastmod>2024-01-28</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://www.dbempresas.com.br/</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://cnpjapi.com.br/#pricing</loc>
-    <lastmod>2024-01-28</lastmod>
+    <loc>https://www.dbempresas.com.br/pricing</loc>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cnpjapi.com.br/#features</loc>
-    <lastmod>2024-01-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://cnpjapi.com.br/#testimonials</loc>
-    <lastmod>2024-01-28</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.dbempresas.com.br/servicos</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cnpjapi.com.br/#faq</loc>
-    <lastmod>2024-01-28</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.dbempresas.com.br/casos-de-uso</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cnpjapi.com.br/#contact</loc>
-    <lastmod>2024-01-28</lastmod>
+    <loc>https://www.dbempresas.com.br/sobre</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/blog</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/contato</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/api</loc>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/login</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/termos</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.dbempresas.com.br/privacidade</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

@@ -61,13 +61,15 @@ const LandingPage = () => {
     loadPlans();
     loadBatchPackages();
 
-    // Update window width on resize
+    // Update window width on resize (com debounce — evita re-render em cascata)
+    let resizeTimer;
     const handleResize = () => {
-      setWindowWidth(window.innerWidth);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => setWindowWidth(window.innerWidth), 150);
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize); };
   }, []);
 
   const loadPlans = async () => {
@@ -108,7 +110,7 @@ const LandingPage = () => {
             '500 consultas em lote/mês',
             '34+ filtros avançados',
             'Acesso API completo',
-            'Dados atualizados diariamente',
+            'Dados sempre na última versão da Receita',
             'Suporte prioritário',
             'Dashboard básico',
             'Créditos batch comprados nunca expiram'
@@ -127,7 +129,7 @@ const LandingPage = () => {
             '2.000 consultas em lote/mês',
             '34+ filtros avançados',
             'Acesso API completo',
-            'Dados em tempo real',
+            'Dados sempre na última versão da Receita',
             'Suporte prioritário',
             'Dashboard avançado',
             'Redis Cache (3x mais rápido)',
@@ -148,7 +150,7 @@ const LandingPage = () => {
             '10.000 consultas em lote/mês',
             '34+ filtros avançados',
             'Acesso API ilimitado',
-            'Dados em tempo real',
+            'Dados sempre na última versão da Receita',
             'Suporte 24/7',
             'Dashboard personalizado',
             'Redis Cache Premium',
@@ -224,7 +226,7 @@ const LandingPage = () => {
     {
       icon: <Database size={32} />,
       title: 'Dados Completos da Receita Federal',
-      description: 'Acesso a milhões de empresas, estabelecimentos, sócios e CNPJs atualizados em tempo real'
+      description: '68M+ empresas, 71M+ estabelecimentos e 27M+ sócios — a base pública oficial inteira, pronta para consultar'
     },
     {
       icon: <Zap size={32} />,
@@ -490,7 +492,7 @@ const LandingPage = () => {
       role: 'Business Analyst, Consultoria Estratégica',
       avatar: 'CT',
       rating: 5,
-      text: 'Dados atualizados diariamente! Conseguimos mapear mercados inteiros em minutos. As consultas em lote economizaram centenas de horas de pesquisa manual!'
+      text: 'Dados confiáveis e completos! Conseguimos mapear mercados inteiros em minutos. As consultas em lote economizaram centenas de horas de pesquisa manual!'
     }
   ];
 
@@ -614,19 +616,19 @@ const LandingPage = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={16} />
-            <span>Mais de 500 empresas já confiam em nossa plataforma</span>
+            <span>Base oficial completa da Receita Federal — comece grátis, sem cartão</span>
           </div>
 
           <h1 className="hero-title">
-            Acesso Instantâneo a 64 Milhões de Empresas
+            Consulta CNPJ via API: 68 Milhões de Empresas
             <br />
-            <span className="gradient-text">Dados 100% Oficiais e Atualizados</span>
+            <span className="gradient-text">Dados Oficiais da Receita Federal</span>
           </h1>
 
           <p className="hero-description">
-            A maneira mais rápida e confiável de acessar dados completos de qualquer empresa no Brasil.
-            Sem burocracia, sem complicação. Consultas em milissegundos, integração simples e
-            dados 100% confiáveis para seu negócio.
+            Todos os CNPJs do Brasil a uma requisição de distância: dados cadastrais completos,
+            QSA com sócios, CNAE e filtros avançados para prospecção B2B, compliance e
+            enriquecimento de dados. Resposta em milissegundos. Comece grátis, sem cartão.
           </p>
 
           <div className="hero-cta">
@@ -645,15 +647,15 @@ const LandingPage = () => {
 
           <div className="hero-stats">
             <div className="stat">
-              <div className="stat-number">64M+</div>
+              <div className="stat-number">68M+</div>
               <div className="stat-label">Empresas</div>
             </div>
             <div className="stat">
-              <div className="stat-number">47M+</div>
+              <div className="stat-number">71M+</div>
               <div className="stat-label">Estabelecimentos</div>
             </div>
             <div className="stat">
-              <div className="stat-number">26M+</div>
+              <div className="stat-number">27M+</div>
               <div className="stat-label">Sócios</div>
             </div>
             <div className="stat">
@@ -826,10 +828,11 @@ const LandingPage = () => {
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
           }}>
             <Clock size={48} style={{ color: 'var(--primary)', margin: '0 auto 16px' }} />
-            <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Dados Totalmente Atualizados</h3>
+            <h3 style={{ marginBottom: '12px', color: 'var(--dark)' }}>Sempre na Última Versão da Receita</h3>
             <p style={{ color: 'var(--gray)', fontSize: '16px', lineHeight: '1.6' }}>
-              Nossa base é sincronizada <strong>diariamente</strong> com a Receita Federal, garantindo que você sempre tenha
-              acesso às informações mais recentes sobre empresas brasileiras. Última atualização: hoje.
+              Nossa base é sincronizada <strong>a cada publicação oficial da Receita Federal</strong> (mensal),
+              com verificação automática de integridade em todas as cargas. Você consulta exatamente
+              o que consta no cadastro nacional — sem dados defasados de anos, como em bases piratas.
             </p>
           </div>
         </div>
@@ -1500,7 +1503,7 @@ const LandingPage = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2024 DB Empresas. Todos os direitos reservados.</p>
+          <p>&copy; 2026 DB Empresas. Todos os direitos reservados.</p>
           <p>Dados oficiais da Receita Federal do Brasil</p>
         </div>
       </footer>
