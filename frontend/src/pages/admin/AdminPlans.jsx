@@ -3,6 +3,7 @@ import { adminAPI } from '../../services/api';
 import {
   CreditCard, Users, Save, AlertCircle, CheckCircle2, Search,
   UserSearch, Layers, FileDown, Eye, Power, Package, Plus, ShoppingCart,
+  ChevronDown, ChevronUp, Gauge, ListChecks, Info,
 } from 'lucide-react';
 
 const brl = (n) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n || 0);
@@ -21,7 +22,7 @@ const TOGGLES = [
   { key: 'can_socios', label: 'Consulta de sócios', icon: UserSearch, hint: 'QSA e busca de sócios por nome/CPF' },
   { key: 'can_batch', label: 'Consultas em lote', icon: Layers, hint: 'API de processamento em lote' },
   { key: 'can_export', label: 'Exportação de dados', icon: FileDown, hint: 'Exportação de resultados (CSV)' },
-  { key: 'is_public', label: 'Visível na página de preços', icon: Eye, hint: 'Aparece para novos assinantes' },
+  { key: 'is_public', label: 'Visível na página de preços', icon: Eye, hint: 'Aparece na LP e no painel do usuário' },
   { key: 'is_active', label: 'Plano ativo', icon: Power, hint: 'Planos inativos não aceitam novas assinaturas' },
 ];
 
@@ -35,6 +36,10 @@ const PKG_FIELDS = [
 
 const EMPTY_PKG = { name: '', display_name: '', credits: 1000, price_brl: 49.9, description: '', sort_order: 99 };
 
+// features vem como array; no editor vira texto (1 por linha) e volta a array ao salvar
+const featsToText = (arr) => (Array.isArray(arr) ? arr.join('\n') : '');
+const textToFeats = (txt) => txt.split('\n').map((s) => s.trim()).filter(Boolean);
+
 const AdminPlans = () => {
   const [plans, setPlans] = useState([]);
   const [packages, setPackages] = useState([]);
@@ -44,7 +49,8 @@ const AdminPlans = () => {
   const [pkgDrafts, setPkgDrafts] = useState({});
   const [saving, setSaving] = useState(null);
   const [savedAt, setSavedAt] = useState(null);
-  const [newPkg, setNewPkg] = useState(null); // null = fechado; objeto = formulário aberto
+  const [newPkg, setNewPkg] = useState(null);
+  const [expanded, setExpanded] = useState({}); // planId -> bool (edição aberta)
 
   useEffect(() => { load(); }, []);
 
@@ -69,7 +75,6 @@ const AdminPlans = () => {
 
   const draftOf = (plan) => ({ ...plan, ...(drafts[plan.id] || {}) });
   const isDirty = (plan) => Boolean(drafts[plan.id] && Object.keys(drafts[plan.id]).length);
-
   const setField = (planId, key, value) => {
     setDrafts((d) => ({ ...d, [planId]: { ...(d[planId] || {}), [key]: value } }));
   };
@@ -82,8 +87,9 @@ const AdminPlans = () => {
     try {
       const payload = {};
       for (const [k, v] of Object.entries(changes)) {
-        payload[k] = ['price_brl'].includes(k) ? parseFloat(v) :
-          ['monthly_queries', 'rate_per_hour', 'burst_per_min', 'max_page_size'].includes(k) ? parseInt(v, 10) : v;
+        payload[k] = k === 'price_brl' ? parseFloat(v) :
+          ['monthly_queries', 'rate_per_hour', 'burst_per_min', 'max_page_size'].includes(k) ? parseInt(v, 10) :
+          k === 'features' ? textToFeats(v) : v;
       }
       await adminAPI.patchPlan(plan.id, payload);
       setSavedAt(plan.id);
@@ -160,13 +166,23 @@ const AdminPlans = () => {
     );
   }
 
+  const totalSubs = plans.reduce((s, p) => s + (p.subscribers || 0), 0);
+  const mrr = plans.reduce((s, p) => s + (p.price_brl > 0 ? p.price_brl * (p.subscribers || 0) : 0), 0);
+  const totalSales = packages.reduce((s, p) => s + (p.purchases || 0), 0);
+
   return (
     <div className="pg" style={{ maxWidth: '1100px' }}>
       <div className="pg-head">
         <div>
           <h1>Planos</h1>
-          <p>Configure limites, preços e recursos de cada plano — as mudanças valem para novas requisições em até 1 minuto</p>
+          <p>Tudo aqui reflete na LP, no painel do usuário e na cobrança do Stripe — mudanças valem em até 1 minuto</p>
         </div>
+      </div>
+
+      <div className="pmetrics" style={{ marginBottom: 20 }}>
+        <div><span className="k">Assinantes</span><span className="v">{fmt(totalSubs)}</span></div>
+        <div><span className="k">MRR estimado</span><span className="v">{brl(mrr)}</span></div>
+        <div><span className="k">Pacotes vendidos</span><span className="v">{fmt(totalSales)}</span></div>
       </div>
 
       {error && (
@@ -177,63 +193,104 @@ const AdminPlans = () => {
 
       {plans.map((plan) => {
         const d = draftOf(plan);
+        const open = expanded[plan.id] ?? false;
         return (
-          <div className="pcard" key={plan.id}>
-            <div className="pcard-head plan-head">
+          <div className={`pcard ${isDirty(plan) ? 'plan-dirty' : ''}`} key={plan.id}>
+            <button className="pcard-head plan-head plan-head-btn" onClick={() => setExpanded((x) => ({ ...x, [plan.id]: !open }))}>
               <div className="plan-title">
                 <CreditCard size={18} />
-                <h2>{plan.display_name}</h2>
+                <h2>{d.display_name}</h2>
                 <span className="pbadge gray">{plan.name}</span>
                 {!d.is_active && <span className="pbadge red">inativo</span>}
+                {!d.is_public && d.is_active && <span className="pbadge gray">oculto</span>}
                 {d.price_brl > 0
                   ? <span className="pbadge blue">{brl(d.price_brl)}/mês</span>
                   : <span className="pbadge green">grátis</span>}
+                {isDirty(plan) && <span className="pbadge orange">não salvo</span>}
               </div>
-              <span className="plan-subs"><Users size={14} /> {fmt(plan.subscribers)} usuário{plan.subscribers === 1 ? '' : 's'}</span>
-            </div>
-            <div className="pcard-body">
-              <div className="plan-fields">
-                {NUM_FIELDS.map((f) => (
-                  <label className="plan-field" key={f.key}>
-                    <span>{f.label}</span>
+              <span className="plan-subs">
+                <Users size={14} /> {fmt(plan.subscribers)} usuário{plan.subscribers === 1 ? '' : 's'}
+                {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </span>
+            </button>
+            {open && (
+              <div className="pcard-body">
+                <div className="plan-section-label"><Gauge size={14} /> Preço e limites</div>
+                <div className="plan-fields">
+                  {NUM_FIELDS.map((f) => (
+                    <label className="plan-field" key={f.key}>
+                      <span>{f.label}</span>
+                      <input
+                        type="number"
+                        step={f.step}
+                        min="0"
+                        value={d[f.key] ?? ''}
+                        onChange={(e) => setField(plan.id, f.key, e.target.value)}
+                      />
+                    </label>
+                  ))}
+                </div>
+
+                <div className="plan-section-label"><ListChecks size={14} /> Recursos e visibilidade</div>
+                <div className="plan-toggles">
+                  {TOGGLES.map((t) => (
+                    <label className={`plan-toggle ${d[t.key] ? 'on' : ''}`} key={t.key} title={t.hint}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(d[t.key])}
+                        onChange={(e) => setField(plan.id, t.key, e.target.checked)}
+                      />
+                      <t.icon size={15} />
+                      <span>{t.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="plan-section-label"><Info size={14} /> Exibição na vitrine (LP e painel)</div>
+                <div className="plan-fields" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <label className="plan-field">
+                    <span>Nome exibido</span>
                     <input
-                      type="number"
-                      step={f.step}
-                      min="0"
-                      value={d[f.key] ?? ''}
-                      onChange={(e) => setField(plan.id, f.key, e.target.value)}
+                      type="text"
+                      value={d.display_name ?? ''}
+                      onChange={(e) => setField(plan.id, 'display_name', e.target.value)}
                     />
                   </label>
-                ))}
-              </div>
-
-              <div className="plan-toggles">
-                {TOGGLES.map((t) => (
-                  <label className={`plan-toggle ${d[t.key] ? 'on' : ''}`} key={t.key} title={t.hint}>
+                  <label className="plan-field">
+                    <span>Descrição curta</span>
                     <input
-                      type="checkbox"
-                      checked={Boolean(d[t.key])}
-                      onChange={(e) => setField(plan.id, t.key, e.target.checked)}
+                      type="text"
+                      value={d.description ?? ''}
+                      placeholder="Ex.: Para quem está começando"
+                      onChange={(e) => setField(plan.id, 'description', e.target.value)}
                     />
-                    <t.icon size={15} />
-                    <span>{t.label}</span>
                   </label>
-                ))}
-              </div>
+                </div>
+                <label className="plan-field" style={{ marginTop: 10 }}>
+                  <span>Benefícios exibidos (um por linha)</span>
+                  <textarea
+                    className="plan-textarea"
+                    rows={4}
+                    value={typeof d.features === 'string' ? d.features : featsToText(d.features)}
+                    placeholder={'Suporte prioritário\nAcesso à API completa'}
+                    onChange={(e) => setField(plan.id, 'features', e.target.value)}
+                  />
+                </label>
 
-              <div className="plan-actions">
-                {savedAt === plan.id && (
-                  <span className="plan-saved"><CheckCircle2 size={15} /> Salvo</span>
-                )}
-                <button
-                  className="btn-flat primary"
-                  disabled={!isDirty(plan) || saving === plan.id}
-                  onClick={() => save(plan)}
-                >
-                  <Save size={15} /> {saving === plan.id ? 'Salvando...' : 'Salvar alterações'}
-                </button>
+                <div className="plan-actions">
+                  {savedAt === plan.id && (
+                    <span className="plan-saved"><CheckCircle2 size={15} /> Salvo</span>
+                  )}
+                  <button
+                    className="btn-flat primary"
+                    disabled={!isDirty(plan) || saving === plan.id}
+                    onClick={() => save(plan)}
+                  >
+                    <Save size={15} /> {saving === plan.id ? 'Salvando...' : 'Salvar alterações'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         );
       })}
@@ -282,60 +339,68 @@ const AdminPlans = () => {
       {packages.map((pkg) => {
         const d = pkgDraftOf(pkg);
         const perUnit = (parseFloat(d.price_brl) || 0) / Math.max(parseInt(d.credits, 10) || 1, 1);
+        const key = `pkg-${pkg.id}`;
+        const open = expanded[key] ?? false;
         return (
-          <div className="pcard" key={`pkg-${pkg.id}`}>
-            <div className="pcard-head plan-head">
+          <div className={`pcard ${pkgIsDirty(pkg) ? 'plan-dirty' : ''}`} key={key}>
+            <button className="pcard-head plan-head plan-head-btn" onClick={() => setExpanded((x) => ({ ...x, [key]: !open }))}>
               <div className="plan-title">
                 <Package size={18} />
-                <h2>{pkg.display_name}</h2>
+                <h2>{d.display_name}</h2>
                 <span className="pbadge gray">{pkg.name}</span>
                 {!d.is_active && <span className="pbadge red">inativo</span>}
                 <span className="pbadge blue">{brl(d.price_brl)}</span>
                 <span className="pbadge green">R$ {perUnit.toFixed(4).replace('.', ',')}/crédito</span>
+                {pkgIsDirty(pkg) && <span className="pbadge orange">não salvo</span>}
               </div>
-              <span className="plan-subs"><ShoppingCart size={14} /> {fmt(pkg.purchases)} venda{pkg.purchases === 1 ? '' : 's'}</span>
-            </div>
-            <div className="pcard-body">
-              <div className="plan-fields">
-                {PKG_FIELDS.map((f) => (
-                  <label className="plan-field" key={f.key}>
-                    <span>{f.label}</span>
+              <span className="plan-subs">
+                <ShoppingCart size={14} /> {fmt(pkg.purchases)} venda{pkg.purchases === 1 ? '' : 's'}
+                {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </span>
+            </button>
+            {open && (
+              <div className="pcard-body">
+                <div className="plan-fields">
+                  {PKG_FIELDS.map((f) => (
+                    <label className="plan-field" key={f.key}>
+                      <span>{f.label}</span>
+                      <input
+                        type={f.type}
+                        step={f.step}
+                        min="0"
+                        value={d[f.key] ?? ''}
+                        onChange={(e) => setPkgField(pkg.id, f.key, e.target.value)}
+                      />
+                    </label>
+                  ))}
+                </div>
+
+                <div className="plan-toggles">
+                  <label className={`plan-toggle ${d.is_active ? 'on' : ''}`} title="Pacotes inativos somem da vitrine e não podem ser comprados">
                     <input
-                      type={f.type}
-                      step={f.step}
-                      min="0"
-                      value={d[f.key] ?? ''}
-                      onChange={(e) => setPkgField(pkg.id, f.key, e.target.value)}
+                      type="checkbox"
+                      checked={Boolean(d.is_active)}
+                      onChange={(e) => setPkgField(pkg.id, 'is_active', e.target.checked)}
                     />
+                    <Power size={15} />
+                    <span>Pacote ativo</span>
                   </label>
-                ))}
-              </div>
+                </div>
 
-              <div className="plan-toggles">
-                <label className={`plan-toggle ${d.is_active ? 'on' : ''}`} title="Pacotes inativos somem da vitrine e não podem ser comprados">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(d.is_active)}
-                    onChange={(e) => setPkgField(pkg.id, 'is_active', e.target.checked)}
-                  />
-                  <Power size={15} />
-                  <span>Pacote ativo</span>
-                </label>
+                <div className="plan-actions">
+                  {savedAt === key && (
+                    <span className="plan-saved"><CheckCircle2 size={15} /> Salvo</span>
+                  )}
+                  <button
+                    className="btn-flat primary"
+                    disabled={!pkgIsDirty(pkg) || saving === key}
+                    onClick={() => savePkg(pkg)}
+                  >
+                    <Save size={15} /> {saving === key ? 'Salvando...' : 'Salvar alterações'}
+                  </button>
+                </div>
               </div>
-
-              <div className="plan-actions">
-                {savedAt === `pkg-${pkg.id}` && (
-                  <span className="plan-saved"><CheckCircle2 size={15} /> Salvo</span>
-                )}
-                <button
-                  className="btn-flat primary"
-                  disabled={!pkgIsDirty(pkg) || saving === `pkg-${pkg.id}`}
-                  onClick={() => savePkg(pkg)}
-                >
-                  <Save size={15} /> {saving === `pkg-${pkg.id}` ? 'Salvando...' : 'Salvar alterações'}
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         );
       })}

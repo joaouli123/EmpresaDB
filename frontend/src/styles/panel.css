@@ -186,6 +186,11 @@
   color: var(--danger);
 }
 
+.pbadge.orange {
+  background: #fef3e2;
+  color: #c2620a;
+}
+
 /* Botões flat */
 .btn-flat {
   display: inline-flex;
@@ -518,6 +523,58 @@
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* cabeçalho clicável (expande/recolhe a edição do plano) */
+.plan-head-btn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-head-btn:hover {
+  background: var(--bg);
+}
+
+.plan-dirty {
+  border-color: #e8a33d;
+}
+
+.plan-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin: 18px 0 10px;
+}
+
+.plan-section-label:first-child {
+  margin-top: 0;
+}
+
+.plan-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.plan-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 .plan-title {

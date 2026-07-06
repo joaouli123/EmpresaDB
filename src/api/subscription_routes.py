@@ -21,6 +21,7 @@ class Plan(BaseModel):
     monthly_queries: int
     price_brl: float
     features: List[str]
+    description: Optional[str] = ""
 
 class SubscriptionInfo(BaseModel):
     plan_name: str
@@ -52,10 +53,14 @@ async def get_available_plans():
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT id, name, display_name, monthly_queries, price_brl, features
+                SELECT id, name, display_name, monthly_queries, price_brl, features, description
                 FROM clientes.plans
-                WHERE is_active = TRUE
-                ORDER BY monthly_queries ASC
+                WHERE is_active = TRUE AND is_public IS NOT FALSE
+                ORDER BY
+                    CASE WHEN LOWER(name) = 'free' THEN 0
+                         WHEN price_brl > 0 THEN 1
+                         ELSE 2 END,
+                    price_brl ASC, monthly_queries ASC
             """)
 
             plans = []
@@ -66,7 +71,8 @@ async def get_available_plans():
                     "display_name": row[2],
                     "monthly_queries": row[3],
                     "price_brl": float(row[4]),
-                    "features": row[5]
+                    "features": row[5] or [],
+                    "description": row[6] or ""
                 })
 
             cursor.close()

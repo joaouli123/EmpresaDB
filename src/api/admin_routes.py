@@ -452,6 +452,10 @@ async def admin_patch_plan(plan_id: int, data: PlanPatch, current_admin: dict = 
             sets.append("features = %s::jsonb"); params.append(_json.dumps(value))
         else:
             sets.append(f"{field} = %s"); params.append(value)
+    # preço/nome/limite mudou -> o price antigo do Stripe cobraria valor errado;
+    # NULL força o checkout a criar um price novo on-the-fly com os dados atuais
+    if any(f in payload for f in ("price_brl", "display_name", "monthly_queries")):
+        sets.append("stripe_price_id = NULL")
     params.append(plan_id)
 
     try:
