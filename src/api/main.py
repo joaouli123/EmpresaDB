@@ -106,6 +106,20 @@ _CSP = (
 
 
 @app.middleware("http")
+async def canonical_host_redirect(request, call_next):
+    """SEO: 301 do domínio sem www para o canônico www.dbempresas.com.br.
+    Dois hosts servindo o mesmo conteúdo dividem o ranking no Google."""
+    host = request.headers.get("host", "")
+    if host == "dbempresas.com.br":
+        from fastapi.responses import RedirectResponse
+        url = f"https://www.dbempresas.com.br{request.url.path}"
+        if request.url.query:
+            url += f"?{request.url.query}"
+        return RedirectResponse(url, status_code=301)
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def security_headers(request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
