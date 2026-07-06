@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import {
@@ -9,6 +9,7 @@ import {
   Eye,
   Trash2,
   AlertCircle,
+  Package,
 } from 'lucide-react';
 
 const Subscription = () => {
@@ -16,16 +17,34 @@ const Subscription = () => {
   const [subscription, setSubscription] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [cards, setCards] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successText, setSuccessText] = useState('');
+  const [activeTab, setActiveTab] = useState('pagamentos');
+  const [subscribing, setSubscribing] = useState(null);
+  const [purchasing, setPurchasing] = useState(null);
+  const plansRef = useRef(null);
+
+  const scrollToPlans = () => {
+    plansRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     const success = searchParams.get('success');
-    if (success === 'true') {
+    const batchSuccess = searchParams.get('batch_purchase');
+    if (success === 'true' || batchSuccess === 'success') {
+      setSuccessText(
+        batchSuccess === 'success'
+          ? 'Créditos em lote adicionados com sucesso! Já estão disponíveis para uso.'
+          : 'Assinatura realizada com sucesso. Sua conta já está ativa.'
+      );
       setShowSuccessMessage(true);
       searchParams.delete('success');
+      searchParams.delete('batch_purchase');
       setSearchParams(searchParams);
       setTimeout(() => setShowSuccessMessage(false), 8000);
     }
@@ -36,7 +55,7 @@ const Subscription = () => {
     setLoading(true);
     setError(null);
     try {
-      const [subRes, transRes, cardsRes] = await Promise.all([
+      const [subRes, transRes, cardsRes, plansRes, pkgsRes] = await Promise.all([
         api.get('/api/v1/subscriptions/my-subscription').catch((err) => {
           console.error('Erro ao buscar assinatura:', err);
           return { data: null };
@@ -47,6 +66,14 @@ const Subscription = () => {
         }),
         api.get('/api/v1/subscriptions/payment-methods').catch((err) => {
           console.error('Erro ao buscar métodos de pagamento:', err);
+          return { data: [] };
+        }),
+        api.get('/api/v1/subscriptions/plans').catch((err) => {
+          console.error('Erro ao buscar planos:', err);
+          return { data: [] };
+        }),
+        api.get('/api/v1/batch/packages').catch((err) => {
+          console.error('Erro ao buscar pacotes:', err);
           return { data: [] };
         }),
       ]);
@@ -60,11 +87,49 @@ const Subscription = () => {
 
       setTransactions(Array.isArray(transRes.data) ? transRes.data : []);
       setCards(Array.isArray(cardsRes.data) ? cardsRes.data : []);
+      setPlans(Array.isArray(plansRes.data) ? plansRes.data : []);
+      setPackages(Array.isArray(pkgsRes.data) ? pkgsRes.data : []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       setError('Erro ao carregar informações da assinatura');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (planId) => {
+    setSubscribing(planId);
+    try {
+      const response = await api.post('/stripe/create-checkout-session', {
+        plan_id: planId,
+        success_url: `${window.location.origin}/subscription?success=true`,
+        cancel_url: `${window.location.origin}/subscription?canceled=true`,
+      });
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('URL de checkout não retornada');
+      }
+    } catch (error) {
+      console.error('Erro ao criar checkout:', error);
+      alert('Erro ao iniciar processo de pagamento. Tente novamente.');
+      setSubscribing(null);
+    }
+  };
+
+  const handlePurchasePackage = async (packageId) => {
+    setPurchasing(packageId);
+    try {
+      const response = await api.post(`/api/v1/batch/packages/${packageId}/purchase`);
+      if (response.data.success && response.data.session_url) {
+        window.location.href = response.data.session_url;
+      } else {
+        throw new Error(response.data.message || 'Erro ao iniciar compra');
+      }
+    } catch (error) {
+      console.error('Erro ao comprar pacote:', error);
+      alert('Erro ao iniciar compra. Tente novamente.');
+      setPurchasing(null);
     }
   };
 
@@ -148,6 +213,16 @@ const Subscription = () => {
   const formatCurrency = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
+  const currentPlanName = (subscription.plan_name || '').toLowerCase();
+
+  const enrichFeatures = (plan) => {
+    const feats = [...(plan.features || [])];
+    if (plan.monthly_batch_queries > 0) {
+      feats.unshift(`${plan.monthly_batch_queries.toLocaleString('pt-BR')} consultas em lote/mês`);
+    }
+    return feats;
+  };
+
   const total = subscription.total_limit || 0;
   const used = subscription.queries_used || 0;
   const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
@@ -165,7 +240,7 @@ const Subscription = () => {
       {showSuccessMessage && (
         <div className="pmsg success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Check size={16} />
-          <span>Assinatura realizada com sucesso. Sua conta já está ativa.</span>
+          <span>{successText}</span>
         </div>
       )}
 
@@ -175,7 +250,7 @@ const Subscription = () => {
             <h3>Aproveite mais com um plano pago</h3>
             <p>Desbloqueie milhares de consultas mensais e recursos exclusivos.</p>
           </div>
-          <a href="/home#pricing" className="upgrade-banner-btn">Ver planos</a>
+          <button onClick={scrollToPlans} className="upgrade-banner-btn">Ver planos</button>
         </div>
       )}
 
@@ -233,11 +308,14 @@ const Subscription = () => {
         </div>
         <div className="pcard-foot">
           {isFree ? (
-            <a href="/home#pricing" className="btn-flat primary" style={{ textDecoration: 'none' }}>
+            <button className="btn-flat primary" onClick={scrollToPlans}>
               <TrendingUp size={16} /> Fazer upgrade
-            </a>
+            </button>
           ) : (
             <>
+              <button className="btn-flat ghost" onClick={scrollToPlans}>
+                <TrendingUp size={16} /> Trocar de plano
+              </button>
               <button className="btn-flat ghost" onClick={handleViewSubscriptionDetails}>
                 <Eye size={16} /> Ver detalhes
               </button>
@@ -251,76 +329,175 @@ const Subscription = () => {
         </div>
       </div>
 
-      {/* Formas de pagamento */}
+      {/* Pagamentos e histórico por abas */}
       <div className="pcard">
         <div className="pcard-head">
-          <h2>Formas de pagamento</h2>
+          <div className="ptabs">
+            <button
+              className={`ptab-btn ${activeTab === 'pagamentos' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pagamentos')}
+            >
+              Pagamentos
+            </button>
+            <button
+              className={`ptab-btn ${activeTab === 'historico' ? 'active' : ''}`}
+              onClick={() => setActiveTab('historico')}
+            >
+              Histórico
+            </button>
+          </div>
         </div>
         <div className="pcard-body">
-          {cards.length === 0 ? (
-            <div className="pempty">
-              <CreditCard size={30} className="ico" />
-              <h3>Nenhum cartão cadastrado</h3>
-              <p>A integração de pagamento será ativada em breve.</p>
-            </div>
-          ) : (
-            cards.map((card) => (
-              <div className="pay-row" key={card.id}>
-                <div className="pay-brand"><CreditCard size={18} /></div>
-                <div className="pay-info">
-                  <span className="num">{(card.brand || '').toUpperCase()} •••• {card.last4}</span>
-                  <span className="exp">Válido até {card.exp_month}/{card.exp_year}</span>
-                </div>
-                {card.is_default && <span className="pbadge gray">Padrão</span>}
-                <button className="btn-icon del" onClick={() => handleRemoveCard(card.id)} aria-label="Remover cartão">
-                  <Trash2 size={16} />
-                </button>
+          {activeTab === 'pagamentos' ? (
+            cards.length === 0 ? (
+              <div className="pempty">
+                <CreditCard size={30} className="ico" />
+                <h3>Nenhum cartão cadastrado</h3>
+                <p>A integração de pagamento será ativada em breve.</p>
               </div>
-            ))
+            ) : (
+              cards.map((card) => (
+                <div className="pay-row" key={card.id}>
+                  <div className="pay-brand"><CreditCard size={18} /></div>
+                  <div className="pay-info">
+                    <span className="num">{(card.brand || '').toUpperCase()} •••• {card.last4}</span>
+                    <span className="exp">Válido até {card.exp_month}/{card.exp_year}</span>
+                  </div>
+                  {card.is_default && <span className="pbadge gray">Padrão</span>}
+                  <button className="btn-icon del" onClick={() => handleRemoveCard(card.id)} aria-label="Remover cartão">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))
+            )
+          ) : (
+            transactions.length === 0 ? (
+              <div className="pempty">
+                <CreditCard size={30} className="ico" />
+                <h3>Nenhuma transação</h3>
+                <p>Suas cobranças aparecerão aqui.</p>
+              </div>
+            ) : (
+              <table className="ptable">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((t) => {
+                    const tcls = t.status === 'paid' ? 'green' : t.status === 'pending' ? 'blue' : 'red';
+                    const ttext = t.status === 'paid' ? 'Pago' : t.status === 'pending' ? 'Pendente' : 'Falhou';
+                    return (
+                      <tr key={t.id}>
+                        <td>{formatDate(t.date)}</td>
+                        <td>{t.description}</td>
+                        <td><span className={`pbadge ${tcls}`}>{ttext}</span></td>
+                        <td className="amount">{formatCurrency(t.amount)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
           )}
         </div>
       </div>
 
-      {/* Histórico de transações */}
-      <div className="pcard">
-        <div className="pcard-head">
-          <h2>Histórico de transações</h2>
-        </div>
-        <div className="pcard-body">
-          {transactions.length === 0 ? (
-            <div className="pempty">
-              <CreditCard size={30} className="ico" />
-              <h3>Nenhuma transação</h3>
-              <p>Suas cobranças aparecerão aqui.</p>
-            </div>
-          ) : (
-            <table className="ptable">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Descrição</th>
-                  <th>Status</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((t) => {
-                  const tcls = t.status === 'paid' ? 'green' : t.status === 'pending' ? 'blue' : 'red';
-                  const ttext = t.status === 'paid' ? 'Pago' : t.status === 'pending' ? 'Pendente' : 'Falhou';
-                  return (
-                    <tr key={t.id}>
-                      <td>{formatDate(t.date)}</td>
-                      <td>{t.description}</td>
-                      <td><span className={`pbadge ${tcls}`}>{ttext}</span></td>
-                      <td className="amount">{formatCurrency(t.amount)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+      {/* Planos disponíveis — sempre visível, é o alvo do botão "Fazer upgrade" */}
+      <div ref={plansRef} className="psection-head">
+        <h2>Planos disponíveis</h2>
+        <p>Faça upgrade ou troque de plano quando quiser, direto por aqui</p>
       </div>
+      <div className="plan-mini-grid">
+        {plans.map((plan) => {
+          const planKey = (plan.name || '').toLowerCase();
+          const isCurrent = currentPlanName === planKey;
+          const isEnterprise = planKey === 'enterprise';
+          const isFreePlanCard = planKey === 'free';
+          const feats = enrichFeatures(plan);
+          return (
+            <div key={plan.id} className={`plan-mini-card ${isCurrent ? 'current' : ''}`}>
+              {isCurrent && <span className="plan-mini-badge">Seu plano</span>}
+              <h3>{plan.display_name}</h3>
+              <div className="plan-mini-price">
+                {isEnterprise ? (
+                  <span className="amount">Sob consulta</span>
+                ) : (
+                  <>
+                    <span className="amount">R$ {Number(plan.price_brl).toFixed(2)}</span>
+                    <span className="period">/mês</span>
+                  </>
+                )}
+              </div>
+              <ul className="plan-mini-feats">
+                {!isEnterprise && (
+                  <li><Check size={14} />{(plan.monthly_queries || 0).toLocaleString('pt-BR')} consultas/mês</li>
+                )}
+                {feats.slice(0, 5).map((f, i) => (
+                  <li key={i}><Check size={14} />{f}</li>
+                ))}
+              </ul>
+              <button
+                className="btn-flat primary"
+                style={{ width: '100%' }}
+                disabled={!isEnterprise && (isCurrent || isFreePlanCard || subscribing === plan.id)}
+                onClick={() =>
+                  isEnterprise
+                    ? (window.location.href = 'mailto:contato@dbempresas.com.br?subject=Interesse no Plano Enterprise')
+                    : handleSubscribe(plan.id)
+                }
+              >
+                {isCurrent
+                  ? 'Plano atual'
+                  : isEnterprise
+                    ? 'Falar com especialista'
+                    : isFreePlanCard
+                      ? 'Plano gratuito'
+                      : subscribing === plan.id
+                        ? 'Processando...'
+                        : 'Assinar'}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pacotes de créditos em lote (adicionais) */}
+      {packages.length > 0 && (
+        <>
+          <div className="psection-head">
+            <h2>Créditos em lote (adicionais)</h2>
+            <p>Compre créditos avulsos para consultas em lote — nunca expiram</p>
+          </div>
+          <div className="plan-mini-grid">
+            {packages.map((pkg) => (
+              <div key={pkg.id} className="plan-mini-card">
+                <h3>{pkg.display_name}</h3>
+                <div className="plan-mini-price">
+                  <span className="amount">R$ {Number(pkg.price_brl).toFixed(2)}</span>
+                </div>
+                <ul className="plan-mini-feats">
+                  <li><Package size={14} />{pkg.credits.toLocaleString('pt-BR')} créditos</li>
+                  <li><Check size={14} />R$ {(pkg.price_per_unit * 100).toFixed(2)} centavos/crédito</li>
+                  {pkg.description && <li><Check size={14} />{pkg.description}</li>}
+                </ul>
+                <button
+                  className="btn-flat primary"
+                  style={{ width: '100%' }}
+                  disabled={purchasing === pkg.id}
+                  onClick={() => handlePurchasePackage(pkg.id)}
+                >
+                  {purchasing === pkg.id ? 'Processando...' : 'Comprar agora'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Modal de cancelamento */}
       {showCancelModal && (

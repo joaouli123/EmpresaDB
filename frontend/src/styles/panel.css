@@ -1044,6 +1044,148 @@
   margin: 12px 0 0;
 }
 
+/* Abas simples (ex: Pagamentos / Histórico) */
+.ptabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.ptab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ptab-btn:hover {
+  color: var(--text);
+}
+
+.ptab-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Cabeçalho de seção solta (fora de um pcard) */
+.psection-head {
+  margin: 28px 0 14px;
+  scroll-margin-top: 90px;
+}
+
+.psection-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 3px;
+}
+
+.psection-head p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Grade compacta de planos/pacotes dentro da conta do usuário */
+.plan-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.plan-mini-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+
+.plan-mini-card.current {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+}
+
+.plan-mini-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.plan-mini-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.plan-mini-price .amount {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.plan-mini-price .period {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.plan-mini-feats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.plan-mini-feats li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.plan-mini-feats svg {
+  color: var(--success, #16a34a);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.plan-mini-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--primary);
+  color: #fff;
+}
+
 @media (max-width: 900px) {
   .pgrid-sidebar,
   .pgrid-2 {

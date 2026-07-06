@@ -787,7 +787,7 @@ async def purchase_batch_package(
             user_id=current_user['id'],
             package_id=package_id,
             success_url=f"{origin}/subscription?batch_purchase=success",
-            cancel_url=f"{origin}/home#batch-packages"
+            cancel_url=f"{origin}/subscription?batch_purchase=canceled"
         )
         
         if not checkout_session:
