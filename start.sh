@@ -25,6 +25,9 @@ case "${RUN_MODE:-api}" in
     ;;
   *)
     echo "[start] RUN_MODE=api -> gunicorn"
-    exec gunicorn src.api.main:app -k uvicorn.workers.UvicornWorker -w "${WEB_CONCURRENCY:-4}" -b "0.0.0.0:${PORT:-8000}" --timeout 120 --graceful-timeout 30 --keep-alive 15
+    # CUSTO: 2 workers bastam p/ ~50 consultas/dia (2-3 clientes). Cada worker
+    # carrega o app inteiro (~150MB RAM); 4 workers dobravam a RAM à toa.
+    # 2 dá resiliência (1 busca lenta não trava tudo). Suba só se o volume crescer.
+    exec gunicorn src.api.main:app -k uvicorn.workers.UvicornWorker -w "${WEB_CONCURRENCY:-2}" -b "0.0.0.0:${PORT:-8000}" --timeout 120 --graceful-timeout 30 --keep-alive 15
     ;;
 esac

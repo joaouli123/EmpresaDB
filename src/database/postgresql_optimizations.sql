@@ -1,6 +1,33 @@
+-- ============================================================================
+-- PRODUÇÃO ATUAL = RAILWAY (Postgres 18). O bloco "VPS 16GB" abaixo é LEGADO
+-- (a VPS 72.61.217.143 foi perdida). Fonte da verdade do tuning: scripts/db_tune.py
+-- e POSTGRES_RAILWAY_TUNING.md. NÃO copie os valores da VPS para o Railway.
+-- ----------------------------------------------------------------------------
+-- !! FIX CRÍTICO DO /dev/shm — incidente 2026-07 !!
+-- Erro em produção: "could not resize shared memory segment ... No space left on device"
+-- Causa: query PARALELA aloca a área dinâmica (DSM) no /dev/shm (tmpfs ~64MB do
+--        container) sobre a matview de 72M linhas -> estoura. NÃO é falta de RAM.
+-- Fix (já aplicado no Railway): DSM em disco em vez de /dev/shm.
+--
+--   ALTER SYSTEM SET dynamic_shared_memory_type = 'mmap';   -- << remove o teto do /dev/shm (requer RESTART)
+--   ALTER SYSTEM SET shared_buffers                 = '512MB';  -- RAM fixa enxuta (requer RESTART)
+--   ALTER SYSTEM SET effective_cache_size           = '3GB';    -- só hint (RAM zero)
+--   ALTER SYSTEM SET work_mem                        = '16MB';   -- baixo/previsível por query
+--   ALTER SYSTEM SET hash_mem_multiplier             = 2.0;
+--   ALTER SYSTEM SET max_parallel_workers_per_gather = 2;       -- não subir sem necessidade
+--   ALTER SYSTEM SET max_parallel_workers            = 4;
+--   ALTER SYSTEM SET jit                             = off;
+--   SELECT pg_reload_conf();
+--   -- depois: Railway -> serviço Postgres -> Deployments -> Restart (ativa mmap + shared_buffers)
+--
+-- Custo: Railway cobra RAM USADA por minuto (não o teto). shared_buffers é RAM
+-- fixa; work_mem × workers é o transitório. Manter ambos baixos = conta baixa.
+-- ============================================================================
+
+
 -- ============================================
--- CONFIGURAÇÕES POSTGRESQL OTIMIZADAS
--- Para VPS: 16GB RAM, 4 vCPUs, 200GB NVMe SSD
+-- [LEGADO / VPS] CONFIGURAÇÕES POSTGRESQL OTIMIZADAS
+-- Para VPS: 16GB RAM, 4 vCPUs, 200GB NVMe SSD  (servidor DESATIVADO)
 -- Execute como superusuário (postgres)
 -- ============================================
 

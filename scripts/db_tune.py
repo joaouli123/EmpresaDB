@@ -6,8 +6,29 @@ Roda do SEU PC apontando pro banco de producao via DATABASE_URL
 
   set DATABASE_URL=postgresql://...  &&  python scripts\\db_tune.py
 
-shared_buffers so vale apos REINICIAR o servico Postgres no Railway;
-os demais aplicam na hora (pg_reload_conf).
+RESTART obrigatorio: dynamic_shared_memory_type e shared_buffers so valem
+apos REINICIAR o servico Postgres no Railway (painel -> Postgres -> Deployments
+-> Restart, ~30-60s). Os demais aplicam na hora (pg_reload_conf).
+
+============================================================================
+!! LEIA ISTO ANTES DE MEXER NOS VALORES  (incidente 2026-07) !!
+----------------------------------------------------------------------------
+Erro: "could not resize shared memory segment ... No space left on device"
+  -> NAO e falta de RAM. E o /dev/shm (tmpfs ~64MB do container) estourando
+     quando a query PARALELA aloca a area dinamica (DSM) da matview de 72M linhas.
+  -> Aumentar a RAM do servico NAO resolve isso de forma confiavel.
+
+Fix definitivo (ja aplicado): dynamic_shared_memory_type = mmap
+  -> move a DSM da RAM (/dev/shm) para DISCO ($PGDATA/pg_dynshmem).
+     O teto do /dev/shm deixa de existir. Disco e barato; nao conta como RAM.
+
+Custo (Railway cobra RAM USADA por minuto, nao o teto configurado):
+  - shared_buffers e RAM FIXA -> manter enxuto (512MB). 2GB = ~4x a conta.
+  - work_mem e por-no-de-query x workers -> manter baixo (16MB) e previsivel.
+  - parallel alto multiplica CPU/RAM por query -> manter em 2.
+Perfil abaixo = custo baixo + previsivel para ~200 usuarios/semana.
+Ver POSTGRES_RAILWAY_TUNING.md para o racional completo.
+============================================================================
 """
 import os
 import sys
@@ -25,20 +46,25 @@ conn.autocommit = True
 cur = conn.cursor()
 
 SETTINGS = [
-    # memoria — CUSTO-CONSCIENTE: Railway cobra RAM por USO.
-    # 2GB de cache = maior parte do ganho (indices quentes cabem) sem inflar a conta.
-    ("shared_buffers", "2GB"),              # requer restart
-    ("effective_cache_size", "12GB"),       # so um HINT ao planner (nao usa RAM)
-    ("work_mem", "32MB"),                   # sorts/bitmap heap scans
-    ("maintenance_work_mem", "1GB"),        # index builds do ETL bem mais rapidos
+    # >>> FIX DO /dev/shm — NAO REMOVER <<< (requer restart)
+    # mmap = DSM em disco, nao no /dev/shm. Elimina o "No space left on device".
+    ("dynamic_shared_memory_type", "mmap"),
+    # memoria — CUSTO-CONSCIENTE: Railway cobra RAM USADA por minuto.
+    ("shared_buffers", "512MB"),            # requer restart. RAM FIXA -> enxuto de proposito.
+    ("effective_cache_size", "3GB"),        # so um HINT ao planner (nao usa RAM)
+    ("work_mem", "16MB"),                   # por-no x workers -> baixo e previsivel
+    ("hash_mem_multiplier", "2.0"),
+    ("maintenance_work_mem", "512MB"),      # so no ETL/index build (transitorio)
     ("autovacuum_work_mem", "256MB"),       # limita cada worker de autovacuum
     # planner para SSD/NVMe
     ("random_page_cost", "1.1"),
     ("effective_io_concurrency", "200"),
-    # paralelismo
-    ("max_parallel_workers_per_gather", "4"),
-    ("max_parallel_workers", "8"),
-    ("max_parallel_maintenance_workers", "4"),
+    # paralelismo — baixo p/ nao multiplicar CPU/RAM (=custo) por query.
+    # Com mmap, 2 e seguro; NAO subir sem necessidade real.
+    ("max_parallel_workers_per_gather", "2"),
+    ("max_parallel_workers", "4"),
+    ("max_worker_processes", "4"),
+    ("max_parallel_maintenance_workers", "2"),
     # latencia OLTP: JIT atrapalha queries curtas
     ("jit", "off"),
     # ETL gera muito WAL — checkpoints mais suaves

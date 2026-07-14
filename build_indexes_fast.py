@@ -17,29 +17,21 @@ URL = os.getenv("DATABASE_URL")
 WORKERS = int(os.getenv("IDX_WORKERS", "4"))
 MWM = os.getenv("MAINT_MEM", "512MB")
 
-# GINs trigram pesados primeiro (rodam em paralelo nos 4 workers), depois os b-tree
+# ============================================================================
+# APENAS os indices das TABELAS-BASE realmente usados por endpoints (2026-07).
+# A BUSCA roda toda na matview vw_estabelecimentos_completos (indices dela sao
+# criados em build_matview_fast.py). Estes 3 servem lookups de DETALHE nas bases:
+#   - idx_estab_cnpj_completo : /cnaes-secundarios (WHERE cnpj_completo=...)
+#   - idx_socios_nome_trgm    : /socios/search (nome_socio ILIKE)
+#   - idx_socios_cpf_cnpj     : /socios/search (cnpj_cpf_socio LIKE 'x%')
+# Os ~18 indices antigos foram DROPADOS (liberou ~14GB) por estarem com idx_scan=0
+# — a busca nao usa as tabelas-base. NAO re-adicionar sem confirmar uso real
+# (idx GIN em 72M linhas = GBs de storage + horas de rebuild no ETL).
+# ============================================================================
 INDEXES = [
-    ("idx_empresas_razao_trgm", "CREATE INDEX IF NOT EXISTS idx_empresas_razao_trgm ON empresas USING gin (razao_social gin_trgm_ops)"),
-    ("idx_estab_nome_fantasia_trgm", "CREATE INDEX IF NOT EXISTS idx_estab_nome_fantasia_trgm ON estabelecimentos USING gin (nome_fantasia gin_trgm_ops)"),
-    ("idx_estab_bairro_trgm", "CREATE INDEX IF NOT EXISTS idx_estab_bairro_trgm ON estabelecimentos USING gin (bairro gin_trgm_ops)"),
-    ("idx_estab_logradouro_trgm", "CREATE INDEX IF NOT EXISTS idx_estab_logradouro_trgm ON estabelecimentos USING gin (logradouro gin_trgm_ops)"),
     ("idx_socios_nome_trgm", "CREATE INDEX IF NOT EXISTS idx_socios_nome_trgm ON socios USING gin (nome_socio gin_trgm_ops)"),
-    ("idx_empresas_natureza", "CREATE INDEX IF NOT EXISTS idx_empresas_natureza ON empresas (natureza_juridica)"),
-    ("idx_empresas_porte", "CREATE INDEX IF NOT EXISTS idx_empresas_porte ON empresas (porte_empresa)"),
     ("idx_estab_cnpj_completo", "CREATE INDEX IF NOT EXISTS idx_estab_cnpj_completo ON estabelecimentos (cnpj_completo)"),
-    ("idx_estab_situacao", "CREATE INDEX IF NOT EXISTS idx_estab_situacao ON estabelecimentos (situacao_cadastral)"),
-    ("idx_estab_uf", "CREATE INDEX IF NOT EXISTS idx_estab_uf ON estabelecimentos (uf)"),
-    ("idx_estab_municipio", "CREATE INDEX IF NOT EXISTS idx_estab_municipio ON estabelecimentos (municipio)"),
-    ("idx_estab_cnae_principal", "CREATE INDEX IF NOT EXISTS idx_estab_cnae_principal ON estabelecimentos (cnae_fiscal_principal)"),
-    ("idx_estab_matriz_filial", "CREATE INDEX IF NOT EXISTS idx_estab_matriz_filial ON estabelecimentos (identificador_matriz_filial)"),
-    ("idx_estab_cep", "CREATE INDEX IF NOT EXISTS idx_estab_cep ON estabelecimentos (cep)"),
-    ("idx_estab_data_inicio", "CREATE INDEX IF NOT EXISTS idx_estab_data_inicio ON estabelecimentos (data_inicio_atividade)"),
-    ("idx_estab_uf_situacao", "CREATE INDEX IF NOT EXISTS idx_estab_uf_situacao ON estabelecimentos (uf, situacao_cadastral)"),
-    ("idx_socios_cnpj_basico", "CREATE INDEX IF NOT EXISTS idx_socios_cnpj_basico ON socios (cnpj_basico)"),
     ("idx_socios_cpf_cnpj", "CREATE INDEX IF NOT EXISTS idx_socios_cpf_cnpj ON socios (cnpj_cpf_socio)"),
-    ("idx_socios_qualificacao", "CREATE INDEX IF NOT EXISTS idx_socios_qualificacao ON socios (qualificacao_socio)"),
-    ("idx_simples_opcao", "CREATE INDEX IF NOT EXISTS idx_simples_opcao ON simples_nacional (opcao_simples)"),
-    ("idx_simples_mei", "CREATE INDEX IF NOT EXISTS idx_simples_mei ON simples_nacional (opcao_mei)"),
 ]
 
 
@@ -114,7 +106,7 @@ def main():
     cur.execute("""SELECT count(*) FROM pg_index ix JOIN pg_class i ON i.oid=ix.indexrelid
                    JOIN pg_class t ON t.oid=ix.indrelid WHERE ix.indisvalid AND i.relname LIKE 'idx_%'
                    AND t.relname IN ('empresas','estabelecimentos','socios','simples_nacional')""")
-    log.info("Indices CNPJ validos: %d de 21", cur.fetchone()[0])
+    log.info("Indices base validos: %d (esperado >= %d)", cur.fetchone()[0], len(INDEXES))
     conn.close()
 
 

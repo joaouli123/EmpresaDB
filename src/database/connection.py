@@ -34,25 +34,24 @@ class DatabaseManager:
         """
         Inicializa pool de conexões para reutilização
 
-        Configuração para VPS (4 CPUs, 16GB RAM):
-        - minconn=5: Mínimo de 5 conexões sempre prontas
-        - maxconn=20: Máximo de 20 conexões simultâneas
-        - 20 conexões × 8MB work_mem = 160MB RAM (OK para 16GB!)
+        RIGHT-SIZED p/ escala real (2026): ~50 consultas/dia, 2-3 clientes.
+        Cada conexão ociosa custa RAM no Postgres (~5-10MB) — por isso pool enxuto.
+        - minconn=1: 1 conexão quente por worker (resposta rápida, RAM mínima)
+        - maxconn=5: teto por worker. Com WEB_CONCURRENCY=2 -> no máx 10 conexões.
+          (max_connections do PG = 500; folga enorme)
+        Se um dia o volume crescer muito, suba maxconn — não antes (evita RAM à toa).
 
-        BENEFÍCIOS:
-        - 10x mais rápido (reutiliza conexões)
-        - Latência: 500ms → 50ms
-        - Throughput: 10 req/s → 100+ req/s
+        BENEFÍCIOS: reutiliza conexões (latência 500ms -> 50ms) sem inflar RAM.
         """
         try:
             self.connection_pool = pool.ThreadedConnectionPool(
-                minconn=2,      # Mínimo sempre aberto
-                maxconn=20,     # Máximo por worker (ESC-02: workers*maxconn deve ser < max_connections=500)
+                minconn=1,      # Mínimo sempre aberto (enxuto p/ custo)
+                maxconn=5,      # Máximo por worker (workers*maxconn << max_connections)
                 dsn=self.connection_string,
                 # ESC-01: timeouts na origem da conexão — query pesada não segura o worker por 120s
                 options='-c statement_timeout=60000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000',
             )
-            logger.info("✅ Connection pool inicializado: 2-20 conexões/worker (statement_timeout=60s)")
+            logger.info("✅ Connection pool inicializado: 1-5 conexões/worker (statement_timeout=60s)")
         except Exception as e:
             logger.error(f"❌ Erro ao criar connection pool: {e}")
             self.connection_pool = None
