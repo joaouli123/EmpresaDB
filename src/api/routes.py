@@ -676,55 +676,32 @@ async def search_companies(
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-            # OTIMIZAÇÃO: Para buscas com ILIKE, fazer COUNT rápido usando EXPLAIN
-            # Se a busca tem ILIKE (razao_social ou nome_fantasia), usar estimativa
-            use_fast_count = razao_social or nome_fantasia
-
-            if use_fast_count and effective_offset == 0:
-                # Para primeira página, usar EXPLAIN para estimativa rápida
-                explain_query = f"""
-                    EXPLAIN (FORMAT JSON)
-                    SELECT 1
-                    FROM vw_estabelecimentos_completos
-                    WHERE {where_clause}
-                """
-                cursor.execute(explain_query, params)
-                explain_result = cursor.fetchone()
-
-                if explain_result and explain_result[0]:
-                    import json
-                    # explain_result[0] pode ser string JSON ou lista/dict já parseado
-                    if isinstance(explain_result[0], str):
-                        plan = json.loads(explain_result[0])
-                    else:
-                        plan = explain_result[0]
-
-                    estimated_rows = plan[0]['Plan'].get('Plan Rows', 0)
-                    total = int(estimated_rows)
-                    logger.info(f"⚡ Usando estimativa rápida: ~{total} registros")
-                else:
-                    total = 0
-            elif not use_fast_count:
-                # COUNT exato é caro (MV de ~70M linhas) e idêntico entre páginas:
-                # cacheia por filtros (TTL 6h; base muda 1x/mês)
-                count_key = f"search:count:{_filters_key}"
-                cached_total = get_from_cache(count_key)
-                if cached_total is not None:
-                    total = int(cached_total)
-                else:
-                    count_query = f"""
-                        SELECT COUNT(*)
-                        FROM vw_estabelecimentos_completos
-                        WHERE {where_clause}
-                    """
-                    cursor.execute(count_query, params)
-                    total_result = cursor.fetchone()
-                    total = total_result[0] if total_result else 0
-                    set_cache(count_key, total, minutes=360)
-                    logger.info(f"📊 COUNT exato: {total} registros")
+            # CONTAGEM RÁPIDA (P0-502): NUNCA usar COUNT(*) exato aqui.
+            # Na MV de ~72M linhas, COUNT(*) com filtro varre milhões de linhas e
+            # ESTOURA o statement_timeout (60s) -> o cliente (ex: imobpro, fetch 25s)
+            # recebe 502. Usamos a ESTIMATIVA do planner (instantânea e ~precisa: a MV
+            # tem stats frescas do ANALYZE pós-ETL). Vale p/ QUALQUER filtro
+            # (uf, cnae, município, situação...). Cache por filtros (TTL 6h; base muda ~1x/mês).
+            count_key = f"search:count:{_filters_key}"
+            cached_total = get_from_cache(count_key)
+            if cached_total is not None:
+                total = int(cached_total)
             else:
-                # Para páginas subsequentes com ILIKE, usar cache ou estimativa
-                total = 1000000  # Estimativa alta para permitir paginação
+                try:
+                    import json as _json
+                    cursor.execute(
+                        f"EXPLAIN (FORMAT JSON) SELECT 1 FROM vw_estabelecimentos_completos WHERE {where_clause}",
+                        params,
+                    )
+                    er = cursor.fetchone()
+                    raw = er[0] if er else None
+                    plan = (_json.loads(raw) if isinstance(raw, str) else raw) or []
+                    total = int(plan[0]['Plan'].get('Plan Rows', 0)) if plan else 0
+                    logger.info(f"⚡ Total estimado (planner): ~{total} registros")
+                except Exception as e:
+                    logger.warning(f"Estimativa de total falhou: {e}; usando 0")
+                    total = 0
+                set_cache(count_key, total, minutes=360)
 
             # Evitar ORDER BY pesado em buscas amplas (ex: UF+município sem texto),
             # que pode estourar statement timeout ao ordenar centenas de milhares de linhas.

@@ -54,6 +54,9 @@ MV_INDEXES = [
     ("idx_mv_estab_uf", "CREATE INDEX idx_mv_estab_uf ON vw_estabelecimentos_completos (uf)"),
     ("idx_mv_estab_situacao", "CREATE INDEX idx_mv_estab_situacao ON vw_estabelecimentos_completos (situacao_cadastral)"),
     ("idx_mv_estab_cnae", "CREATE INDEX idx_mv_estab_cnae ON vw_estabelecimentos_completos (cnae_fiscal_principal)"),
+    # Composto p/ filtro regional (uf+situacao) com paginacao por cnpj: torna o
+    # COUNT index-only e a busca ordenada instantaneos (evita o 502 por timeout).
+    ("idx_mv_estab_uf_sit_cnpj", "CREATE INDEX idx_mv_estab_uf_sit_cnpj ON vw_estabelecimentos_completos (uf, situacao_cadastral, cnpj_completo)"),
 ]
 
 
